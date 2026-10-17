@@ -1,25 +1,25 @@
 # Tasks
 
-## 1. Infraestructura
+## 1. Infrastructure
 
-- [ ] 1.1 Añadir dependencias de desarrollo (`playwright`, `lighthouse`, `chrome-launcher`) y `qa.config.json` con umbrales por defecto; verificar `npm ci` y que el JSON valida contra un esquema simple incluido en el script
-- [ ] 1.2 Implementar en `scripts/qa.mjs` build + `astro preview` en puerto libre + descubrimiento de páginas; verificar que lista la página demo y cierra el servidor al terminar (también ante error)
+- [ ] 1.1 Add dev dependencies (`playwright`, `lighthouse`, `chrome-launcher`) and `qa.config.json` with default thresholds; verify `npm ci` and that the JSON validates against a simple schema included in the script
+- [ ] 1.2 Implement build + `astro preview` on a free port + page discovery in `scripts/qa.mjs`; verify it lists the demo page and shuts the server down at the end (also on error)
 
-## 2. Comprobaciones
+## 2. Checks
 
-- [ ] 2.1 Capturas de página completa a 375/768/1440; verificar que se generan 3 PNG por página
-- [ ] 2.2 Detección de desbordes y texto cortado con selector y ancho; verificar con una página fixture que fuerza un desborde a 375 px (debe fallar) y con la demo (debe pasar)
-- [ ] 2.3 Comprobación de reduced motion; verificar con fixture que deja un `[data-reveal]` invisible (debe fallar)
-- [ ] 2.4 Lighthouse móvil y escritorio con umbrales; verificar que la demo supera 90 y que bajar el umbral a 101 provoca fallo
-- [ ] 2.5 Integrar `impeccable detect` con mapeo de severidades; verificar con un test del parser sobre una salida JSON de ejemplo
+- [ ] 2.1 Full-page screenshots at 375/768/1440; verify 3 PNGs are generated per page
+- [ ] 2.2 Overflow and clipped-text detection with selector and width; verify with a fixture page that forces overflow at 375 px (must fail) and with the demo (must pass)
+- [ ] 2.3 Reduced-motion check; verify with a fixture that leaves a `[data-reveal]` invisible (must fail)
+- [ ] 2.4 Lighthouse mobile and desktop with thresholds; verify the demo scores above 90 and that raising the threshold to 101 causes a failure
+- [ ] 2.5 Integrate `impeccable detect` with severity mapping; verify with a parser test on sample JSON output
 
-## 3. Informe y CI
+## 3. Report and CI
 
-- [ ] 3.1 Generar `report.json`, `report.md` y symlink `qa/latest`; código de salida 0/1; verificar ambos casos con la demo y una fixture fallida
-- [ ] 3.2 Añadir `npm run qa` y documentar en `CLAUDE.md` cómo leer el informe y el bucle "QA → corregir → QA"; verificar que el comando documentado funciona tal cual
-- [ ] 3.3 Crear `.github/workflows/qa.yml` que ejecuta la QA en PRs y sube el informe; verificar en el PR de este change que el check aparece y el artefacto se descarga
+- [ ] 3.1 Generate `report.json`, `report.md` and the `qa/latest` symlink; exit code 0/1; verify both cases with the demo and a failing fixture
+- [ ] 3.2 Add `npm run qa` and document in `CLAUDE.md` how to read the report and the "QA → fix → QA" loop; verify the documented command works as written
+- [ ] 3.3 Create `.github/workflows/qa.yml` running QA on PRs and uploading the report; verify on this change's PR that the check appears and the artifact downloads
 
 ## Workflow follow-up
 
-- Abrir PR, revisar y mergear.
-- `/opsx:archive add-qa-pipeline` tras el merge.
+- Open PR, review and merge.
+- `/opsx:archive add-qa-pipeline` after merge.

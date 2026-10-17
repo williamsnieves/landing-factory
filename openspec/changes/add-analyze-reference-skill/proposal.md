@@ -2,29 +2,29 @@
 
 ## Why
 
-El principio clave de la roadmap es "extraer patrones, no clonar": de 1–3 webs de inspiración se obtienen fichas abstractas (secciones, retícula, tipografía, motion, librerías) que alimentan la síntesis. Hoy ese análisis sería manual, inconsistente y con riesgo de guardar assets o texto ajeno. Una skill versionada lo hace repetible y aplica las salvaguardas legales por diseño.
+The roadmap's key principle is "extract patterns, don't clone": from 1–3 inspiration sites we produce abstract pattern sheets (sections, grid, typography, motion, libraries) that feed the synthesis. Today that analysis would be manual, inconsistent and at risk of storing third-party assets or text. A versioned skill makes it repeatable and builds the legal safeguards in by design.
 
 ## What Changes
 
-- Skill `/analyze-reference <url> [--focus "qué gusta"]` en `.claude/skills/analyze-reference/`.
-- Comprobación previa de `robots.txt` y de reserva de minería de datos (TDM) del sitio; si hay reserva, se aborta.
-- Reconocimiento con navegador (adaptando las fases de reconocimiento del ai-website-cloner-template): capturas temporales a 375/768/1440, extracción de estructura DOM, estilos computados y comportamiento al hacer scroll.
-- Detección de librerías y técnicas (GSAP, ScrollTrigger, Lenis, Locomotive, Three.js, WebGL/shaders, View Transitions…) por globals, scripts y red; REA opcional cuando un efecto no queda claro.
-- Salida: ficha abstracta `patterns/<slug>.md` con frontmatter + secciones fijas, sin assets, copy ni código del sitio.
-- Plantilla de ficha `patterns/_template.md` y validador `scripts/validate-pattern.mjs`.
-- Las capturas son solo material de trabajo local: se guardan fuera del repo (ignoradas) y se borran al terminar.
+- `/analyze-reference <url> [--focus "what we like"]` skill in `.claude/skills/analyze-reference/`.
+- Pre-check of the site's `robots.txt` and text-and-data-mining (TDM) reservation; if there is a reservation, abort.
+- Browser reconnaissance (adapting the recon phases of ai-website-cloner-template): temporary screenshots at 375/768/1440, DOM structure, computed styles and scroll behavior.
+- Library and technique detection (GSAP, ScrollTrigger, Lenis, Locomotive, Three.js, WebGL/shaders, View Transitions…) via globals, scripts and network; REA optional when an effect is unclear.
+- Output: abstract sheet `patterns/<slug>.md` with frontmatter + fixed sections, with no assets, copy or code from the site.
+- Sheet template `patterns/_template.md` and validator `scripts/validate-pattern.mjs`.
+- Screenshots are local working material only: stored outside the versioned area (ignored) and deleted at the end.
 
 ## Capabilities
 
 ### New Capabilities
-- `reference-analysis`: conversión de una URL de referencia en una ficha abstracta de patrones, con salvaguardas de cumplimiento (robots/TDM, sin assets, sin copy) y formato validable.
+- `reference-analysis`: turning a reference URL into an abstract pattern sheet, with compliance safeguards (robots/TDM, no assets, no copy) and a validatable format.
 
 ### Modified Capabilities
-<!-- Ninguna. -->
+<!-- None. -->
 
 ## Impact
 
-- Nuevos: `.claude/skills/analyze-reference/` (SKILL.md + scripts de reconocimiento), `patterns/_template.md`, `scripts/validate-pattern.mjs`.
-- Usa Playwright (de `setup-ai-tooling`). REA (`rea-agents`) solo como opcional, no requerido.
-- Depende de `setup-astro-starter` y `setup-ai-tooling`.
-- Nota legal: orientativo, no asesoramiento jurídico (ver roadmap).
+- New: `.claude/skills/analyze-reference/` (SKILL.md + recon scripts), `patterns/_template.md`, `scripts/validate-pattern.mjs`.
+- Uses Playwright (from `setup-ai-tooling`). REA (`rea-agents`) only as an optional, non-required tool.
+- Depends on `setup-astro-starter` and `setup-ai-tooling`.
+- Legal note: guidance only, not legal advice (see roadmap).

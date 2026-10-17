@@ -2,31 +2,31 @@
 
 ## Why
 
-El criterio de éxito del MVP es que una landing cumpla umbrales objetivos (Lighthouse ≥ 90, sin desbordes en 375/768/1440, reduced-motion, sin hallazgos principales de impeccable) **sin retoques manuales**. Para que Claude pueda iterar solo hasta cumplirlos necesita un comando de QA que mida todo y devuelva un veredicto legible por máquina.
+The MVP success criterion is that a landing meets objective thresholds (Lighthouse ≥ 90, no overflow at 375/768/1440, reduced motion, no major impeccable findings) **with no manual touch-ups**. For Claude to iterate on its own until they are met, it needs a QA command that measures everything and returns a machine-readable verdict.
 
 ## What Changes
 
-- `scripts/qa.mjs` (expuesto como `npm run qa`): build, servidor de preview, y por cada página:
-  - capturas a 375, 768 y 1440 px (página completa) en `qa/<timestamp>/`;
-  - detección de desbordes horizontales y texto cortado;
-  - comprobación con `prefers-reduced-motion: reduce`;
-  - Lighthouse (rendimiento, accesibilidad, SEO, buenas prácticas) en móvil y escritorio;
-  - `impeccable detect` sobre el código fuente.
-- Informe `qa/<timestamp>/report.json` + `report.md` y código de salida 0/1 según umbrales.
-- Umbrales configurables en `qa.config.json` con los valores de la roadmap por defecto.
-- Workflow de GitHub Actions que ejecuta la QA en cada PR y sube el informe y capturas como artefacto.
+- `scripts/qa.mjs` (exposed as `npm run qa`): build, preview server, and for each page:
+  - full-page screenshots at 375, 768 and 1440 px in `qa/<timestamp>/`;
+  - horizontal overflow and clipped-text detection;
+  - a check under `prefers-reduced-motion: reduce`;
+  - Lighthouse (performance, accessibility, SEO, best practices) on mobile and desktop;
+  - `impeccable detect` on the source code.
+- Report `qa/<timestamp>/report.json` + `report.md` and exit code 0/1 based on thresholds.
+- Thresholds configurable in `qa.config.json`, defaulting to the roadmap values.
+- GitHub Actions workflow running QA on every PR and uploading the report and screenshots as an artifact.
 
 ## Capabilities
 
 ### New Capabilities
-- `quality-gates`: verificación automática de una landing contra los criterios de aceptación del MVP, con informe y veredicto aptos para que un agente itere.
+- `quality-gates`: automatic verification of a landing against the MVP acceptance criteria, with a report and verdict an agent can iterate on.
 
 ### Modified Capabilities
-<!-- Ninguna. -->
+<!-- None. -->
 
 ## Impact
 
-- Dependencias de desarrollo: `playwright` (o `@playwright/test`), `lighthouse`, `chrome-launcher`, `impeccable` (vía npx, versión fijada).
-- Requiere Chromium (preinstalado en sesiones cloud; en CI se instala en el job).
-- Nuevo workflow `.github/workflows/qa.yml`.
-- Depende de `setup-astro-starter`. Lo usarán `add-new-landing-skill` y el despliegue.
+- Dev dependencies: `playwright` (or `@playwright/test`), `lighthouse`, `chrome-launcher`, `impeccable` (via npx, pinned version).
+- Requires Chromium (preinstalled in cloud sessions; installed in the CI job).
+- New workflow `.github/workflows/qa.yml`.
+- Depends on `setup-astro-starter`. Used by `add-new-landing-skill` and deployment.

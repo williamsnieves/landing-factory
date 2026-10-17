@@ -1,30 +1,30 @@
 # Tasks
 
-## 0. Requisito previo
+## 0. Prerequisite
 
-- [ ] 0.1 Completar la primera prueba manual de la roadmap (nicho de prueba + 1–3 referencias analizadas + landing construida y desplegada) y anotar en `design.md` qué pasos se repitieron y qué falló; verificar que las notas existen antes de seguir
+- [ ] 0.1 Complete the roadmap's first manual run (test niche + 1–3 analyzed references + landing built and deployed) and note in `design.md` which steps were repeated and what failed; verify the notes exist before continuing
 
-## 1. Estructura de sitios
+## 1. Site structure
 
-- [ ] 1.1 Mover el starter a `templates/site/` y configurar npm workspaces con `sites/*` (según la decisión 1 aprobada en revisión); verificar que la raíz sigue construyendo y pasando QA
-- [ ] 1.2 Implementar `scripts/new-site.sh <slug> --niche ... [--refs ...] [--auto] [--dry-run]`: crea `sites/<slug>/` desde la plantilla y lanza Claude Code; verificar con `--dry-run` que crea la carpeta y la propuesta sin construir
+- [ ] 1.1 Move the starter to `templates/site/` and set up npm workspaces with `sites/*` (per decision 1 as approved in review); verify the root still builds and passes QA
+- [ ] 1.2 Implement `scripts/new-site.sh <slug> --niche ... [--refs ...] [--auto] [--dry-run]`: creates `sites/<slug>/` from the template and runs Claude Code; verify with `--dry-run` that it creates the folder and the proposal without building
 
-## 2. Skill /new-landing
+## 2. /new-landing skill
 
-- [ ] 2.1 Escribir `.claude/skills/new-landing/SKILL.md` con las fases brief → síntesis → punto de control → design system → construcción → QA, y plantillas de `PROPOSAL.md`, `RUN.md` y `CREDITS.md`; verificar que aparece como `/new-landing`
-- [ ] 2.2 Fase de design system: generar `design-system/<slug>/MASTER.md` con ui-ux-pro-max y traducirlo a `tokens.css` del sitio; verificar que los valores coinciden
-- [ ] 2.3 Fase de construcción con taste-skill (dirección de arte e imágenes con créditos) y primitivas de motion; verificar que toda imagen externa aparece en `CREDITS.md` con un chequeo automático
-- [ ] 2.4 Comprobación de originalidad de copy (n-gramas) contra las referencias usadas; verificar con una frase copiada a propósito que se detecta
-- [ ] 2.5 Bucle de QA con máximo de intentos y priorización de fallos, seguido de impeccable critique/audit/polish; verificar con un sitio que falla al principio que el bucle corrige y converge
-- [ ] 2.6 Registro `RUN.md` con entradas, decisiones, intentos y duración; verificar contenido tras una ejecución
+- [ ] 2.1 Write `.claude/skills/new-landing/SKILL.md` with the phases brief → synthesis → checkpoint → design system → build → QA, and templates for `PROPOSAL.md`, `RUN.md` and `CREDITS.md`; verify it shows up as `/new-landing`
+- [ ] 2.2 Design system phase: generate `design-system/<slug>/MASTER.md` with ui-ux-pro-max and translate it into the site's `tokens.css`; verify the values match
+- [ ] 2.3 Build phase with taste-skill (art direction and credited images) and the motion primitives; verify every external image appears in `CREDITS.md` with an automatic check
+- [ ] 2.4 Copy originality check (n-grams) against the references used; verify a deliberately copied sentence is detected
+- [ ] 2.5 QA loop with max attempts and failure prioritization, followed by impeccable critique/audit/polish; verify with a site that initially fails that the loop fixes and converges
+- [ ] 2.6 `RUN.md` log with inputs, decisions, attempts and duration; verify its content after a run
 
-## 3. Validación del MVP
+## 3. MVP validation
 
-- [ ] 3.1 Generar con una sola orden en modo automático un sitio para un nicho y verificar que pasa la QA sin retoques y se despliega su preview
-- [ ] 3.2 Generar sitios para 3 nichos distintos y verificar que difieren en paleta, tipografía principal y tipo de hero
-- [ ] 3.3 Documentar el flujo completo en `README.md` y `CLAUDE.md`; verificar que un usuario puede seguirlo de principio a fin
+- [ ] 3.1 Generate a site for one niche with a single command in automatic mode and verify it passes QA with no touch-ups and its preview deploys
+- [ ] 3.2 Generate sites for 3 different niches and verify they differ in palette, main font and hero type
+- [ ] 3.3 Document the full flow in `README.md` and `CLAUDE.md`; verify a user can follow it end to end
 
 ## Workflow follow-up
 
-- Abrir PR, revisar y mergear.
-- `/opsx:archive add-new-landing-skill` tras el merge.
+- Open PR, review and merge.
+- `/opsx:archive add-new-landing-skill` after merge.

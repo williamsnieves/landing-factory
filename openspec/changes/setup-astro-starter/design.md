@@ -2,33 +2,33 @@
 
 ## Context
 
-Repo vacío (solo OpenSpec). Ver `proposal.md` — Why. El starter es a la vez la plantilla de cada landing y el banco de pruebas de los changes siguientes, así que debe ser pequeño, estático por defecto y fácil de copiar.
+Empty repo (OpenSpec only). See `proposal.md` — Why. The starter is both the template for each landing and the test bed for later changes, so it must be small, static by default and easy to copy.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Base que construya en estático, pase `astro check` y quede lista para la QA del change `add-qa-pipeline`.
-- Motion "Awwwards-like" disponible desde el día 1 sin coste en páginas que no lo usen.
-- Reglas del sistema escritas una vez en `CLAUDE.md`.
+- A base that builds statically, passes `astro check` and is ready for the QA from `add-qa-pipeline`.
+- "Awwwards-like" motion available from day 1 at no cost on pages that don't use it.
+- System rules written once in `CLAUDE.md`.
 
 **Non-Goals:**
-- Secciones finales de diseño (las genera `add-new-landing-skill` por nicho).
-- 3D (Three.js / R3F): se añade bajo demanda en un change posterior.
-- CMS, i18n, formularios con backend.
+- Final designed sections (generated per niche by `add-new-landing-skill`).
+- 3D (Three.js / R3F): added on demand in a later change.
+- CMS, i18n, forms with a backend.
 
 ## Decisions
 
-1. **Astro 7 con salida estática (`output: 'static'`)**. Encaja con Cloudflare Pages sin adaptador. Alternativa: SSR con adaptador de Cloudflare → innecesario para landings.
-2. **Tailwind v4 vía `@tailwindcss/vite`** con tokens en `src/styles/tokens.css` usando `@theme`. Las variables CSS son la única fuente de verdad del tema; el `MASTER.md` del nicho se traduce a este fichero. Alternativa: `tailwind.config` JS → v4 favorece configuración CSS-first.
-3. **Islas React (`@astrojs/react`) solo cuando haya interacción** (`client:visible` por defecto). Secciones en `.astro` siempre que sea posible.
-4. **Motion en vanilla TS, no en React**: `src/components/motion/` expone `initMotion()` que lee atributos `data-reveal`, `data-pin`, `data-parallax` y crea los ScrollTrigger. Un componente `<Motion />` (script Astro) lo inicializa por página. Lenis se sincroniza con `gsap.ticker`. Así una sección `.astro` gana motion con un atributo y no necesita hidratar React. Alternativa: hooks de React → obliga a hidratar islas solo para animar.
-5. **Reduced motion y no-JS**: el estado inicial oculto de `data-reveal` se aplica solo bajo una clase `.js-motion` en `<html>` añadida por script inline cuando hay JS y no hay `prefers-reduced-motion: reduce`. Sin esa clase todo es visible.
-6. **Limpieza**: `initMotion()` devuelve una función `destroy()` que mata ScrollTriggers y Lenis; se engancha a `astro:before-swap` si se usan view transitions.
-7. **Calidad de código**: TypeScript `strict`, `astro check`, Prettier con `prettier-plugin-astro`. ESLint queda fuera para no inflar el MVP.
-8. **Node 22 LTS** fijado en `.nvmrc` y `engines`.
+1. **Astro 7 with static output (`output: 'static'`)**. Fits Cloudflare Pages with no adapter. Alternative: SSR with the Cloudflare adapter → unnecessary for landings.
+2. **Tailwind v4 via `@tailwindcss/vite`** with tokens in `src/styles/tokens.css` using `@theme`. CSS variables are the single source of truth for the theme; the niche's `MASTER.md` is translated into this file. Alternative: JS `tailwind.config` → v4 favors CSS-first config.
+3. **React islands (`@astrojs/react`) only when there is interaction** (`client:visible` by default). Sections in `.astro` whenever possible.
+4. **Motion in vanilla TS, not React**: `src/components/motion/` exposes `initMotion()`, which reads `data-reveal`, `data-pin`, `data-parallax` attributes and creates the ScrollTriggers. A `<Motion />` component (Astro script) initializes it per page. Lenis is synced with `gsap.ticker`. This way an `.astro` section gets motion from an attribute without hydrating React. Alternative: React hooks → forces hydrating islands just to animate.
+5. **Reduced motion and no-JS**: the hidden initial state of `data-reveal` applies only under a `.js-motion` class on `<html>`, added by an inline script when JS runs and `prefers-reduced-motion: reduce` is not set. Without that class everything is visible.
+6. **Cleanup**: `initMotion()` returns a `destroy()` function that kills ScrollTriggers and Lenis; hooked to `astro:before-swap` when view transitions are used.
+7. **Code quality**: strict TypeScript, `astro check`, Prettier with `prettier-plugin-astro`. ESLint left out to keep the MVP small.
+8. **Node 22 LTS** pinned in `.nvmrc` and `engines`.
 
 ## Risks / Trade-offs
 
-- [GSAP + Lenis añaden ~50 KB] → se cargan solo en páginas que incluyen `<Motion />`, con import dinámico.
-- [Pin/parallax causan CLS o desbordes en móvil] → el QA del change `add-qa-pipeline` mide desbordes a 375 px; las primitivas permiten desactivar pin por breakpoint (`data-pin-min="md"`).
-- [Astro 7 cambia APIs respecto a lo que conoce el modelo] → `setup-ai-tooling` añade Astro Docs MCP; mientras tanto, seguir la doc oficial.
+- [GSAP + Lenis add ~50 KB] → loaded only on pages that include `<Motion />`, via dynamic import.
+- [Pin/parallax cause CLS or overflow on mobile] → the QA from `add-qa-pipeline` measures overflow at 375 px; primitives allow disabling pin per breakpoint (`data-pin-min="md"`).
+- [Astro 7 APIs differ from what the model knows] → `setup-ai-tooling` adds the Astro Docs MCP; until then, follow the official docs.

@@ -2,28 +2,28 @@
 
 ## Why
 
-El pipeline depende de que Claude Code tenga, de forma reproducible en cualquier máquina o sesión cloud, la documentación actual de Astro, un navegador controlable y las tres skills de diseño de la roadmap. Hoy no hay nada instalado ni versionado, y cada sesión tendría que montarlo a mano.
+The pipeline relies on Claude Code having, reproducibly on any machine or cloud session, current Astro docs, a controllable browser and the three design skills from the roadmap. Nothing is installed or versioned today, and every session would have to set it up by hand.
 
 ## What Changes
 
-- `.mcp.json` versionado con Astro Docs MCP y Playwright MCP.
-- Instalación a nivel de proyecto (en `.claude/`) de ui-ux-pro-max, taste-skill e impeccable, fijando versión/commit y registrando la fuente en un manifiesto.
-- Telemetría de impeccable desactivada por defecto.
-- Reparto de roles entre skills documentado en `CLAUDE.md`: ui-ux-pro-max → tokens; taste-skill → dirección de arte e imágenes; impeccable → crítica y pulido.
-- Script `scripts/setup-agent.sh` idempotente que reinstala/verifica todo, y hook SessionStart para sesiones cloud.
-- `.claude/settings.json` con permisos para los comandos habituales del pipeline (npm, npx impeccable, playwright) y sin permisos destructivos.
-- REA y el cloner **no** se instalan aquí: se integran (o no) en `add-analyze-reference-skill`.
+- Versioned `.mcp.json` with the Astro Docs MCP and the Playwright MCP.
+- Project-level install (in `.claude/`) of ui-ux-pro-max, taste-skill and impeccable, with pinned version/commit and the source recorded in a manifest.
+- impeccable telemetry disabled by default.
+- Role split between skills documented in `CLAUDE.md`: ui-ux-pro-max → tokens; taste-skill → art direction and images; impeccable → critique and polish.
+- Idempotent `scripts/setup-agent.sh` that reinstalls/verifies everything, plus a SessionStart hook for cloud sessions.
+- `.claude/settings.json` with permissions for the pipeline's usual commands (npm, npx impeccable, playwright) and no destructive permissions.
+- REA and the cloner are **not** installed here: they are integrated (or not) in `add-analyze-reference-skill`.
 
 ## Capabilities
 
 ### New Capabilities
-- `agent-tooling`: entorno de agente reproducible — servidores MCP, skills de diseño fijadas por versión, roles de cada skill, privacidad (telemetría) y verificación del entorno.
+- `agent-tooling`: reproducible agent environment — MCP servers, version-pinned design skills, a role for each skill, privacy (telemetry) and environment verification.
 
 ### Modified Capabilities
-<!-- Ninguna. `project-guidelines` se amplía en implementación (sección de roles) sin cambiar sus requisitos. -->
+<!-- None. `project-guidelines` gains a roles section during implementation without changing its requirements. -->
 
 ## Impact
 
-- Nuevos ficheros: `.mcp.json`, `.claude/settings.json`, `.claude/skills/*` de terceros, `scripts/setup-agent.sh`, `agent-tooling.lock.json` (manifiesto).
-- Dependencias de red en setup (npm, GitHub). Requiere Chromium para Playwright y taste-skill (preinstalado en sesiones cloud).
-- Depende de `setup-astro-starter` (necesita `package.json` y `CLAUDE.md`).
+- New files: `.mcp.json`, `.claude/settings.json`, third-party `.claude/skills/*`, `scripts/setup-agent.sh`, `agent-tooling.lock.json` (manifest).
+- Setup needs network access (npm, GitHub). Requires Chromium for Playwright and taste-skill (preinstalled in cloud sessions).
+- Depends on `setup-astro-starter` (needs `package.json` and `CLAUDE.md`).

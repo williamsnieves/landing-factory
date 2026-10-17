@@ -2,60 +2,60 @@
 
 ## Purpose
 
-Convierte webs de referencia en fichas abstractas de patrones de diseño y motion, reutilizables para crear landings originales, sin almacenar ni reproducir contenido protegido del sitio analizado.
+Turns reference websites into abstract design and motion pattern sheets, reusable to create original landings, without storing or reproducing protected content from the analyzed site.
 
 ## ADDED Requirements
 
-### Requirement: Análisis de una URL a ficha abstracta
-Dada una URL pública y una nota opcional de qué interesa de ella, el sistema SHALL generar una ficha en `patterns/<slug>.md` con: mapa y orden de secciones, tipo de hero, retícula y espaciados, escala tipográfica, paleta en términos genéricos, densidad, inventario de animaciones con la técnica de cada una y librerías detectadas.
+### Requirement: Analyze a URL into an abstract sheet
+Given a public URL and an optional note on what is interesting about it, the system SHALL generate a sheet at `patterns/<slug>.md` with: section map and order, hero type, grid and spacing, type scale, palette in generic terms, density, motion inventory with the technique behind each, and detected libraries.
 
-#### Scenario: Análisis correcto
-- **WHEN** se ejecuta el análisis sobre una URL accesible sin reserva de minería
-- **THEN** se crea `patterns/<slug>.md` con todas las secciones de la plantilla rellenas
-- **AND** la ficha registra URL, fecha de análisis y el foco indicado
+#### Scenario: Successful analysis
+- **WHEN** the analysis runs on a reachable URL with no mining reservation
+- **THEN** `patterns/<slug>.md` is created with every template section filled in
+- **AND** the sheet records the URL, analysis date and the given focus
 
-### Requirement: Respeto a reservas del titular
-Antes de analizar, el sistema MUST comprobar `robots.txt` y señales de reserva de minería de texto y datos del sitio, y MUST abortar sin generar ficha si el acceso del agente está prohibido o existe reserva expresa.
+### Requirement: Respect rights-holder reservations
+Before analyzing, the system MUST check `robots.txt` and text-and-data-mining reservation signals for the site, and MUST abort without producing a sheet if agent access is disallowed or an express reservation exists.
 
-#### Scenario: Sitio con reserva
-- **WHEN** el `robots.txt` del sitio prohíbe el acceso a la ruta o declara reserva de minería
-- **THEN** el análisis se detiene, no se guarda ninguna ficha y se informa del motivo
+#### Scenario: Site with a reservation
+- **WHEN** the site's `robots.txt` disallows the path or declares a mining reservation
+- **THEN** the analysis stops, no sheet is saved and the reason is reported
 
-### Requirement: Sin contenido del sitio en el repo
-La ficha y cualquier fichero versionado MUST NOT contener imágenes, vídeos, modelos 3D, logos, ilustraciones, textos del sitio (más allá de su título y URL) ni fragmentos de su código fuente.
+### Requirement: No site content in the repo
+The sheet and any versioned file MUST NOT contain images, videos, 3D models, logos, illustrations, text from the site (beyond its title and URL) or fragments of its source code.
 
-#### Scenario: Validación de la ficha
-- **WHEN** se valida una ficha que incluye una URL de imagen del sitio, un bloque de código copiado o frases de su copy
-- **THEN** la validación falla indicando la línea infractora
+#### Scenario: Validating the sheet
+- **WHEN** a sheet that includes an image URL from the site, a copied code block or sentences of its copy is validated
+- **THEN** validation fails naming the offending line
 
-#### Scenario: Material temporal
-- **WHEN** el análisis termina, con éxito o con error
-- **THEN** las capturas y volcados temporales se han eliminado y ninguno queda en el área versionada del repo
+#### Scenario: Temporary material
+- **WHEN** the analysis finishes, successfully or with an error
+- **THEN** temporary screenshots and dumps have been deleted and none remain in the versioned area of the repo
 
-### Requirement: Paleta y tipografía genéricas
-La ficha SHALL describir colores y tipos en términos genéricos (por ejemplo "fondo casi negro, acento cálido saturado", "grotesca de gran tamaño + serif para cuerpo") y MUST NOT incluir nombres de fuentes de marca propias del sitio ni valores hex exactos de su identidad.
+### Requirement: Generic palette and typography
+The sheet SHALL describe colors and typefaces in generic terms (for example "near-black background, warm saturated accent", "large grotesque + serif body") and MUST NOT include the site's proprietary brand font names or exact hex values of its identity.
 
-#### Scenario: Paleta en la ficha
-- **WHEN** se revisa la sección de paleta de una ficha generada
-- **THEN** contiene descripciones de rol y tono, no códigos de color
+#### Scenario: Palette in the sheet
+- **WHEN** the palette section of a generated sheet is reviewed
+- **THEN** it contains role and tone descriptions, not color codes
 
-### Requirement: Detección de técnicas de motion
-Para cada animación relevante observada, la ficha SHALL indicar disparador (carga, scroll, hover), tipo (reveal, pin, parallax, scrub, transición de página, shader/3D) y la librería o técnica probable con su nivel de confianza.
+### Requirement: Motion technique detection
+For each relevant animation observed, the sheet SHALL record the trigger (load, scroll, hover), the type (reveal, pin, parallax, scrub, page transition, shader/3D) and the likely library or technique with its confidence level.
 
-#### Scenario: Sección fijada con scroll
-- **WHEN** el sitio fija una sección mientras se anima su contenido con el scroll
-- **THEN** la ficha recoge una entrada con disparador scroll, tipo pin+scrub y la librería detectada
+#### Scenario: Scroll-pinned section
+- **WHEN** the site pins a section while animating its content with scroll
+- **THEN** the sheet includes an entry with trigger scroll, type pin+scrub and the detected library
 
-### Requirement: Formato de ficha validable
-Toda ficha SHALL seguir una plantilla con frontmatter (url, slug, fecha, foco, librerías) y secciones fijas, y el repo SHALL ofrecer un validador que compruebe estructura y reglas de contenido.
+### Requirement: Validatable sheet format
+Every sheet SHALL follow a template with frontmatter (url, slug, date, focus, libraries) and fixed sections, and the repo SHALL provide a validator that checks structure and content rules.
 
-#### Scenario: Ficha incompleta
-- **WHEN** se valida una ficha a la que le falta la sección de motion
-- **THEN** el validador falla indicando la sección ausente
+#### Scenario: Incomplete sheet
+- **WHEN** a sheet missing the motion section is validated
+- **THEN** the validator fails naming the missing section
 
-### Requirement: URL inaccesible
-Si la URL no responde, requiere autenticación o bloquea el navegador automatizado, el sistema SHALL abortar sin ficha y explicar el motivo.
+### Requirement: Unreachable URL
+If the URL does not respond, requires authentication or blocks the automated browser, the system SHALL abort without a sheet and explain why.
 
-#### Scenario: Página con login
-- **WHEN** la URL redirige a un formulario de login
-- **THEN** no se genera ficha y se informa de que la página no es pública
+#### Scenario: Login page
+- **WHEN** the URL redirects to a login form
+- **THEN** no sheet is generated and the user is told the page is not public

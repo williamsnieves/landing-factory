@@ -2,29 +2,29 @@
 
 ## Why
 
-El repo está vacío y todo el pipeline (análisis, generación, QA, despliegue) necesita una base Astro común sobre la que construir. Sin un starter con stack, capa de motion y reglas fijadas, cada landing generada reinventaría la base y sería imposible medir calidad de forma consistente.
+The repo is empty, and the whole pipeline (analysis, generation, QA, deployment) needs a common Astro base to build on. Without a starter with a fixed stack, motion layer and rules, every generated landing would reinvent the base and quality could not be measured consistently.
 
 ## What Changes
 
-- Proyecto Astro en la raíz del repo con Tailwind e islas de React, listo para `npm run dev` y `npm run build` (salida estática).
-- Estructura de carpetas de la roadmap: `src/components/sections/`, `src/components/motion/`, `src/layouts/`, `src/pages/`, `patterns/`, `design-system/`, `scripts/`.
-- Layout base con SEO mínimo (title, description, Open Graph, `lang`), tokens de diseño vía variables CSS y página de demostración.
-- Capa de motion: scroll suave con Lenis, utilidades GSAP + ScrollTrigger (reveal, pin, parallax) que se desactivan con `prefers-reduced-motion`.
-- `CLAUDE.md` con las reglas del sistema: stack, presupuesto de rendimiento, accesibilidad, principio "extraer patrones, no clonar" y prohibición de assets ajenos.
-- Tooling de calidad mínimo: TypeScript estricto, `astro check`, Prettier.
+- Astro project at the repo root with Tailwind and React islands, ready for `npm run dev` and `npm run build` (static output).
+- Folder structure from the roadmap: `src/components/sections/`, `src/components/motion/`, `src/layouts/`, `src/pages/`, `patterns/`, `design-system/`, `scripts/`.
+- Base layout with minimal SEO (title, description, Open Graph, `lang`), design tokens as CSS variables, and a demo page.
+- Motion layer: smooth scroll with Lenis, GSAP + ScrollTrigger utilities (reveal, pin, parallax) that switch off under `prefers-reduced-motion`.
+- `CLAUDE.md` with the system rules: stack, performance budget, accessibility, the "extract patterns, don't clone" principle, and a ban on third-party assets.
+- Minimal quality tooling: strict TypeScript, `astro check`, Prettier.
 
 ## Capabilities
 
 ### New Capabilities
-- `site-foundation`: base Astro del sistema — build estático, layout con SEO y accesibilidad, tokens de diseño y estructura de carpetas sobre la que se generan las landings.
-- `motion-system`: utilidades de animación reutilizables (scroll suave, reveal, pin, parallax) con respeto obligatorio a `prefers-reduced-motion`.
-- `project-guidelines`: reglas versionadas que cualquier agente debe seguir al trabajar en el repo (stack, rendimiento, accesibilidad, uso ético de referencias).
+- `site-foundation`: the system's Astro base — static build, layout with SEO and accessibility, design tokens and the folder structure landings are generated on.
+- `motion-system`: reusable animation utilities (smooth scroll, reveal, pin, parallax) that must respect `prefers-reduced-motion`.
+- `project-guidelines`: versioned rules any agent must follow when working in the repo (stack, performance, accessibility, ethical use of references).
 
 ### Modified Capabilities
-<!-- Ninguna: el repo no tiene specs previas. -->
+<!-- None: the repo has no existing specs. -->
 
 ## Impact
 
-- Nuevas dependencias: `astro`, `@astrojs/react`, `react`, `react-dom`, `tailwindcss` (+ integración Vite), `gsap`, `lenis`, `typescript`, `@astrojs/check`, `prettier`.
-- Requiere Node 22 LTS.
-- Es la base de todos los changes posteriores (`setup-ai-tooling`, `add-qa-pipeline`, `add-cloudflare-preview-deploy`, `add-analyze-reference-skill`, `add-new-landing-skill`).
+- New dependencies: `astro`, `@astrojs/react`, `react`, `react-dom`, `tailwindcss` (+ Vite integration), `gsap`, `lenis`, `typescript`, `@astrojs/check`, `prettier`.
+- Requires Node 22 LTS.
+- Base for every later change (`setup-ai-tooling`, `add-qa-pipeline`, `add-cloudflare-preview-deploy`, `add-analyze-reference-skill`, `add-new-landing-skill`).

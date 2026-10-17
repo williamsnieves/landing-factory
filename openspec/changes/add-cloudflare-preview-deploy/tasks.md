@@ -1,20 +1,20 @@
 # Tasks
 
-## 1. Configuración
+## 1. Configuration
 
-- [ ] 1.1 Añadir `wrangler` (versión fijada) y configuración del proyecto Pages (nombre desde configuración del sitio, salida `dist/`); verificar `npx wrangler pages deploy --help` y que no hay credenciales en ficheros
-- [ ] 1.2 Añadir `public/_headers` con caché inmutable para `/_astro/*` y cabeceras de seguridad; verificar que el fichero aparece en `dist/` tras el build
-- [ ] 1.3 Documentar en `README.md` cómo crear el proyecto en Cloudflare, el token mínimo y los secretos `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID`; verificar que los pasos son completos siguiéndolos una vez
+- [ ] 1.1 Add `wrangler` (pinned version) and the Pages project config (name from site config, output `dist/`); verify `npx wrangler pages deploy --help` and that no credentials are in files
+- [ ] 1.2 Add `public/_headers` with immutable caching for `/_astro/*` and security headers; verify the file appears in `dist/` after the build
+- [ ] 1.3 Document in `README.md` how to create the Cloudflare project, the minimal token and the `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID` secrets; verify the steps are complete by following them once
 
 ## 2. Workflow
 
-- [ ] 2.1 Unificar QA y despliegue en `.github/workflows/ci.yml` (job `qa` sube `dist/`, job `deploy` con `needs: qa`); verificar que un commit con QA fallida no despliega
-- [ ] 2.2 Desplegar previews con `--branch` en PRs y producción en `main`; verificar que el PR de este change obtiene URL de preview que responde 200
-- [ ] 2.3 Comentario único y actualizable con la URL del preview; verificar con dos pushes que solo existe un comentario
-- [ ] 2.4 Mensaje claro cuando faltan secretos u origen es un fork; verificar ejecutando sin secretos (rama de prueba) que el job falla/omite sin exponer valores
-- [ ] 2.5 Comprobar con `curl -I` sobre el preview que `/_astro/*` lleva `immutable` y las páginas las cabeceras de seguridad
+- [ ] 2.1 Merge QA and deployment into `.github/workflows/ci.yml` (`qa` job uploads `dist/`, `deploy` job with `needs: qa`); verify a commit with failing QA does not deploy
+- [ ] 2.2 Deploy previews with `--branch` on PRs and production on `main`; verify this change's PR gets a preview URL that responds 200
+- [ ] 2.3 A single, updatable comment with the preview URL; verify with two pushes that only one comment exists
+- [ ] 2.4 Clear message when secrets are missing or the source is a fork; verify by running without secrets (test branch) that the job fails/skips without exposing values
+- [ ] 2.5 Check with `curl -I` on the preview that `/_astro/*` carries `immutable` and pages carry the security headers
 
 ## Workflow follow-up
 
-- Abrir PR, revisar y mergear (requiere que el usuario haya creado los secretos).
-- `/opsx:archive add-cloudflare-preview-deploy` tras el merge.
+- Open PR, review and merge (requires the user to have created the secrets).
+- `/opsx:archive add-cloudflare-preview-deploy` after merge.

@@ -2,63 +2,63 @@
 
 ## Purpose
 
-Genera con una sola orden una landing original y desplegable para un nicho dado, reutilizando patrones abstractos de referencias y cumpliendo los criterios de calidad del sistema sin retoques manuales.
+Generates, with a single command, an original and deployable landing for a given niche, reusing abstract patterns from references and meeting the system's quality criteria with no manual touch-ups.
 
 ## ADDED Requirements
 
-### Requirement: Orden única de generación
-El sistema SHALL ofrecer una orden que, dados un slug, un nicho y opcionalmente fichas de `patterns/`, cree el proyecto del sitio y ejecute de principio a fin brief, síntesis, design system, construcción y QA sin intervención cuando se pide modo automático.
+### Requirement: Single generation command
+The system SHALL provide a command that, given a slug, a niche and optionally `patterns/` sheets, creates the site project and runs brief, synthesis, design system, build and QA end to end with no intervention when automatic mode is requested.
 
-#### Scenario: Ejecución automática
-- **WHEN** se ejecuta la orden con slug, nicho y modo automático
-- **THEN** al terminar existe el proyecto del sitio con su propuesta, su design system, la landing construida y el informe de QA
+#### Scenario: Automatic run
+- **WHEN** the command runs with slug, niche and automatic mode
+- **THEN** at the end the site project exists with its proposal, design system, the built landing and the QA report
 
-### Requirement: Propuesta revisable antes de construir
-Antes de construir, el sistema SHALL producir una propuesta con mapa de páginas, secciones y su objetivo, plan de motion y fichas usadas; en modo interactivo MUST detenerse hasta que el usuario la apruebe o la modifique.
+### Requirement: Reviewable proposal before building
+Before building, the system SHALL produce a proposal with page map, sections and their purpose, motion plan and sheets used; in interactive mode it MUST stop until the user approves or edits it.
 
-#### Scenario: Modo interactivo
-- **WHEN** la orden se ejecuta sin modo automático
-- **THEN** se guarda la propuesta y la ejecución se detiene esperando aprobación antes de generar código
+#### Scenario: Interactive mode
+- **WHEN** the command runs without automatic mode
+- **THEN** the proposal is saved and the run stops awaiting approval before generating code
 
-### Requirement: Design system por nicho
-Cada sitio SHALL tener un `design-system/<slug>/MASTER.md` con patrón, estilo, paleta, tipografías y anti-patrones del nicho, y los tokens del sitio SHALL derivarse de él.
+### Requirement: Per-niche design system
+Every site SHALL have a `design-system/<slug>/MASTER.md` with the niche's pattern, style, palette, fonts and anti-patterns, and the site's tokens SHALL be derived from it.
 
-#### Scenario: Tokens derivados
-- **WHEN** se genera el sitio
-- **THEN** los valores de color y tipografía de los tokens del sitio coinciden con los definidos en su `MASTER.md`
+#### Scenario: Derived tokens
+- **WHEN** the site is generated
+- **THEN** the color and typography values in the site's tokens match those defined in its `MASTER.md`
 
-### Requirement: Contenido original y con licencia
-Todo el copy del sitio MUST ser original, y toda imagen o componente externo MUST tener licencia que permita su uso y MUST figurar en el `CREDITS.md` del sitio con fuente, autor y licencia.
+### Requirement: Original and licensed content
+All site copy MUST be original, and every external image or component MUST have a license that allows its use and MUST be listed in the site's `CREDITS.md` with source, author and license.
 
-#### Scenario: Imagen sin crédito
-- **WHEN** el sitio contiene una imagen externa que no figura en `CREDITS.md`
-- **THEN** la verificación final de la generación falla indicando la imagen
+#### Scenario: Uncredited image
+- **WHEN** the site contains an external image not listed in `CREDITS.md`
+- **THEN** the generation's final check fails naming the image
 
-#### Scenario: Copy de una referencia
-- **WHEN** una frase del sitio coincide literalmente con texto de una web de referencia usada
-- **THEN** la generación no se da por terminada hasta reescribirla
+#### Scenario: Copy from a reference
+- **WHEN** a sentence on the site literally matches text from a reference site used
+- **THEN** generation is not considered done until it is rewritten
 
-### Requirement: Bucle de QA hasta aprobar
-Tras construir, el sistema SHALL ejecutar la QA, corregir los fallos reportados y repetir hasta aprobar o hasta un máximo configurable de intentos; si se agotan, MUST terminar con estado fallido y un resumen de lo pendiente.
+### Requirement: QA loop until passing
+After building, the system SHALL run QA, fix the reported failures and repeat until it passes or a configurable maximum of attempts is reached; if attempts run out, it MUST end in a failed state with a summary of what is left.
 
-#### Scenario: Corrección automática
-- **WHEN** la primera QA falla por desborde a 375 px
-- **THEN** el sistema corrige el desborde y vuelve a ejecutar la QA
+#### Scenario: Automatic fix
+- **WHEN** the first QA run fails due to overflow at 375 px
+- **THEN** the system fixes the overflow and runs QA again
 
-#### Scenario: Intentos agotados
-- **WHEN** la QA sigue fallando tras el número máximo de intentos
-- **THEN** la orden termina con código distinto de 0 y el registro de la ejecución lista los fallos restantes
+#### Scenario: Attempts exhausted
+- **WHEN** QA still fails after the maximum number of attempts
+- **THEN** the command exits with a non-zero code and the run log lists the remaining failures
 
-### Requirement: Registro de la ejecución
-Cada generación SHALL dejar un registro con entradas usadas, decisiones de diseño, intentos de QA con su resultado y duración total.
+### Requirement: Run log
+Every generation SHALL leave a log with the inputs used, design decisions, QA attempts with their result, and total duration.
 
-#### Scenario: Revisión posterior
-- **WHEN** se abre el registro de una generación terminada
-- **THEN** se ven las fichas usadas, el número de intentos de QA y el resultado final
+#### Scenario: Later review
+- **WHEN** the log of a finished generation is opened
+- **THEN** it shows the sheets used, the number of QA attempts and the final result
 
-### Requirement: Diversidad entre nichos
-Sitios generados para nichos distintos SHALL ser visualmente diferentes: distinta paleta, tipografía y estructura de hero.
+### Requirement: Diversity across niches
+Sites generated for different niches SHALL be visually different: different palette, typography and hero structure.
 
-#### Scenario: Tres nichos
-- **WHEN** se generan sitios para tres nichos distintos
-- **THEN** ningún par de sitios comparte a la vez paleta, familia tipográfica principal y tipo de hero
+#### Scenario: Three niches
+- **WHEN** sites are generated for three different niches
+- **THEN** no pair of sites shares palette, main font family and hero type all at once

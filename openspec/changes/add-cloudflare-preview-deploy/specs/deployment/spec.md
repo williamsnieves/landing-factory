@@ -2,48 +2,48 @@
 
 ## Purpose
 
-Publica cada versión del sitio en una URL revisable — preview por rama y producción desde la rama principal — solo cuando la QA ha pasado.
+Publishes every version of the site at a reviewable URL — a preview per branch and production from the main branch — only once QA has passed.
 
 ## ADDED Requirements
 
-### Requirement: Preview por rama
-Cada push a una rama con pull request abierto SHALL publicar un preview del sitio en una URL estable asociada a esa rama.
+### Requirement: Preview per branch
+Every push to a branch with an open pull request SHALL publish a preview of the site at a stable URL tied to that branch.
 
-#### Scenario: Push a rama de feature
-- **WHEN** se hace push a una rama con un PR abierto y la QA pasa
-- **THEN** el sitio queda publicado en una URL de preview de esa rama
+#### Scenario: Push to a feature branch
+- **WHEN** a branch with an open PR is pushed and QA passes
+- **THEN** the site is published at that branch's preview URL
 
-### Requirement: Producción desde la rama principal
-Un push a la rama principal SHALL publicar el sitio en la URL de producción del proyecto.
+### Requirement: Production from the main branch
+A push to the main branch SHALL publish the site at the project's production URL.
 
-#### Scenario: Merge a main
-- **WHEN** se mergea un PR en `main` y la QA pasa
-- **THEN** la URL de producción sirve la nueva versión
+#### Scenario: Merge to main
+- **WHEN** a PR is merged into `main` and QA passes
+- **THEN** the production URL serves the new version
 
-### Requirement: Despliegue condicionado a la QA
-El despliegue MUST NOT ejecutarse si la QA del mismo commit ha fallado.
+### Requirement: Deployment gated by QA
+Deployment MUST NOT run if QA failed for the same commit.
 
-#### Scenario: QA fallida
-- **WHEN** la QA de un commit falla
-- **THEN** no se crea ningún deployment para ese commit y el check de despliegue aparece como omitido
+#### Scenario: Failed QA
+- **WHEN** QA fails for a commit
+- **THEN** no deployment is created for that commit and the deploy check shows as skipped
 
-### Requirement: URL del preview en el PR
-El sistema SHALL publicar la URL del preview en el pull request en un único comentario que se actualiza en cada despliegue.
+### Requirement: Preview URL on the PR
+The system SHALL post the preview URL on the pull request in a single comment that is updated on every deployment.
 
-#### Scenario: Segundo push
-- **WHEN** se hace un segundo push a la misma rama del PR
-- **THEN** el comentario existente se actualiza con la nueva URL y el commit, sin crear otro comentario
+#### Scenario: Second push
+- **WHEN** the same PR branch is pushed a second time
+- **THEN** the existing comment is updated with the new URL and commit, without creating another comment
 
-### Requirement: Secretos fuera del repo
-Las credenciales de despliegue MUST leerse de secretos del entorno de CI y MUST NOT aparecer en ficheros versionados ni en logs.
+### Requirement: Secrets kept out of the repo
+Deployment credentials MUST be read from CI environment secrets and MUST NOT appear in versioned files or logs.
 
-#### Scenario: Secretos ausentes
-- **WHEN** el workflow se ejecuta sin los secretos configurados
-- **THEN** el paso de despliegue termina con un mensaje que indica qué secretos faltan, sin exponer valores
+#### Scenario: Missing secrets
+- **WHEN** the workflow runs without the secrets configured
+- **THEN** the deploy step ends with a message naming the missing secrets, without exposing values
 
-### Requirement: Cabeceras de caché y seguridad
-El sitio publicado SHALL servir los assets con hash con caché inmutable de larga duración y las páginas HTML con cabeceras de seguridad básicas (nosniff, referrer-policy, frame-ancestors).
+### Requirement: Cache and security headers
+The published site SHALL serve hashed assets with long-lived immutable caching, and HTML pages with basic security headers (nosniff, referrer-policy, frame-ancestors).
 
-#### Scenario: Asset con hash
-- **WHEN** se solicita un fichero de `/_astro/` del sitio publicado
-- **THEN** la respuesta incluye `Cache-Control` con `immutable` y `max-age` de al menos un año
+#### Scenario: Hashed asset
+- **WHEN** a file under `/_astro/` of the published site is requested
+- **THEN** the response includes `Cache-Control` with `immutable` and a `max-age` of at least one year

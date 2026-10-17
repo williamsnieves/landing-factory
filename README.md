@@ -1,32 +1,32 @@
 # landing-factory
 
-Pipeline que, a partir de un nicho, genera con Claude una landing original en Astro, con calidad cercana a Awwwards y lista para desplegar. Ver [docs/roadmap.md](docs/roadmap.md).
+A pipeline that, given a niche, uses Claude to generate an original Astro landing page with near-Awwwards quality, ready to deploy. See [docs/roadmap.md](docs/roadmap.md) (original roadmap, in Spanish).
 
-## Cómo trabajamos: OpenSpec
+## How we work: OpenSpec
 
-Los requisitos viven en [`openspec/`](openspec/) ([OpenSpec](https://github.com/Fission-AI/OpenSpec)):
+Requirements live in [`openspec/`](openspec/) ([OpenSpec](https://github.com/Fission-AI/OpenSpec)):
 
-- `openspec/specs/` — lo que el sistema hace hoy (se rellena al archivar changes).
-- `openspec/changes/` — trabajo propuesto: `proposal.md` (por qué), `specs/` (qué), `design.md` (cómo), `tasks.md` (pasos).
+- `openspec/specs/` — what the system does today (filled in as changes are archived).
+- `openspec/changes/` — proposed work: `proposal.md` (why), `specs/` (what), `design.md` (how), `tasks.md` (steps).
 
-Ciclo por change, un PR por change:
+Cycle per change, one PR per change:
 
 ```text
-/opsx:apply <change>     # implementar siguiendo tasks.md
-  → PR → revisión → merge
-/opsx:archive <change>   # fusiona las specs del change en openspec/specs/
+/opsx:apply <change>     # implement following tasks.md
+  → PR → review → merge
+/opsx:archive <change>   # merges the change's specs into openspec/specs/
 ```
 
 CLI: `npm i -g @fission-ai/openspec` · `openspec list` · `openspec show <change>` · `openspec validate --all --strict`.
 
-## Orden de implementación
+## Implementation order
 
-| # | Change | Semana roadmap | Depende de |
-|---|--------|----------------|------------|
+| # | Change | Roadmap week | Depends on |
+|---|--------|--------------|------------|
 | 1 | `setup-astro-starter` — Astro + Tailwind + React, motion (GSAP/Lenis), `CLAUDE.md` | 1 | — |
 | 2 | `setup-ai-tooling` — Astro Docs MCP, Playwright MCP, ui-ux-pro-max, taste-skill, impeccable | 1 | 1 |
-| 3 | `add-qa-pipeline` — `npm run qa`: capturas 375/768/1440, desbordes, reduced motion, Lighthouse, impeccable | 1–2 | 1 |
-| 4 | `add-cloudflare-preview-deploy` — previews por rama gated por QA | 2 | 1, 3 |
-| 5 | `add-analyze-reference-skill` — `/analyze-reference` URL → ficha abstracta en `patterns/` | 2 | 1, 2 |
-| — | **Primera prueba manual** (nicho + referencias + landing a mano) | 2 | 1–5 |
-| 6 | `add-new-landing-skill` — `/new-landing` + `scripts/new-site.sh`, una orden → landing | 3 | todo lo anterior |
+| 3 | `add-qa-pipeline` — `npm run qa`: screenshots at 375/768/1440, overflow, reduced motion, Lighthouse, impeccable | 1–2 | 1 |
+| 4 | `add-cloudflare-preview-deploy` — per-branch previews gated by QA | 2 | 1, 3 |
+| 5 | `add-analyze-reference-skill` — `/analyze-reference` URL → abstract pattern sheet in `patterns/` | 2 | 1, 2 |
+| — | **First manual run** (niche + references + landing built by hand) | 2 | 1–5 |
+| 6 | `add-new-landing-skill` — `/new-landing` + `scripts/new-site.sh`, one command → landing | 3 | all of the above |

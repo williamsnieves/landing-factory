@@ -2,34 +2,34 @@
 
 ## Purpose
 
-Fija en el propio repo las reglas que cualquier agente o persona debe seguir al generar landings, para que calidad, accesibilidad y uso ético de referencias no dependan de la memoria de cada sesión.
+Captures in the repo itself the rules any agent or person must follow when generating landings, so quality, accessibility and ethical use of references do not depend on each session's memory.
 
 ## ADDED Requirements
 
-### Requirement: Fichero de reglas para agentes
-El repo SHALL incluir un `CLAUDE.md` en la raíz que describa stack, comandos, estructura de carpetas y flujo de trabajo con OpenSpec.
+### Requirement: Rules file for agents
+The repo SHALL include a `CLAUDE.md` at the root describing the stack, commands, folder structure and the OpenSpec workflow.
 
-#### Scenario: Sesión nueva de agente
-- **WHEN** un agente abre el repo por primera vez
-- **THEN** encuentra en `CLAUDE.md` los comandos de dev, build, check y QA y la ubicación de cada tipo de pieza
+#### Scenario: New agent session
+- **WHEN** an agent opens the repo for the first time
+- **THEN** it finds in `CLAUDE.md` the dev, build, check and QA commands and where each kind of piece lives
 
-### Requirement: Principio extraer patrones, no clonar
-Las reglas MUST prohibir copiar a las landings imágenes, vídeos, modelos 3D, logos, copy, ilustraciones o código literal de webs de referencia, y MUST indicar que de las referencias solo se guardan fichas abstractas en `patterns/`.
+### Requirement: Extract patterns, don't clone
+The rules MUST forbid copying images, videos, 3D models, logos, copy, illustrations or literal code from reference sites into landings, and MUST state that only abstract pattern sheets in `patterns/` are kept from references.
 
-#### Scenario: Petición de copiar un asset
-- **WHEN** un agente lee las reglas antes de construir una sección inspirada en una referencia
-- **THEN** las reglas le indican explícitamente que no puede reutilizar assets ni textos de esa referencia
+#### Scenario: Request to copy an asset
+- **WHEN** an agent reads the rules before building a section inspired by a reference
+- **THEN** the rules explicitly tell it that it cannot reuse that reference's assets or text
 
-### Requirement: Presupuestos de calidad explícitos
-Las reglas SHALL fijar los umbrales de aceptación del MVP: Lighthouse ≥ 90 en rendimiento, accesibilidad y SEO; sin desbordes en 375, 768 y 1440 px; respeto a `prefers-reduced-motion`.
+### Requirement: Explicit quality budgets
+The rules SHALL state the MVP acceptance thresholds: Lighthouse ≥ 90 in performance, accessibility and SEO; no overflow at 375, 768 and 1440 px; `prefers-reduced-motion` respected.
 
-#### Scenario: Consulta de umbrales
-- **WHEN** un agente necesita saber si una landing está lista
-- **THEN** encuentra los umbrales numéricos en `CLAUDE.md`
+#### Scenario: Looking up thresholds
+- **WHEN** an agent needs to know whether a landing is done
+- **THEN** it finds the numeric thresholds in `CLAUDE.md`
 
-### Requirement: Licencias de recursos externos
-Las reglas MUST exigir que toda imagen o componente externo usado tenga licencia compatible y que su atribución quede registrada en el repo del sitio.
+### Requirement: Licensing of external resources
+The rules MUST require every external image or component used to have a compatible license, and its attribution to be recorded in the site's repo.
 
-#### Scenario: Uso de imagen de banco abierto
-- **WHEN** se añade una imagen de una colección abierta a una landing
-- **THEN** su fuente, autor y licencia quedan registrados en el fichero de créditos del sitio
+#### Scenario: Using an image from an open collection
+- **WHEN** an image from an open collection is added to a landing
+- **THEN** its source, author and license are recorded in the site's credits file

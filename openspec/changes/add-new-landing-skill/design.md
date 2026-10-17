@@ -2,26 +2,26 @@
 
 ## Context
 
-Ver `proposal.md` — Why. Disponibles al implementar: starter, motion, skills de diseño, QA, despliegue y `/analyze-reference`. Este change se implementa en la semana 3, tras la primera prueba manual; las tareas se ajustarán con lo aprendido (editar este design y tasks está previsto).
+See `proposal.md` — Why. Available at implementation time: starter, motion, design skills, QA, deployment and `/analyze-reference`. This change is implemented in week 3, after the first manual run; tasks will be adjusted with what was learned (editing this design and the tasks is expected).
 
 ## Goals / Non-Goals
 
-**Goals:** una orden → sitio aprobado por QA; propuesta revisable; trazabilidad de decisiones y créditos.
+**Goals:** one command → site that passes QA; reviewable proposal; traceable decisions and credits.
 
-**Non-Goals:** multi-idioma, CMS, formularios con backend, 3D por defecto (solo si la propuesta lo justifica).
+**Non-Goals:** multi-language, CMS, forms with a backend, 3D by default (only if the proposal justifies it).
 
 ## Decisions
 
-1. **Dónde vive cada sitio: `sites/<slug>/` dentro de este repo (monorepo con npm workspaces)**, cada uno con su `package.json` heredado del starter y su proyecto Cloudflare Pages. Motivo: patrones, skills y QA se comparten sin copiar; un PR por sitio encaja con el flujo de revisión. El starter de la raíz se convierte en `templates/site/` al implementar.
-   Alternativa (roadmap: "cada web es un repo"): `new-site.sh` copia el starter a `../<slug>`, hace `git init` y crea repo. Más aislado, pero duplica skills y patrones y exige crear repos de GitHub (no posible desde sesiones cloud sin permisos extra). **Decisión abierta para el usuario en la revisión del PR**; cambiarla solo afecta a `new-site.sh` y a la ruta de salida.
-2. **Skill orquestadora + subagentes por fase**: la skill encadena fases y delega construcción/QA a subagentes para limitar el contexto. Cada fase escribe su artefacto en disco (PROPOSAL.md, MASTER.md, RUN.md) para poder reanudar.
-3. **Modo automático** vía `claude -p "/new-landing ..." --permission-mode acceptEdits` con lista de herramientas permitidas en `.claude/settings.json`; en Actions se puede lanzar con `workflow_dispatch`.
-4. **Bucle de QA**: máx. 5 intentos (configurable); cada intento lee `qa/latest/report.json` y prioriza fallos por tipo (desbordes → reduced motion → a11y → rendimiento → impeccable).
-5. **Originalidad**: comprobación de copy contra los textos visibles de las referencias usando el material temporal del análisis (si sigue disponible) o una nueva lectura en memoria de la página; nunca se guarda ese texto. Comparación por n-gramas de 8 palabras.
-6. **Diversidad**: el brief registra paleta/tipografía/hero de los sitios existentes en `sites/` y la síntesis debe elegir valores distintos.
+1. **Where each site lives: `sites/<slug>/` inside this repo (monorepo with npm workspaces)**, each with its own `package.json` inherited from the starter and its own Cloudflare Pages project. Reason: patterns, skills and QA are shared without copying; one PR per site fits the review flow. The root starter becomes `templates/site/` during implementation.
+   Alternative (roadmap: "each site is a repo"): `new-site.sh` copies the starter to `../<slug>`, runs `git init` and creates a repo. More isolated, but duplicates skills and patterns and requires creating GitHub repos (not possible from cloud sessions without extra permissions). **Open decision for the user in PR review**; changing it only affects `new-site.sh` and the output path.
+2. **Orchestrator skill + per-phase subagents**: the skill chains phases and delegates build/QA to subagents to limit context. Each phase writes its artifact to disk (PROPOSAL.md, MASTER.md, RUN.md) so runs can resume.
+3. **Automatic mode** via `claude -p "/new-landing ..." --permission-mode acceptEdits` with an allowed-tools list in `.claude/settings.json`; it can be launched from Actions with `workflow_dispatch`.
+4. **QA loop**: max 5 attempts (configurable); each attempt reads `qa/latest/report.json` and prioritizes failures by type (overflow → reduced motion → a11y → performance → impeccable).
+5. **Originality**: copy is checked against the visible text of the references used, using the temporary analysis material (if still available) or a fresh in-memory read of the page; that text is never stored. Comparison by 8-word n-grams.
+6. **Diversity**: the brief records palette/typography/hero of existing sites in `sites/` and the synthesis must choose different values.
 
 ## Risks / Trade-offs
 
-- [Choque ui-ux-pro-max vs taste-skill en dirección visual] → la skill aplica el reparto de roles; si la primera prueba demuestra choque, se elimina una (change aparte).
-- [Coste y duración elevados] → modo `--dry-run` que solo genera PROPOSAL.md + MASTER.md.
-- [La QA nunca converge en sitios con mucho motion] → límite de intentos y registro de fallos; la propuesta limita el número de efectos pesados.
+- [ui-ux-pro-max vs taste-skill clash on visual direction] → the skill applies the role split; if the first run shows a clash, one is removed (separate change).
+- [High cost and duration] → `--dry-run` mode that only generates PROPOSAL.md + MASTER.md.
+- [QA never converges on motion-heavy sites] → attempt limit and failure log; the proposal caps the number of heavy effects.

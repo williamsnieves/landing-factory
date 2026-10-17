@@ -1,24 +1,24 @@
 # Tasks
 
-## 1. Plantilla y validador
+## 1. Template and validator
 
-- [ ] 1.1 Crear `patterns/_template.md` con frontmatter y secciones fijas y `patterns/README.md` con las reglas de qué se extrae y qué no; verificar que la plantilla pasa el validador una vez rellenada con datos ficticios
-- [ ] 1.2 Implementar `scripts/validate-pattern.mjs` (estructura + contenido prohibido) con tests sobre fixtures válidas e inválidas (URL de imagen, bloque de código, hex, copy largo, sección ausente); verificar `npm run validate:patterns` y los tests
-- [ ] 1.3 Añadir validación de `patterns/*.md` al workflow de CI; verificar que una ficha inválida hace fallar el check
+- [ ] 1.1 Create `patterns/_template.md` with frontmatter and fixed sections, and `patterns/README.md` with the rules on what is and isn't extracted; verify the template passes the validator once filled in with dummy data
+- [ ] 1.2 Implement `scripts/validate-pattern.mjs` (structure + forbidden content) with tests on valid and invalid fixtures (image URL, code block, hex, long copy, missing section); verify `npm run validate:patterns` and the tests
+- [ ] 1.3 Add `patterns/*.md` validation to the CI workflow; verify an invalid sheet fails the check
 
-## 2. Reconocimiento
+## 2. Reconnaissance
 
-- [ ] 2.1 Implementar `check-robots.mjs` (robots.txt, meta robots, X-Robots-Tag, TDMRep) con tests sobre respuestas simuladas; verificar que una reserva aborta
-- [ ] 2.2 Implementar `recon.mjs` con Playwright: secciones, estilos agregados, globals/librerías, red, canvas/WebGL, capturas por scroll a 375/768/1440 en `.cache/analyze/<slug>/`; verificar contra la propia demo del starter servida localmente
-- [ ] 2.3 Garantizar limpieza de `.cache/analyze/<slug>/` en éxito y error y que `.cache/` está en `.gitignore`; verificar forzando un error a mitad
+- [ ] 2.1 Implement `check-robots.mjs` (robots.txt, meta robots, X-Robots-Tag, TDMRep) with tests on mocked responses; verify a reservation aborts
+- [ ] 2.2 Implement `recon.mjs` with Playwright: sections, aggregated styles, globals/libraries, network, canvas/WebGL, scroll screenshots at 375/768/1440 in `.cache/analyze/<slug>/`; verify against the starter's own demo served locally
+- [ ] 2.3 Guarantee cleanup of `.cache/analyze/<slug>/` on success and error, and that `.cache/` is in `.gitignore`; verify by forcing an error midway
 
 ## 3. Skill
 
-- [ ] 3.1 Escribir `.claude/skills/analyze-reference/SKILL.md`: entradas, pasos (robots → recon → redacción → validación → limpieza), reglas de abstracción, uso opcional de REA y atribución MIT al cloner; verificar que aparece como `/analyze-reference`
-- [ ] 3.2 Ejecutar la skill sobre una URL pública de prueba con permiso de rastreo y revisar a mano la ficha; verificar que pasa el validador y no contiene contenido del sitio
-- [ ] 3.3 Documentar el uso en `CLAUDE.md` y `README.md`; verificar que el ejemplo documentado funciona
+- [ ] 3.1 Write `.claude/skills/analyze-reference/SKILL.md`: inputs, steps (robots → recon → write-up → validation → cleanup), abstraction rules, optional REA use and MIT attribution to the cloner; verify it shows up as `/analyze-reference`
+- [ ] 3.2 Run the skill on a public test URL that allows crawling and review the sheet by hand; verify it passes the validator and contains no site content
+- [ ] 3.3 Document usage in `CLAUDE.md` and `README.md`; verify the documented example works
 
 ## Workflow follow-up
 
-- Abrir PR, revisar y mergear.
-- `/opsx:archive add-analyze-reference-skill` tras el merge.
+- Open PR, review and merge.
+- `/opsx:archive add-analyze-reference-skill` after merge.

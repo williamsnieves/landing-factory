@@ -2,26 +2,26 @@
 
 ## Context
 
-Ver `proposal.md` — Why. El ai-website-cloner-template (MIT) tiene una skill `clone-website` con fases de reconocimiento (capturas, tokens, interacciones) y fases de descarga de assets y reconstrucción. Solo nos interesan las primeras. REA es un MCP/CLI para ingeniería inversa; útil pero pesado.
+See `proposal.md` — Why. ai-website-cloner-template (MIT) has a `clone-website` skill with recon phases (screenshots, tokens, interactions) and phases for asset download and rebuilding. We only want the former. REA is an MCP/CLI for reverse engineering; useful but heavy.
 
 ## Goals / Non-Goals
 
-**Goals:** fichas consistentes y comparables entre sí, generadas en < 10 min por URL, sin riesgo de filtrar contenido ajeno al repo.
+**Goals:** consistent, comparable sheets, generated in under 10 min per URL, with no risk of leaking third-party content into the repo.
 
-**Non-Goals:** reconstrucción visual, descarga de assets, análisis de sitios con login, crawl de varias páginas (solo la URL dada, opcionalmente 1–2 enlaces internos si el usuario los pasa).
+**Non-Goals:** visual rebuilding, asset download, analyzing sites behind login, multi-page crawling (only the given URL, optionally 1–2 internal links if the user passes them).
 
 ## Decisions
 
-1. **Skill propia inspirada en el cloner, no vendorizar el cloner entero.** Se reescriben (con atribución MIT en el SKILL.md) solo las instrucciones de reconocimiento, adaptadas a "describir en abstracto". Así no entra en el repo el código de descarga de assets.
-2. **Scripts deterministas + juicio del modelo.** `recon.mjs` (Playwright) produce un JSON temporal en `.cache/analyze/<slug>/`: árbol de secciones (landmarks, alturas, orden), estilos computados agregados (familias tipográficas genéricas por clasificación, tamaños, line-heights, rejilla, espaciados), globals JS detectados (`gsap`, `ScrollTrigger`, `Lenis`, `THREE`, `__NEXT_DATA__`…), scripts/red por dominio, presencia de `<canvas>`/WebGL, y capturas por scroll a 3 anchos. Claude lee eso + capturas y redacta la ficha. Las capturas nunca salen de `.cache/` (en `.gitignore`) y se borran al final.
-3. **robots/TDM**: `check-robots.mjs` evalúa `robots.txt` para user-agents genéricos y de IA (`*`, `ClaudeBot`, `anthropic-ai`, `GPTBot`), `<meta name="robots">`, cabecera `X-Robots-Tag`, `tdm-reservation` (TDMRep: `/.well-known/tdmrep.json` y meta). Cualquier reserva → abortar.
-4. **Validador** `scripts/validate-pattern.mjs`: frontmatter obligatorio, secciones obligatorias, y heurísticas de contenido prohibido: URLs a ficheros de imagen/vídeo/fuente, bloques de código > 3 líneas, hex colors, comillas largas (> 12 palabras) que sugieran copy. Se ejecuta al final de la skill y en CI sobre `patterns/*.md`.
-5. **REA opcional**: si `recon` no identifica la técnica de un efecto marcado como interesante, la skill sugiere `npx rea-agents analyze-javascript-application` y registra el resultado solo como conclusión en texto.
-6. **Plantilla de ficha** (`patterns/_template.md`): Resumen · Mapa de secciones · Hero · Retícula y espaciado · Tipografía · Paleta · Densidad · Motion (tabla) · Librerías · Qué tomar / qué evitar.
+1. **Own skill inspired by the cloner, not vendoring the whole cloner.** Only the recon instructions are rewritten (with MIT attribution in SKILL.md), adapted to "describe in the abstract". This keeps the asset-download code out of the repo.
+2. **Deterministic scripts + model judgment.** `recon.mjs` (Playwright) writes a temporary JSON in `.cache/analyze/<slug>/`: section tree (landmarks, heights, order), aggregated computed styles (generic font families by classification, sizes, line-heights, grid, spacing), detected JS globals (`gsap`, `ScrollTrigger`, `Lenis`, `THREE`, `__NEXT_DATA__`…), scripts/network by domain, `<canvas>`/WebGL presence, and scroll screenshots at 3 widths. Claude reads that + the screenshots and writes the sheet. Screenshots never leave `.cache/` (in `.gitignore`) and are deleted at the end.
+3. **robots/TDM**: `check-robots.mjs` evaluates `robots.txt` for generic and AI user agents (`*`, `ClaudeBot`, `anthropic-ai`, `GPTBot`), `<meta name="robots">`, the `X-Robots-Tag` header, and `tdm-reservation` (TDMRep: `/.well-known/tdmrep.json` and meta). Any reservation → abort.
+4. **Validator** `scripts/validate-pattern.mjs`: required frontmatter, required sections, and heuristics for forbidden content: URLs to image/video/font files, code blocks longer than 3 lines, hex colors, long quotes (> 12 words) suggesting copy. Runs at the end of the skill and in CI on `patterns/*.md`.
+5. **Optional REA**: if `recon` cannot identify the technique behind an effect flagged as interesting, the skill suggests `npx rea-agents analyze-javascript-application` and records the result only as a written conclusion.
+6. **Sheet template** (`patterns/_template.md`): Summary · Section map · Hero · Grid and spacing · Typography · Palette · Density · Motion (table) · Libraries · What to take / what to avoid.
 
 ## Risks / Trade-offs
 
-- [Heurística de copy produce falsos positivos] → el validador permite marcar descripciones propias con `> nota:`; revisión humana en el PR.
-- [Sitios que bloquean headless] → abortar limpio (requisito "URL inaccesible"), no intentar evadir.
-- [Detección de librerías por globals falla con bundles minificados] → combinar con firmas en nombres de fichero/red y declarar confianza.
-- Marco legal orientativo; antes de producto, consulta con abogado (roadmap).
+- [Copy heuristic produces false positives] → the validator allows marking our own descriptions with `> note:`; human review in the PR.
+- [Sites that block headless browsers] → abort cleanly ("Unreachable URL" requirement), never try to evade.
+- [Library detection via globals fails on minified bundles] → combine with signatures in file names/network and state confidence.
+- Legal framework is guidance only; consult an IP lawyer before productizing (roadmap).
