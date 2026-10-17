@@ -1,0 +1,46 @@
+schema: spec-driven
+
+context: |
+  Language: Spanish
+  All artifacts must be written in Spanish.
+  Keep OpenSpec structural headings and SHALL/MUST keywords in English.
+
+  Proyecto: landing-factory. Pipeline que, a partir de un nicho, genera con Claude
+  una landing original en Astro con calidad cercana a Awwwards y lista para desplegar.
+  Roadmap completa en docs/roadmap.md.
+  Stack: Astro (salida estática) + Tailwind v4 + islas React; motion con GSAP +
+  ScrollTrigger y Lenis; Three.js/R3F solo si hace falta 3D. Node 22.
+  Despliegue: Cloudflare Pages con preview por rama.
+  Principio clave: extraer patrones, no clonar. Nunca se guardan ni publican assets,
+  copy ni código de webs de referencia; solo fichas abstractas en patterns/.
+  Criterios de éxito: Lighthouse >= 90 (rendimiento, accesibilidad, SEO), sin
+  desbordes en 375/768/1440 px, respeto a prefers-reduced-motion, sin hallazgos
+  principales en impeccable detect, copy y assets originales.
+  Fuera de alcance: clientes, licencias comerciales, CMS, multi-idioma.
+
+rules:
+  tasks:
+    - Cada tarea debe indicar cómo se verifica (comando, test u observación).
+    - Un change = un PR; mantener los changes pequeños y revisables.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing
