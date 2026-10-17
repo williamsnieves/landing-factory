@@ -12,7 +12,6 @@ import { measureLayout, measureReducedMotion } from './qa/browser-checks.mjs';
 import { loadConfig } from './qa/config.mjs';
 import { runImpeccable } from './qa/impeccable.mjs';
 import {
-  CATEGORIES,
   PRESETS,
   launchChrome,
   runPreset,
