@@ -7,6 +7,7 @@
 // Usage: node check-robots.mjs <url> [--json] [--timeout <ms>] | --help
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { reexecWithEnvProxy } from './proxy.mjs';
 
 export const USER_AGENTS = ['*', 'ClaudeBot', 'anthropic-ai', 'GPTBot'];
 export const FETCH_UA =
@@ -416,7 +417,8 @@ export async function main(argv, io = console) {
 
 if (
   process.argv[1] &&
-  resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+  resolve(process.argv[1]) === fileURLToPath(import.meta.url) &&
+  !reexecWithEnvProxy()
 ) {
   main(process.argv.slice(2)).then(
     (code) => {
