@@ -15,7 +15,7 @@
 ## 3. Skill
 
 - [x] 3.1 Write `.claude/skills/analyze-reference/SKILL.md`: inputs, steps (robots → recon → write-up → validation → cleanup), abstraction rules, optional REA use and MIT attribution to the cloner; verify it shows up as `/analyze-reference`
-- [ ] 3.2 Run the skill on a public test URL that allows crawling and review the sheet by hand; verify it passes the validator and contains no site content
+- [ ] 3.2 Run the skill on a public test URL that allows crawling and review the sheet by hand; verify it passes the validator and contains no site content — PENDING: the cloud sandbox cannot reach public sites; to be done in the first manual run.
 - [x] 3.3 Document usage in `CLAUDE.md` and `README.md`; verify the documented example works
 
 ## Workflow follow-up
