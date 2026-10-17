@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fixture clipped text</title>
+    <meta name="description" content="QA fixture page: Fixture clipped text." />
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        color: #111;
+        background: #fff;
+      }
+      .clip {
+        width: 120px;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="main">
+      <h1>Fixture clipped text</h1>
+      <p class="clip">
+        A long sentence that does not fit inside its fixed-width container.
+      </p>
+      <p class="clip" data-qa-allow-clip>
+        An intentionally clipped sentence that is explicitly allowed.
+      </p>
+    </main>
+  </body>
+</html>

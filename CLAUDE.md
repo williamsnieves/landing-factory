@@ -22,17 +22,18 @@ All documentation, comments, commit messages and pull request descriptions MUST 
 
 ## Commands
 
-| Command                | Purpose                                                         |
-| ---------------------- | --------------------------------------------------------------- |
-| `npm ci`               | Install exact dependencies                                      |
-| `npm run dev`          | Dev server with hot reload                                      |
-| `npm run build`        | Static build into `dist/`                                       |
-| `npm run preview`      | Serve the built `dist/`                                         |
-| `npm run check`        | `astro check` (types and Astro diagnostics)                     |
-| `npm run format`       | Format with Prettier (`format:check` to verify)                 |
-| `npm run setup:agent`  | Install/verify agent tooling (design skills, telemetry opt-out) |
-| `npm run setup:verify` | Fast, offline, read-only check of the agent tooling             |
-| `npm run qa`           | Not available yet: arrives with `add-qa-pipeline`               |
+| Command                | Purpose                                                                |
+| ---------------------- | ---------------------------------------------------------------------- |
+| `npm ci`               | Install exact dependencies                                             |
+| `npm run dev`          | Dev server with hot reload                                             |
+| `npm run build`        | Static build into `dist/`                                              |
+| `npm run preview`      | Serve the built `dist/`                                                |
+| `npm run check`        | `astro check` (types and Astro diagnostics)                            |
+| `npm run format`       | Format with Prettier (`format:check` to verify)                        |
+| `npm run setup:agent`  | Install/verify agent tooling (design skills, telemetry opt-out)        |
+| `npm run setup:verify` | Fast, offline, read-only check of the agent tooling                    |
+| `npm test`             | Unit and fixture tests for the QA script (`node --test`)               |
+| `npm run qa`           | Build, serve and verify every page; writes `qa/latest/`; exit 0 = pass |
 
 ## Folder structure
 
@@ -60,7 +61,7 @@ To bump a tool, edit its pin in `agent-tooling.lock.json`, run `FORCE=1 npm run 
 Declared in `.mcp.json` (approve them the first time Claude Code asks).
 
 - `astro-docs` (remote, `https://mcp.docs.astro.build/mcp`): look up current Astro APIs, config and integrations before writing Astro code. Prefer it over memory, since Astro moves fast.
-- `playwright` (`@playwright/mcp`, pinned, `--headless`): open the running dev server or `dist/` preview, take screenshots at 375/768/1440 px, check overflow, console errors and interactions. Use it for visual checks while building; the repeatable QA run lives in `npm run qa` (later change).
+- `playwright` (`@playwright/mcp`, pinned, `--headless`): open the running dev server or `dist/` preview, take screenshots at 375/768/1440 px, check overflow, console errors and interactions. Use it for visual checks while building; the repeatable QA run lives in `npm run qa` (see QA loop).
 
 `.mcp.json` is portable and does not hard-code a browser path. In a cloud session, where Chromium is preinstalled outside Playwright's default cache, register a local override instead of editing the file, for example:
 
@@ -100,6 +101,37 @@ Work is organized with OpenSpec. One change = one branch `change/<name>` = one P
 ```
 
 Keep changes small and reviewable. Every task states how it is verified. Validate with `openspec validate <name> --strict`.
+
+## QA loop
+
+`npm run qa` is the single verdict for the quality budgets below. It builds the site, serves `dist/` with `astro preview` on a free port (and always shuts it down), discovers every `dist/**/*.html` page (including noindex ones such as `/islands/`; `404.html` is excluded in `qa.config.json`), and runs:
+
+- full-page screenshots at 375, 768 and 1440 px;
+- horizontal overflow and clipped-text detection at each width;
+- a `prefers-reduced-motion: reduce` load (at 1440 px): every `[data-reveal]` must be visible, `<html>` must not carry a `lenis` class, and there must be no ScrollTrigger `.pin-spacer`;
+- Lighthouse on mobile and desktop (worst of the two per category); performance, accessibility and SEO must be >= 90, best-practices is only reported;
+- `npx impeccable@4.6.0 detect --json src/`; findings mapped to major/minor/info in `qa.config.json`, and any major finding fails. If the detector cannot run (for example offline on first use), the check fails with the reason; it never passes silently.
+
+Exit code: `0` all checks passed, `1` at least one check failed, `2` the run itself broke (bad config, build error, no Chromium). Options: `npm run qa -- --help` (`--dist <dir>` to skip the build and serve prebuilt HTML, `--skip lighthouse,impeccable`, `--runs 3` for the median of 3 Lighthouse runs, `--config <file>`). Chromium comes from Playwright; set `QA_CHROME_PATH` (or `CHROME_PATH`) to use another binary, for example `/opt/pw-browsers/chromium-*/chrome-linux/chrome` in a cloud session. Thresholds live in `qa.config.json`; with no file the roadmap defaults apply. Never lower a threshold to get a pass.
+
+Output goes to `qa/<ISO-timestamp>/` (colons replaced by `-`) with `report.json`, `report.md` and `screens/<page>-<width>.png`; `qa/latest` is a symlink to the newest run. `qa/` is not committed.
+
+### Reading `report.json`
+
+- `verdict`: `"passed"` or `"failed"`. `skipped` lists checks that were not run.
+- `failures[]`: one entry per problem. Fields: `check` (`overflow`, `clipped-text`, `reduced-motion`, `lighthouse`, `impeccable`, `page-load`), `page` (URL path, `null` for impeccable), `viewport` (width in px, or `mobile`/`desktop` for Lighthouse), `metric`, `measured`, `threshold`, `message`, plus `selector` (CSS selector of the offending element), `file` and `line` (impeccable) or `topAudits` (Lighthouse: the highest-impact failing audits).
+- `pages[]`: per page, `viewports["375"|"768"|"1440"]` (`documentScrollWidth`, `overflowing[]`, `clipped[]`, `screenshot`), `reducedMotion`, and `lighthouse` (`presets[]` with scores and `topAudits`, `worst` per category).
+- `impeccable`: all findings with `rule`, `severity` (raw), `level` (mapped), `file`, `line`, `snippet`.
+
+### QA -> fix -> QA
+
+1. `npm run qa`, then read `qa/latest/report.json` (`failures` first, `report.md` for a summary) and look at the failing `screens/*.png`.
+2. Fix the cause in `src/` (use the `selector`, `file` and `line` fields), never the threshold.
+3. Re-run `npm run qa` until the verdict is `passed`. Use `--skip lighthouse,impeccable` for fast layout-only iterations, but the final run must be the full one.
+
+Clipped text that is intentional (for example a truncated card title with `text-overflow: ellipsis`) can be exempted by putting `data-qa-allow-clip` on the element or any ancestor. Use it sparingly and only for deliberate clipping, never to hide a real overflow bug. Pages that are `noindex` skip only Lighthouse's `is-crawlable` audit (`lighthouse.skipCrawlableOnNoindex`); every other SEO audit still counts.
+
+Tests for the QA script itself live in `tests/` (`npm test`). Failing-case fixtures (overflow at 375 px, invisible `[data-reveal]`, clipped text) are tiny static pages in `tests/fixtures/qa/`, served with `--dist`; they are never part of the site build.
 
 ## Quality budgets
 

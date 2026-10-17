@@ -2,7 +2,7 @@ node_modules/
 dist/
 .astro/
 .cache/
-qa/
+/qa/
 .env
 .env.*
 .DS_Store

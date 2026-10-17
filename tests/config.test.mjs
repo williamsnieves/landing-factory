@@ -1,0 +1,50 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { test } from 'node:test';
+import {
+  DEFAULT_CONFIG,
+  loadConfig,
+  validateConfig,
+} from '../scripts/qa/config.mjs';
+
+const read = (file) =>
+  JSON.parse(readFileSync(new URL(`../${file}`, import.meta.url), 'utf8'));
+
+test('qa.config.json is valid and matches the roadmap defaults', () => {
+  const file = read('qa.config.json');
+  assert.deepEqual(validateConfig(file), []);
+  assert.deepEqual(file, DEFAULT_CONFIG);
+});
+
+test('a missing config file falls back to the defaults', () => {
+  const config = loadConfig('/nonexistent/qa.config.json');
+  assert.deepEqual(
+    config.viewports.map((v) => v.width),
+    [375, 768, 1440],
+  );
+  assert.deepEqual(config.lighthouse.thresholds, {
+    performance: 90,
+    accessibility: 90,
+    seo: 90,
+  });
+  assert.deepEqual(config.impeccable.failOn, ['major']);
+});
+
+test('invalid configs are rejected with the offending path', () => {
+  const bad = structuredClone(DEFAULT_CONFIG);
+  bad.lighthouse.thresholds.performance = 'high';
+  bad.lighthouse.thresholds.pwa = 90;
+  bad.impeccable.severityMap.error = 'catastrophic';
+  bad.surprise = true;
+  const errors = validateConfig(bad).join('\n');
+  assert.match(errors, /lighthouse\.thresholds\.performance/);
+  assert.match(errors, /lighthouse\.thresholds\.pwa/);
+  assert.match(errors, /impeccable\.severityMap/);
+  assert.match(errors, /config\.surprise/);
+});
+
+test('the impeccable version in qa.config.json matches agent-tooling.lock.json', () => {
+  const lock = read('agent-tooling.lock.json');
+  const pin = lock.tools.find((t) => t.name === 'impeccable').cli;
+  assert.equal(`impeccable@${read('qa.config.json').impeccable.version}`, pin);
+});

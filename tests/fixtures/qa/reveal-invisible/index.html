@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fixture invisible reveal</title>
+    <meta
+      name="description"
+      content="QA fixture page: Fixture invisible reveal."
+    />
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        color: #111;
+        background: #fff;
+      }
+      [data-reveal] {
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="main">
+      <h1>Fixture invisible reveal</h1>
+      <p data-reveal>This reveal element never becomes visible.</p>
+    </main>
+  </body>
+</html>
