@@ -17,7 +17,7 @@
 
 - [x] 3.1 Generate `report.json`, `report.md` and the `qa/latest` symlink; exit code 0/1; verify both cases with the demo and a failing fixture
 - [x] 3.2 Add `npm run qa` and document in `CLAUDE.md` how to read the report and the "QA → fix → QA" loop; verify the documented command works as written
-- [ ] 3.3 Create `.github/workflows/qa.yml` running QA on PRs and uploading the report; verify on this change's PR that the check appears and the artifact downloads
+- [x] 3.3 Create `.github/workflows/qa.yml` running QA on PRs and uploading the report; verify on this change's PR that the check appears and the artifact downloads — verified on PR #4: the `qa` check passed and the `qa-report` artifact was uploaded.
 
 ## Workflow follow-up
 
