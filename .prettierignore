@@ -4,3 +4,4 @@ docs/
 package-lock.json
 dist/
 .astro/
+third-party-licenses/

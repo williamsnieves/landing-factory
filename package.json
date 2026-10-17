@@ -13,7 +13,9 @@
     "check": "astro check",
     "astro": "astro",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "setup:agent": "bash scripts/setup-agent.sh",
+    "setup:verify": "bash scripts/setup-agent.sh --verify"
   },
   "dependencies": {
     "@astrojs/react": "^7.1.0",
