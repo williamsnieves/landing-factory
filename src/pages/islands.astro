@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FaqAccordion from '../components/sections/FaqAccordion';
+---
+
+<BaseLayout
+  title="Islands test"
+  description="Test page with one React island hydrated on visibility, without the motion layer."
+  noindex
+>
+  <section class="mx-auto max-w-2xl px-6 py-24">
+    <h1 class="font-display mb-8 text-3xl">React island test</h1>
+    <FaqAccordion
+      client:visible
+      items={[
+        {
+          question: 'Is this island hydrated?',
+          answer: 'Yes, once it scrolls into view.',
+        },
+        {
+          question: 'Does this page load GSAP?',
+          answer: 'No: it does not include <Motion />.',
+        },
+      ]}
+    />
+  </section>
+</BaseLayout>

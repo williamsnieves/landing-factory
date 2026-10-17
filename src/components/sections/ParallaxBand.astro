@@ -1,0 +1,24 @@
+---
+interface Props {
+  label: string;
+}
+const { label } = Astro.props;
+---
+
+<!-- The wrapper clips; the inner layer drifts with data-parallax. -->
+<section class="relative h-[60svh] overflow-hidden" aria-label={label}>
+  <div
+    data-parallax="0.2"
+    aria-hidden="true"
+    class="from-primary to-accent absolute inset-x-0 -top-[20%] h-[140%] bg-gradient-to-br"
+  >
+    <div class="absolute top-1/4 left-[10%] size-48 rounded-full bg-white/20 md:size-80"></div>
+    <div class="absolute right-[12%] bottom-1/4 size-32 rounded-full bg-black/10 md:size-56"></div>
+  </div>
+  <p
+    data-reveal
+    class="font-display text-primary-contrast relative grid h-full place-items-center px-6 text-center text-3xl text-balance"
+  >
+    {label}
+  </p>
+</section>

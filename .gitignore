@@ -6,3 +6,9 @@ qa/
 .env
 .env.*
 .DS_Store
+npm-debug.log*
+*.log
+.vscode/
+.idea/
+test-results/
+playwright-report/
