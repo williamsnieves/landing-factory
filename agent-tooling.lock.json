@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "description": "Pinned agent tooling for Claude Code sessions. Read and enforced by scripts/setup-agent.sh. Update versions here and rerun the script with FORCE=1.",
+  "tools": [
+    {
+      "name": "ui-ux-pro-max",
+      "role": "design tokens per niche (design-system/<slug>/MASTER.md)",
+      "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
+      "version": "2.15.0",
+      "commit": null,
+      "license": "MIT",
+      "installMethod": "vendored",
+      "installedAt": "2026-10-17",
+      "path": ".claude/skills/ui-ux-pro-max",
+      "skillFile": ".claude/skills/ui-ux-pro-max/SKILL.md",
+      "installer": "npx ui-ux-pro-max-cli@2.15.0 init --ai claude --offline",
+      "keep": "ui-ux-pro-max",
+      "notes": "The installer also writes banner-design, brand, design-system, design, slides and ui-styling skills (claudekit); they overlap other roles and are discarded.",
+      "licenseFiles": ["third-party-licenses/ui-ux-pro-max.LICENSE"]
+    },
+    {
+      "name": "taste-skill",
+      "role": "art direction and openly licensed images with credits",
+      "source": "https://github.com/Leonxlnx/taste-skill",
+      "version": null,
+      "commit": "f624f37a8c650b9cc550253104925efe4c8de246",
+      "license": "MIT",
+      "installMethod": "vendored",
+      "installedAt": "2026-10-17",
+      "path": ".claude/skills/design-taste-frontend",
+      "skillFile": ".claude/skills/design-taste-frontend/SKILL.md",
+      "installer": "git checkout of the pinned commit, copy of skills/taste-skill (skill name: design-taste-frontend)",
+      "fetch": {
+        "repo": "https://github.com/Leonxlnx/taste-skill.git",
+        "subpath": "skills/taste-skill"
+      },
+      "notes": "Equivalent to `npx skills add https://github.com/Leonxlnx/taste-skill --skill design-taste-frontend`, but pinned to a commit and without the skills CLI telemetry.",
+      "licenseFiles": ["third-party-licenses/taste-skill.LICENSE"]
+    },
+    {
+      "name": "impeccable",
+      "role": "critique, audit, polish and `impeccable detect`",
+      "source": "https://github.com/pbakaus/impeccable",
+      "version": "4.6.0",
+      "commit": "08d5b470495d242ca0470f4aeae1956c3a074f83",
+      "license": "Apache-2.0",
+      "installMethod": "vendored",
+      "installedAt": "2026-10-17",
+      "path": ".claude/skills/impeccable",
+      "skillFile": ".claude/skills/impeccable/SKILL.md",
+      "installer": "git checkout of the pinned commit, copy of .claude/skills/impeccable (the compiled Claude Code project install)",
+      "fetch": {
+        "repo": "https://github.com/pbakaus/impeccable.git",
+        "subpath": ".claude/skills/impeccable"
+      },
+      "cli": "impeccable@4.6.0",
+      "telemetry": "off (npx impeccable@4.6.0 telemetry off; stored in ~/.impeccable/config.json)",
+      "notes": "Hooks and subagents that the project install ships (.claude/settings.json hooks, .claude/agents) are intentionally not kept: the hooks run on every edit and at every stop.",
+      "licenseFiles": [
+        "third-party-licenses/impeccable.LICENSE",
+        "third-party-licenses/impeccable.NOTICE.md"
+      ]
+    }
+  ],
+  "mcpServers": [
+    {
+      "name": "astro-docs",
+      "type": "http",
+      "url": "https://mcp.docs.astro.build/mcp",
+      "version": "remote (unversioned)"
+    },
+    {
+      "name": "playwright",
+      "type": "stdio",
+      "package": "@playwright/mcp",
+      "version": "0.0.83",
+      "command": "npx -y @playwright/mcp@0.0.83 --headless"
+    }
+  ]
+}

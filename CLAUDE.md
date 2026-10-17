@@ -22,15 +22,17 @@ All documentation, comments, commit messages and pull request descriptions MUST 
 
 ## Commands
 
-| Command           | Purpose                                           |
-| ----------------- | ------------------------------------------------- |
-| `npm ci`          | Install exact dependencies                        |
-| `npm run dev`     | Dev server with hot reload                        |
-| `npm run build`   | Static build into `dist/`                         |
-| `npm run preview` | Serve the built `dist/`                           |
-| `npm run check`   | `astro check` (types and Astro diagnostics)       |
-| `npm run format`  | Format with Prettier (`format:check` to verify)   |
-| `npm run qa`      | Not available yet: arrives with `add-qa-pipeline` |
+| Command                | Purpose                                                         |
+| ---------------------- | --------------------------------------------------------------- |
+| `npm ci`               | Install exact dependencies                                      |
+| `npm run dev`          | Dev server with hot reload                                      |
+| `npm run build`        | Static build into `dist/`                                       |
+| `npm run preview`      | Serve the built `dist/`                                         |
+| `npm run check`        | `astro check` (types and Astro diagnostics)                     |
+| `npm run format`       | Format with Prettier (`format:check` to verify)                 |
+| `npm run setup:agent`  | Install/verify agent tooling (design skills, telemetry opt-out) |
+| `npm run setup:verify` | Fast, offline, read-only check of the agent tooling             |
+| `npm run qa`           | Not available yet: arrives with `add-qa-pipeline`               |
 
 ## Folder structure
 
@@ -46,6 +48,46 @@ scripts/                   pipeline automation
 openspec/                  specs, changes, archive
 docs/                      roadmap and project docs
 ```
+
+## Agent tooling setup
+
+Run `npm run setup:agent` once per machine (or cloud session). It is idempotent: it reads the pins in `agent-tooling.lock.json`, restores any missing design skill under `.claude/skills/`, and turns impeccable telemetry off. `npm run setup:verify` is the fast, offline check; a SessionStart hook in `.claude/settings.json` runs it at every session start and names whatever is missing. `.claude/settings.json` also sets `OPENSPEC_TELEMETRY=0` and allows only safe pipeline commands (npm scripts, `npx astro`, `npx impeccable`, `npx playwright`, `openspec`, read-only git). Telemetry stays off: never run `npx impeccable telemetry on`.
+
+To bump a tool, edit its pin in `agent-tooling.lock.json`, run `FORCE=1 npm run setup:agent`, review the diff and commit. Vendored skill files under `.claude/skills/{ui-ux-pro-max,design-taste-frontend,impeccable}/` are third-party content: never edit them by hand. Their license texts live in `third-party-licenses/` and must be kept.
+
+## MCP servers
+
+Declared in `.mcp.json` (approve them the first time Claude Code asks).
+
+- `astro-docs` (remote, `https://mcp.docs.astro.build/mcp`): look up current Astro APIs, config and integrations before writing Astro code. Prefer it over memory, since Astro moves fast.
+- `playwright` (`@playwright/mcp`, pinned, `--headless`): open the running dev server or `dist/` preview, take screenshots at 375/768/1440 px, check overflow, console errors and interactions. Use it for visual checks while building; the repeatable QA run lives in `npm run qa` (later change).
+
+`.mcp.json` is portable and does not hard-code a browser path. In a cloud session, where Chromium is preinstalled outside Playwright's default cache, register a local override instead of editing the file, for example:
+
+```bash
+claude mcp add --scope local playwright -- npx -y @playwright/mcp@0.0.83 --headless \
+  --executable-path /opt/pw-browsers/chromium-1194/chrome-linux/chrome
+```
+
+(find the real path with `ls /opt/pw-browsers/chromium-*/chrome-linux/chrome`; add `--no-sandbox` only when running as root in a container). Locally, `npx playwright install chromium` is enough.
+
+## Design skills
+
+Three skills are vendored in `.claude/skills/`, each with one role. Do not use a skill outside its role.
+
+| Skill (folder)                        | Single role                                                                                                    | Typical output                                                 |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `ui-ux-pro-max`                       | Design tokens per niche: palette, font pairing, spacing, style                                                 | `design-system/<slug>/MASTER.md`, then `src/styles/tokens.css` |
+| `design-taste-frontend` (taste-skill) | Art direction and openly licensed images, with credits                                                         | Direction brief, images recorded in `CREDITS.md`               |
+| `impeccable`                          | Critique, audit and polish of what exists; `npx impeccable@4.6.0 detect <path-or-url>` for anti-pattern checks | Findings and fixes; zero major findings before shipping        |
+
+To define a niche's palette and fonts use ui-ux-pro-max only, not the other two. If ui-ux-pro-max and taste-skill disagree on visual direction, stop and raise it; a separate change decides which one stays.
+
+Costs and cautions:
+
+- taste-skill is expensive: a build takes 30-45 minutes and hundreds of thousands of tokens. Use it only in the build phase, once per landing, never for small tweaks.
+- impeccable's project hooks (run on every edit and at stop) are intentionally not installed; run critique/audit/detect on demand.
+- Telemetry is off (`npx impeccable telemetry off`, `OPENSPEC_TELEMETRY=0`). Provenance and licenses (MIT, MIT, Apache-2.0) are recorded in `agent-tooling.lock.json`.
 
 ## Workflow: OpenSpec
 

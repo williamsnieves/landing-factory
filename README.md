@@ -12,6 +12,8 @@ npm run dev       # dev server with hot reload
 npm run build     # static build into dist/
 npm run preview   # serve dist/
 npm run check     # type and Astro diagnostics
+npm run setup:agent   # install/verify Claude Code tooling (MCP config, design skills); idempotent
+npm run setup:verify  # fast offline check of that tooling
 ```
 
 Agent rules and conventions: [CLAUDE.md](CLAUDE.md). Motion primitives: [src/components/motion/README.md](src/components/motion/README.md).
