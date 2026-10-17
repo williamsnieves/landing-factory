@@ -33,11 +33,12 @@ jobs:
       - name: Types and Astro diagnostics
         run: npm run check
 
-      - name: Unit and fixture tests
-        run: npm test
-
+      # The fixture tests launch Chromium, so install it before npm test.
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
+
+      - name: Unit and fixture tests
+        run: npm test
 
       - name: QA (build, screenshots, overflow, reduced motion, Lighthouse, impeccable)
         run: npm run qa
