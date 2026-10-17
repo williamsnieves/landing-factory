@@ -2,7 +2,7 @@
 
 ## 1. MCP
 
-- [ ] 1.1 Create `.mcp.json` with the Astro Docs MCP (HTTP) and the Playwright MCP (pinned version, headless); verify with `claude mcp list` (or by opening a session) that both connect
+- [ ] 1.1 Create `.mcp.json` with the Astro Docs MCP (HTTP) and the Playwright MCP (pinned version, headless); verify with `claude mcp list` (or by opening a session) that both connect — PENDING: Playwright MCP verified (initialize + tools/list); Astro Docs MCP not verified because mcp.docs.astro.build is blocked by the cloud sandbox network policy. Verify locally with `claude mcp list`.
 - [x] 1.2 Document in `CLAUDE.md` when to use each MCP; verify the section exists
 
 ## 2. Design skills
