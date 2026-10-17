@@ -22,19 +22,20 @@ All documentation, comments, commit messages and pull request descriptions MUST 
 
 ## Commands
 
-| Command                | Purpose                                                                     |
-| ---------------------- | --------------------------------------------------------------------------- |
-| `npm ci`               | Install exact dependencies                                                  |
-| `npm run dev`          | Dev server with hot reload                                                  |
-| `npm run build`        | Static build into `dist/`                                                   |
-| `npm run preview`      | Serve the built `dist/`                                                     |
-| `npm run check`        | `astro check` (types and Astro diagnostics)                                 |
-| `npm run format`       | Format with Prettier (`format:check` to verify)                             |
-| `npm run setup:agent`  | Install/verify agent tooling (design skills, telemetry opt-out)             |
-| `npm run setup:verify` | Fast, offline, read-only check of the agent tooling                         |
-| `npm test`             | Unit and fixture tests for the QA script (`node --test`)                    |
-| `npm run qa`           | Build, serve and verify every page; writes `qa/latest/`; exit 0 = pass      |
-| `npx wrangler ...`     | Pinned Cloudflare CLI; CI uses it to deploy `dist/` (do not deploy locally) |
+| Command                     | Purpose                                                                     |
+| --------------------------- | --------------------------------------------------------------------------- |
+| `npm ci`                    | Install exact dependencies                                                  |
+| `npm run dev`               | Dev server with hot reload                                                  |
+| `npm run build`             | Static build into `dist/`                                                   |
+| `npm run preview`           | Serve the built `dist/`                                                     |
+| `npm run check`             | `astro check` (types and Astro diagnostics)                                 |
+| `npm run format`            | Format with Prettier (`format:check` to verify)                             |
+| `npm run setup:agent`       | Install/verify agent tooling (design skills, telemetry opt-out)             |
+| `npm run setup:verify`      | Fast, offline, read-only check of the agent tooling                         |
+| `npm test`                  | Unit and fixture tests (QA script, analyze-reference scripts, validator)    |
+| `npm run validate:patterns` | Validate `patterns/*.md` sheets (structure, no site content); runs in CI    |
+| `npm run qa`                | Build, serve and verify every page; writes `qa/latest/`; exit 0 = pass      |
+| `npx wrangler ...`          | Pinned Cloudflare CLI; CI uses it to deploy `dist/` (do not deploy locally) |
 
 ## Folder structure
 
@@ -46,7 +47,7 @@ src/pages/                 routes
 src/styles/                global.css and tokens.css (single source of the theme)
 patterns/                  abstract pattern sheets from references (no assets, copy or code)
 design-system/             per-niche design decisions, translated into tokens.css
-scripts/                   pipeline automation (qa.mjs, parse-wrangler-output.mjs, setup-agent.sh)
+scripts/                   pipeline automation (qa.mjs, validate-pattern.mjs, parse-wrangler-output.mjs, setup-agent.sh)
 public/_headers            Cloudflare Pages cache and security headers (lands in dist/_headers)
 site.config.json           per-site Cloudflare settings: Pages project name and production branch
 .github/workflows/ci.yml   CI: qa job, then deploy job (needs: qa)
@@ -56,7 +57,7 @@ docs/                      roadmap and project docs
 
 ## CI and deployment
 
-`.github/workflows/ci.yml` (triggers: `pull_request`, push to `main`, `workflow_dispatch`) has two jobs. `qa` runs Prettier, `astro check`, Chromium install, `npm test` and `npm run qa`, uploads the `qa-report` artifact, and, only if everything passed, the `site-dist` artifact (`dist/`). `deploy` has `needs: qa`, downloads `site-dist` and runs `npx wrangler pages deploy dist --project-name <site.config.json> --branch <head_ref || ref_name>`: `main` is the Pages production branch, every other branch gets a preview at `https://<branch-alias>.<project>.pages.dev`. On PRs it posts one sticky comment (hidden marker `<!-- landing-factory-preview -->`) with the URLs. The project is created idempotently if missing. URLs are read from wrangler's `WRANGLER_OUTPUT_FILE_PATH` ND-JSON via `scripts/parse-wrangler-output.mjs`.
+`.github/workflows/ci.yml` (triggers: `pull_request`, push to `main`, `workflow_dispatch`) has two jobs. `qa` runs Prettier, `astro check`, `npm run validate:patterns`, Chromium install, `npm test` and `npm run qa`, uploads the `qa-report` artifact, and, only if everything passed, the `site-dist` artifact (`dist/`). `deploy` has `needs: qa`, downloads `site-dist` and runs `npx wrangler pages deploy dist --project-name <site.config.json> --branch <head_ref || ref_name>`: `main` is the Pages production branch, every other branch gets a preview at `https://<branch-alias>.<project>.pages.dev`. On PRs it posts one sticky comment (hidden marker `<!-- landing-factory-preview -->`) with the URLs. The project is created idempotently if missing. URLs are read from wrangler's `WRANGLER_OUTPUT_FILE_PATH` ND-JSON via `scripts/parse-wrangler-output.mjs`.
 
 Deploy gating: the first `deploy` step checks that the secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are set (never echoing them) and that the PR is not from a fork. If not, it emits a `::warning::` naming what is missing and skips the remaining deploy steps (job stays green). Never print, log or commit credentials; never deploy from a local machine. Docs for setup: README, "Deployment".
 
@@ -170,6 +171,18 @@ NEVER extract, download, store, reuse or publish from a reference site:
 - literal code (markup, CSS, JS, shaders), even if minified or lightly edited
 
 Landings use original copy and original or properly licensed assets.
+
+### Analyzing a reference: `/analyze-reference`
+
+Use the `analyze-reference` skill (`.claude/skills/analyze-reference/SKILL.md`) for every reference; do not browse and take notes by hand.
+
+```text
+/analyze-reference <url> [--focus "what we like"]    # optionally 1-2 internal links of the same site
+```
+
+Pipeline: `check-robots.mjs` (robots.txt for `*`, ClaudeBot, anthropic-ai, GPTBot, `X-Robots-Tag`, meta robots, TDM reservation; any disallow, reservation or unverifiable check aborts with no sheet) -> `recon.mjs` (Playwright; writes `.cache/analyze/<slug>/recon.json` and screenshots at 375/768/1440) -> you read the JSON and look at the screenshots -> write `patterns/<slug>.md` from `patterns/_template.md` in abstract terms -> `npm run validate:patterns` -> `recon.mjs --cleanup <slug>`, which always runs, even after an abort or error.
+
+Where things go: sheets in `patterns/<slug>.md` (versioned, reviewed in the PR; `patterns/_example-starter-demo.md` is a model); temporary working files only in `.cache/analyze/` (git-ignored, deleted at the end). Never write colors as codes, name brand fonts, quote copy beyond 12 words, link media files or paste code in a sheet; the validator enforces this and a human reviews it. Never try to bypass a login, bot challenge or block. Optional REA (`npx rea-agents analyze-javascript-application`) only to explain an effect recon cannot identify, and only its written conclusion goes in the sheet. Guidance, not legal advice. The recon approach is adapted from JCodesMore/ai-website-cloner-template (MIT).
 
 ## Licensing and credits
 

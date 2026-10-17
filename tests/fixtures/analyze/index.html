@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fixture Reference Page</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #0b0b0f;
+        color: #f4efe6;
+        font-family: 'Inter Nova', Helvetica, sans-serif;
+        font-size: 18px;
+        line-height: 1.6;
+      }
+      h1,
+      h2 {
+        font-family: 'Zephyr Display', Georgia, serif;
+        letter-spacing: -0.03em;
+        line-height: 1;
+        margin: 0;
+      }
+      h1 {
+        font-size: 96px;
+      }
+      h2 {
+        font-size: 48px;
+      }
+      header {
+        position: fixed;
+        inset: 0 0 auto 0;
+        z-index: 10;
+        padding: 16px 32px;
+        display: flex;
+        justify-content: space-between;
+      }
+      header a {
+        color: #ff5a1f;
+      }
+      section {
+        padding: 128px 32px;
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+      .hero {
+        min-height: 100vh;
+      }
+      .pin {
+        min-height: 100vh;
+        background: #f4efe6;
+        color: #0b0b0f;
+        display: grid;
+        place-items: center;
+      }
+      .pin .bar {
+        width: 60%;
+        height: 12px;
+        background: #ff5a1f;
+        transform-origin: left;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+      }
+      .card {
+        border: 1px solid #3a3a46;
+        padding: 32px;
+        border-radius: 16px;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+        height: 320px;
+        background: #000;
+      }
+      footer {
+        padding: 64px 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <span>Zephyrquill</span>
+      <a href="#cards">Marmalade index</a>
+    </header>
+    <main>
+      <section class="hero">
+        <div class="wrap">
+          <h1 class="reveal">Quillfeather orbits the lantern harbour</h1>
+          <p class="reveal">
+            Unmistakable fixture sentence about marmalade skies and copper
+            kettles that must never reach the recon output.
+          </p>
+        </div>
+      </section>
+      <section class="pin" id="pin">
+        <div class="wrap">
+          <h2>Pinned and scrubbed</h2>
+          <div class="bar"></div>
+        </div>
+      </section>
+      <section id="gl">
+        <div class="wrap">
+          <canvas id="gl-canvas" width="640" height="320"></canvas>
+        </div>
+      </section>
+      <section id="cards">
+        <div class="wrap">
+          <h2 class="reveal">Three kettles</h2>
+          <div class="cards">
+            <div class="card reveal">
+              <h3>Kettle one</h3>
+              <p>Copper handle</p>
+            </div>
+            <div class="card reveal">
+              <h3>Kettle two</h3>
+              <p>Brass spout</p>
+            </div>
+            <div class="card reveal">
+              <h3>Kettle three</h3>
+              <p>Steel lid</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer>Fixture footer</footer>
+
+    <script src="/vendor/gsap/gsap.min.js"></script>
+    <script src="/vendor/gsap/ScrollTrigger.min.js"></script>
+    <script src="/vendor/lenis/lenis.min.js"></script>
+    <script>
+      gsap.registerPlugin(ScrollTrigger);
+      const lenis = new Lenis();
+      window.lenis = lenis;
+      lenis.on('scroll', ScrollTrigger.update);
+      gsap.ticker.add((t) => lenis.raf(t * 1000));
+      gsap.ticker.lagSmoothing(0);
+      document.querySelectorAll('.reveal').forEach((el) => {
+        gsap.from(el, {
+          y: 40,
+          opacity: 0,
+          duration: 0.6,
+          scrollTrigger: { trigger: el, start: 'top 85%' },
+        });
+      });
+      gsap.to('.pin .bar', {
+        scaleX: 0.1,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '#pin',
+          start: 'top top',
+          end: '+=900',
+          pin: true,
+          scrub: true,
+        },
+      });
+      const gl = document.getElementById('gl-canvas').getContext('webgl');
+      if (gl) {
+        gl.clearColor(0.2, 0.1, 0.3, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+      }
+    </script>
+  </body>
+</html>

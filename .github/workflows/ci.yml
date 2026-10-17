@@ -35,6 +35,9 @@ jobs:
       - name: Types and Astro diagnostics
         run: npm run check
 
+      - name: Validate pattern sheets
+        run: npm run validate:patterns
+
       # The fixture tests launch Chromium, so install it before npm test.
       - name: Install Chromium
         run: npx playwright install --with-deps chromium

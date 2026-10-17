@@ -12,7 +12,8 @@ npm run dev       # dev server with hot reload
 npm run build     # static build into dist/
 npm run preview   # serve dist/
 npm run check     # type and Astro diagnostics
-npm test          # unit and fixture tests for the QA script
+npm test          # unit and fixture tests (QA script, reference-analysis scripts, pattern validator)
+npm run validate:patterns  # check patterns/*.md (structure, no site content)
 npm run qa        # build + screenshots, overflow, reduced motion, Lighthouse, impeccable -> qa/latest/report.md
 npm run setup:agent   # install/verify Claude Code tooling (MCP config, design skills); idempotent
 npm run setup:verify  # fast offline check of that tooling
@@ -51,6 +52,16 @@ The `deploy` job still runs but skips every deploy step: it emits a `::warning::
 ### Headers
 
 [`public/_headers`](public/_headers) is copied to `dist/_headers` by the build. It serves `/_astro/*` with `Cache-Control: public, max-age=31536000, immutable` and every response with `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Content-Security-Policy: frame-ancestors 'self'` and a minimal `Permissions-Policy`.
+
+## Analyzing reference sites
+
+References are for learning patterns, never for copying. In Claude Code run:
+
+```text
+/analyze-reference https://example.com/ --focus "pinned storytelling, large serif type"
+```
+
+The skill ([`.claude/skills/analyze-reference/SKILL.md`](.claude/skills/analyze-reference/SKILL.md)) first checks `robots.txt` and text-and-data-mining reservations and aborts if access is disallowed or cannot be verified. Otherwise it runs a local Playwright reconnaissance (temporary screenshots in the git-ignored `.cache/analyze/<slug>/`), writes an abstract sheet to `patterns/<slug>.md` (no assets, copy, code, color codes or brand font names), validates it with `npm run validate:patterns` and always deletes the temporary files. See [`patterns/README.md`](patterns/README.md) and the worked example [`patterns/_example-starter-demo.md`](patterns/_example-starter-demo.md). The scripts also run standalone: `node .claude/skills/analyze-reference/scripts/check-robots.mjs <url>`, `node .claude/skills/analyze-reference/scripts/recon.mjs <url>`, each with `--help`. This is guidance, not legal advice.
 
 ## How we work: OpenSpec
 
