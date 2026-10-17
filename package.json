@@ -16,6 +16,7 @@
     "format:check": "prettier --check .",
     "setup:agent": "bash scripts/setup-agent.sh",
     "setup:verify": "bash scripts/setup-agent.sh --verify",
+    "validate:patterns": "node scripts/validate-pattern.mjs",
     "qa": "node scripts/qa.mjs",
     "test": "node --test \"tests/**/*.test.mjs\""
   },
