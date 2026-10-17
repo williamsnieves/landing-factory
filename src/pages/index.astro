@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Motion from '../components/motion/Motion.astro';
+import Hero from '../components/sections/Hero.astro';
+import FeatureGrid from '../components/sections/FeatureGrid.astro';
+import PinnedStatement from '../components/sections/PinnedStatement.astro';
+import ParallaxBand from '../components/sections/ParallaxBand.astro';
+---
+
+<BaseLayout
+  title="Landing Factory Starter"
+  description="Starter demo for landing-factory: Astro, Tailwind v4, and a GSAP + Lenis motion layer."
+>
+  <Motion slot="head" smooth />
+
+  <Hero
+    eyebrow="Landing Factory Starter"
+    title="Motion that respects the people watching it."
+    lead="A static Astro base with design tokens, accessible structure and declarative scroll animation: reveal, pin and parallax from plain HTML attributes."
+    ctaLabel="See the primitives"
+    ctaHref="#features"
+  />
+
+  <FeatureGrid
+    heading="Three primitives, zero animation code in your sections."
+    features={[
+      {
+        title: 'Reveal',
+        text: 'Add data-reveal and the element fades and rises into place as it enters the viewport.',
+      },
+      {
+        title: 'Pin',
+        text: 'Add data-pin and a section holds the screen for a set scroll distance, then lets go.',
+      },
+      {
+        title: 'Parallax',
+        text: 'Add data-parallax and a layer drifts at its own pace behind the content.',
+      },
+    ]}
+  />
+
+  <PinnedStatement
+    title="Reduced motion? Everything is simply there."
+    text="With prefers-reduced-motion, or without JavaScript, nothing is hidden, pinned or smoothed. Content always comes first."
+  />
+
+  <ParallaxBand label="Tokens in one file. Theme in one edit." />
+</BaseLayout>

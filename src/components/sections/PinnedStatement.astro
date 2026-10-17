@@ -1,0 +1,20 @@
+---
+interface Props {
+  title: string;
+  text: string;
+}
+const { title, text } = Astro.props;
+---
+
+<!-- data-pin keeps this section fixed for one viewport of scroll (desktop only). -->
+<section
+  data-pin
+  data-pin-distance="100%"
+  data-pin-min="md"
+  class="bg-ink text-paper grid min-h-[70svh] place-items-center md:min-h-svh"
+>
+  <div class="mx-auto max-w-4xl px-6 py-24 text-center">
+    <h2 class="font-display text-3xl text-balance">{title}</h2>
+    <p class="text-line mx-auto mt-8 max-w-xl text-lg">{text}</p>
+  </div>
+</section>

@@ -1,0 +1,30 @@
+---
+interface Feature {
+  title: string;
+  text: string;
+}
+interface Props {
+  heading: string;
+  features: Feature[];
+}
+const { heading, features } = Astro.props;
+---
+
+<section id="features" class="mx-auto max-w-6xl px-6 py-24 md:py-36">
+  <h2 data-reveal class="font-display text-3xl max-w-2xl text-balance">
+    {heading}
+  </h2>
+  <ul class="mt-16 grid gap-6 md:grid-cols-3">
+    {features.map((feature, index) => (
+      <li
+        data-reveal
+        data-reveal-delay={index * 0.12}
+        class="bg-surface border-line rounded-lg border p-8"
+      >
+        <span class="text-primary font-display text-2xl">0{index + 1}</span>
+        <h3 class="mt-6 text-xl font-medium">{feature.title}</h3>
+        <p class="text-ink-soft mt-3">{feature.text}</p>
+      </li>
+    ))}
+  </ul>
+</section>

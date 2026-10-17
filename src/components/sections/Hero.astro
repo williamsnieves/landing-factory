@@ -1,0 +1,47 @@
+---
+interface Props {
+  eyebrow: string;
+  title: string;
+  lead: string;
+  ctaLabel: string;
+  ctaHref: string;
+}
+const { eyebrow, title, lead, ctaLabel, ctaHref } = Astro.props;
+---
+
+<section class="relative isolate overflow-hidden">
+  <div class="mx-auto max-w-6xl px-6 pt-28 pb-24 md:pt-40 md:pb-36">
+    <p
+      data-reveal
+      class="text-primary mb-6 text-sm font-semibold tracking-widest uppercase"
+    >
+      {eyebrow}
+    </p>
+    <h1
+      data-reveal
+      data-reveal-delay="0.1"
+      class="font-display text-4xl max-w-4xl leading-[0.95] tracking-tight text-balance"
+    >
+      {title}
+    </h1>
+    <p
+      data-reveal
+      data-reveal-delay="0.2"
+      class="text-ink-soft mt-8 max-w-xl text-lg"
+    >
+      {lead}
+    </p>
+    <a
+      data-reveal
+      data-reveal-delay="0.3"
+      href={ctaHref}
+      class="bg-primary text-primary-contrast rounded-pill mt-10 inline-block px-8 py-4 font-medium transition-transform hover:-translate-y-0.5"
+    >
+      {ctaLabel}
+    </a>
+  </div>
+  <div
+    aria-hidden="true"
+    class="bg-accent/40 absolute -top-24 -right-24 -z-10 size-80 rounded-full blur-3xl md:size-[32rem]"
+  ></div>
+</section>
