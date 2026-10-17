@@ -1,0 +1,45 @@
+schema: spec-driven
+
+context: |
+  Language: English
+  All artifacts, docs and pull request descriptions must be written in English.
+
+  Project: landing-factory. A pipeline that, given a niche, uses Claude to generate
+  an original Astro landing page with near-Awwwards quality, ready to deploy.
+  Full roadmap in docs/roadmap.md.
+  Stack: Astro (static output) + Tailwind v4 + React islands; motion with GSAP +
+  ScrollTrigger and Lenis; Three.js/R3F only when 3D is needed. Node 22.
+  Deployment: Cloudflare Pages with per-branch previews.
+  Key principle: extract patterns, don't clone. Never store or publish assets,
+  copy or code from reference sites; only abstract pattern sheets in patterns/.
+  Success criteria: Lighthouse >= 90 (performance, accessibility, SEO), no
+  overflow at 375/768/1440 px, prefers-reduced-motion respected, no major
+  findings in impeccable detect, original copy and assets.
+  Out of scope: clients, commercial licensing, CMS, multi-language.
+
+rules:
+  tasks:
+    - Every task must state how it is verified (command, test or observation).
+    - One change = one PR; keep changes small and reviewable.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing
