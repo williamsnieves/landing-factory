@@ -2,8 +2,8 @@
 
 ## 1. Configuration
 
-- [ ] 1.1 Add `wrangler` (pinned version) and the Pages project config (name from site config, output `dist/`); verify `npx wrangler pages deploy --help` and that no credentials are in files
-- [ ] 1.2 Add `public/_headers` with immutable caching for `/_astro/*` and security headers; verify the file appears in `dist/` after the build
+- [x] 1.1 Add `wrangler` (pinned version) and the Pages project config (name from site config, output `dist/`); verify `npx wrangler pages deploy --help` and that no credentials are in files
+- [x] 1.2 Add `public/_headers` with immutable caching for `/_astro/*` and security headers; verify the file appears in `dist/` after the build
 - [ ] 1.3 Document in `README.md` how to create the Cloudflare project, the minimal token and the `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID` secrets; verify the steps are complete by following them once
 
 ## 2. Workflow

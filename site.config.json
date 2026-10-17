@@ -1,0 +1,6 @@
+{
+  "cloudflare": {
+    "pagesProject": "landing-factory",
+    "productionBranch": "main"
+  }
+}

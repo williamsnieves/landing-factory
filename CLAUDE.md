@@ -18,22 +18,23 @@ All documentation, comments, commit messages and pull request descriptions MUST 
 - Motion: GSAP + ScrollTrigger and Lenis, vanilla TypeScript, driven by `data-*` attributes
 - Three.js / R3F only when a landing needs 3D (later change)
 - TypeScript strict, `astro check`, Prettier (with `prettier-plugin-astro`)
-- Deployment target: Cloudflare Pages (per-branch previews, later change)
+- Deployment: Cloudflare Pages via GitHub Actions (`wrangler pages deploy`), per-branch previews, production from `main`
 
 ## Commands
 
-| Command                | Purpose                                                                |
-| ---------------------- | ---------------------------------------------------------------------- |
-| `npm ci`               | Install exact dependencies                                             |
-| `npm run dev`          | Dev server with hot reload                                             |
-| `npm run build`        | Static build into `dist/`                                              |
-| `npm run preview`      | Serve the built `dist/`                                                |
-| `npm run check`        | `astro check` (types and Astro diagnostics)                            |
-| `npm run format`       | Format with Prettier (`format:check` to verify)                        |
-| `npm run setup:agent`  | Install/verify agent tooling (design skills, telemetry opt-out)        |
-| `npm run setup:verify` | Fast, offline, read-only check of the agent tooling                    |
-| `npm test`             | Unit and fixture tests for the QA script (`node --test`)               |
-| `npm run qa`           | Build, serve and verify every page; writes `qa/latest/`; exit 0 = pass |
+| Command                | Purpose                                                                     |
+| ---------------------- | --------------------------------------------------------------------------- |
+| `npm ci`               | Install exact dependencies                                                  |
+| `npm run dev`          | Dev server with hot reload                                                  |
+| `npm run build`        | Static build into `dist/`                                                   |
+| `npm run preview`      | Serve the built `dist/`                                                     |
+| `npm run check`        | `astro check` (types and Astro diagnostics)                                 |
+| `npm run format`       | Format with Prettier (`format:check` to verify)                             |
+| `npm run setup:agent`  | Install/verify agent tooling (design skills, telemetry opt-out)             |
+| `npm run setup:verify` | Fast, offline, read-only check of the agent tooling                         |
+| `npm test`             | Unit and fixture tests for the QA script (`node --test`)                    |
+| `npm run qa`           | Build, serve and verify every page; writes `qa/latest/`; exit 0 = pass      |
+| `npx wrangler ...`     | Pinned Cloudflare CLI; CI uses it to deploy `dist/` (do not deploy locally) |
 
 ## Folder structure
 
@@ -45,10 +46,19 @@ src/pages/                 routes
 src/styles/                global.css and tokens.css (single source of the theme)
 patterns/                  abstract pattern sheets from references (no assets, copy or code)
 design-system/             per-niche design decisions, translated into tokens.css
-scripts/                   pipeline automation
+scripts/                   pipeline automation (qa.mjs, parse-wrangler-output.mjs, setup-agent.sh)
+public/_headers            Cloudflare Pages cache and security headers (lands in dist/_headers)
+site.config.json           per-site Cloudflare settings: Pages project name and production branch
+.github/workflows/ci.yml   CI: qa job, then deploy job (needs: qa)
 openspec/                  specs, changes, archive
 docs/                      roadmap and project docs
 ```
+
+## CI and deployment
+
+`.github/workflows/ci.yml` (triggers: `pull_request`, push to `main`, `workflow_dispatch`) has two jobs. `qa` runs Prettier, `astro check`, Chromium install, `npm test` and `npm run qa`, uploads the `qa-report` artifact, and, only if everything passed, the `site-dist` artifact (`dist/`). `deploy` has `needs: qa`, downloads `site-dist` and runs `npx wrangler pages deploy dist --project-name <site.config.json> --branch <head_ref || ref_name>`: `main` is the Pages production branch, every other branch gets a preview at `https://<branch-alias>.<project>.pages.dev`. On PRs it posts one sticky comment (hidden marker `<!-- landing-factory-preview -->`) with the URLs. The project is created idempotently if missing. URLs are read from wrangler's `WRANGLER_OUTPUT_FILE_PATH` ND-JSON via `scripts/parse-wrangler-output.mjs`.
+
+Deploy gating: the first `deploy` step checks that the secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are set (never echoing them) and that the PR is not from a fork. If not, it emits a `::warning::` naming what is missing and skips the remaining deploy steps (job stays green). Never print, log or commit credentials; never deploy from a local machine. Docs for setup: README, "Deployment".
 
 ## Agent tooling setup
 
