@@ -1,0 +1,34 @@
+{
+  "viewports": [
+    { "width": 375, "height": 812 },
+    { "width": 768, "height": 1024 },
+    { "width": 1440, "height": 900 }
+  ],
+  "pages": {
+    "exclude": ["404.html"]
+  },
+  "reducedMotion": {
+    "viewportWidth": 1440,
+    "settleMs": 500
+  },
+  "lighthouse": {
+    "thresholds": {
+      "performance": 90,
+      "accessibility": 90,
+      "seo": 90
+    },
+    "reportOnly": ["best-practices"],
+    "runs": 1,
+    "skipCrawlableOnNoindex": true
+  },
+  "impeccable": {
+    "version": "4.6.0",
+    "target": "src",
+    "severityMap": {
+      "error": "major",
+      "warning": "minor",
+      "advisory": "info"
+    },
+    "failOn": ["major"]
+  }
+}

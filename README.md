@@ -12,6 +12,8 @@ npm run dev       # dev server with hot reload
 npm run build     # static build into dist/
 npm run preview   # serve dist/
 npm run check     # type and Astro diagnostics
+npm test          # unit and fixture tests for the QA script
+npm run qa        # build + screenshots, overflow, reduced motion, Lighthouse, impeccable -> qa/latest/report.md
 npm run setup:agent   # install/verify Claude Code tooling (MCP config, design skills); idempotent
 npm run setup:verify  # fast offline check of that tooling
 ```
