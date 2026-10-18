@@ -22,23 +22,28 @@ All documentation, comments, commit messages and pull request descriptions MUST 
 
 ## Commands
 
-| Command                       | Purpose                                                                      |
-| ----------------------------- | ---------------------------------------------------------------------------- |
-| `npm ci`                      | Install exact dependencies                                                   |
-| `npm run dev`                 | Dev server with hot reload                                                   |
-| `npm run build`               | Static build into `dist/`                                                    |
-| `npm run preview`             | Serve the built `dist/`                                                      |
-| `npm run check`               | `astro check` for the root starter (`sites/` is excluded in `tsconfig.json`) |
-| `npm run check:sites`         | `astro check` in every site workspace                                        |
-| `npm run new-site -- <slug>`  | Scaffold `sites/<slug>/` from the starter (see "Sites")                      |
-| `npm run format`              | Format with Prettier (`format:check` to verify)                              |
-| `npm run setup:agent`         | Install/verify agent tooling (design skills, telemetry opt-out)              |
-| `npm run setup:verify`        | Fast, offline, read-only check of the agent tooling                          |
-| `npm test`                    | Unit and fixture tests (QA script, analyze-reference scripts, validator)     |
-| `npm run validate:patterns`   | Validate `patterns/*.md` sheets (structure, no site content); runs in CI     |
-| `npm run qa`                  | Build, serve and verify every page; writes `qa/latest/`; exit 0 = pass       |
-| `npm run qa -- --site <slug>` | Same checks for one site; writes `qa/<slug>/latest/`                         |
-| `npx wrangler ...`            | Pinned Cloudflare CLI; CI uses it to deploy `dist/` (do not deploy locally)  |
+| Command                                       | Purpose                                                                            |
+| --------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `npm ci`                                      | Install exact dependencies                                                         |
+| `npm run dev`                                 | Dev server with hot reload                                                         |
+| `npm run build`                               | Static build into `dist/`                                                          |
+| `npm run preview`                             | Serve the built `dist/`                                                            |
+| `npm run check`                               | `astro check` for the root starter (`sites/` is excluded in `tsconfig.json`)       |
+| `npm run check:sites`                         | `astro check` in every site workspace                                              |
+| `npm run new-site -- <slug>`                  | Scaffold `sites/<slug>/` from the starter (see "Sites")                            |
+| `npm run new-landing -- <slug> --niche "..."` | Generate a whole landing with `claude -p` (see "Generating a landing")             |
+| `npm run preflight`                           | Check npm and Commons reachability, Chromium and a free slug                       |
+| `npm run find-images -- ...`                  | Search and download licensed Commons photos into `sites/<slug>/assets.json`        |
+| `npm run credits -- --site <slug>`            | Write the photo credits (`CREDITS.md`, `src/data/credits.json`) from `assets.json` |
+| `npm run check-landing -- --site <slug>`      | Final check: credits, photo reuse, tokens, diversity, copy originality             |
+| `npm run format`                              | Format with Prettier (`format:check` to verify)                                    |
+| `npm run setup:agent`                         | Install/verify agent tooling (design skills, telemetry opt-out)                    |
+| `npm run setup:verify`                        | Fast, offline, read-only check of the agent tooling                                |
+| `npm test`                                    | Unit and fixture tests (QA script, analyze-reference scripts, validator)           |
+| `npm run validate:patterns`                   | Validate `patterns/*.md` sheets (structure, no site content); runs in CI           |
+| `npm run qa`                                  | Build, serve and verify every page; writes `qa/latest/`; exit 0 = pass             |
+| `npm run qa -- --site <slug>`                 | Same checks for one site; writes `qa/<slug>/latest/`                               |
+| `npx wrangler ...`                            | Pinned Cloudflare CLI; CI uses it to deploy `dist/` (do not deploy locally)        |
 
 ## Folder structure
 
@@ -51,7 +56,7 @@ src/styles/                global.css and tokens.css (single source of the theme
 sites/<slug>/              one self-contained Astro site per landing (npm workspace `site-<slug>`)
 patterns/                  abstract pattern sheets from references (no assets, copy or code)
 design-system/             per-niche design decisions, translated into tokens.css
-scripts/                   pipeline automation (qa.mjs, new-site.mjs, changed-sites.mjs, validate-pattern.mjs, parse-wrangler-output.mjs, setup-agent.sh)
+scripts/                   pipeline automation (qa.mjs, new-site.mjs, new-landing.sh, preflight.mjs, find-images.mjs, credits.mjs, check-landing.mjs, changed-sites.mjs, validate-pattern.mjs, parse-wrangler-output.mjs, setup-agent.sh)
 public/_headers            Cloudflare Pages cache and security headers (lands in dist/_headers)
 site.config.json           per-site Cloudflare settings: Pages project name and production branch
 .github/workflows/ci.yml   CI: qa job, then deploy job (needs: qa)
@@ -63,11 +68,20 @@ docs/                      roadmap and project docs
 
 Each landing is a complete static Astro site in `sites/<slug>/` (slug rule `^[a-z0-9]+(-[a-z0-9]+)*$`), registered as the npm workspace `site-<slug>` through `"workspaces": ["sites/*"]` in the root `package.json`. One `npm ci` at the root installs everything; one root `package-lock.json`. Details and conventions: `sites/README.md`.
 
-- Create: `npm run new-site -- <slug> [--title ... --lang ... --message ...]` copies `astro.config.mjs`, `tsconfig.json`, `src/layouts/`, `src/components/motion/`, `src/styles/`, `src/env.d.ts`, `public/_headers` and `public/favicon.svg` from the root, and writes `package.json` (same dependency ranges as the root), `site.config.json` (`pagesProject: <slug>`), `CREDITS.md`, `README.md` and a `noindex` placeholder `src/pages/index.astro`. It never copies the starter's pages or sections, and refuses invalid slugs and existing folders (`--allow-existing-docs` accepts a folder holding only `*.md` planning docs such as `PROPOSAL.md` and never overwrites them). Then run `npm install` once and commit the updated `package-lock.json`.
+- Create: `npm run new-site -- <slug> [--title ... --lang ... --message ...]` copies `astro.config.mjs`, `tsconfig.json`, `src/layouts/`, `src/components/motion/`, `src/styles/`, `src/env.d.ts`, `public/_headers` and `public/favicon.svg` from the root, and writes `package.json` (same dependency ranges as the root), `site.config.json` (`pagesProject: <slug>`), `CREDITS.md`, `README.md`, the planning templates `PROPOSAL.md` and `RUN.md`, an empty `assets.json` (image manifest) and a `noindex` placeholder `src/pages/index.astro`. It never copies the starter's pages or sections, and refuses invalid slugs and existing folders (`--allow-existing-docs` accepts a folder holding only `*.md` planning docs such as `PROPOSAL.md` and never overwrites them). Then run `npm install` once and commit the updated `package-lock.json`.
 - Build and check one site: `npm run build -w site-<slug>`, `npm run check -w site-<slug>` (`npm run check:sites` for all).
 - QA one site: `npm run qa -- --site <slug>` builds and serves `sites/<slug>`, checks its pages, runs impeccable on `sites/<slug>/src` and writes `qa/<slug>/<timestamp>/` (`qa/<slug>/latest`). A `sites/<slug>/qa.config.json` overrides the root `qa.config.json` for that site; never lower a threshold to get a pass.
 - Sites copy the starter at creation and may diverge; nothing is shared at runtime. The root `src/styles/global.css` excludes `sites/` and `scripts/` from Tailwind's class scan so a site never changes the starter's CSS.
 - Each site has its own Cloudflare Pages project (`sites/<slug>/site.config.json`) and its own `CREDITS.md`. Do not edit another site's folder from a site change.
+
+## Generating a landing
+
+`scripts/new-landing.sh <slug> --niche "..." [--refs a,b] [--auto] [--dry-run] [--resume] [--max-attempts N] [--model M]` runs `scripts/preflight.mjs`, `npm run new-site`, `npm install`, then `claude -p "/new-landing ..."` (skill: `.claude/skills/new-landing/SKILL.md`) and writes `sites/<slug>/.run.log`. Phases: brief, synthesis (`PROPOSAL.md`), checkpoint (stops unless `--auto`), design system (`design-system/<slug>/MASTER.md` with a `landing-meta` block, ui-ux-pro-max only), build (design-taste-frontend for art direction, palette and type fixed), QA loop (`npm run qa -- --site <slug>` until it passes or attempts run out), impeccable polish once, final check, `RUN.md`. Outcome is the `Result:` line of `sites/<slug>/RUN.md`; the script exits non-zero on `failed`.
+
+- Images: only `node scripts/find-images.mjs` (Commons API through the proxy, throttled, CC0 / public domain / CC BY / CC BY-SA). Each file is recorded in `sites/<slug>/assets.json`; `node scripts/credits.mjs --site <slug>` regenerates the photo table of `CREDITS.md` (between `<!-- credits:start -->` and `<!-- credits:end -->`) and `src/data/credits.json` for the footer. Do not hand-edit those. The vendored taste-skill `assets.mjs` ignores the proxy and is not used.
+- Final check: `node scripts/check-landing.mjs --site <slug> [--refs urls]` fails on an uncredited image, stale credits, a source photo referenced from more than two places, a MASTER.md palette color or font missing from `tokens.css`, a site that matches another on primary color, display font and hero type, or (with `--refs`) 8 words in a row copied from a reference read in memory. Exit 0 passed, 1 failed, 2 the run broke.
+- `design-system/<slug>/MASTER.md` ends with a fenced `landing-meta` block: `primary: #rrggbb`, `display-font`, optional `body-font`, `hero: full-bleed-photo|split|typographic|video|illustration|collage`.
+- Auto mode runs with `--permission-mode acceptEdits`; the commands the skill needs are allowed in `.claude/settings.json`. Generation never commits, pushes or deploys.
 
 ## CI and deployment
 

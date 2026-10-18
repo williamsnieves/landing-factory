@@ -1,0 +1,48 @@
+{
+  "images": [
+    {
+      "file": "hero.jpg",
+      "title": "File:Sample loaf.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Sample_loaf.jpg",
+      "author": "Ana Pan",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+      "credit": true,
+      "retrievedAt": "2026-10-18T12:00:00.000Z",
+      "note": "hero"
+    },
+    {
+      "file": "loaf-crop.jpg",
+      "title": "File:Sample loaf.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Sample_loaf.jpg",
+      "author": "Ana Pan",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+      "credit": true,
+      "retrievedAt": "2026-10-18T12:00:00.000Z",
+      "note": "crop of the loaf"
+    },
+    {
+      "file": "oven.jpg",
+      "title": "File:Clay oven.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Clay_oven.jpg",
+      "author": "Bo | Cy",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "credit": true,
+      "retrievedAt": "2026-10-18T12:00:00.000Z",
+      "note": ""
+    },
+    {
+      "file": "croissant.jpg",
+      "title": "File:Croissant.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Croissant.jpg",
+      "author": "Dee",
+      "license": "CC0",
+      "licenseUrl": "",
+      "credit": false,
+      "retrievedAt": "2026-10-18T12:00:00.000Z",
+      "note": ""
+    }
+  ]
+}

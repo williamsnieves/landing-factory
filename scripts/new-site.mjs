@@ -144,6 +144,126 @@ Every external image, font, icon or component used by this site must be listed h
 `;
 }
 
+/** Phases of the /new-landing skill, in order. RUN.md tracks one row per phase. */
+export const RUN_PHASES = [
+  'brief',
+  'synthesis',
+  'checkpoint',
+  'design-system',
+  'build',
+  'qa',
+  'polish',
+  'final-check',
+];
+
+export function proposalFile(slug, title) {
+  return `# Proposal: ${title ?? slug}
+
+Status: **draft**. Fill every section; the checkpoint waits for approval unless the run is automatic.
+
+## Brief
+
+- **Niche:**
+- **Brand (fictional or real):**
+- **Goal of the page:** primary action and secondary action.
+- **Audience:**
+- **Tone:**
+- **Language:** the copy language (default Spanish unless the brief says otherwise).
+- **Site location:** \`sites/${slug}/\`, its own Cloudflare Pages project.
+
+## References used
+
+| Sheet | What we take | What we leave |
+| ----- | ------------ | ------------- |
+
+**Direction in one line:**
+
+## Page map
+
+| #   | Section | Height | Purpose | Layout idea |
+| --- | ------- | ------ | ------- | ----------- |
+
+## Motion plan
+
+| Moment | Trigger | Type | Notes |
+| ------ | ------- | ---- | ----- |
+
+Reduced motion: no pin, no scrub, no parallax, no smooth scroll; all content visible in its final state. Without JavaScript the page reads top to bottom with every section visible.
+
+## Visual direction
+
+- **Type:**
+- **Palette:**
+- **Hero type:** one of the types listed in the new-landing skill (full-bleed-photo, split, typographic, video, illustration, collage).
+- **Imagery:** openly licensed photos only; every one recorded in \`assets.json\` and \`CREDITS.md\`. No images from the references.
+
+## Quality targets
+
+Lighthouse >= 90 (performance, accessibility, SEO), no overflow at 375/768/1440, reduced motion respected, content visible without JS, no major impeccable findings.
+
+## Out of scope
+
+Online shop, cart, payments, backend forms, CMS, multiple languages.
+
+## Decisions
+
+1.
+`;
+}
+
+export function runFile(slug) {
+  const rows = RUN_PHASES.map(
+    (phase) => `| ${phase.padEnd(13)} | pending |         |          |       |`,
+  );
+  return `# Run log: ${slug}
+
+Result: pending
+
+Written by the /new-landing skill. \`Result:\` ends as one of \`checkpoint\` (waiting for approval), \`dry-run-done\`, \`passed\` or \`failed\`; scripts/new-landing.sh reads it for its exit code. A phase marked \`done\` is skipped when the run resumes.
+
+## Inputs
+
+| Field           | Value |
+| --------------- | ----- |
+| Niche           |       |
+| References      |       |
+| Mode            |       |
+| Max QA attempts |       |
+| Started         |       |
+
+## Phases
+
+| Phase         | Status  | Started | Finished | Notes |
+| ------------- | ------- | ------- | -------- | ----- |
+${rows.join('\n')}
+
+## Design decisions
+
+Skill conflicts and how they were resolved (the approved proposal wins).
+
+## Images
+
+Count, sources and any photo dropped, with the reason.
+
+## QA attempts
+
+| #   | Verdict | Failures by check | Fixed | Notes |
+| --- | ------- | ----------------- | ----- | ----- |
+
+## Final check
+
+Result of \`check-landing\`, \`credits --check\`, Prettier and \`astro check\`.
+
+## Totals
+
+Wall clock, approximate tokens when the session reports them, remaining failures if the run did not finish.
+`;
+}
+
+export function assetsFile() {
+  return `${JSON.stringify({ images: [] }, null, 2)}\n`;
+}
+
 export function readmeFile(slug) {
   return `# ${slug}
 
@@ -218,6 +338,9 @@ export function scaffoldSite({
     'package.json': `${JSON.stringify(siteManifest(slug, rootPackage), null, 2)}\n`,
     'site.config.json': `${JSON.stringify(siteConfig(slug), null, 2)}\n`,
     'CREDITS.md': creditsFile(slug),
+    'PROPOSAL.md': proposalFile(slug, title),
+    'RUN.md': runFile(slug),
+    'assets.json': assetsFile(),
     'README.md': readmeFile(slug),
     'src/pages/index.astro': placeholderPage({
       title: pageTitle,
@@ -262,7 +385,8 @@ export function scaffoldSite({
 const HELP = `Usage: npm run new-site -- <slug> [options]
 
 Creates sites/<slug>/ from the starter: layout, motion layer, styles, headers
-and configuration, plus a placeholder home page, CREDITS.md and README.md.
+and configuration, plus a placeholder home page, CREDITS.md, README.md, the
+planning templates PROPOSAL.md and RUN.md, and an empty assets.json (image manifest).
 The starter's demo pages and sections are never copied.
 
   <slug>                    lowercase letters, digits, single hyphens
@@ -271,8 +395,10 @@ The starter's demo pages and sections are never copied.
   --lang <tag>              <html lang> of the placeholder page (default: en)
   --message <text>          placeholder body text (default: "This site is under construction.")
   --allow-existing-docs     accept an existing sites/<slug> that holds only *.md
-                            files (for example a PROPOSAL.md); they are never overwritten
+                            files (for example a PROPOSAL.md or RUN.md); they are never overwritten
   --help                    show this help
+
+Environment: LANDING_FACTORY_ROOT=<dir> creates the site in <dir>/sites/ instead of this repo (tests only).
 
 Refuses invalid slugs and existing folders. Afterwards run \`npm install\` once to
 register the workspace in package-lock.json, and commit the lockfile.`;
@@ -298,8 +424,13 @@ function main() {
     return 1;
   }
   try {
+    // LANDING_FACTORY_ROOT redirects only where sites/ lives (used by tests); the starter source stays this repo.
+    const rootOverride = process.env.LANDING_FACTORY_ROOT;
     const { created, kept } = scaffoldSite({
       slug: positionals[0],
+      ...(rootOverride
+        ? { sitesDir: join(resolve(rootOverride), 'sites') }
+        : {}),
       allowExistingDocs: values['allow-existing-docs'],
       title: values.title,
       description: values.description,

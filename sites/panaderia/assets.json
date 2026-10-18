@@ -1,0 +1,158 @@
+{
+  "images": [
+    {
+      "file": "slices.jpg",
+      "title": "File:Slices of sourdough bread.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Slices_of_sourdough_bread.jpg",
+      "author": "Angel Ganev",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+      "credit": true,
+      "retrievedAt": "2026-10-18T00:00:00.000Z",
+      "note": "Used twice: hero and the process step \"El reposo largo\"."
+    },
+    {
+      "file": "starter.jpg",
+      "title": "File:Sourdough.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Sourdough.jpg",
+      "author": "Janus Sandsgaard",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "credit": true,
+      "retrievedAt": "2026-10-18T00:00:00.000Z",
+      "note": "Process step \"La masa madre\"."
+    },
+    {
+      "file": "danesa.jpg",
+      "title": "File:Pastries on display.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Pastries_on_display.jpg",
+      "author": "Chris Rycroft",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+      "credit": true,
+      "retrievedAt": "2026-10-18T00:00:00.000Z",
+      "note": "Crop, Danesa tile."
+    },
+    {
+      "file": "arch-danish.jpg",
+      "title": "File:Pastries on display.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Pastries_on_display.jpg",
+      "author": "Chris Rycroft",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+      "credit": true,
+      "retrievedAt": "2026-10-18T00:00:00.000Z",
+      "note": "Crop, arch strip."
+    },
+    {
+      "file": "hogaza.jpg",
+      "title": "File:Swiss Bread LCD.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Swiss_Bread_LCD.jpg",
+      "author": "Murdockcrc",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "credit": true,
+      "retrievedAt": "2026-10-18T00:00:00.000Z",
+      "note": "Crop, Hogaza tile."
+    },
+    {
+      "file": "visit.jpg",
+      "title": "File:Swiss Bread LCD.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Swiss_Bread_LCD.jpg",
+      "author": "Murdockcrc",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "credit": true,
+      "retrievedAt": "2026-10-18T00:00:00.000Z",
+      "note": "Crop, Visit photo."
+    },
+    {
+      "file": "dough.jpg",
+      "title": "File:Boulangerie(fabric.baguette_bio) Cl J Weber01.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Boulangerie(fabric.baguette_bio)_Cl_J_Weber01.jpg",
+      "author": "inra.dist",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+      "credit": true,
+      "retrievedAt": "2026-10-18T00:00:00.000Z",
+      "note": "Process step \"El amasado\"."
+    },
+    {
+      "file": "oven.jpg",
+      "title": "File:Boulangerie traditionnelle.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Boulangerie_traditionnelle.jpg",
+      "author": "Souleymane DIARRA",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "credit": true,
+      "retrievedAt": "2026-10-18T00:00:00.000Z",
+      "note": "Process step \"El horno\"; a clay wood-fired oven."
+    },
+    {
+      "file": "arch-hands.jpg",
+      "title": "File:Baker woman's hands kneading bread dough.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Baker_woman%27s_hands_kneading_bread_dough.jpg",
+      "author": "Shixart1985",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+      "credit": true,
+      "retrievedAt": "2026-10-18T00:00:00.000Z",
+      "note": "Crop, arch strip."
+    },
+    {
+      "file": "tarta-santiago.jpg",
+      "title": "File:Detalle de la cruz de una Tarta de Santiago.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Detalle_de_la_cruz_de_una_Tarta_de_Santiago.jpg",
+      "author": "Keith Williamson",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+      "credit": true,
+      "retrievedAt": "2026-10-18T00:00:00.000Z",
+      "note": "Tarta de Santiago tile (\"Sin gluten\")."
+    },
+    {
+      "file": "bizcocho-naranja.jpg",
+      "title": "File:Orange almond cake (48839116778).jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Orange_almond_cake_(48839116778).jpg",
+      "author": "Ella Olsson",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+      "credit": true,
+      "retrievedAt": "2026-10-18T00:00:00.000Z",
+      "note": "Crop, almond and orange cake tile (\"Sin gluten\")."
+    },
+    {
+      "file": "rustico.jpg",
+      "title": "File:Boulangerie de Saint-Maurice-de-Beynost (Ain, France) - pains spéciaux.JPG",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Boulangerie_de_Saint-Maurice-de-Beynost_(Ain,_France)_-_pains_sp%C3%A9ciaux.JPG",
+      "author": "Benoît Prieur",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "credit": false,
+      "retrievedAt": "2026-10-18T00:00:00.000Z",
+      "note": "Crop, rustic loaf tile."
+    },
+    {
+      "file": "arch-loaf.jpg",
+      "title": "File:Boulangerie de Saint-Maurice-de-Beynost (Ain, France) - pains spéciaux.JPG",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Boulangerie_de_Saint-Maurice-de-Beynost_(Ain,_France)_-_pains_sp%C3%A9ciaux.JPG",
+      "author": "Benoît Prieur",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "credit": false,
+      "retrievedAt": "2026-10-18T00:00:00.000Z",
+      "note": "Crop, arch strip."
+    },
+    {
+      "file": "croissant.jpg",
+      "title": "File:Croissants-3.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Croissants-3.jpg",
+      "author": "ViajeroExtraviado",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "credit": false,
+      "retrievedAt": "2026-10-18T00:00:00.000Z",
+      "note": "Crop, croissant tile."
+    }
+  ]
+}

@@ -8,12 +8,15 @@ sites/<slug>/
   astro.config.mjs    static output, React and Tailwind v4 (copied from the root)
   tsconfig.json
   site.config.json    Cloudflare Pages project (cloudflare.pagesProject) and production branch
-  CREDITS.md          source URL, author and license of every external asset
+  CREDITS.md          source URL, author and license of every external asset (photo table generated)
+  assets.json         image manifest (written by scripts/find-images.mjs): file, source, author, license, credit
+  PROPOSAL.md         the landing proposal (page map, motion plan, visual direction)
+  RUN.md              run log of /new-landing: phases, QA attempts, decisions, result
   README.md
   qa.config.json      optional: QA thresholds for this site (falls back to the root file)
   src/                layouts/, components/motion/, styles/ (tokens.css), pages/
   public/             _headers, favicon.svg, site assets
-  PROPOSAL.md ...     planning docs may live next to the code
+  src/data/credits.json  generated list of credited photos for the footer
 ```
 
 ## Create a site
@@ -24,9 +27,13 @@ npm install                          # registers the workspace; commit package-l
 npm run build -w site-cafeteria      # -> sites/cafeteria/dist/index.html
 ```
 
-The scaffold copies the layout, motion layer, styles and headers from the root starter and writes a `noindex` placeholder home page, `site.config.json` (`pagesProject` equals the slug; change it if the name is taken on Cloudflare), `CREDITS.md` and `README.md`. It never copies the starter's demo pages or sections. It refuses invalid slugs (`^[a-z0-9]+(-[a-z0-9]+)*$`) and existing folders. For a folder that so far holds only planning docs (`sites/panaderia/PROPOSAL.md`), pass `--allow-existing-docs`: the `*.md` files stay untouched.
+The scaffold copies the layout, motion layer, styles and headers from the root starter and writes a `noindex` placeholder home page, `site.config.json` (`pagesProject` equals the slug; change it if the name is taken on Cloudflare), `CREDITS.md`, `README.md`, the `PROPOSAL.md` and `RUN.md` templates and an empty `assets.json`. It never copies the starter's demo pages or sections. It refuses invalid slugs (`^[a-z0-9]+(-[a-z0-9]+)*$`) and existing folders. For a folder that so far holds only planning docs (`sites/panaderia/PROPOSAL.md`), pass `--allow-existing-docs`: the `*.md` files stay untouched.
 
 Run `npm run new-site -- --help` for every option.
+
+## Generate a whole site
+
+`scripts/new-landing.sh <slug> --niche "..."` does the scaffold above and then runs the `/new-landing` skill: proposal, design system, build, QA loop and final check (see the root [README](../README.md#generating-a-landing)). Photos come from Wikimedia Commons through `node scripts/find-images.mjs` and are listed in `assets.json`; `node scripts/credits.mjs --site <slug>` writes `CREDITS.md` and `src/data/credits.json`, and the footer imports the latter. `node scripts/check-landing.mjs --site <slug>` is the final gate. A site's `design-system/<slug>/MASTER.md` ends with a `landing-meta` block (primary color, display font, hero type) that the diversity rule compares across sites.
 
 ## Work on a site
 

@@ -15,7 +15,22 @@
       "Bash(bash scripts/setup-agent.sh *)",
       "Bash(git status *)",
       "Bash(git diff *)",
-      "Bash(git log *)"
+      "Bash(git log *)",
+      "Bash(npx impeccable@4.6.0 *)",
+      "Bash(QA_CHROME_PATH=* npm run qa *)",
+      "Bash(npm install)",
+      "Bash(npm install --no-audit --no-fund)",
+      "Bash(npm install -w site-* @fontsource-variable/*)",
+      "Bash(npm install -w site-* @fontsource/*)",
+      "Bash(npm view *)",
+      "Bash(node scripts/preflight.mjs *)",
+      "Bash(node scripts/find-images.mjs *)",
+      "Bash(node scripts/credits.mjs *)",
+      "Bash(node scripts/check-landing.mjs *)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py *)",
+      "Bash(node .claude/skills/design-taste-frontend/scripts/*)",
+      "Bash(date *)",
+      "Bash(node scripts/section-shots.mjs *)"
     ]
   },
   "hooks": {

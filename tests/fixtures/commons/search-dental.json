@@ -1,0 +1,212 @@
+{
+  "batchcomplete": true,
+  "continue": {
+    "gsroffset": 4,
+    "continue": "gsroffset||"
+  },
+  "query": {
+    "pages": [
+      {
+        "pageid": 164735259,
+        "ns": 6,
+        "title": "File:A dental chair in a dentist clinic in North Carolina, United States.jpg",
+        "index": 1,
+        "imagerepository": "local",
+        "imageinfo": [
+          {
+            "size": 7818666,
+            "width": 4032,
+            "height": 3024,
+            "thumburl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/A_dental_chair_in_a_dentist_clinic_in_North_Carolina%2C_United_States.jpg/960px-A_dental_chair_in_a_dentist_clinic_in_North_Carolina%2C_United_States.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+            "thumbwidth": 960,
+            "thumbheight": 720,
+            "url": "https://upload.wikimedia.org/wikipedia/commons/9/92/A_dental_chair_in_a_dentist_clinic_in_North_Carolina%2C_United_States.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:A_dental_chair_in_a_dentist_clinic_in_North_Carolina,_United_States.jpg",
+            "descriptionshorturl": "https://commons.wikimedia.org/w/index.php?curid=164735259",
+            "extmetadata": {
+              "ObjectName": {
+                "value": "A dental chair in a dentist clinic in North Carolina, United States",
+                "source": "mediawiki-metadata"
+              },
+              "ImageDescription": {
+                "value": "A dental chair in a dentist office in North Carolina, United States",
+                "source": "commons-desc-page"
+              },
+              "Credit": {
+                "value": "<span class=\"int-own-work\" lang=\"en\">Own work</span>",
+                "source": "commons-desc-page"
+              },
+              "Artist": {
+                "value": "<a href=\"//commons.wikimedia.org/wiki/User:Hkeely\" title=\"User:Hkeely\">Harrison Keely</a>",
+                "source": "commons-desc-page"
+              },
+              "LicenseShortName": {
+                "value": "CC BY 4.0",
+                "source": "commons-desc-page",
+                "hidden": ""
+              },
+              "UsageTerms": {
+                "value": "Creative Commons Attribution 4.0",
+                "source": "commons-desc-page"
+              },
+              "AttributionRequired": {
+                "value": "true",
+                "source": "commons-desc-page",
+                "hidden": ""
+              },
+              "LicenseUrl": {
+                "value": "https://creativecommons.org/licenses/by/4.0",
+                "source": "commons-desc-page"
+              },
+              "Copyrighted": {
+                "value": "True",
+                "source": "commons-desc-page",
+                "hidden": ""
+              },
+              "Restrictions": {
+                "value": "",
+                "source": "commons-desc-page",
+                "hidden": ""
+              }
+            },
+            "mime": "image/jpeg"
+          }
+        ]
+      },
+      {
+        "pageid": 168074015,
+        "ns": 6,
+        "title": "File:Aspen Dental clinic in Franklin, North Carolina.jpg",
+        "index": 2,
+        "imagerepository": "local",
+        "imageinfo": [
+          {
+            "size": 5420221,
+            "width": 3973,
+            "height": 2720,
+            "thumburl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5d/Aspen_Dental_clinic_in_Franklin%2C_North_Carolina.jpg/960px-Aspen_Dental_clinic_in_Franklin%2C_North_Carolina.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+            "thumbwidth": 960,
+            "thumbheight": 657,
+            "url": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Aspen_Dental_clinic_in_Franklin%2C_North_Carolina.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:Aspen_Dental_clinic_in_Franklin,_North_Carolina.jpg",
+            "descriptionshorturl": "https://commons.wikimedia.org/w/index.php?curid=168074015",
+            "extmetadata": {
+              "ObjectName": {
+                "value": "Aspen Dental clinic in Franklin, North Carolina",
+                "source": "mediawiki-metadata"
+              },
+              "ImageDescription": {
+                "value": "Aspen Dental clinic in Franklin, North Carolina",
+                "source": "commons-desc-page"
+              },
+              "Credit": {
+                "value": "<span class=\"int-own-work\" lang=\"en\">Own work</span>",
+                "source": "commons-desc-page"
+              },
+              "Artist": {
+                "value": "<a href=\"//commons.wikimedia.org/wiki/User:Hkeely\" title=\"User:Hkeely\">Harrison Keely</a>",
+                "source": "commons-desc-page"
+              },
+              "LicenseShortName": {
+                "value": "CC BY 4.0",
+                "source": "commons-desc-page",
+                "hidden": ""
+              },
+              "UsageTerms": {
+                "value": "Creative Commons Attribution 4.0",
+                "source": "commons-desc-page"
+              },
+              "AttributionRequired": {
+                "value": "true",
+                "source": "commons-desc-page",
+                "hidden": ""
+              },
+              "LicenseUrl": {
+                "value": "https://creativecommons.org/licenses/by/4.0",
+                "source": "commons-desc-page"
+              },
+              "Copyrighted": {
+                "value": "True",
+                "source": "commons-desc-page",
+                "hidden": ""
+              },
+              "Restrictions": {
+                "value": "",
+                "source": "commons-desc-page",
+                "hidden": ""
+              }
+            },
+            "mime": "image/jpeg"
+          }
+        ]
+      },
+      {
+        "pageid": 187755297,
+        "ns": 6,
+        "title": "File:In a dental clinic, New Orleans, 2 April 2026 - 2.jpg",
+        "index": 4,
+        "imagerepository": "local",
+        "imageinfo": [
+          {
+            "size": 14982440,
+            "width": 3888,
+            "height": 5184,
+            "thumburl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/In_a_dental_clinic%2C_New_Orleans%2C_2_April_2026_-_2.jpg/960px-In_a_dental_clinic%2C_New_Orleans%2C_2_April_2026_-_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+            "thumbwidth": 960,
+            "thumbheight": 1280,
+            "url": "https://upload.wikimedia.org/wikipedia/commons/f/f6/In_a_dental_clinic%2C_New_Orleans%2C_2_April_2026_-_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:In_a_dental_clinic,_New_Orleans,_2_April_2026_-_2.jpg",
+            "descriptionshorturl": "https://commons.wikimedia.org/w/index.php?curid=187755297",
+            "extmetadata": {
+              "ObjectName": {
+                "value": "In a dental clinic, New Orleans, 2 April 2026 - 2",
+                "source": "mediawiki-metadata"
+              },
+              "ImageDescription": {
+                "value": "Tooth I had a root canal on in 1995 cracked and became infected, had to come out.  The gruesome aftermath.",
+                "source": "commons-desc-page"
+              },
+              "Credit": {
+                "value": "<span class=\"int-own-work\" lang=\"en\">Own work</span>",
+                "source": "commons-desc-page"
+              },
+              "Artist": {
+                "value": "<a href=\"//commons.wikimedia.org/wiki/User:Infrogmation\" title=\"User:Infrogmation\">Infrogmation</a>",
+                "source": "commons-desc-page"
+              },
+              "LicenseShortName": {
+                "value": "CC BY-SA 4.0",
+                "source": "commons-desc-page",
+                "hidden": ""
+              },
+              "UsageTerms": {
+                "value": "Creative Commons Attribution-Share Alike 4.0",
+                "source": "commons-desc-page"
+              },
+              "AttributionRequired": {
+                "value": "true",
+                "source": "commons-desc-page",
+                "hidden": ""
+              },
+              "LicenseUrl": {
+                "value": "https://creativecommons.org/licenses/by-sa/4.0",
+                "source": "commons-desc-page"
+              },
+              "Copyrighted": {
+                "value": "True",
+                "source": "commons-desc-page",
+                "hidden": ""
+              },
+              "Restrictions": {
+                "value": "",
+                "source": "commons-desc-page",
+                "hidden": ""
+              }
+            },
+            "mime": "image/jpeg"
+          }
+        ]
+      }
+    ]
+  }
+}

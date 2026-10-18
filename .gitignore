@@ -3,6 +3,7 @@ dist/
 .astro/
 .cache/
 /qa/
+sites/*/.run.log
 .env
 .env.*
 .DS_Store
