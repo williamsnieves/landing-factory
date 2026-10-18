@@ -16,3 +16,6 @@ playwright-report/
 
 # Python bytecode (from running vendored skill scripts)
 __pycache__/
+
+# taste-skill working state (draw.mjs direction, inspector output)
+.taste-skill/
