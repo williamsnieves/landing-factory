@@ -45,6 +45,8 @@ Holds a section at the top of the viewport for a scroll distance, then releases 
 - `data-pin-distance`: extra scroll distance; `100%` is one viewport height, or a px number such as `600` (default `100%`)
 - `data-pin-min`: only pin from this breakpoint up: `sm` 640, `md` 768, `lg` 1024, `xl` 1280 (default: always). Use `md` to avoid pin overflow on phones.
 
+`data-pin-steps` (site-specific addition): on a pinned element that contains `[data-step]` children, splits the pinned scroll into one slice per step and mirrors the active index in `data-step-active` (`0`, `1`, ...). CSS decides what each step shows; the markup and styles must also read fine when nothing is pinned (mobile, reduced motion, no JavaScript), where `data-step-active` stays `0` and is ignored.
+
 ### Parallax
 
 Moves a layer by `±speed × its own height` while its parent crosses the viewport. Put it on a child of an `overflow-hidden` wrapper, and oversize it so edges never show.
@@ -59,9 +61,29 @@ Moves a layer by `±speed × its own height` while its parent crosses the viewpo
 
 - `data-parallax`: speed factor (default `0.2`)
 
+### Marquee scrub
+
+Translates an element sideways, scrubbed to scroll (linear), while its parent crosses the viewport. Use it for one giant word. Center the element in an `overflow-hidden` parent; the travel is symmetric around that static position, so nothing overflows the page.
+
+```html
+<div class="flex justify-center overflow-hidden">
+  <p
+    data-marquee-scrub
+    data-marquee-direction="left"
+    class="flex-none whitespace-nowrap"
+  >
+    MASA MADRE
+  </p>
+</div>
+```
+
+- `data-marquee-scrub`: total travel. Empty or `auto` (default): the distance the element overflows its parent, at least 20% of its width, so a word wider than the viewport scrolls from its first to its last letter. A number or `NN%`: percentage of the element's own width. `NNNpx`: pixels.
+- `data-marquee-direction`: `left` (default, the element moves left as you scroll down) or `right`.
+- Reduced motion or no JavaScript: nothing moves; the element stays in its static centered position. Give it a layout that fits the viewport in that state (for example by wrapping the words onto two lines unless `.js-motion` is on `<html>`).
+
 ## Accessibility and fallbacks
 
-- Under `prefers-reduced-motion: reduce`: no Lenis, no pin, no parallax; reveal elements are shown in their final state.
+- Under `prefers-reduced-motion: reduce`: no Lenis, no pin, no parallax, no marquee scrub; reveal elements are shown in their final state.
 - Without JavaScript: the hidden initial state of `[data-reveal]` only exists under the `.js-motion` class on `<html>`, which an inline script adds when JS runs and reduced motion is not requested. Content is visible otherwise.
 
 ## Programmatic use and cleanup

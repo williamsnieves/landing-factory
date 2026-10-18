@@ -1,0 +1,65 @@
+---
+import { Picture } from 'astro:assets';
+import { products } from '../../data/images';
+---
+
+<section
+  id="horno"
+  aria-labelledby="horno-title"
+  class="bg-paper scroll-mt-16 py-(--section-y)"
+>
+  <div class="mx-auto max-w-[110rem] px-(--gutter)">
+    <div class="grid gap-6 md:grid-cols-12">
+      <h2
+        id="horno-title"
+        data-reveal
+        class="font-display text-3xl leading-[1.05] font-medium tracking-tight text-balance md:col-span-5"
+      >
+        Hoy en el horno.
+      </h2>
+      <p
+        data-reveal
+        data-reveal-delay="0.1"
+        class="max-w-[42ch] text-lg md:col-span-4 md:col-start-8 md:self-end"
+      >
+        Hacemos poco y lo hacemos cada día. Cuando se acaba una hogaza, se
+        acaba.
+      </p>
+    </div>
+
+    <ul class="mt-14 grid list-none gap-x-6 gap-y-14 p-0 sm:grid-cols-2 md:mt-20 lg:grid-cols-3 lg:gap-x-10">
+      {products.map((product, i) => (
+        <li
+          data-reveal
+          data-reveal-delay={(i % 3) * 0.1}
+          class:list={[i % 3 === 1 && 'lg:mt-16']}
+        >
+          <div class="rounded-arch aspect-[4/5] overflow-hidden">
+            <Picture
+              src={product.photo.src}
+              alt={product.photo.alt}
+              formats={['avif', 'webp']}
+              widths={[360, 540, 720, 900]}
+              sizes="(min-width: 1024px) 30vw, (min-width: 640px) 46vw, 92vw"
+              loading="lazy"
+              decoding="async"
+              class="h-full w-full object-cover"
+              style={`object-position: ${product.photo.position}`}
+            />
+          </div>
+          <div class="mt-5 flex items-baseline justify-between gap-4">
+            <h3 class="font-display text-xl font-semibold">{product.name}</h3>
+            <p class="shrink-0 text-lg font-medium whitespace-nowrap tabular-nums">
+              {product.price}
+            </p>
+          </div>
+          {product.glutenFree && (
+            <p class="bg-surface text-ink rounded-pill mt-2 inline-block px-3 py-1 text-sm font-medium">
+              Sin gluten
+            </p>
+          )}
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

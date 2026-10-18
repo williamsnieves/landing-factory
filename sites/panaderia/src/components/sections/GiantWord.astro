@@ -1,0 +1,97 @@
+---
+import { Picture } from 'astro:assets';
+import { images } from '../../data/images';
+
+const arches = [images.archA, images.archB, images.archC];
+---
+
+<section
+  aria-labelledby="marta-title"
+  class="giant-section bg-paper overflow-hidden py-(--section-y)"
+>
+  <div class="giant-stage relative">
+    <!-- The one playful moment: an outlined word that travels sideways as you
+         scroll, behind three arch photos. Decorative, so hidden from AT. -->
+    <div
+      class="giant-track pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden"
+      aria-hidden="true"
+      data-qa-allow-clip
+    >
+      <p data-marquee-scrub class="giant-word font-display flex-none">
+        MASA MADRE
+      </p>
+    </div>
+
+    <ul class="relative mx-auto flex w-full max-w-[110rem] list-none items-end justify-center gap-3 px-(--gutter) sm:gap-6 md:gap-10">
+      {arches.map((arch, i) => (
+        <li
+          class:list={[
+            'w-[29%] max-w-[18rem] sm:w-[25%]',
+            i === 1 ? 'mb-0' : i === 0 ? 'mb-8 sm:mb-16' : 'mb-4 sm:mb-8',
+          ]}
+        >
+          <div class="rounded-arch relative aspect-[3/4] overflow-hidden">
+            <div
+              data-parallax="0.12"
+              class="absolute inset-x-0 -top-[14%] h-[128%]"
+            >
+              <Picture
+                src={arch.src}
+                alt={arch.alt}
+                formats={['avif', 'webp']}
+                widths={[320, 480, 640, 800]}
+                sizes="(min-width: 1024px) 22rem, 30vw"
+                loading="lazy"
+                decoding="async"
+                class="h-full w-full object-cover"
+                style={`object-position: ${arch.position}`}
+              />
+            </div>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <div class="mx-auto mt-12 max-w-[110rem] px-(--gutter) md:mt-20">
+    <h2
+      id="marta-title"
+      data-reveal
+      class="font-display text-2xl leading-tight font-medium tracking-tight text-balance md:max-w-[28ch]"
+    >
+      La nuestra se llama Marta y lleva seis años burbujeando.
+    </h2>
+  </div>
+</section>
+
+<style>
+  .giant-stage {
+    --giant: clamp(14rem, 28vw, 30rem);
+    display: grid;
+    align-items: center;
+    padding-block: clamp(2rem, 6vw, 5rem);
+    min-height: calc(var(--giant) * 0.95);
+  }
+  /* Static state (no JS or reduced motion): two lines that fit the viewport. */
+  .giant-word {
+    margin: 0;
+    font-size: min(var(--text-giant), 19vw);
+    font-weight: 600;
+    line-height: 0.86;
+    letter-spacing: -0.02em;
+    text-align: center;
+    white-space: normal;
+    /* Fill in the page color painted over an outer stroke: hides the inner
+       overlaps of the variable font while keeping a clean outline. */
+    color: var(--color-paper);
+    -webkit-text-stroke: clamp(3px, 0.44vw, 8px) var(--color-accent);
+    paint-order: stroke fill;
+    width: min-content;
+  }
+  /* Travelling state: one long line, centered, overflow clipped by the track. */
+  :global(.js-motion) .giant-word {
+    font-size: var(--giant);
+    white-space: nowrap;
+    width: auto;
+  }
+</style>

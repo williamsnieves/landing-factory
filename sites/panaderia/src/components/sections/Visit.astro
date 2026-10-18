@@ -1,0 +1,75 @@
+---
+import { Picture } from 'astro:assets';
+import { images } from '../../data/images';
+import { site } from '../../data/site';
+
+const hours = [
+  { days: 'Lunes', time: 'Cerrado' },
+  { days: 'Martes a viernes', time: '7:30 – 20:00' },
+  { days: 'Sábado', time: '8:00 – 20:00' },
+  { days: 'Domingo', time: '8:00 – 15:00' },
+];
+---
+
+<section
+  id="visitanos"
+  aria-labelledby="visitanos-title"
+  class="bg-surface scroll-mt-16 py-(--section-y)"
+>
+  <div class="mx-auto grid max-w-[110rem] gap-12 px-(--gutter) md:grid-cols-12 md:items-center md:gap-10">
+    <div class="md:col-span-5">
+      <h2
+        id="visitanos-title"
+        data-reveal
+        class="font-display text-3xl leading-[1.05] font-medium tracking-tight text-balance"
+      >
+        Pasa a verlo salir del horno.
+      </h2>
+      <address data-reveal class="mt-8 text-lg not-italic">
+        {site.street}
+        <br />
+        {site.area}
+      </address>
+      <table
+        data-reveal
+        aria-label="Horario de apertura"
+        class="mt-8 w-full max-w-md text-left text-lg"
+      >
+        <tbody>
+          {hours.map((row) => (
+            <tr class="border-line border-b">
+              <th scope="row" class="py-3 pr-4 font-medium">
+                {row.days}
+              </th>
+              <td class="py-3 text-right tabular-nums">{row.time}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p data-reveal class="mt-8">
+        <a
+          href={site.mapUrl}
+          rel="noopener"
+          class="bg-ink text-paper rounded-pill hover:bg-primary-hover inline-flex min-h-12 items-center px-7 font-semibold transition-colors duration-(--duration-fast)"
+        >
+          Cómo llegar
+        </a>
+      </p>
+    </div>
+    <figure data-reveal class="m-0 md:col-span-6 md:col-start-7">
+      <div class="aspect-square overflow-hidden rounded-md md:aspect-[5/4]">
+        <Picture
+          src={images.visit.src}
+          alt={images.visit.alt}
+          formats={['avif', 'webp']}
+          widths={[480, 720, 960, 1280]}
+          sizes="(min-width: 768px) 50vw, 92vw"
+          loading="lazy"
+          decoding="async"
+          class="h-full w-full object-cover"
+          style={`object-position: ${images.visit.position}`}
+        />
+      </div>
+    </figure>
+  </div>
+</section>

@@ -1,0 +1,40 @@
+---
+import { site } from '../../data/site';
+---
+
+<section
+  aria-labelledby="sin-gluten-title"
+  class="bg-ink text-paper py-24 md:py-32"
+>
+  <div class="mx-auto grid max-w-[110rem] gap-8 px-(--gutter) md:grid-cols-12 md:gap-10">
+    <h2
+      id="sin-gluten-title"
+      data-reveal
+      class="font-display text-3xl leading-[1.05] font-medium tracking-tight text-balance md:col-span-5"
+    >
+      También hay pan sin gluten.
+    </h2>
+    <div
+      data-reveal
+      data-reveal-delay="0.12"
+      class="md:col-span-5 md:col-start-8"
+    >
+      <p class="text-lg">
+        Cada día horneamos un pan y un par de bollos elaborados sin ingredientes
+        que contengan gluten. Los reconocerás por la etiqueta «Sin gluten» en el
+        mostrador y en la lista de hoy.
+      </p>
+      <p class="mt-5 max-w-[52ch]">
+        Si tienes celiaquía, pregunta en la tienda: te explicamos cómo
+        trabajamos y qué hay disponible ese día. También puedes escribirnos a{' '}
+        <a
+          href={`mailto:${site.email}`}
+          class="decoration-accent underline underline-offset-4 hover:no-underline"
+        >
+          {site.email}
+        </a>
+        .
+      </p>
+    </div>
+  </div>
+</section>

@@ -110,19 +110,77 @@ export async function initMotion(
       );
     });
 
+    // Marquee scrub: data-marquee-scrub translates the element horizontally,
+    // scrubbed to scroll while its parent crosses the viewport. The element is
+    // expected to be centered in an overflow-hidden parent, so the travel is
+    // symmetric around its static position. Value: "auto" (default, the
+    // distance the element overflows its parent, at least 20% of its width),
+    // a percentage of its own width ("30" or "30%"), or px ("400px").
+    // Optional data-marquee-direction="left" (default) | "right".
+    root.querySelectorAll<HTMLElement>('[data-marquee-scrub]').forEach((el) => {
+      const raw = (el.dataset.marqueeScrub ?? '').trim();
+      const sign = el.dataset.marqueeDirection === 'right' ? 1 : -1;
+      const parent = el.parentElement ?? el;
+      const travel = (): number => {
+        if (raw.endsWith('px')) return num(raw, 0);
+        if (raw !== '' && raw !== 'auto') {
+          return (el.offsetWidth * num(raw, 20)) / 100;
+        }
+        return Math.max(
+          el.offsetWidth - parent.clientWidth,
+          el.offsetWidth * 0.2,
+        );
+      };
+      gsap.fromTo(
+        el,
+        { x: () => (-sign * travel()) / 2 },
+        {
+          x: () => (sign * travel()) / 2,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: parent,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: true,
+            invalidateOnRefresh: true,
+          },
+        },
+      );
+    });
+
     // Pin: data-pin, optional data-pin-distance ("100%" of viewport height, or px)
     // and data-pin-min="md" to only pin from that breakpoint up.
     root.querySelectorAll<HTMLElement>('[data-pin]').forEach((el) => {
       const minWidth = BREAKPOINTS[el.dataset.pinMin ?? ''] ?? 0;
       const distance = el.dataset.pinDistance ?? '100%';
       mm.add(`(min-width: ${minWidth}px)`, () => {
+        // data-pin-steps: split the pinned scroll into one slice per [data-step]
+        // child and mirror the active index in data-step-active (CSS does the rest).
+        const stepCount = el.hasAttribute('data-pin-steps')
+          ? el.querySelectorAll('[data-step]').length
+          : 0;
         const trigger = ScrollTrigger.create({
           trigger: el,
           start: 'top top',
           end: `+=${distance}`,
           pin: true,
+          onUpdate: stepCount
+            ? (self) =>
+                el.setAttribute(
+                  'data-step-active',
+                  String(
+                    Math.min(
+                      stepCount - 1,
+                      Math.floor(self.progress * stepCount),
+                    ),
+                  ),
+                )
+            : undefined,
         });
-        return () => trigger.kill();
+        return () => {
+          trigger.kill();
+          if (stepCount) el.setAttribute('data-step-active', '0');
+        };
       });
     });
   }, document.documentElement);

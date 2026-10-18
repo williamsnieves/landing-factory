@@ -1,0 +1,66 @@
+---
+import { site } from '../../data/site';
+---
+
+<!-- Static (absolute) header by default; the inline script below makes it
+     fixed and solid once the page scrolls. Without JS it simply sits on top. -->
+<header
+  id="site-header"
+  class="text-paper absolute inset-x-0 top-0 z-40 transition-colors duration-(--duration-base) data-[solid=true]:bg-paper data-[solid=true]:text-ink"
+>
+  <div class="mx-auto flex max-w-[110rem] items-center justify-between gap-4 px-(--gutter) py-3">
+    <a
+      href="#top"
+      class="font-display flex min-h-11 items-center text-xl font-semibold tracking-tight"
+      aria-label={`${site.name}, inicio`}
+    >
+      {site.name}
+    </a>
+    <nav aria-label="Principal" class="flex items-center gap-2 sm:gap-6">
+      <ul class="hidden items-center gap-2 md:flex lg:gap-4">
+        <li>
+          <a
+            href="#horno"
+            class="flex min-h-11 items-center px-3 text-sm font-medium underline-offset-4 hover:underline"
+          >
+            Hoy en el horno
+          </a>
+        </li>
+        <li>
+          <a
+            href="#proceso"
+            class="flex min-h-11 items-center px-3 text-sm font-medium underline-offset-4 hover:underline"
+          >
+            El proceso
+          </a>
+        </li>
+        <li>
+          <a
+            href="#visitanos"
+            class="flex min-h-11 items-center px-3 text-sm font-medium underline-offset-4 hover:underline"
+          >
+            Visítanos
+          </a>
+        </li>
+      </ul>
+      <a
+        href="#encargar"
+        class="bg-primary text-primary-contrast rounded-pill hover:bg-primary-hover inline-flex min-h-11 items-center px-5 text-sm font-semibold transition-colors duration-(--duration-fast)"
+      >
+        Encarga
+      </a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const header = document.getElementById('site-header');
+  if (header) {
+    header.classList.remove('absolute');
+    header.classList.add('fixed');
+    const update = () =>
+      header.setAttribute('data-solid', String(window.scrollY > 40));
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+  }
+</script>

@@ -1,18 +1,32 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Motion from '../components/motion/Motion.astro';
+import Header from '../components/sections/Header.astro';
+import Hero from '../components/sections/Hero.astro';
+import Manifesto from '../components/sections/Manifesto.astro';
+import Products from '../components/sections/Products.astro';
+import GlutenFree from '../components/sections/GlutenFree.astro';
+import Process from '../components/sections/Process.astro';
+import GiantWord from '../components/sections/GiantWord.astro';
+import Visit from '../components/sections/Visit.astro';
+import Order from '../components/sections/Order.astro';
+import Footer from '../components/sections/Footer.astro';
 
-const title = 'Horno Lento — Panadería de masa madre en Barcelona';
+const title = 'Horno Lento · Panadería de masa madre en Gràcia, Barcelona';
 const description =
-  'Horno Lento, panadería de masa madre en Barcelona. Nuestra web está en construcción.';
-const lang = 'es';
-const message = 'Estamos preparando la web de Horno Lento. Vuelve pronto.';
+  'Pan de masa madre con 36 horas de fermentación, bollería y opciones sin gluten, horneado cada día en Gràcia. Encarga el día antes y recoge en la tienda.';
 ---
 
-<BaseLayout title={title} description={description} lang={lang} noindex>
-  <section class="mx-auto max-w-5xl px-6 py-32 md:py-48">
-    <h1 class="font-display text-4xl leading-none font-medium tracking-tight text-balance">
-      {title}
-    </h1>
-    <p class="text-ink-soft mt-6 text-lg">{message}</p>
-  </section>
+<BaseLayout title={title} description={description} lang="es">
+  <Motion slot="head" smooth />
+  <Header slot="header" />
+  <Hero />
+  <Manifesto />
+  <Products />
+  <GlutenFree />
+  <Process />
+  <GiantWord />
+  <Visit />
+  <Order />
+  <Footer slot="footer" />
 </BaseLayout>
