@@ -103,10 +103,22 @@ export async function captureSections({
               (el) => el.id || el.tagName.toLowerCase(),
             );
             await target.evaluate((el) => {
-              // Re-measure at scroll time: pins and reveals move things.
+              // Re-measure at scroll time: pins and reveals move things. Leave room for a fixed or
+              // sticky header so it does not cover the top of the section (the header itself: no offset).
+              let offset = 0;
+              if (el.tagName !== 'HEADER') {
+                for (const header of document.querySelectorAll('header')) {
+                  const position = getComputedStyle(header).position;
+                  if (position === 'fixed' || position === 'sticky')
+                    offset = Math.max(
+                      offset,
+                      header.getBoundingClientRect().height,
+                    );
+                }
+              }
               window.scrollTo(
                 0,
-                el.getBoundingClientRect().top + window.scrollY,
+                el.getBoundingClientRect().top + window.scrollY - offset,
               );
             });
             await tab.waitForTimeout(700);

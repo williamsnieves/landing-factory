@@ -70,7 +70,7 @@ If neither `--auto` nor `--dry-run` was given: set `Result: checkpoint` in RUN.m
 Spawn a subagent with this brief: the `Direction in one line` and the Visual direction section of the proposal, the niche, the language, the other sites' `landing-meta` to avoid, and the instruction to use only the `ui-ux-pro-max` skill (not design-taste-frontend, not impeccable). It must:
 
 1. Query the skill with the direction, not just the niche: `python3 .claude/skills/ui-ux-pro-max/scripts/search.py "<niche + direction keywords>" --design-system -p "<Brand>"`, then `--domain color`, `--domain typography`, `--domain style`. Record the queries.
-2. Write `design-system/<slug>/MASTER.md` following `design-system/panaderia/MASTER.md`: queries run, conflicts between the skill and the proposal (the approved proposal wins; list each), chosen style, a Palette section whose table holds every color as `#RRGGBB` plus measured WCAG contrast for each pair used (text >= 4.5, large text and non-text >= 3), typography (open-licensed families that exist as `@fontsource-variable/<name>`, or `@fontsource/<name>`; check with `npm view <package> version`), type scale, spacing and radii, motion tokens, do/don't for the build, and a final fenced block:
+2. Write `design-system/<slug>/MASTER.md` following `design-system/panaderia/MASTER.md`: queries run, conflicts between the skill and the proposal (the approved proposal wins; list each), chosen style, a Palette section whose table holds every color as `#RRGGBB` plus the WCAG contrast of each pair used (text >= 4.5, large text and non-text >= 3; do not compute ratios by hand: `node scripts/check-landing.mjs --site <slug>` checks the standard text pairs of `tokens.css` and names any pair under 4.5), typography (open-licensed families that exist as `@fontsource-variable/<name>`, or `@fontsource/<name>`; check with `npm view <package> version`), type scale, spacing and radii, motion tokens, do/don't for the build, and a final fenced block:
 
    ````
    ```landing-meta
@@ -82,7 +82,7 @@ Spawn a subagent with this brief: the `Direction in one line` and the Visual dir
    ````
 
 3. Translate it into `sites/<slug>/src/styles/tokens.css` (same shape as `sites/panaderia/src/styles/tokens.css`: `@theme` colors, fonts, type scale, spacing, radii, motion) and the font imports in `src/styles/global.css`. Install the font packages with `npm install -w site-<slug> @fontsource-variable/<name>`. Add each font to the fonts table in `sites/<slug>/CREDITS.md` (source URL, author, SIL OFL 1.1).
-4. Verify: `node scripts/check-landing.mjs --site <slug> --json` shows `tokens`, `landing-meta` and `diversity` ok (other checks may still fail before the build). Fix MASTER.md or tokens until they are.
+4. Verify: `node scripts/check-landing.mjs --site <slug> --json` shows `tokens`, `contrast`, `landing-meta` and `diversity` ok (other checks may still fail before the build). Fix MASTER.md or tokens until they are.
 
 Mark the phase `done`. With `--dry-run`: set `Result: dry-run-done`, write the Totals section and stop here.
 

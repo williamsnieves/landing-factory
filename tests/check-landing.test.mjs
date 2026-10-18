@@ -16,6 +16,8 @@ import { join, resolve } from 'node:path';
 import { after, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import {
+  colorTokens,
+  contrastRatio,
   countFileUses,
   findCopiedSentences,
   htmlToText,
@@ -176,6 +178,29 @@ test('palette hex or font family of MASTER.md missing from tokens.css fails', as
     (await failuresOf(root, 'tokens-mismatch'))[0].message,
     /MASTER\.md does not exist/,
   );
+});
+
+test('contrast: a failing token pair is named with its ratio; passing and absent pairs are silent', async () => {
+  const root = freshRoot();
+  // The fixture has ink, paper and primary: all pairs among them pass.
+  assert.deepEqual(await failuresOf(root, 'contrast'), []);
+  edit(site(root, 'src/styles/tokens.css'), (t) =>
+    t.replace('--color-ink: #2b1d14', '--color-ink: #b8aa98'),
+  );
+  const failures = await failuresOf(root, 'contrast');
+  assert.deepEqual(failures.map((f) => f.item).sort(), [
+    'ink/paper',
+    'paper/ink',
+  ]);
+  assert.match(
+    failures[0].message,
+    /ink #b8aa98 on paper #faf5ec has contrast [12]\.\d\d:1/,
+  );
+  // A 3-digit hex is understood; pairs with a missing token are skipped.
+  assert.equal(contrastRatio('#000000', '#ffffff'), 21);
+  assert.deepEqual(colorTokens('--color-a: #FFF; --color-b: rgb(1 2 3);'), {
+    a: '#ffffff',
+  });
 });
 
 test('the palette section ignores hex colors in other sections', () => {

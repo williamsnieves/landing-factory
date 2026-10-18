@@ -8,6 +8,7 @@
 //   credits-stale      CREDITS.md or src/data/credits.json is out of sync with assets.json (scripts/credits.mjs)
 //   photo-overuse      one source photo is referenced from more than two places in src/
 //   tokens-mismatch    a palette hex or font family of design-system/<slug>/MASTER.md is missing from tokens.css
+//   contrast           a standard text pair of tokens.css (ink/paper, primary-contrast/primary, ...) is below 4.5:1
 //   landing-meta       MASTER.md has no valid `landing-meta` block
 //   diversity          another site matches on primary color, display font and hero type all at once
 //   copy-match         (--refs) 8 words in a row of the built page text also appear in a reference page
@@ -386,6 +387,72 @@ export function checkTokens(slug, root) {
   return failures;
 }
 
+// --------------------------------------------------------------------------------------------------
+// Rule: WCAG contrast of the standard text pairs in tokens.css
+
+export const MIN_CONTRAST = 4.5;
+/** [foreground token, background token]; a pair is checked only when both tokens exist as hex colors. */
+export const CONTRAST_PAIRS = [
+  ['ink', 'paper'],
+  ['ink', 'surface'],
+  ['ink-soft', 'paper'],
+  ['ink-soft', 'surface'],
+  ['primary-contrast', 'primary'],
+  ['primary-contrast', 'primary-hover'],
+  ['primary', 'paper'],
+  ['primary', 'surface'],
+  ['paper', 'ink'],
+];
+
+/** `--color-<name>: #hex` declarations of a stylesheet as { name: '#rrggbb' }. */
+export function colorTokens(css) {
+  const tokens = {};
+  const re = /--color-([a-z0-9-]+)\s*:\s*(#[0-9a-f]{3,8})\b/gi;
+  for (const [, name, hex] of css.matchAll(re))
+    tokens[name.toLowerCase()] = normalizeHex(hex);
+  return tokens;
+}
+
+function luminance(hex) {
+  const channel = (i) => {
+    const c = parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * channel(0) + 0.7152 * channel(1) + 0.0722 * channel(2);
+}
+
+/** WCAG 2.x contrast ratio of two #rrggbb colors. */
+export function contrastRatio(a, b) {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+export function checkContrast(slug, root) {
+  const path = join(root, 'sites', slug, 'src/styles/tokens.css');
+  if (!existsSync(path)) return []; // checkTokens reports the missing file
+  const tokens = colorTokens(readFileSync(path, 'utf8'));
+  const failures = [];
+  for (const [fg, bg] of CONTRAST_PAIRS) {
+    if (
+      !tokens[fg] ||
+      !tokens[bg] ||
+      tokens[fg].length !== 7 ||
+      tokens[bg].length !== 7
+    )
+      continue;
+    const ratio = contrastRatio(tokens[fg], tokens[bg]);
+    if (ratio < MIN_CONTRAST)
+      failures.push(
+        failure(
+          'contrast',
+          `${fg}/${bg}`,
+          `${fg} ${tokens[fg]} on ${bg} ${tokens[bg]} has contrast ${ratio.toFixed(2)}:1 (min ${MIN_CONTRAST}:1); adjust tokens.css and MASTER.md`,
+        ),
+      );
+  }
+  return failures;
+}
+
 export function validateLandingMeta(meta) {
   if (!meta)
     return ['no ```landing-meta block (keys: primary, display-font, hero)'];
@@ -627,6 +694,7 @@ export async function runChecks({
     ['photo-uses', () => checkPhotoUses(siteDir, manifest)],
     ['landing-meta', () => checkLandingMeta(slug, root)],
     ['tokens', () => checkTokens(slug, root)],
+    ['contrast', () => checkContrast(slug, root)],
     ['diversity', () => checkDiversity(slug, root)],
   ].map(([name, run]) => ({ name, failures: run() }));
 
@@ -669,6 +737,7 @@ Final check of sites/<slug>/ after site QA passes. Fails, naming the item, when:
   credits-stale     CREDITS.md or src/data/credits.json is out of date (node scripts/credits.mjs --site <slug>)
   photo-overuse     one source photo is referenced from more than ${MAX_USES_PER_PHOTO} places in src/
   tokens-mismatch   a palette hex or font family of design-system/<slug>/MASTER.md is not in tokens.css
+  contrast          a standard text token pair in tokens.css is below 4.5:1 (WCAG)
   landing-meta      MASTER.md has no valid \`landing-meta\` block (primary, display-font, hero)
   diversity         another site has the same primary color, display font and hero type
   copy-match        (--refs) ${SHINGLE_WORDS} words in a row of the built page also occur in a reference

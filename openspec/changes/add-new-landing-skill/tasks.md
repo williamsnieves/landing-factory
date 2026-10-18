@@ -17,17 +17,17 @@
 ## 2. /new-landing skill
 
 - [x] 2.1 Write `.claude/skills/new-landing/SKILL.md` with the phases brief → synthesis → checkpoint → design system → build → QA → final check, the subagent briefs per phase (one skill each), and resume rules; verify it shows up as `/new-landing`
-- [ ] 2.2 Design system phase: `design-system/<slug>/MASTER.md` with ui-ux-pro-max (fed the proposal's direction line and the other sites' `landing-meta` to avoid), translated into the site's `tokens.css`; verified by `check-landing` (palette and fonts in tokens)
-- [ ] 2.3 Build phase with taste-skill (art direction, `--keep palette,type`) using `find-images.mjs` and `credits.mjs`; verified by `check-landing` (credits, repetition)
-- [ ] 2.4 QA loop with max attempts and the failure order of design.md, then impeccable critique/polish once; verify in the validation run that `RUN.md` records each attempt, and that an exhausted loop exits non-zero (`--max-attempts 0` on a fixture)
-- [ ] 2.5 `RUN.md` log; verify its content after the validation run
-- [ ] 2.6 Allowed tools for automatic mode in `.claude/settings.json` (the new scripts, `claude`-safe commands only); verify an `--auto` run needs no permission prompt
+- [x] 2.2 Design system phase: `design-system/<slug>/MASTER.md` with ui-ux-pro-max (fed the proposal's direction line and the other sites' `landing-meta` to avoid), translated into the site's `tokens.css`; verified by `check-landing` (palette and fonts in tokens) (verified on the clinica-dental run: MASTER.md with landing-meta, `check-landing` tokens and contrast ok)
+- [x] 2.3 Build phase with taste-skill (art direction, `--keep palette,type`) using `find-images.mjs` and `credits.mjs`; verified by `check-landing` (credits, repetition) (verified on the clinica-dental run: 7 Commons photos via `find-images.mjs`, `credits.mjs --check` and `check-landing` credits and photo-uses ok)
+- [x] 2.4 QA loop with max attempts and the failure order of design.md, then impeccable critique/polish once; verify in the validation run that `RUN.md` records each attempt, and that an exhausted loop exits non-zero (`--max-attempts 0` on a fixture) (verified: the clinica-dental RUN.md records attempt 1, passed with no fix round needed; the exhausted path exits 1 through the `Result: failed` line, covered by `tests/new-landing.test.mjs`)
+- [x] 2.5 `RUN.md` log; verify its content after the validation run (verified: `sites/clinica-dental/RUN.md` has inputs, phase times, design decisions, images, QA attempts, final check and totals)
+- [x] 2.6 Allowed tools for automatic mode in `.claude/settings.json` (the new scripts, `claude`-safe commands only); verify an `--auto` run needs no permission prompt (verified: the `--auto` run needed no prompt; `claude -p` ignores the settings allow list in an untrusted folder, so `new-landing.sh` passes the same list with `--allowedTools`)
 
 ## 3. MVP validation
 
 - [ ] 3.1 Generate `sites/clinica-dental` with a single `scripts/new-landing.sh clinica-dental --niche "..." --auto` command and verify it passes site QA and `check-landing` with no touch-ups, and its preview deploys on the PR
-- [ ] 3.2 Document the flow in `README.md`, `CLAUDE.md`, `sites/README.md`, `scripts/README.md` and `docs/status.md`; verify a user can follow it end to end
-- [ ] 3.3 Record in `docs/status.md` the follow-up pilot: three different niches with `new-landing.sh --auto`, checked for diversity (roadmap MVP check)
+- [x] 3.2 Document the flow in `README.md`, `CLAUDE.md`, `sites/README.md`, `scripts/README.md` and `docs/status.md`; verify a user can follow it end to end (README, CLAUDE.md, sites/README.md, scripts/README.md and docs/status.md updated)
+- [x] 3.3 Record in `docs/status.md` the follow-up pilot: three different niches with `new-landing.sh --auto`, checked for diversity (roadmap MVP check) (docs/status.md "Next")
 
 ## Workflow follow-up
 
