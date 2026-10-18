@@ -18,6 +18,7 @@ import {
   worstScores,
 } from './qa/lighthouse.mjs';
 import { renderMarkdown } from './qa/report.mjs';
+import { resolveImpeccableTarget, resolveQaPaths } from './qa/site.mjs';
 import {
   build,
   discoverPages,
@@ -34,9 +35,15 @@ Builds the site, serves it, and checks every dist/**/*.html page.
 
   --dist <dir>      Skip the build and serve this directory of static HTML instead
                     (alias: --fixture). Default: build, then \`astro preview\` on dist/.
-  --config <file>   Config file (default: qa.config.json; defaults apply if missing).
-  --out <dir>       Where run folders go (default: qa/). qa/latest links to the newest.
-  --src <path>      Source path for impeccable detect (default: config impeccable.target).
+  --site <slug>     QA one site of sites/<slug>/ instead of the root starter: builds and
+                    serves that site, runs impeccable on its src/, reports to
+                    qa/<slug>/ (qa/<slug>/latest links to the newest run).
+  --config <file>   Config file (default: sites/<slug>/qa.config.json if present with
+                    --site, else qa.config.json; defaults apply if missing).
+  --out <dir>       Where run folders go (default: qa/, then <slug>/ with --site).
+                    <out>/latest links to the newest run.
+  --src <path>      Source path for impeccable detect (default: config impeccable.target,
+                    resolved inside the site with --site).
   --runs <n>        Lighthouse runs per page and preset; the median is used.
   --skip <list>     Comma-separated checks to skip: ${CHECKS.join(', ')}.
   --help            Show this help.
@@ -49,6 +56,8 @@ const log = (msg) => process.stderr.write(`[qa] ${msg}\n`);
 async function main() {
   const { values: args } = parseArgs({
     options: {
+      site: { type: 'string' },
+      'sites-dir': { type: 'string' }, // test hook: where sites live (default sites/)
       dist: { type: 'string' },
       fixture: { type: 'string' },
       config: { type: 'string' },
@@ -64,7 +73,14 @@ async function main() {
     return 0;
   }
 
-  const config = loadConfig(resolve(ROOT, args.config ?? 'qa.config.json'));
+  const paths = resolveQaPaths({
+    root: ROOT,
+    site: args.site,
+    sitesDir: args['sites-dir'] ? resolve(ROOT, args['sites-dir']) : undefined,
+    config: args.config,
+    out: args.out,
+  });
+  const config = loadConfig(paths.configPath);
   if (args.runs) {
     config.lighthouse.runs = Number(args.runs);
     if (!Number.isInteger(config.lighthouse.runs) || config.lighthouse.runs < 1)
@@ -87,7 +103,7 @@ async function main() {
     .toISOString()
     .replace(/\.\d+Z$/, 'Z')
     .replace(/:/g, '-'); // no ':' so CI artifact upload accepts it
-  const outRoot = resolve(ROOT, args.out ?? 'qa');
+  const outRoot = paths.outRoot;
   const outDir = join(outRoot, runId);
   await mkdir(join(outDir, 'screens'), { recursive: true });
 
@@ -111,10 +127,12 @@ async function main() {
       distDir = resolve(ROOT, distArg);
       server = await startStatic(distDir);
     } else {
-      log('building (astro build)');
-      await build(ROOT);
-      distDir = join(ROOT, 'dist');
-      server = await startPreview(ROOT);
+      log(
+        `building ${args.site ? `site ${args.site}` : 'the starter'} (astro build)`,
+      );
+      await build(paths.projectDir);
+      distDir = join(paths.projectDir, 'dist');
+      server = await startPreview(paths.projectDir);
     }
     cleanups.push(() => server.close());
     const pages = discoverPages(distDir, config.pages.exclude);
@@ -384,7 +402,12 @@ async function main() {
     let impeccable = null;
     if (!skip.has('impeccable')) {
       const imp = config.impeccable;
-      const target = args.src ?? imp.target;
+      const target = resolveImpeccableTarget({
+        root: ROOT,
+        projectDir: paths.projectDir,
+        src: args.src,
+        target: imp.target,
+      });
       log(`impeccable@${imp.version} detect ${target}`);
       impeccable = {
         version: imp.version,
@@ -436,6 +459,7 @@ async function main() {
     const finishedAt = new Date();
     const report = {
       schemaVersion: 1,
+      site: args.site ?? null,
       runId,
       verdict: failures.length ? 'failed' : 'passed',
       startedAt: startedAt.toISOString(),
@@ -462,7 +486,7 @@ async function main() {
     await symlink(runId, latest, 'dir');
 
     log(
-      `${report.verdict.toUpperCase()}: ${failures.length} failure(s). Report: ${relative(ROOT, join(outDir, 'report.md'))} (qa/latest)`,
+      `${report.verdict.toUpperCase()}: ${failures.length} failure(s). Report: ${relative(ROOT, join(outDir, 'report.md'))} (${relative(ROOT, join(outRoot, 'latest'))})`,
     );
     for (const f of failures.slice(0, 20))
       log(`  - [${f.check}] ${f.page ?? ''} ${f.viewport ?? ''} ${f.message}`);

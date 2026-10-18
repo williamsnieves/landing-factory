@@ -4,7 +4,7 @@ Rules for any agent or person working in this repo. Keep this file current.
 
 ## Project
 
-landing-factory turns a niche into an original, near-Awwwards-quality Astro landing page, ready to deploy. Roadmap: `docs/roadmap.md`.
+landing-factory turns a niche into an original, near-Awwwards-quality Astro landing page, ready to deploy. Roadmap: `docs/roadmap.md`. Current state, next steps and working agreements: `docs/status.md` (read it first in a new or compacted session). The root is the starter demo and the template source; every generated landing lives in its own workspace under `sites/<slug>/` (see "Sites").
 
 ## Language
 
@@ -22,20 +22,23 @@ All documentation, comments, commit messages and pull request descriptions MUST 
 
 ## Commands
 
-| Command                     | Purpose                                                                     |
-| --------------------------- | --------------------------------------------------------------------------- |
-| `npm ci`                    | Install exact dependencies                                                  |
-| `npm run dev`               | Dev server with hot reload                                                  |
-| `npm run build`             | Static build into `dist/`                                                   |
-| `npm run preview`           | Serve the built `dist/`                                                     |
-| `npm run check`             | `astro check` (types and Astro diagnostics)                                 |
-| `npm run format`            | Format with Prettier (`format:check` to verify)                             |
-| `npm run setup:agent`       | Install/verify agent tooling (design skills, telemetry opt-out)             |
-| `npm run setup:verify`      | Fast, offline, read-only check of the agent tooling                         |
-| `npm test`                  | Unit and fixture tests (QA script, analyze-reference scripts, validator)    |
-| `npm run validate:patterns` | Validate `patterns/*.md` sheets (structure, no site content); runs in CI    |
-| `npm run qa`                | Build, serve and verify every page; writes `qa/latest/`; exit 0 = pass      |
-| `npx wrangler ...`          | Pinned Cloudflare CLI; CI uses it to deploy `dist/` (do not deploy locally) |
+| Command                       | Purpose                                                                      |
+| ----------------------------- | ---------------------------------------------------------------------------- |
+| `npm ci`                      | Install exact dependencies                                                   |
+| `npm run dev`                 | Dev server with hot reload                                                   |
+| `npm run build`               | Static build into `dist/`                                                    |
+| `npm run preview`             | Serve the built `dist/`                                                      |
+| `npm run check`               | `astro check` for the root starter (`sites/` is excluded in `tsconfig.json`) |
+| `npm run check:sites`         | `astro check` in every site workspace                                        |
+| `npm run new-site -- <slug>`  | Scaffold `sites/<slug>/` from the starter (see "Sites")                      |
+| `npm run format`              | Format with Prettier (`format:check` to verify)                              |
+| `npm run setup:agent`         | Install/verify agent tooling (design skills, telemetry opt-out)              |
+| `npm run setup:verify`        | Fast, offline, read-only check of the agent tooling                          |
+| `npm test`                    | Unit and fixture tests (QA script, analyze-reference scripts, validator)     |
+| `npm run validate:patterns`   | Validate `patterns/*.md` sheets (structure, no site content); runs in CI     |
+| `npm run qa`                  | Build, serve and verify every page; writes `qa/latest/`; exit 0 = pass       |
+| `npm run qa -- --site <slug>` | Same checks for one site; writes `qa/<slug>/latest/`                         |
+| `npx wrangler ...`            | Pinned Cloudflare CLI; CI uses it to deploy `dist/` (do not deploy locally)  |
 
 ## Folder structure
 
@@ -45,9 +48,10 @@ src/components/motion/     motion layer: initMotion(), <Motion />, README with p
 src/layouts/               BaseLayout (SEO, skip link, <main id="main">)
 src/pages/                 routes
 src/styles/                global.css and tokens.css (single source of the theme)
+sites/<slug>/              one self-contained Astro site per landing (npm workspace `site-<slug>`)
 patterns/                  abstract pattern sheets from references (no assets, copy or code)
 design-system/             per-niche design decisions, translated into tokens.css
-scripts/                   pipeline automation (qa.mjs, validate-pattern.mjs, parse-wrangler-output.mjs, setup-agent.sh)
+scripts/                   pipeline automation (qa.mjs, new-site.mjs, changed-sites.mjs, validate-pattern.mjs, parse-wrangler-output.mjs, setup-agent.sh)
 public/_headers            Cloudflare Pages cache and security headers (lands in dist/_headers)
 site.config.json           per-site Cloudflare settings: Pages project name and production branch
 .github/workflows/ci.yml   CI: qa job, then deploy job (needs: qa)
@@ -55,11 +59,23 @@ openspec/                  specs, changes, archive
 docs/                      roadmap and project docs
 ```
 
+## Sites
+
+Each landing is a complete static Astro site in `sites/<slug>/` (slug rule `^[a-z0-9]+(-[a-z0-9]+)*$`), registered as the npm workspace `site-<slug>` through `"workspaces": ["sites/*"]` in the root `package.json`. One `npm ci` at the root installs everything; one root `package-lock.json`. Details and conventions: `sites/README.md`.
+
+- Create: `npm run new-site -- <slug> [--title ... --lang ... --message ...]` copies `astro.config.mjs`, `tsconfig.json`, `src/layouts/`, `src/components/motion/`, `src/styles/`, `src/env.d.ts`, `public/_headers` and `public/favicon.svg` from the root, and writes `package.json` (same dependency ranges as the root), `site.config.json` (`pagesProject: <slug>`), `CREDITS.md`, `README.md` and a `noindex` placeholder `src/pages/index.astro`. It never copies the starter's pages or sections, and refuses invalid slugs and existing folders (`--allow-existing-docs` accepts a folder holding only `*.md` planning docs such as `PROPOSAL.md` and never overwrites them). Then run `npm install` once and commit the updated `package-lock.json`.
+- Build and check one site: `npm run build -w site-<slug>`, `npm run check -w site-<slug>` (`npm run check:sites` for all).
+- QA one site: `npm run qa -- --site <slug>` builds and serves `sites/<slug>`, checks its pages, runs impeccable on `sites/<slug>/src` and writes `qa/<slug>/<timestamp>/` (`qa/<slug>/latest`). A `sites/<slug>/qa.config.json` overrides the root `qa.config.json` for that site; never lower a threshold to get a pass.
+- Sites copy the starter at creation and may diverge; nothing is shared at runtime. The root `src/styles/global.css` excludes `sites/` and `scripts/` from Tailwind's class scan so a site never changes the starter's CSS.
+- Each site has its own Cloudflare Pages project (`sites/<slug>/site.config.json`) and its own `CREDITS.md`. Do not edit another site's folder from a site change.
+
 ## CI and deployment
 
 `.github/workflows/ci.yml` (triggers: `pull_request`, push to `main`, `workflow_dispatch`) has two jobs. `qa` runs Prettier, `astro check`, `npm run validate:patterns`, Chromium install, `npm test` and `npm run qa`, uploads the `qa-report` artifact, and, only if everything passed, the `site-dist` artifact (`dist/`). `deploy` has `needs: qa`, downloads `site-dist` and runs `npx wrangler pages deploy dist --project-name <site.config.json> --branch <head_ref || ref_name>`: `main` is the Pages production branch, every other branch gets a preview at `https://<branch-alias>.<project>.pages.dev`. On PRs it posts one sticky comment (hidden marker `<!-- landing-factory-preview -->`) with the URLs. The project is created idempotently if missing. URLs are read from wrangler's `WRANGLER_OUTPUT_FILE_PATH` ND-JSON via `scripts/parse-wrangler-output.mjs`.
 
-Deploy gating: the first `deploy` step checks that the secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are set (never echoing them) and that the PR is not from a fork. If not, it emits a `::warning::` naming what is missing and skips the remaining deploy steps (job stays green). Never print, log or commit credentials; never deploy from a local machine. Docs for setup: README, "Deployment".
+Sites: the `sites` job runs `scripts/changed-sites.mjs` (full history, `fetch-depth: 0`) to list the sites whose `sites/<slug>/` changed, or all of them when a shared path changed (`package.json`, `package-lock.json`, `qa.config.json`, `src/components/motion/`, `src/layouts/`, `src/styles/`, `scripts/qa.mjs`, `scripts/qa/`, `scripts/lib/`, `scripts/parse-wrangler-output.mjs`, `.github/workflows/`); manual runs build all. The `site-qa-deploy` matrix job (one per site, skipped when the list is empty) runs `astro check`, `npm run qa -- --site <slug>`, uploads the `qa-report-<slug>` artifact and, only if everything passed, deploys `sites/<slug>/dist` to the Pages project in `sites/<slug>/site.config.json` with the same secrets gate, project creation and URL capture as `deploy`. On PRs each site gets its own sticky comment (marker `<!-- landing-factory-preview:<slug> -->`). The root `qa` job also runs `npm run check:sites`.
+
+Deploy gating: the first `deploy` step checks that the secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are set (never echoing them) and that the PR is not from a fork (the site jobs apply the same gate after their QA passes). If not, it emits a `::warning::` naming what is missing and skips the remaining deploy steps (job stays green). Never print, log or commit credentials; never deploy from a local machine. Docs for setup: README, "Deployment".
 
 ## Agent tooling setup
 
@@ -190,4 +206,4 @@ Every external image, font, icon or component must have a compatible license (fo
 
 ## Scope discipline
 
-Do not add CMS, i18n, client/commercial licensing features or backend forms: they are out of scope. Do not commit generated output (`dist/`, `.astro/`, `qa/`).
+Do not add a shared component package across sites (sites copy the starter), per-site custom domains, CMS, i18n, client/commercial licensing features or backend forms: they are out of scope. Do not commit generated output (`dist/`, `.astro/`, `qa/`).

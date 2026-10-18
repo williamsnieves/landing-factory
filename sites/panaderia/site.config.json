@@ -1,0 +1,6 @@
+{
+  "cloudflare": {
+    "pagesProject": "panaderia",
+    "productionBranch": "main"
+  }
+}
