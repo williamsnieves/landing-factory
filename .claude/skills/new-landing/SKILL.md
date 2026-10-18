@@ -19,6 +19,8 @@ Read `CLAUDE.md` first (language, extract-patterns-don't-clone, licensing, quali
 
 Headless runs (`claude -p`) cannot ask questions: make a sensible choice, and write it in the proposal under Decisions as "Assumed: ... (confirm at the checkpoint)".
 
+Run every subagent and every long command in the **foreground** (Agent tool with `run_in_background: false`, Bash without `run_in_background`) and wait for its result before the next step. In `claude -p` the run ends as soon as you end your turn, and background work left running is stopped; never end a turn to "wait for a report". The run is finished only when RUN.md has its final `Result:`.
+
 ## Run log and resume rules
 
 `sites/<slug>/RUN.md` is the state. Before each phase set its row in the Phases table to `in-progress` with the start time, and at the end to `done` (or `failed`) with the finish time and a one-line note. Get timestamps with `date -u +%Y-%m-%dT%H:%M:%SZ`. The `Result:` line near the top is read by `scripts/new-landing.sh` for its exit code: `checkpoint`, `dry-run-done`, `passed` or `failed`.

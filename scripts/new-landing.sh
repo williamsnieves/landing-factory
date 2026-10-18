@@ -152,7 +152,9 @@ mkdir -p "$SITE_DIR"
 
 echo "new-landing: running claude for $SLUG (log: $LOG)"
 set +e
-claude "${CLAUDE_ARGS[@]}" 2>&1 | tee -a "$LOG"
+# Never cut off subagents or commands the run still waits on (claude -p stops background
+# work 10 minutes after the last turn by default).
+CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS=0 claude "${CLAUDE_ARGS[@]}" 2>&1 | tee -a "$LOG"
 claude_status="${PIPESTATUS[0]}"
 set -e
 if [ "$claude_status" -ne 0 ]; then
