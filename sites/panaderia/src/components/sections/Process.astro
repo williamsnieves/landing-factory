@@ -1,0 +1,153 @@
+---
+import { Picture } from 'astro:assets';
+import { images } from '../../data/images';
+
+const steps = [
+  {
+    title: 'La masa madre',
+    text: 'Alimentamos nuestro cultivo cada día con harina y agua, y lo dejamos burbujear hasta que huele a fruta y a pan recién cortado.',
+    image: images.starter,
+  },
+  {
+    title: 'El amasado',
+    text: 'Mezclamos a mano y sin prisa: poca levadura, nada de aditivos. Solo harina, agua, sal y tiempo.',
+    image: images.dough,
+  },
+  {
+    title: 'El reposo largo',
+    text: 'La masa descansa más de un día en frío. Es lo que le da su miga abierta, su sabor ácido y suave, y que se conserve tierna.',
+    image: images.crumb,
+  },
+  {
+    title: 'El horno',
+    text: 'Antes del amanecer encendemos el horno de leña. Cada hogaza sale cuando suena hueca al golpearla, ni un minuto antes.',
+    image: images.oven,
+  },
+];
+---
+
+<section
+  id="proceso"
+  aria-labelledby="proceso-title"
+  data-pin
+  data-pin-distance="300%"
+  data-pin-min="md"
+  data-pin-steps
+  data-step-active="0"
+  class="process bg-paper py-(--section-y) md:py-24"
+>
+  <div class="mx-auto max-w-[110rem] px-(--gutter)">
+    <h2
+      id="proceso-title"
+      data-reveal
+      class="font-display text-3xl leading-[1.05] font-medium tracking-tight text-balance"
+    >
+      Cuatro pasos, ningún atajo.
+    </h2>
+
+    <ol class="process-steps mt-12 md:mt-16">
+      {steps.map((step, i) => (
+        <li class="process-step" data-step={i}>
+          <figure class="process-figure">
+            <Picture
+              src={step.image.src}
+              alt={step.image.alt}
+              formats={['avif', 'webp']}
+              widths={[480, 720, 960, 1280]}
+              sizes="(min-width: 768px) 46vw, 92vw"
+              loading="lazy"
+              decoding="async"
+              class="h-full w-full object-cover"
+              style={`object-position: ${step.image.position}`}
+            />
+          </figure>
+          <div class="process-text">
+            <h3 class="font-display text-2xl font-semibold">{step.title}</h3>
+            <p class="mt-3 max-w-[44ch] text-lg">{step.text}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .process-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 4rem;
+  }
+  .process-step {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .process-figure {
+    margin: 0;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: var(--radius-arch);
+  }
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .process-step {
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 2.5rem;
+    }
+    .process-figure {
+      aspect-ratio: 1 / 1;
+    }
+  }
+
+  /* Pinned layout: only when JS runs, reduced motion is off and the pin is
+     active (md and up). All steps share one grid cell pair and cross-fade. */
+  @media (min-width: 768px) {
+    :global(.js-motion) .process {
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      padding-block: 3rem;
+    }
+    :global(.js-motion) .process > div {
+      width: 100%;
+    }
+    :global(.js-motion) .process-steps {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto;
+      gap: 0 clamp(2rem, 6vw, 6rem);
+      margin-top: 2.5rem;
+    }
+    :global(.js-motion) .process-step {
+      display: contents;
+    }
+    :global(.js-motion) .process-figure {
+      grid-column: 1;
+      grid-row: 1;
+      aspect-ratio: auto;
+      height: min(60svh, 40rem);
+      opacity: 0;
+      transition: opacity var(--duration-slow) var(--ease-out-soft);
+    }
+    :global(.js-motion) .process-text {
+      grid-column: 2;
+      grid-row: 1;
+      align-self: center;
+      opacity: 0;
+      transform: translateY(1.5rem);
+      transition:
+        opacity var(--duration-slow) var(--ease-out-soft),
+        transform var(--duration-slow) var(--ease-out-soft);
+    }
+    :global(.js-motion) .process[data-step-active='0'] [data-step='0'] > *,
+    :global(.js-motion) .process[data-step-active='1'] [data-step='1'] > *,
+    :global(.js-motion) .process[data-step-active='2'] [data-step='2'] > *,
+    :global(.js-motion) .process[data-step-active='3'] [data-step='3'] > * {
+      opacity: 1;
+      transform: none;
+    }
+    :global(.js-motion) .process-text h3 {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>

@@ -1,0 +1,96 @@
+---
+import { credits } from '../../data/images';
+import { site } from '../../data/site';
+---
+
+<footer class="bg-ink text-paper overflow-hidden pt-20 md:pt-28">
+  <div class="mx-auto grid max-w-[110rem] gap-10 px-(--gutter) sm:grid-cols-2 lg:grid-cols-4">
+    <div>
+      <h2 class="font-display text-xl font-semibold">Visítanos</h2>
+      <p class="mt-3">
+        {site.street}
+        <br />
+        {site.area}
+      </p>
+    </div>
+    <div>
+      <h2 class="font-display text-xl font-semibold">Escríbenos</h2>
+      <ul class="mt-3 list-none space-y-1 p-0">
+        <li>
+          <a
+            href={`mailto:${site.email}`}
+            class="inline-flex min-h-11 items-center underline underline-offset-4 hover:no-underline"
+          >
+            {site.email}
+          </a>
+        </li>
+        <li>
+          <a
+            href={site.phoneHref}
+            class="inline-flex min-h-11 items-center underline underline-offset-4 hover:no-underline"
+          >
+            {site.phone}
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <h2 class="font-display text-xl font-semibold">Síguenos</h2>
+      <ul class="mt-3 list-none space-y-1 p-0">
+        <li>
+          <span class="inline-flex min-h-11 items-center">
+            Instagram {site.instagram}
+          </span>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <h2 class="font-display text-xl font-semibold">En esta página</h2>
+      <ul class="mt-3 list-none space-y-1 p-0">
+        {[
+          ['#horno', 'Hoy en el horno'],
+          ['#proceso', 'El proceso'],
+          ['#visitanos', 'Visítanos'],
+          ['#encargar', 'Encarga para recoger'],
+        ].map(([href, label]) => (
+          <li>
+            <a
+              href={href}
+              class="inline-flex min-h-11 items-center underline-offset-4 hover:underline"
+            >
+              {label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+
+  <p
+    class="font-display mt-16 w-full text-center leading-[0.8] font-semibold tracking-[-0.04em] whitespace-nowrap select-none md:mt-24"
+    style="font-size: clamp(3rem, 16vw, 26rem)"
+    aria-hidden="true"
+  >
+    Horno Lento
+  </p>
+
+  <div class="bg-ink text-paper mx-auto max-w-[110rem] px-(--gutter) pt-8 pb-10 text-sm">
+    <p>
+      Datos de contacto de ejemplo. Fotografías:{' '}
+      {credits.map((c, i) => (
+        <>
+          {i > 0 ? ', ' : ''}
+          <a
+            href={c.url}
+            rel="noopener"
+            class="underline underline-offset-2 hover:no-underline"
+          >
+            {c.author}
+          </a>{' '}
+          ({c.license})
+        </>
+      ))}
+      . Licencias y fuentes en CREDITS.md.
+    </p>
+  </div>
+</footer>

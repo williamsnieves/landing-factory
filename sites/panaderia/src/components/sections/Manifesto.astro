@@ -1,0 +1,27 @@
+---
+const facts = [
+  { figure: '36 h', label: 'de fermentación lenta en cada masa' },
+  { figure: '3 harinas', label: 'molidas en piedra, de molinos catalanes' },
+  { figure: 'Cada día', label: 'horneado desde las cuatro de la madrugada' },
+];
+---
+
+<section class="bg-surface text-ink py-(--section-y)">
+  <div class="mx-auto max-w-[110rem] px-(--gutter)">
+    <p
+      data-reveal
+      class="font-display text-manifesto max-w-[22ch] leading-[1.08] font-medium tracking-tight text-balance md:max-w-[26ch]"
+    >
+      El buen pan no se apura. Lo dejamos reposar hasta que la masa está lista,
+      no hasta que lo pide el reloj.
+    </p>
+    <dl class="mt-16 grid gap-10 md:mt-24 md:ml-[calc(100%/12*5)] md:grid-cols-3 md:gap-8">
+      {facts.map((fact, i) => (
+        <div data-reveal data-reveal-delay={i * 0.12}>
+          <dt class="font-display text-2xl font-semibold">{fact.figure}</dt>
+          <dd class="text-ink mt-2 max-w-[24ch]">{fact.label}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>
