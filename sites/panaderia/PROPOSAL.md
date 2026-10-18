@@ -1,11 +1,11 @@
 # Proposal: panaderia (first manual run)
 
-Status: **awaiting review**. Nothing is built until this proposal is approved or edited.
+Status: **approved** (2026-10-18) with the decisions below. Nothing is built yet.
 
 ## Brief
 
 - **Niche:** artisan neighborhood bakery (sourdough bread, pastries, coffee).
-- **Brand (placeholder, fictional):** "Horno Lento", a small bakery in a Spanish city. Name, city and products are placeholders to confirm or replace.
+- **Brand (fictional):** "Horno Lento", a small sourdough bakery in Barcelona.
 - **Goal of the page:** make people want to visit or pre-order for pickup. Primary action: "Encarga para recoger" (order for pickup); secondary: "Cómo llegar" (visit).
 - **Audience:** locals who care about real bread; weekend visitors.
 - **Tone:** warm, crafted, unhurried, with one playful moment. Copy in Spanish, original.
@@ -62,12 +62,12 @@ Lighthouse >= 90 (performance, accessibility, SEO), no overflow at 375/768/1440,
 
 Online shop, cart, payments, backend forms, CMS, multiple languages.
 
-## Questions for review
+## Decisions (review of 2026-10-18)
 
-1. Keep the placeholder brand "Horno Lento", or give me a name and city?
-2. Copy in Spanish (proposed) or English?
-3. Products: generic sourdough loaves and pastries, or a specific list?
-4. Is one playful moment (the giant scrubbed word) the right amount, or do you want more or less personality?
+1. Brand "Horno Lento", located in Barcelona (fictional business; address and phone are placeholders).
+2. Copy in Spanish, original.
+3. Generic sourdough loaves and pastries, plus gluten-free variants (bread and a couple of pastries) shown with a "Sin gluten" tag and a short dedicated block (section 4b). Copy must not make medical or certification claims; it says the items are made without gluten-containing ingredients and that customers with coeliac disease should ask in the shop.
+4. Personality: one playful moment (the scrubbed giant word) is the right amount.
 
 ## Next steps after approval
 
