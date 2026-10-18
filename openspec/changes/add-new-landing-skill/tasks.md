@@ -6,8 +6,8 @@
 
 ## 1. Site structure
 
-- [ ] 1.1 Move the starter to `templates/site/` and set up npm workspaces with `sites/*` (per decision 1 as approved in review); verify the root still builds and passes QA
-- [ ] 1.2 Implement `scripts/new-site.sh <slug> --niche ... [--refs ...] [--auto] [--dry-run]`: creates `sites/<slug>/` from the template and runs Claude Code; verify with `--dry-run` that it creates the folder and the proposal without building
+- [ ] 1.1 Build on the `sites/<slug>/` workspaces from `add-site-workspaces` (no move to `templates/`): extend the `npm run new-site` scaffold with whatever `/new-landing` needs (for example the `PROPOSAL.md`, `RUN.md` and `CREDITS.md` templates); verify a scaffolded site builds and passes `npm run qa -- --site <slug>`, and the root still builds and passes `npm run qa`
+- [ ] 1.2 Implement `scripts/new-landing.sh <slug> --niche ... [--refs ...] [--auto] [--dry-run]`: runs `npm run new-site -- <slug>` to create `sites/<slug>/` and then runs Claude Code; verify with `--dry-run` that it creates the folder and the proposal without building
 
 ## 2. /new-landing skill
 

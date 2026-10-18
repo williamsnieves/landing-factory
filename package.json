@@ -6,11 +6,15 @@
   "engines": {
     "node": ">=22.22.0"
   },
+  "workspaces": [
+    "sites/*"
+  ],
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "check:sites": "npm run check --workspaces --if-present",
     "astro": "astro",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -18,6 +22,7 @@
     "setup:verify": "bash scripts/setup-agent.sh --verify",
     "validate:patterns": "node scripts/validate-pattern.mjs",
     "qa": "node scripts/qa.mjs",
+    "new-site": "node scripts/new-site.mjs",
     "test": "node --test \"tests/**/*.test.mjs\""
   },
   "dependencies": {

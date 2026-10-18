@@ -13,7 +13,7 @@ The MVP goal is that **a single command** generates, from a niche and 0–3 refe
   4. **Design system**: `design-system/<slug>/MASTER.md` with ui-ux-pro-max, translated into CSS tokens.
   5. **Build**: original sections, original copy, openly licensed images (taste-skill) with `CREDITS.md`, motion layer.
   6. **QA loop**: `npm run qa` → fix → repeat until it passes or attempts run out; then impeccable critique/audit/polish.
-- `scripts/new-site.sh <slug> --niche "..." [--refs a,b] [--auto]` that creates the site project from the starter and runs Claude Code non-interactively.
+- `scripts/new-landing.sh <slug> --niche "..." [--refs a,b] [--auto]` that creates the site with `npm run new-site` (from `add-site-workspaces`) and runs Claude Code non-interactively.
 - Run log (`sites/<slug>/RUN.md`): decisions, QA attempts, approximate tokens/time.
 
 ## Capabilities
@@ -26,7 +26,7 @@ The MVP goal is that **a single command** generates, from a niche and 0–3 refe
 
 ## Impact
 
-- New: `.claude/skills/new-landing/`, `scripts/new-site.sh`, site template, `sites/` (or separate repos, see design.md).
+- New: `.claude/skills/new-landing/`, `scripts/new-landing.sh`, `sites/<slug>/` workspaces (see design.md).
 - Uses everything before it: starter, design skills, QA, deployment and pattern sheets.
 - Cost: a full build with taste-skill takes 30–45 min and several hundred thousand tokens.
 - Must be implemented **after** the week-1 first manual run, to encode only what worked.

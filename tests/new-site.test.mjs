@@ -1,0 +1,258 @@
+// Tests for scripts/new-site.mjs. Sites are created in a temporary folder, never in sites/.
+import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import { after, test } from 'node:test';
+import { fileURLToPath } from 'node:url';
+import {
+  SHARED_DEPENDENCIES,
+  SHARED_DEV_DEPENDENCIES,
+  jsString,
+  scaffoldSite,
+  stripRootOnlyCss,
+  validateSlug,
+} from '../scripts/new-site.mjs';
+
+const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
+const tmp = mkdtempSync(join(tmpdir(), 'new-site-test-'));
+after(() => rmSync(tmp, { recursive: true, force: true }));
+
+const freshSites = () => mkdtempSync(join(tmp, 'sites-'));
+const readJson = (file) => JSON.parse(readFileSync(file, 'utf8'));
+
+const EXPECTED_FILES = [
+  'CREDITS.md',
+  'README.md',
+  'astro.config.mjs',
+  'package.json',
+  'public/_headers',
+  'public/favicon.svg',
+  'site.config.json',
+  'src/components/motion/Motion.astro',
+  'src/components/motion/README.md',
+  'src/components/motion/index.ts',
+  'src/env.d.ts',
+  'src/layouts/BaseLayout.astro',
+  'src/layouts/README.md',
+  'src/pages/index.astro',
+  'src/styles/global.css',
+  'src/styles/tokens.css',
+  'tsconfig.json',
+];
+
+test('valid slugs pass and invalid slugs are rejected', () => {
+  for (const ok of ['panaderia', 'cafe-2', 'a', 'x1-y2-z3'])
+    assert.equal(validateSlug(ok), null, ok);
+  for (const bad of [
+    '',
+    undefined,
+    'Panaderia',
+    'two words',
+    '-lead',
+    'trail-',
+    'dou--ble',
+    'under_score',
+    '../escape',
+    'a/b',
+    'ñandu',
+  ])
+    assert.match(validateSlug(bad) ?? '', /slug/i, String(bad));
+});
+
+test('scaffolding writes exactly the expected files and never the starter pages or sections', () => {
+  const sitesDir = freshSites();
+  const { created, kept } = scaffoldSite({ slug: 'cafeteria', sitesDir });
+  assert.deepEqual(created, EXPECTED_FILES);
+  assert.deepEqual(kept, []);
+  const site = join(sitesDir, 'cafeteria');
+  assert.ok(!existsSync(join(site, 'src/components/sections')));
+  assert.ok(!existsSync(join(site, 'src/pages/islands.astro')));
+  assert.ok(!existsSync(join(site, 'src/pages/_README.md')));
+});
+
+test('the site manifest is private, named site-<slug> and pins the root versions exactly', () => {
+  const sitesDir = freshSites();
+  scaffoldSite({ slug: 'cafeteria', sitesDir });
+  const site = readJson(join(sitesDir, 'cafeteria/package.json'));
+  const root = readJson(join(ROOT, 'package.json'));
+  assert.equal(site.name, 'site-cafeteria');
+  assert.equal(site.private, true);
+  assert.deepEqual(Object.keys(site.scripts).sort(), [
+    'build',
+    'check',
+    'dev',
+    'preview',
+  ]);
+  for (const name of SHARED_DEPENDENCIES)
+    assert.equal(site.dependencies[name], root.dependencies[name], name);
+  for (const name of SHARED_DEV_DEPENDENCIES)
+    assert.equal(site.devDependencies[name], root.devDependencies[name], name);
+});
+
+test('site.config.json names its own Pages project on the main branch', () => {
+  const sitesDir = freshSites();
+  scaffoldSite({ slug: 'cafe-bar', sitesDir });
+  assert.deepEqual(readJson(join(sitesDir, 'cafe-bar/site.config.json')), {
+    cloudflare: { pagesProject: 'cafe-bar', productionBranch: 'main' },
+  });
+});
+
+test('the placeholder page is noindex, uses the given language and escapes its text', () => {
+  const sitesDir = freshSites();
+  scaffoldSite({
+    slug: 'cafeteria',
+    sitesDir,
+    title: 'Cafe "Uno" <b>',
+    lang: 'es',
+    message: 'En construcción.',
+  });
+  const page = readFileSync(
+    join(sitesDir, 'cafeteria/src/pages/index.astro'),
+    'utf8',
+  );
+  assert.match(page, /\bnoindex\b/);
+  assert.match(page, /const lang = 'es';/);
+  assert.match(page, /const title = 'Cafe "Uno" <b>';/);
+  assert.equal(jsString("it's a \\ b"), "'it\\'s a \\\\ b'");
+  assert.match(page, /En construcción\./);
+});
+
+test('the copied stylesheet drops the root-only source exclusions', () => {
+  const sitesDir = freshSites();
+  scaffoldSite({ slug: 'cafeteria', sitesDir });
+  const css = readFileSync(
+    join(sitesDir, 'cafeteria/src/styles/global.css'),
+    'utf8',
+  );
+  assert.ok(!css.includes('@source'));
+  assert.ok(!css.includes('Root-only'));
+  assert.ok(!/\n{3,}/.test(css));
+  assert.equal(
+    stripRootOnlyCss(
+      "@import 'x';\n\n/* Root-only: a\n */\n@source not '../a';\n\nbody {}\n",
+    ),
+    "@import 'x';\n\nbody {}\n",
+  );
+});
+
+test('an existing folder is refused and left untouched', () => {
+  const sitesDir = freshSites();
+  const existing = join(sitesDir, 'cafeteria');
+  mkdirSync(existing);
+  writeFileSync(join(existing, 'keep.txt'), 'x');
+  assert.throws(
+    () => scaffoldSite({ slug: 'cafeteria', sitesDir }),
+    /already exists/,
+  );
+  assert.ok(!existsSync(join(existing, 'package.json')));
+  // Even a folder with only docs is refused without the explicit flag.
+  const docsOnly = join(sitesDir, 'docs-only');
+  mkdirSync(docsOnly);
+  writeFileSync(join(docsOnly, 'PROPOSAL.md'), 'plan');
+  assert.throws(
+    () => scaffoldSite({ slug: 'docs-only', sitesDir }),
+    /already exists/,
+  );
+  assert.ok(!existsSync(join(docsOnly, 'package.json')));
+});
+
+test('an invalid slug is refused and creates nothing', () => {
+  const sitesDir = freshSites();
+  assert.throws(() => scaffoldSite({ slug: '../evil', sitesDir }), /slug/i);
+  assert.throws(() => scaffoldSite({ slug: 'Bad Slug', sitesDir }), /slug/i);
+  assert.deepEqual(
+    spawnSync('ls', [sitesDir], { encoding: 'utf8' }).stdout.trim(),
+    '',
+  );
+});
+
+test('--allow-existing-docs scaffolds around planning docs and never overwrites them', () => {
+  const sitesDir = freshSites();
+  const site = join(sitesDir, 'panaderia');
+  mkdirSync(site);
+  writeFileSync(join(site, 'PROPOSAL.md'), 'my proposal');
+  writeFileSync(join(site, 'README.md'), 'my readme');
+  const { created, kept } = scaffoldSite({
+    slug: 'panaderia',
+    sitesDir,
+    allowExistingDocs: true,
+  });
+  assert.deepEqual(kept, ['PROPOSAL.md', 'README.md']);
+  assert.ok(created.includes('package.json'));
+  assert.ok(created.includes('CREDITS.md'));
+  assert.ok(!created.includes('README.md'));
+  assert.equal(readFileSync(join(site, 'PROPOSAL.md'), 'utf8'), 'my proposal');
+  assert.equal(readFileSync(join(site, 'README.md'), 'utf8'), 'my readme');
+});
+
+test('--allow-existing-docs still refuses folders with anything but top-level Markdown', () => {
+  const sitesDir = freshSites();
+  const withCode = join(sitesDir, 'a');
+  mkdirSync(withCode);
+  writeFileSync(join(withCode, 'index.js'), '');
+  assert.throws(
+    () => scaffoldSite({ slug: 'a', sitesDir, allowExistingDocs: true }),
+    /other than Markdown/,
+  );
+  const withDir = join(sitesDir, 'b');
+  mkdirSync(join(withDir, 'src'), { recursive: true });
+  assert.throws(
+    () => scaffoldSite({ slug: 'b', sitesDir, allowExistingDocs: true }),
+    /other than Markdown/,
+  );
+  assert.ok(!existsSync(join(withCode, 'package.json')));
+  assert.ok(!existsSync(join(withDir, 'package.json')));
+});
+
+test('the CLI exits non-zero for a bad slug and prints help with --help', () => {
+  const bad = spawnSync(
+    process.execPath,
+    ['scripts/new-site.mjs', 'Bad Slug'],
+    {
+      cwd: ROOT,
+      encoding: 'utf8',
+    },
+  );
+  assert.equal(bad.status, 1);
+  assert.match(bad.stderr, /Invalid slug/);
+  const help = spawnSync(process.execPath, ['scripts/new-site.mjs', '--help'], {
+    cwd: ROOT,
+    encoding: 'utf8',
+  });
+  assert.equal(help.status, 0);
+  assert.match(help.stdout, /--allow-existing-docs/);
+  assert.ok(!existsSync(join(ROOT, 'sites/Bad Slug')));
+});
+
+test('a scaffolded site is already Prettier-formatted', () => {
+  const sitesDir = freshSites();
+  scaffoldSite({
+    slug: 'cafeteria',
+    sitesDir,
+    title: 'Café Uno — pan y café',
+    lang: 'es',
+    message: 'Volvemos pronto.',
+  });
+  const prettier = join(ROOT, 'node_modules/prettier/bin/prettier.cjs');
+  const r = spawnSync(
+    process.execPath,
+    [
+      prettier,
+      '--config',
+      join(ROOT, '.prettierrc.json'),
+      '--check',
+      join(sitesDir, 'cafeteria'),
+    ],
+    { cwd: ROOT, encoding: 'utf8' },
+  );
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+});

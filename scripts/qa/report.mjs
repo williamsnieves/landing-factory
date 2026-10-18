@@ -15,6 +15,7 @@ const mark = (ok) => (ok ? 'pass' : '**FAIL**');
 export function renderMarkdown(report) {
   const out = [];
   out.push(`# QA report: ${report.verdict.toUpperCase()}`, '');
+  if (report.site) out.push(`- Site: \`sites/${report.site}\``);
   out.push(`- Run: \`${report.runId}\` (${report.durationMs} ms)`);
   out.push(
     `- Source: ${report.source.kind}${report.source.dist ? ` of \`${report.source.dist}\`` : ''}, ${report.pages.length} page(s)`,

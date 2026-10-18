@@ -11,13 +11,18 @@ npm ci            # install
 npm run dev       # dev server with hot reload
 npm run build     # static build into dist/
 npm run preview   # serve dist/
-npm run check     # type and Astro diagnostics
+npm run check     # type and Astro diagnostics (root starter)
+npm run check:sites   # the same for every site under sites/
 npm test          # unit and fixture tests (QA script, reference-analysis scripts, pattern validator)
 npm run validate:patterns  # check patterns/*.md (structure, no site content)
 npm run qa        # build + screenshots, overflow, reduced motion, Lighthouse, impeccable -> qa/latest/report.md
+npm run new-site -- <slug>        # scaffold sites/<slug>/ from the starter (then `npm install`)
+npm run qa -- --site <slug>       # full QA for one site -> qa/<slug>/latest/report.md
 npm run setup:agent   # install/verify Claude Code tooling (MCP config, design skills); idempotent
 npm run setup:verify  # fast offline check of that tooling
 ```
+
+Each landing lives in its own workspace under `sites/<slug>/` with its own build, QA and Cloudflare Pages project; see [sites/README.md](sites/README.md). The root is the starter demo and the template that `new-site` copies from.
 
 Agent rules and conventions: [CLAUDE.md](CLAUDE.md). Motion primitives: [src/components/motion/README.md](src/components/motion/README.md).
 
@@ -32,6 +37,10 @@ Every push is built and verified by [`.github/workflows/ci.yml`](.github/workflo
 | Pull request                | One comment with the preview URL, updated on every push            |
 
 Preview URLs look like `https://<branch-alias>.<project>.pages.dev`. Pages normalizes the branch name into the alias (lowercased, `/` and other characters replaced by `-`, long names truncated), so `change/add-cloudflare-preview-deploy` becomes something like `change-add-cloudflare-preview-deploy.landing-factory.pages.dev`. Each deployment also has its own `https://<hash>.<project>.pages.dev` URL. The PR comment and the job summary list both.
+
+### Sites
+
+Landings under `sites/<slug>/` use the same pipeline per site. The `sites` job lists the sites that changed in the push or pull request (or all of them when a shared file changed), and a matrix job per site runs `astro check` and `npm run qa -- --site <slug>`, then deploys `sites/<slug>/dist` to the Pages project named in `sites/<slug>/site.config.json` (created on the first deploy), with the same secrets gate. Each site gets its own preview URL and its own PR comment, and the QA report is uploaded as `qa-report-<slug>`. The Cloudflare token needs no extra permission: one Pages project is created per site.
 
 ### One-time setup
 
@@ -90,4 +99,4 @@ CLI: `npm i -g @fission-ai/openspec` · `openspec list` · `openspec show <chang
 | 4   | `add-cloudflare-preview-deploy` — per-branch previews gated by QA                                               | 2            | 1, 3             |
 | 5   | `add-analyze-reference-skill` — `/analyze-reference` URL → abstract pattern sheet in `patterns/`                | 2            | 1, 2             |
 | —   | **First manual run** (niche + references + landing built by hand)                                               | 2            | 1–5              |
-| 6   | `add-new-landing-skill` — `/new-landing` + `scripts/new-site.sh`, one command → landing                         | 3            | all of the above |
+| 6   | `add-new-landing-skill` — `/new-landing` + `scripts/new-landing.sh`, one command → landing                      | 3            | all of the above |

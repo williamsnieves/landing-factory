@@ -1,6 +1,11 @@
 @import 'tailwindcss';
 @import './tokens.css';
 
+/* Root-only (new-site strips these two rules): keep site workspaces and the
+ * scaffolder's page template out of the starter's utility scan. */
+@source not '../../sites';
+@source not '../../scripts';
+
 @layer base {
   html {
     background: var(--color-paper);
