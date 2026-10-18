@@ -4,7 +4,7 @@ Rules for any agent or person working in this repo. Keep this file current.
 
 ## Project
 
-landing-factory turns a niche into an original, near-Awwwards-quality Astro landing page, ready to deploy. Roadmap: `docs/roadmap.md`. The root is the starter demo and the template source; every generated landing lives in its own workspace under `sites/<slug>/` (see "Sites").
+landing-factory turns a niche into an original, near-Awwwards-quality Astro landing page, ready to deploy. Roadmap: `docs/roadmap.md`. Current state, next steps and working agreements: `docs/status.md` (read it first in a new or compacted session). The root is the starter demo and the template source; every generated landing lives in its own workspace under `sites/<slug>/` (see "Sites").
 
 ## Language
 
