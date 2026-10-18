@@ -3,22 +3,28 @@
  * Tailwind v4 turns every --color-*, --font-*, --text-*, --spacing and
  * --radius-* variable below into utilities (bg-primary, font-display, ...).
  * To retheme a site, edit only this file.
+ *
+ * Horno Lento (panaderia). Decisions and measured contrast ratios:
+ * design-system/panaderia/MASTER.md (ui-ux-pro-max). Keep both in sync.
  */
 @theme {
-  /* Colors */
-  --color-primary: #c2410c;
+  /* Colors. primary is the only action color (buttons, links, focus ring). */
+  --color-primary: #92400e;
+  --color-primary-hover: #7c2d12;
   --color-primary-contrast: #ffffff;
-  --color-accent: #f2b84b;
-  --color-ink: #14120f;
-  --color-ink-soft: #4a463f;
-  --color-paper: #faf7f2;
-  --color-surface: #f0ebe2;
-  --color-line: #d9d2c5;
+  --color-accent: #b45309; /* decorative only: strokes, marks, large shapes */
+  --color-ink: #2b1d14;
+  --color-ink-soft: #5c4838;
+  --color-paper: #faf5ec;
+  --color-surface: #efe4d0; /* sand panel tint */
+  --color-line: #d8c8ae; /* hairlines and dividers, never text */
 
-  /* Fonts (system stacks keep the starter free of font downloads) */
-  --font-display: ui-serif, Georgia, 'Times New Roman', serif;
+  /* Fonts (self-hosted variable fonts via @fontsource-variable, see global.css) */
+  --font-display:
+    'Fraunces Variable', ui-serif, Georgia, 'Times New Roman', serif;
   --font-sans:
-    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Roboto, sans-serif;
 
   /* Type scale */
   --text-xs: 0.8125rem;
@@ -26,16 +32,30 @@
   --text-base: 1.0625rem;
   --text-lg: 1.25rem;
   --text-xl: 1.625rem;
-  --text-2xl: 2.25rem;
-  --text-3xl: clamp(2.5rem, 5vw, 3.75rem);
-  --text-4xl: clamp(3rem, 9vw, 7rem);
+  --text-2xl: clamp(1.75rem, 3vw, 2.25rem);
+  --text-3xl: clamp(2.25rem, 4.5vw, 3.75rem); /* section headings */
+  --text-4xl: clamp(2.75rem, 8vw, 7rem); /* hero statement */
+  --text-manifesto: clamp(1.875rem, 4vw, 3.5rem); /* manifesto sentence */
+  --text-giant: clamp(8rem, 28vw, 30rem); /* outlined word "MASA MADRE" */
+  --text-wordmark: clamp(3rem, 15vw, 20rem); /* footer wordmark */
 
   /* Spacing base unit: p-4 = 1rem, p-24 = 6rem, ... */
   --spacing: 0.25rem;
+  --section-y: clamp(5rem, 12vw, 10rem); /* vertical rhythm between sections */
+  --gutter: clamp(1.25rem, 4vw, 3rem); /* page side padding */
 
-  /* Radii */
+  /* Radii. rounded-arch crops photos into an arch (round top, near-square base). */
   --radius-sm: 0.375rem;
   --radius-md: 0.75rem;
   --radius-lg: 1.5rem;
   --radius-pill: 999px;
+  --radius-arch: 999px 999px 0.75rem 0.75rem;
+
+  /* Motion (GSAP equivalents: ease-out-soft = expo.out, ease-in-out-soft = power3.inOut) */
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 180ms; /* hover, focus, press */
+  --duration-base: 320ms; /* header solid, small state changes */
+  --duration-reveal: 900ms; /* data-reveal fade and rise */
+  --duration-slow: 1400ms; /* hero statement stagger, pinned step change */
 }
