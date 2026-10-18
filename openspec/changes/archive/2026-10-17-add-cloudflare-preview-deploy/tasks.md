@@ -10,7 +10,7 @@
 
 - [ ] 2.1 Merge QA and deployment into `.github/workflows/ci.yml` (`qa` job uploads `dist/`, `deploy` job with `needs: qa`); verify a commit with failing QA does not deploy — PENDING: not yet exercised (secrets now present).
 - [x] 2.2 Deploy previews with `--branch` on PRs and production on `main`; verify this change's PR gets a preview URL that responds 200 — verified on PR #7/#8: preview URLs served; main deploy serves https://landing-factory-71t.pages.dev (HTTP 200).
-- [ ] 2.3 A single, updatable comment with the preview URL; verify with two pushes that only one comment exists — PENDING: not yet exercised (secrets now present).
+- [x] 2.3 A single, updatable comment with the preview URL; verify with two pushes that only one comment exists — verified on PR #9: the second push updated the same comment (same id) instead of creating a new one.
 - [x] 2.4 Clear message when secrets are missing or the source is a fork; verify by running without secrets (test branch) that the job fails/skips without exposing values — verified on PR #5: deploy job green with a "Deploy skipped" warning naming both secrets; log shows them empty, never their values.
 - [x] 2.5 Check with `curl -I` on the preview that `/_astro/*` carries `immutable` and pages carry the security headers — verified with curl -I on production: /_astro/* has max-age=31536000 immutable; pages have nosniff, referrer-policy, frame-ancestors CSP, permissions-policy.
 
