@@ -14,7 +14,7 @@
 
 - [x] 3.1 Implement `scripts/changed-sites.mjs` with unit tests covering: only one site changed, a shared path changed, no site changed; verify the tests pass
 - [x] 3.2 Add the `sites` and `site-qa-deploy` jobs to `ci.yml` per design decision 5 (secrets gate, project create, deploy, URL capture, per-site sticky comment); verify the YAML parses and passes `@action-validator/cli`
-- [ ] 3.3 Verify on this change's PR that the `panaderia` site job runs QA, deploys a preview to its own Pages project and posts its own comment, while the root starter jobs still pass
+- [x] 3.3 Verify on this change's PR that the `panaderia` site job runs QA, deploys a preview to its own Pages project and posts its own comment, while the root starter jobs still pass (verified on PR #10: `site panaderia` deployed to `panaderia-a3o` with its own sticky comment; all jobs green)
 
 ## 4. Docs and dependent change
 

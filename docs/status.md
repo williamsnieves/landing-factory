@@ -15,15 +15,14 @@ Read this first in a new or compacted session. Last updated: 2026-10-18.
 
 | Roadmap step | State |
 | --- | --- |
-| setup-astro-starter, setup-ai-tooling, add-qa-pipeline, add-cloudflare-preview-deploy, add-analyze-reference-skill, fix-recon-scroll-containers | Merged and archived |
+| setup-astro-starter, setup-ai-tooling, add-qa-pipeline, add-cloudflare-preview-deploy, add-analyze-reference-skill, fix-recon-scroll-containers, add-site-workspaces | Merged and archived |
 | Pilot step 1-2: bakery references analyzed, landing proposal approved | Merged (PR #9): `patterns/{sonomabakery,blackstarbakery,bernicebakery}-com.md`, `sites/panaderia/PROPOSAL.md` |
-| add-site-workspaces (model A: `sites/<slug>/`) | PR #10 open; archive it after merge |
-| Pilot step 3-6: build the bakery landing in `sites/panaderia/` | Next |
+| Pilot step 3-6: build the bakery landing in `sites/panaderia/` | In progress on `pilot/panaderia-build` |
 | add-new-landing-skill (`/new-landing`, one command per landing) | Planned, after the pilot; its plan already targets `sites/<slug>/` |
 
 ## Next steps (pilot)
 
-1. Archive `add-site-workspaces` on a new branch `pilot/panaderia-build`.
+1. ~~Archive `add-site-workspaces` on a new branch `pilot/panaderia-build`.~~ Done.
 2. Design system with ui-ux-pro-max: `design-system/panaderia/MASTER.md`, then `sites/panaderia/src/styles/tokens.css`.
 3. Build with taste-skill (art direction, openly licensed photos recorded in `sites/panaderia/CREDITS.md`) and the motion primitives; follow `sites/panaderia/PROPOSAL.md` (9 sections + 4b gluten-free block, Spanish copy, brand "Horno Lento", Barcelona). The giant scrubbed word needs a small new primitive (`data-marquee-scrub`).
 4. QA loop (`npm run qa -- --site panaderia`), impeccable critique/polish, PR with preview.
