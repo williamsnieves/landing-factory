@@ -14,6 +14,7 @@
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { chromiumProxyOption, reexecWithEnvProxy } from './proxy.mjs';
 
 export const VIEWPORTS = [
   { width: 375, height: 812 },
@@ -944,9 +945,79 @@ export function initHooks() {
   }
 }
 
+/**
+ * Pick the element that scrolls the page. Evaluated in the page (no closure over module scope).
+ * The document wins unless it is about one viewport tall; then the visible overflow-y:auto|scroll|overlay
+ * element covering at least 60% of the viewport with the largest scroll range is used. The element is kept
+ * in window.__reconScroller so scrollToY/getScrollY/snapshot act on the same scroller.
+ */
+export function detectScroller() {
+  const vh = innerHeight;
+  const doc = document.documentElement;
+  let best = null;
+  if (doc.scrollHeight > vh * 1.1) {
+    window.__reconScroller = null;
+  } else {
+    let range = 0;
+    for (const el of document.querySelectorAll('body, body *')) {
+      const cs = getComputedStyle(el);
+      if (!/^(auto|scroll|overlay)$/.test(cs.overflowY)) continue;
+      if (cs.display === 'none' || cs.visibility === 'hidden') continue;
+      const r = el.getBoundingClientRect();
+      if (r.width <= 0 || r.height <= 0) continue;
+      const visW = Math.min(r.right, innerWidth) - Math.max(r.left, 0);
+      const visH = Math.min(r.bottom, vh) - Math.max(r.top, 0);
+      if (visW * visH < innerWidth * vh * 0.6) continue;
+      const diff = el.scrollHeight - el.clientHeight;
+      if (diff > Math.max(vh * 0.1, 40) && diff > range) {
+        range = diff;
+        best = el;
+      }
+    }
+    window.__reconScroller = best;
+  }
+  const el = window.__reconScroller;
+  return el
+    ? {
+        kind: 'container',
+        scrollHeightPx: el.scrollHeight,
+        clientHeightPx: el.clientHeight,
+      }
+    : {
+        kind: 'document',
+        scrollHeightPx: doc.scrollHeight,
+        clientHeightPx: vh,
+      };
+}
+
+/** Scroll the chosen scroller (container or window) to y, without animation. */
+export function scrollToY(y) {
+  const el = window.__reconScroller;
+  if (el) el.scrollTop = y;
+  else window.scrollTo({ top: y, behavior: 'instant' });
+}
+
+export function getScrollY() {
+  const el = window.__reconScroller;
+  return Math.round(el ? el.scrollTop : scrollY);
+}
+
+/** Viewport center of the scroller, where wheel events should be dispatched. */
+export function scrollerCenter() {
+  const el = window.__reconScroller;
+  const r = el
+    ? el.getBoundingClientRect()
+    : { left: 0, top: 0, width: innerWidth, height: innerHeight };
+  const x = Math.max(0, r.left) + Math.min(r.width, innerWidth) / 2;
+  const y = Math.max(0, r.top) + Math.min(r.height, innerHeight) / 2;
+  return { x: Math.round(x), y: Math.round(y) };
+}
+
 export function collectStructure() {
   const vh = innerHeight;
-  const docH = document.documentElement.scrollHeight;
+  const sc = window.__reconScroller ?? null;
+  const docH = sc ? sc.scrollHeight : document.documentElement.scrollHeight;
+  const scrollNow = sc ? sc.scrollTop : scrollY;
   const SKIP = new Set([
     'SCRIPT',
     'STYLE',
@@ -959,7 +1030,7 @@ export function collectStructure() {
   const abs = (el) => {
     const r = el.getBoundingClientRect();
     return {
-      top: r.top + scrollY,
+      top: r.top + scrollNow,
       height: r.height,
       width: r.width,
       left: r.left,
@@ -1499,8 +1570,9 @@ export function compareEarly() {
 
 export function snapshot() {
   const els = window.__reconTrack ?? [];
+  const sc = window.__reconScroller;
   return {
-    scrollY: Math.round(scrollY),
+    scrollY: Math.round(sc ? sc.scrollTop : scrollY),
     items: els.map((el, i) => {
       const r = el.getBoundingClientRect();
       const cs = getComputedStyle(el);
@@ -1571,9 +1643,14 @@ export async function recon(url, options = {}) {
       throw new Error(
         `Chromium not found at ${chromePath}. Run \`npx playwright install chromium\` or set QA_CHROME_PATH / CHROME_PATH.`,
       );
-    browser = await chromium.launch(
-      envChrome ? { executablePath: envChrome } : {},
-    );
+    const proxy = chromiumProxyOption();
+    // Playwright otherwise forces loopback through the proxy, which breaks local servers.
+    if (proxy)
+      process.env.PLAYWRIGHT_DISABLE_FORCED_CHROMIUM_PROXIED_LOOPBACK ??= '1';
+    browser = await chromium.launch({
+      ...(envChrome ? { executablePath: envChrome } : {}),
+      ...(proxy ? { proxy } : {}),
+    });
     phaseDone('launch');
 
     const domains = new Map();
@@ -1630,6 +1707,7 @@ export async function recon(url, options = {}) {
     const finalUrl = page.url();
     phaseDone('load');
 
+    await page.evaluate(detectScroller);
     const structure = await page.evaluate(collectStructure);
     const loginPath =
       /\/(log-?in|sign-?in|sso|auth(?:orize)?|account\/login)(\/|$|\?)/i.test(
@@ -1679,12 +1757,15 @@ export async function recon(url, options = {}) {
     // --- the scroll pass (motion sampling + screenshots at 1440)
     const tracked = await page.evaluate(pickTracked);
     await wait(2200);
+    // lazy content may have changed the scrollable height since the static pass: detect again
+    const scroller = await page.evaluate(detectScroller);
+    result.viewports[main.width].docHeightPx = scroller.scrollHeightPx;
     const loadReveal = await page.evaluate(compareEarly);
 
     const frames = [];
     const positions = scrollPositions(
-      structure.docHeight,
-      main.height,
+      scroller.scrollHeightPx,
+      scroller.clientHeightPx,
       MAX_FRAMES,
       0.5,
     );
@@ -1692,10 +1773,7 @@ export async function recon(url, options = {}) {
     let shotN = 0;
     for (const [i, y] of positions.entries()) {
       if (Date.now() > deadline) break;
-      await page.evaluate(
-        (top) => window.scrollTo({ top, behavior: 'instant' }),
-        y,
-      );
+      await page.evaluate(scrollToY, y);
       await wait(90);
       frames.push({ ...(await page.evaluate(snapshot)), settled: false });
       await wait(650);
@@ -1722,15 +1800,16 @@ export async function recon(url, options = {}) {
     });
 
     // smooth-scroll (inertia) probe: a wheel tick should keep moving after the event if scroll is eased
-    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    await page.evaluate(scrollToY, 0);
     await wait(400);
-    await page.mouse.move(main.width / 2, main.height / 2);
+    const center = await page.evaluate(scrollerCenter);
+    await page.mouse.move(center.x, center.y);
     await page.mouse.wheel(0, 500);
     const wheel = [];
     let t0 = Date.now();
     for (const at of [40, 120, 250, 600]) {
       await wait(Math.max(0, at - (Date.now() - t0)));
-      wheel.push([at, await page.evaluate(() => Math.round(scrollY))]);
+      wheel.push([at, await page.evaluate(getScrollY)]);
     }
     const eased =
       wheel[3][1] - wheel[1][1] > 20 || wheel[2][1] - wheel[0][1] > 60;
@@ -1738,7 +1817,7 @@ export async function recon(url, options = {}) {
     await wait(1000);
     const rafPerSecond =
       (await page.evaluate(() => window.__recon?.raf ?? 0)) - rafBefore;
-    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    await page.evaluate(scrollToY, 0);
 
     const observations = analyzeMotion(frames, {
       viewportHeight: main.height,
@@ -1771,6 +1850,7 @@ export async function recon(url, options = {}) {
           .waitForLoadState('networkidle', { timeout: 5000 })
           .catch(() => {});
         await wait(400);
+        const sc = await p.evaluate(detectScroller);
         const m = await p.evaluate(() => ({
           docHeight: document.documentElement.scrollHeight,
           docWidth: document.documentElement.scrollWidth,
@@ -1782,18 +1862,19 @@ export async function recon(url, options = {}) {
           body: parseFloat(getComputedStyle(document.body).fontSize),
         }));
         result.viewports[vp.width] = {
-          docHeightPx: m.docHeight,
+          docHeightPx: sc.scrollHeightPx,
           h1Px: m.h1,
           bodyPx: m.body,
           horizontalOverflow: m.docWidth > vp.width + 1,
         };
-        const pos = scrollPositions(m.docHeight, vp.height, MAX_SCREENS);
+        const pos = scrollPositions(
+          sc.scrollHeightPx,
+          sc.clientHeightPx,
+          MAX_SCREENS,
+        );
         for (const [i, y] of pos.entries()) {
           if (Date.now() > deadline) break;
-          await p.evaluate(
-            (top) => window.scrollTo({ top, behavior: 'instant' }),
-            y,
-          );
+          await p.evaluate(scrollToY, y);
           await wait(450);
           const rel = `screens/${vp.width}-${i + 1}.png`;
           await p.screenshot({ path: join(dir, rel) });
@@ -1826,6 +1907,7 @@ export async function recon(url, options = {}) {
       title: structure.title,
       lang: structure.lang,
       viewports: result.viewports,
+      scroller,
       landmarks: structure.landmarks,
       sections: structureLite.sections,
       totalWords: structure.totalWords,
@@ -1937,7 +2019,8 @@ export async function main(argv, io = console) {
 
 if (
   process.argv[1] &&
-  resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+  resolve(process.argv[1]) === fileURLToPath(import.meta.url) &&
+  !reexecWithEnvProxy()
 ) {
   main(process.argv.slice(2)).then((code) => {
     process.exitCode = code;

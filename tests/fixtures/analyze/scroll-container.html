@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Scroll Container Fixture</title>
+    <style>
+      html,
+      body {
+        height: 100vh;
+        margin: 0;
+        overflow: hidden;
+        font-family: sans-serif;
+      }
+      #scroller {
+        height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+      .panel {
+        min-height: 100vh;
+        padding: 2rem;
+        box-sizing: border-box;
+      }
+      .panel:nth-child(odd) {
+        background: #eef;
+      }
+      .bar {
+        position: sticky;
+        top: 0;
+        padding: 0.75rem 2rem;
+        background: #222;
+        color: #fff;
+        z-index: 2;
+      }
+      .reveal {
+        opacity: 0;
+        transform: translateY(40px);
+        transition:
+          opacity 0.5s ease,
+          transform 0.5s ease;
+      }
+      .reveal.in {
+        opacity: 1;
+        transform: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="scroller">
+      <div class="bar">Sticky bar</div>
+      <main>
+        <section class="panel" id="p1">
+          <h2>Panel 1</h2>
+          <p class="reveal" data-reveal>
+            Reveal block number 1 inside the scroller.
+          </p>
+        </section>
+        <section class="panel" id="p2">
+          <h2>Panel 2</h2>
+          <p class="reveal" data-reveal>
+            Reveal block number 2 inside the scroller.
+          </p>
+        </section>
+        <section class="panel" id="p3">
+          <h2>Panel 3</h2>
+          <p class="reveal" data-reveal>
+            Reveal block number 3 inside the scroller.
+          </p>
+        </section>
+        <section class="panel" id="p4">
+          <h2>Panel 4</h2>
+          <p class="reveal" data-reveal>
+            Reveal block number 4 inside the scroller.
+          </p>
+        </section>
+        <section class="panel" id="p5">
+          <h2>Panel 5</h2>
+          <p class="reveal" data-reveal>
+            Reveal block number 5 inside the scroller.
+          </p>
+        </section>
+      </main>
+    </div>
+    <script>
+      const root = document.getElementById('scroller');
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries)
+            if (e.isIntersecting) {
+              e.target.classList.add('in');
+              io.unobserve(e.target);
+            }
+        },
+        { root, threshold: 0.2 },
+      );
+      document
+        .querySelectorAll('[data-reveal]')
+        .forEach((el) => io.observe(el));
+    </script>
+  </body>
+</html>

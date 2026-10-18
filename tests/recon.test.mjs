@@ -295,6 +295,11 @@ describe('recon in Chromium', { concurrency: false }, () => {
 
       assert.equal(output.title, 'Fixture Reference Page');
       assert.equal(output.access.status, 'ok');
+      assert.equal(output.scroller.kind, 'document');
+      assert.equal(
+        output.viewports[1440].docHeightPx,
+        output.scroller.scrollHeightPx,
+      );
       assert.ok(
         output.sections.length >= 4,
         `sections: ${output.sections.length}`,
@@ -384,6 +389,51 @@ describe('recon in Chromium', { concurrency: false }, () => {
   );
 
   test(
+    'inner scroll container: screenshots cover the wrapper, motion is sampled, scroller is recorded',
+    { timeout: 180000 },
+    async () => {
+      const outRoot = mkdtempSync(join(out, 'sc-'));
+      const { output, dir } = await recon(
+        `${fx.baseUrl}/scroll-container.html`,
+        {
+          slug: 'scroll-container',
+          outRoot,
+        },
+      );
+      // 5 panels of one viewport plus a sticky bar: the document itself is one viewport tall.
+      assert.equal(output.scroller.kind, 'container');
+      assert.ok(output.scroller.scrollHeightPx >= 4.5 * 900);
+      assert.equal(output.scroller.clientHeightPx, 900);
+      assert.equal(
+        output.viewports[1440].docHeightPx,
+        output.scroller.scrollHeightPx,
+      );
+      for (const w of [375, 768, 1440]) {
+        const shots = output.screenshots.filter((x) =>
+          x.startsWith(`screens/${w}-`),
+        );
+        assert.ok(shots.length >= 5, `${w}px: ${shots.length} screenshots`);
+        assert.ok(
+          output.viewports[w].docHeightPx >
+            3 * VIEWPORTS.find((v) => v.width === w).height,
+        );
+      }
+      assert.ok(output.motion.framesSampled >= 8);
+      const kinds = output.motion.observations.map(
+        (o) => `${o.kind}:${o.trigger}`,
+      );
+      assert.ok(kinds.includes('reveal:scroll'), kinds.join());
+      assert.equal(output.motion.smoothScroll.easedWheelScroll, false);
+      assert.ok(
+        output.motion.smoothScroll.wheelSamples.at(-1).scrollY > 0,
+        'the wheel probe reached the inner scroller',
+      );
+      cleanup('scroll-container', outRoot);
+      assert.equal(existsSync(dir), false);
+    },
+  );
+
+  test(
     "the starter's own built demo: Lenis, pinned section, reveal and parallax",
     { timeout: 180000 },
     async () => {
@@ -403,6 +453,7 @@ describe('recon in Chromium', { concurrency: false }, () => {
       assert.ok(kinds.includes('reveal:scroll'), kinds.join());
       assert.ok(kinds.includes('parallax:scroll'), kinds.join());
       assert.equal(output.title, 'Landing Factory Starter');
+      assert.equal(output.scroller.kind, 'document');
       assert.ok(output.sections.length >= 4);
       assert.ok(
         !/Motion that respects/.test(
