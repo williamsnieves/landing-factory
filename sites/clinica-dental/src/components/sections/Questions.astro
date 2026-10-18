@@ -1,0 +1,95 @@
+---
+const items = [
+  {
+    q: '¿Me va a doler?',
+    a: 'No podemos prometerte cómo lo vas a sentir, porque cada persona es distinta. Lo que sí hacemos es explicarte cada paso antes de darlo, avisarte de lo que vas a notar y parar cuando nos lo pidas. Si te preocupa, cuéntanoslo al pedir cita.',
+  },
+  {
+    q: 'Me pongo muy nervioso. ¿Qué puedo hacer?',
+    a: 'Dínoslo desde el principio. Podemos acordar una señal para hacer una pausa, ir poco a poco y, si lo prefieres, venir primero solo a conocer la clínica y hablar. Nadie va a meterte prisa.',
+  },
+  {
+    q: '¿Cuánto cuesta y cómo se paga?',
+    a: 'Depende de lo que necesites, y solo podemos decirlo después de mirarte. Pregúntanos por las formas de pago cuando pidas cita y te lo explicamos con claridad.',
+  },
+  {
+    q: '¿Y si tengo una urgencia?',
+    a: 'Llámanos por teléfono y te decimos cómo podemos ayudarte. Si crees que es algo grave, llama al 112.',
+  },
+  {
+    q: '¿Qué pasa en la primera visita?',
+    a: 'Hablamos, miramos tu boca con calma, te explicamos lo que vemos y decides tú. Tienes los cuatro pasos más arriba, en el apartado de la primera visita.',
+  },
+];
+---
+
+<section
+  id="preguntas"
+  aria-labelledby="preguntas-title"
+  class="scroll-mt-16 px-(--gutter) pb-(--section-y)"
+>
+  <div class="mx-auto grid max-w-[90rem] gap-10 lg:grid-cols-12 lg:gap-16">
+    <div class="lg:col-span-4">
+      <h2
+        id="preguntas-title"
+        data-reveal
+        class="font-display text-3xl font-medium text-balance"
+      >
+        Lo que suele preocupar
+      </h2>
+      <p
+        data-reveal
+        data-reveal-delay="0.1"
+        class="text-ink-soft mt-5 max-w-[34ch]"
+      >
+        Respuestas cortas y sinceras. Si te queda alguna duda, pregúntanos.
+      </p>
+    </div>
+    <div class="lg:col-span-8">
+      {items.map((item) => (
+        <details
+          data-reveal
+          class="faq border-line group border-b first:border-t"
+        >
+          <summary class="font-display flex min-h-14 cursor-pointer list-none items-center justify-between gap-6 py-4 text-xl font-semibold">
+            <span>{item.q}</span>
+            <span
+              class="faq-mark bg-surface relative size-8 shrink-0 rounded-full"
+              aria-hidden="true"
+            />
+          </summary>
+          <p class="max-w-[62ch] pb-6 text-lg">{item.a}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq-mark::before,
+  .faq-mark::after {
+    content: '';
+    position: absolute;
+    inset: 50% 0.5rem auto;
+    height: 2px;
+    margin-top: -1px;
+    background: var(--color-primary);
+    border-radius: 2px;
+    transition: transform var(--duration-base) var(--ease-in-out-soft);
+  }
+  .faq-mark::after {
+    transform: rotate(90deg);
+  }
+  .faq[open] .faq-mark::after {
+    transform: rotate(0deg);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .faq-mark::before,
+    .faq-mark::after {
+      transition: none;
+    }
+  }
+</style>

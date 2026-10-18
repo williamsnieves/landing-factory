@@ -1,0 +1,81 @@
+{
+  "images": [
+    {
+      "file": "implantes.jpg",
+      "title": "File:Implant retained bridge model.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Implant_retained_bridge_model.jpg",
+      "author": "Ian Furst",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "credit": true,
+      "retrievedAt": "2026-10-18T17:46:44.132Z",
+      "note": "Dental implant bridge model, implants card"
+    },
+    {
+      "file": "hero.jpg",
+      "title": "File:Wicker plant and big window (Unsplash).jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Wicker_plant_and_big_window_(Unsplash).jpg",
+      "author": "Amanda Mocci amandamocci",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "credit": false,
+      "retrievedAt": "2026-10-18T18:00:13.117Z",
+      "note": "Bright room with plant and large window, hero"
+    },
+    {
+      "file": "azahar.jpg",
+      "title": "File:Orange Blossom.JPG",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Orange_Blossom.JPG",
+      "author": "Alexander Hardin",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+      "credit": true,
+      "retrievedAt": "2026-10-18T18:00:56.269Z",
+      "note": "Orange blossom, clinic strip"
+    },
+    {
+      "file": "higiene.jpg",
+      "title": "File:Toothbrush x3 20050716 002.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Toothbrush_x3_20050716_002.jpg",
+      "author": "Jonas Bergsten",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "credit": false,
+      "retrievedAt": "2026-10-18T18:08:04.392Z",
+      "note": "Toothbrushes, hygiene card"
+    },
+    {
+      "file": "aligners.jpg",
+      "title": "File:Invisalign.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Invisalign.jpg",
+      "author": "Kinseikun",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": true,
+      "retrievedAt": "2026-10-18T18:12:05.684Z",
+      "note": "Clear aligner trays, orthodontics card"
+    },
+    {
+      "file": "general.jpg",
+      "title": "File:Dental Explorer 11-12.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Dental_Explorer_11-12.jpg",
+      "author": "Toothscraper",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": true,
+      "retrievedAt": "2026-10-18T18:13:02.885Z",
+      "note": "Dental explorer instrument, general card"
+    },
+    {
+      "file": "waiting.jpg",
+      "title": "File:Doctor office waiting room.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Doctor_office_waiting_room.jpg",
+      "author": "Kurt Kaiser",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "credit": false,
+      "retrievedAt": "2026-10-18T18:13:35.662Z",
+      "note": "Waiting room, first visit and clinic strip"
+    }
+  ]
+}

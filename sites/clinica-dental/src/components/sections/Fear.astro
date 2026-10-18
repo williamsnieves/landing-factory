@@ -1,0 +1,48 @@
+---
+const promises = [
+  {
+    title: 'Te lo explicamos antes',
+    text: 'Qué vamos a mirar y para qué, con palabras normales y sin prisa.',
+  },
+  {
+    title: 'Paramos cuando quieras',
+    text: 'Levantas la mano y nos detenemos. Sin explicaciones y sin mala cara.',
+  },
+  {
+    title: 'Vamos a tu ritmo',
+    text: 'Si hoy solo quieres conocer la clínica y charlar un rato, también vale.',
+  },
+];
+---
+
+<section
+  id="miedo"
+  aria-labelledby="miedo-title"
+  class="px-(--gutter) py-(--section-y)"
+>
+  <div class="bg-surface rounded-frame mx-auto max-w-[90rem] px-6 py-14 sm:px-12 md:py-20 lg:px-20">
+    <h2
+      id="miedo-title"
+      data-reveal
+      class="font-display text-fear max-w-[22ch] font-medium text-balance"
+    >
+      Si te da miedo ir al dentista, no eres el único.
+    </h2>
+    <p data-reveal data-reveal-delay="0.1" class="mt-6 max-w-[54ch] text-lg">
+      Mucha gente aplaza la cita porque no sabe qué va a pasar. Aquí empezamos
+      por contártelo.
+    </p>
+    <ul class="mt-12 grid list-none gap-8 p-0 md:mt-16 md:grid-cols-3 md:gap-10">
+      {promises.map((p, i) => (
+        <li data-reveal data-reveal-delay={String(0.1 * i)}>
+          <span
+            class="bg-accent mb-4 block h-1 w-8 rounded-full"
+            aria-hidden="true"
+          />
+          <h3 class="font-display text-xl font-semibold">{p.title}</h3>
+          <p class="text-ink-soft mt-2 max-w-[34ch]">{p.text}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

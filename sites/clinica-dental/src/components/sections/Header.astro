@@ -1,0 +1,51 @@
+---
+import { site } from '../../data/site';
+
+const links = [
+  ['#tratamientos', 'Tratamientos'],
+  ['#primera-visita', 'La primera visita'],
+  ['#preguntas', 'Preguntas'],
+];
+---
+
+<header
+  id="site-header"
+  class="bg-paper text-ink border-line sticky top-0 z-40 border-b"
+>
+  <div class="mx-auto flex max-w-[90rem] items-center justify-between gap-4 px-(--gutter) py-2">
+    <a
+      href="#top"
+      class="font-display flex min-h-11 items-center gap-2 text-xl font-semibold tracking-tight"
+      aria-label={`${site.name}, inicio`}
+    >
+      <span class="bg-accent size-2 rounded-full" aria-hidden="true"></span>
+      {site.name}
+    </a>
+    <nav aria-label="Principal" class="flex items-center gap-2 sm:gap-4">
+      <ul class="hidden items-center gap-1 lg:flex">
+        {links.map(([href, label]) => (
+          <li>
+            <a
+              href={href}
+              class="flex min-h-11 items-center px-3 text-sm font-medium underline-offset-4 hover:underline"
+            >
+              {label}
+            </a>
+          </li>
+        ))}
+      </ul>
+      <a
+        href={site.phoneHref}
+        class="text-primary hidden min-h-11 items-center px-2 text-sm font-medium underline-offset-4 hover:underline md:flex"
+      >
+        {site.phone}
+      </a>
+      <a
+        href="#pedir-cita"
+        class="bg-primary text-primary-contrast rounded-pill hover:bg-primary-hover inline-flex min-h-11 items-center px-5 text-sm font-semibold transition-colors duration-(--duration-fast)"
+      >
+        Pedir cita
+      </a>
+    </nav>
+  </div>
+</header>

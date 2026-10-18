@@ -1,0 +1,53 @@
+---
+import { getImage } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Motion from '../components/motion/Motion.astro';
+import Header from '../components/sections/Header.astro';
+import Hero from '../components/sections/Hero.astro';
+import Fear from '../components/sections/Fear.astro';
+import Treatments from '../components/sections/Treatments.astro';
+import FirstVisit from '../components/sections/FirstVisit.astro';
+import Calm from '../components/sections/Calm.astro';
+import Clinic from '../components/sections/Clinic.astro';
+import Questions from '../components/sections/Questions.astro';
+import Appointment from '../components/sections/Appointment.astro';
+import Footer from '../components/sections/Footer.astro';
+import { heroWidths, images } from '../data/images';
+
+const title = 'Dental Azahar · Clínica dental de barrio en Valencia';
+const description =
+  'Clínica dental pequeña en Valencia: odontología general, higiene, ortodoncia invisible e implantes. Te explicamos cada paso y vamos a tu ritmo. Pide cita.';
+
+// Preload the hero photo (AVIF) with the same widths the <Picture> uses.
+const heroSet = await Promise.all(
+  heroWidths.map((width) =>
+    getImage({ src: images.hero.src, format: 'avif', width }),
+  ),
+);
+const heroSrcset = heroSet
+  .map((img, i) => `${img.src} ${heroWidths[i]}w`)
+  .join(', ');
+---
+
+<BaseLayout title={title} description={description} lang="es">
+  <link
+    slot="head"
+    rel="preload"
+    as="image"
+    type="image/avif"
+    imagesrcset={heroSrcset}
+    imagesizes="(min-width: 1024px) 46vw, 92vw"
+    fetchpriority="high"
+  />
+  <Motion slot="head" smooth />
+  <Header slot="header" />
+  <Hero />
+  <Fear />
+  <Treatments />
+  <FirstVisit />
+  <Calm />
+  <Clinic />
+  <Questions />
+  <Appointment />
+  <Footer slot="footer" />
+</BaseLayout>
