@@ -25,7 +25,7 @@
 
 ## 3. MVP validation
 
-- [ ] 3.1 Generate `sites/clinica-dental` with a single `scripts/new-landing.sh clinica-dental --niche "..." --auto` command and verify it passes site QA and `check-landing` with no touch-ups, and its preview deploys on the PR
+- [x] 3.1 Generate `sites/clinica-dental` with a single `scripts/new-landing.sh clinica-dental --niche "..." --auto` command and verify it passes site QA and `check-landing` with no touch-ups, and its preview deploys on the PR (verified: one `--auto` run, QA passed on attempt 1, `check-landing` passed, preview deployed on PR #12 to the new Pages project `clinica-dental-9pd`)
 - [x] 3.2 Document the flow in `README.md`, `CLAUDE.md`, `sites/README.md`, `scripts/README.md` and `docs/status.md`; verify a user can follow it end to end (README, CLAUDE.md, sites/README.md, scripts/README.md and docs/status.md updated)
 - [x] 3.3 Record in `docs/status.md` the follow-up pilot: three different niches with `new-landing.sh --auto`, checked for diversity (roadmap MVP check) (docs/status.md "Next")
 
