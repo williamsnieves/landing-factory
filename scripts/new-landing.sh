@@ -132,6 +132,17 @@ PROMPT+=" --max-attempts $MAX_ATTEMPTS --lang $LANG_TAG"
 CLAUDE_ARGS=(-p "$PROMPT" --permission-mode acceptEdits)
 [ -z "$MODEL" ] || CLAUDE_ARGS+=(--model "$MODEL")
 
+# Headless runs ignore a project's settings.json allow list until the folder is trusted
+# interactively, so pass the same reviewed list explicitly (plus the skill and subagent tools).
+ALLOWED_TOOLS="$(node -e '
+  const s = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+  const allow = (s.permissions && s.permissions.allow) || [];
+  process.stdout.write([...allow, "Skill", "Agent"].join("\n"));
+' "$ROOT/.claude/settings.json")"
+while IFS= read -r tool; do
+  [ -z "$tool" ] || CLAUDE_ARGS+=(--allowedTools "$tool")
+done <<< "$ALLOWED_TOOLS"
+
 LOG="$SITE_DIR/.run.log"
 mkdir -p "$SITE_DIR"
 {

@@ -160,7 +160,8 @@ test('--dry-run scaffolds the site with its templates, then runs claude with the
     readFileSync(join(siteDir, 'src/pages/index.astro'), 'utf8'),
     /const lang = 'es';/,
   );
-  assert.deepEqual(recorded(), [
+  const args = recorded();
+  assert.deepEqual(args.slice(0, 6), [
     '-p',
     `/new-landing ${slug} --niche "a \\"quoted\\" niche" --refs sonomabakery-com --dry-run --max-attempts 3 --lang es`,
     '--permission-mode',
@@ -168,6 +169,16 @@ test('--dry-run scaffolds the site with its templates, then runs claude with the
     '--model',
     'sonnet-test',
   ]);
+  // The rest passes the reviewed allow list of .claude/settings.json (headless runs
+  // ignore it in an untrusted folder), plus the skill and subagent tools.
+  const settings = JSON.parse(
+    readFileSync(join(ROOT, '.claude/settings.json'), 'utf8'),
+  );
+  const expected = [...settings.permissions.allow, 'Skill', 'Agent'];
+  assert.deepEqual(
+    args.slice(6),
+    expected.flatMap((tool) => ['--allowedTools', tool]),
+  );
   // Output is logged next to the site.
   const log = readFileSync(join(siteDir, '.run.log'), 'utf8');
   assert.match(log, /new-landing\.sh zz-nl-/);
