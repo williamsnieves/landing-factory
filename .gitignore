@@ -12,3 +12,6 @@ npm-debug.log*
 .idea/
 test-results/
 playwright-report/
+
+# Python bytecode (from running vendored skill scripts)
+__pycache__/
