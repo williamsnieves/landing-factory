@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-18 (add-new-landing-skill).
+Read this first in a new or compacted session. Last updated: 2026-10-21 (add-design-archetypes, three-niche pilot in progress).
 
 ## Working agreements
 
@@ -20,7 +20,34 @@ Read this first in a new or compacted session. Last updated: 2026-10-18 (add-new
 | Pilot step 3-6: build the bakery landing in `sites/panaderia/` | Merged (PR #11), production https://panaderia-a3o.pages.dev; lessons in `docs/pilot-panaderia-lessons.md` |
 | add-new-landing-skill (`/new-landing`, one command per landing) | Merged (PR #12) and archived; `sites/clinica-dental` in production at https://clinica-dental-9pd.pages.dev |
 | add-3d-scenes (opt-in Three.js scenes, 3D QA budgets, Met images), validated with `sites/samurai` | Merged (PR #13) and archived; production https://samurai-1v4.pages.dev |
-| Product plan (`docs/product-plan.md`): archetypes, intake, report, deploy adapters, agent interface, 3D models | Agreed 2026-10-21; step 1 `add-design-archetypes` in progress: catalog, validator, `pick-archetypes`, `layout-signature` and the `layout-diversity` rule are implemented (tasks 1 to 3); the three-niche pilot (task 4) is next |
+| Product plan (`docs/product-plan.md`): archetypes, intake, report, deploy adapters, agent interface, 3D models | Agreed 2026-10-21; step 1 `add-design-archetypes` in progress on branch `change/add-design-archetypes` (no PR yet): tasks 1 to 3 implemented and pushed; task 4 (three-niche pilot) running, see "Resume here" |
+
+## Resume here (2026-10-21)
+
+Branch `change/add-design-archetypes`, pushed up to the allow-list fix (font install with `--no-audit --no-fund` first). Not committed yet, on purpose: the pilot sites and `package-lock.json` (commit them together once all three runs finish).
+
+Three-niche pilot (task 4.1), one `npm run new-landing -- <slug> --niche "..." --auto --model sonnet` each, niches chosen by the owner's pick of my proposal:
+
+| Site | State | Blend (`landing-meta`) |
+| --- | --- | --- |
+| `festival-electronica` ("Taller 303", Bilbao) | passed, QA on the first run; reviewed: brutalist poster, neon lime on black, mono type, point-floor 3D scene | `brutalist-raw+typographic-poster` (marquee-type, giant-numerals) |
+| `app-finanzas` ("Trazo") | passed, QA after 2 fix rounds; reviewed: UI screens drawn in code, privacy table, plan comparison, no photos | `data-and-proof+swiss-grid-minimal` (split-sticky, flush-left-axis) |
+| `estudio-arquitectura` (Madrid) | first run stopped at the design-system phase (font install refused by the allow list; fixed in commit 0b69332). Regenerating from scratch; log in the session scratchpad, site log in `sites/estudio-arquitectura/.run.log` | first run chose `swiss-grid-minimal+bento-product-showcase` |
+
+If the session was compacted or the run was lost: check `sites/estudio-arquitectura/RUN.md` (`Result:`). If it is not `passed`, delete `sites/estudio-arquitectura` and `design-system/estudio-arquitectura`, run `npm install`, and rerun the command above with the same niche ("Estudio de arquitectura pequeño en Madrid especializado en rehabilitación de vivienda y espacios de trabajo; tono sobrio, preciso y culto; quiere mostrar 4-6 proyectos con planos y fotos, su método de trabajo y conseguir contactos para encargos; público: particulares con presupuesto medio-alto y pequeñas empresas").
+
+Then:
+
+1. For each new site: `node scripts/layout-signature.mjs --site <slug> --write` (if the run did not), `node scripts/check-landing.mjs --site <slug>`, and review `qa/<slug>/sections/*.png`. Record the pairwise layout distances of all six sites in tasks.md 4.1/4.2.
+2. Commit the three sites, their `design-system/<slug>/` and `package-lock.json`; run the full checks in a clean clone; open the PR (title `add-design-archetypes: ...`) with the three previews; check off 4.1; 4.2 waits for the owner's review of the previews.
+3. After merge and the owner's go-ahead: archive `add-design-archetypes` as the first commit of `change/add-brief-intake`.
+
+## Owner decisions to keep (2026-10-21)
+
+- Archetypes are only a base: blends are driven by the requirement and the references; reference-led (`custom`) landings are allowed; deviations are logged, never failed.
+- One landing per repository, introduced gradually: monorepo now, then an export command, then generation straight into a repository, then product storage (`docs/product-plan.md`).
+- 3D models later may come from generators such as Meshy, purchases, open licenses or the customer's own files (for example a Drive link in the brief).
+- First real customer test: the owner's own landing to promote their digital products, after `add-design-archetypes` and `add-brief-intake`.
 
 ## How to generate a landing
 
@@ -62,7 +89,7 @@ Small fixes pending: panaderia process heading covered at 375 px; `new-landing.s
 
 ## Environment facts
 
-- Cloudflare Pages projects (names got a suffix because the base names were taken): starter `landing-factory-71t` (https://landing-factory-71t.pages.dev), bakery `panaderia-a3o` (https://panaderia-a3o.pages.dev), dental clinic `clinica-dental-9pd` (https://clinica-dental-9pd.pages.dev). CI creates a new site's project on its first deploy. Preview aliases: `https://<branch-alias>.<project>.pages.dev`.
+- Cloudflare Pages projects (names got a suffix because the base names were taken): starter `landing-factory-71t` (https://landing-factory-71t.pages.dev), bakery `panaderia-a3o` (https://panaderia-a3o.pages.dev), dental clinic `clinica-dental-9pd` (https://clinica-dental-9pd.pages.dev), samurai `samurai-1v4` (https://samurai-1v4.pages.dev). A new project's TLS certificate takes a few minutes after its first deploy (browsers show ERR_SSL_VERSION_OR_CIPHER_MISMATCH meanwhile). CI creates a new site's project on its first deploy. Preview aliases: `https://<branch-alias>.<project>.pages.dev`.
 - GitHub secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are repository secrets (not environment secrets).
-- Cloud session network: allowed domains include the three bakery sites, their CDNs (`cdn.sanity.io`, `cdnjs.cloudflare.com`, `unpkg.com`, `use.typekit.net`, `cdn.shopify.com`) and `*.pages.dev`. New reference sites need their domains added by the user.
+- Cloud session network: allowed domains include the three bakery sites, their CDNs (`cdn.sanity.io`, `cdnjs.cloudflare.com`, `unpkg.com`, `use.typekit.net`, `cdn.shopify.com`) and `*.pages.dev`, plus `crazy.studio`, `experience2026.funtech.inc`, `collectionapi.metmuseum.org`, `images.metmuseum.org`, `api.artic.edu`, `www.artic.edu`, Commons and Unsplash hosts. The Art Institute of Chicago image host answers with a bot challenge (never bypassed; source dropped). The Met search API moved to `/public/collection/v1.1/search` on 2026-10-01. New reference sites need their domains added by the user.
 - Chromium for Playwright: `/opt/pw-browsers/chromium-1194/chrome-linux/chrome` (matches the pinned `playwright@1.56.1`).
