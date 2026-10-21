@@ -18,6 +18,7 @@ npm run validate:patterns  # check patterns/*.md (structure, no site content)
 npm run qa        # build + screenshots, overflow, reduced motion, Lighthouse, impeccable -> qa/latest/report.md
 npm run new-site -- <slug>        # scaffold sites/<slug>/ from the starter (then `npm install`)
 npm run qa -- --site <slug>       # full QA for one site -> qa/<slug>/latest/report.md
+npm run new-landing -- <slug> --niche "..."  # generate a whole landing with Claude (see "Generating a landing")
 npm run setup:agent   # install/verify Claude Code tooling (MCP config, design skills); idempotent
 npm run setup:verify  # fast offline check of that tooling
 ```
@@ -61,6 +62,23 @@ The `deploy` job still runs but skips every deploy step: it emits a `::warning::
 ### Headers
 
 [`public/_headers`](public/_headers) is copied to `dist/_headers` by the build. It serves `/_astro/*` with `Cache-Control: public, max-age=31536000, immutable` and every response with `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Content-Security-Policy: frame-ancestors 'self'` and a minimal `Permissions-Policy`.
+
+## Generating a landing
+
+One command turns a niche into a site in `sites/<slug>/`: preflight, scaffold, then the [`/new-landing`](.claude/skills/new-landing/SKILL.md) skill through `claude -p` (brief, proposal, design system, build, QA loop, polish, final check). Run it from a terminal or a Claude session, not from GitHub Actions.
+
+```bash
+# 1. Proposal only: stops at the checkpoint so you can review sites/<slug>/PROPOSAL.md
+scripts/new-landing.sh clinica-dental --niche "private dental clinic in Valencia" --refs sonomabakery-com
+# 2. Continue after the review: design system, build, QA until it passes, polish, final check
+scripts/new-landing.sh clinica-dental --niche "private dental clinic in Valencia" --resume --auto
+# Everything unattended in one go:
+scripts/new-landing.sh clinica-dental --niche "..." --auto [--max-attempts 5] [--model <id>]
+# Check the setup cheaply: proposal + design system only
+scripts/new-landing.sh clinica-dental --niche "..." --dry-run
+```
+
+The run leaves `sites/<slug>/RUN.md` (inputs, phase times, QA attempts, decisions, what to confirm before launch) and a git-ignored `.run.log`. Afterwards review the diff, commit and open a PR; CI builds, checks and deploys the preview. Helper scripts, each with `--help`: `npm run preflight` (hosts, Chromium, free slug), `npm run find-images` (licensed Commons photos into `assets.json`), `npm run credits -- --site <slug>` (CREDITS.md and footer credits), `npm run check-landing -- --site <slug>` (credits, photo reuse, tokens, diversity, copy originality). See [scripts/README.md](scripts/README.md).
 
 ## Analyzing reference sites
 

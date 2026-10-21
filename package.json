@@ -23,6 +23,12 @@
     "validate:patterns": "node scripts/validate-pattern.mjs",
     "qa": "node scripts/qa.mjs",
     "new-site": "node scripts/new-site.mjs",
+    "new-landing": "bash scripts/new-landing.sh",
+    "preflight": "node scripts/preflight.mjs",
+    "find-images": "node scripts/find-images.mjs",
+    "credits": "node scripts/credits.mjs",
+    "section-shots": "node scripts/section-shots.mjs",
+    "check-landing": "node scripts/check-landing.mjs",
     "test": "node --test \"tests/**/*.test.mjs\""
   },
   "dependencies": {

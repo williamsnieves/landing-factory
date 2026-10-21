@@ -1,0 +1,6 @@
+{
+  "cloudflare": {
+    "pagesProject": "clinica-dental",
+    "productionBranch": "main"
+  }
+}

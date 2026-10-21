@@ -1,3 +1,4 @@
+import creditsData from './credits.json';
 import slices from '../assets/images/slices.jpg';
 import starter from '../assets/images/starter.jpg';
 import dough from '../assets/images/dough.jpg';
@@ -134,51 +135,6 @@ export const products: Product[] = [
   },
 ];
 
-/** Photos under CC BY (credit required). CC0 photos are listed in CREDITS.md only. */
-export const credits: { author: string; license: string; url: string }[] = [
-  {
-    author: 'Angel Ganev',
-    license: 'CC BY 2.0',
-    url: 'https://commons.wikimedia.org/wiki/File:Slices_of_sourdough_bread.jpg',
-  },
-  {
-    author: 'Janus Sandsgaard',
-    license: 'CC BY 4.0',
-    url: 'https://commons.wikimedia.org/wiki/File:Sourdough.jpg',
-  },
-  {
-    author: 'Chris Rycroft',
-    license: 'CC BY 2.0',
-    url: 'https://commons.wikimedia.org/wiki/File:Pastries_on_display.jpg',
-  },
-  {
-    author: 'Murdockcrc',
-    license: 'CC BY 3.0',
-    url: 'https://commons.wikimedia.org/wiki/File:Swiss_Bread_LCD.jpg',
-  },
-  {
-    author: 'inra.dist',
-    license: 'CC BY 2.0',
-    url: 'https://commons.wikimedia.org/wiki/File:Boulangerie(fabric.baguette_bio)_Cl_J_Weber01.jpg',
-  },
-  {
-    author: 'Souleymane DIARRA',
-    license: 'CC BY 4.0',
-    url: 'https://commons.wikimedia.org/wiki/File:Boulangerie_traditionnelle.jpg',
-  },
-  {
-    author: 'Shixart1985',
-    license: 'CC BY 2.0',
-    url: 'https://commons.wikimedia.org/wiki/File:Baker_woman%27s_hands_kneading_bread_dough.jpg',
-  },
-  {
-    author: 'Keith Williamson',
-    license: 'CC BY 2.0',
-    url: 'https://commons.wikimedia.org/wiki/File:Detalle_de_la_cruz_de_una_Tarta_de_Santiago.jpg',
-  },
-  {
-    author: 'Ella Olsson',
-    license: 'CC BY 2.0',
-    url: 'https://commons.wikimedia.org/wiki/File:Orange_almond_cake_(48839116778).jpg',
-  },
-];
+/** Photos under CC BY (credit required) shown in the footer; CC0 photos are listed in CREDITS.md only. Generated from assets.json by `node scripts/credits.mjs --site panaderia`. */
+export const credits: { author: string; license: string; url: string }[] =
+  creditsData;

@@ -1,0 +1,151 @@
+---
+import { Picture } from 'astro:assets';
+import { images, photoStyle } from '../../data/images';
+
+const steps = [
+  {
+    title: 'Hablamos',
+    text: 'Nos cuentas por qué vienes, qué te preocupa y qué esperas. Sin formularios eternos y sin juicios.',
+    photo: images.stepTalk,
+  },
+  {
+    title: 'Revisamos',
+    text: 'Miramos tu boca con calma y te avisamos antes de cada gesto. Si necesitas parar, paramos.',
+    photo: images.stepLook,
+  },
+  {
+    title: 'Te lo explicamos',
+    text: 'Te contamos lo que vemos con palabras sencillas y, si ayuda, con un modelo en la mano.',
+    photo: images.stepExplain,
+  },
+  {
+    title: 'Decides tú',
+    text: 'Te presentamos las opciones. Puedes decidir hoy, pensarlo en casa o preguntarnos lo que quieras.',
+    photo: images.stepDecide,
+  },
+];
+---
+
+<section
+  id="primera-visita"
+  aria-labelledby="visita-title"
+  data-pin
+  data-pin-distance="300%"
+  data-pin-min="md"
+  data-pin-steps
+  data-step-active="0"
+  class="visit scroll-mt-16 px-(--gutter) pb-(--section-y)"
+>
+  <div class="mx-auto max-w-[90rem]">
+    <h2
+      id="visita-title"
+      data-reveal
+      class="font-display text-3xl max-w-[22ch] font-medium text-balance"
+    >
+      Así es la primera visita, paso a paso.
+    </h2>
+
+    <ol class="visit-steps mt-12 md:mt-14">
+      {steps.map((step, i) => (
+        <li class="visit-step" data-step={i}>
+          <figure class="visit-figure rounded-frame">
+            <Picture
+              src={step.photo.src}
+              alt={step.photo.alt}
+              formats={['avif', 'webp']}
+              widths={[480, 720, 960, 1280]}
+              sizes="(min-width: 768px) 46vw, 92vw"
+              loading="lazy"
+              decoding="async"
+              class="h-full w-full object-cover"
+              style={photoStyle(step.photo)}
+            />
+          </figure>
+          <div class="visit-text">
+            <p class="text-ink-soft text-sm font-medium">
+              Paso {i + 1} de {steps.length}
+            </p>
+            <h3 class="font-display mt-2 text-2xl font-semibold">
+              {step.title}
+            </h3>
+            <p class="mt-3 max-w-[42ch] text-lg">{step.text}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .visit-steps {
+    list-style: none;
+    margin: 3rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 3.5rem;
+  }
+  .visit-step {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .visit-figure {
+    margin: 0;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--color-surface);
+  }
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .visit-step {
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 2.5rem;
+    }
+  }
+
+  /* Pinned layout: only when JS runs, reduced motion is off and the pin is
+     active (md and up). The four steps share one grid row and cross-fade. */
+  @media (min-width: 768px) {
+    :global(.js-motion) .visit {
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      padding-block: 5.5rem 2rem;
+    }
+    :global(.js-motion) .visit > div {
+      width: 100%;
+    }
+    :global(.js-motion) .visit-steps {
+      grid-template-columns: 1fr 1fr;
+      gap: 0 clamp(2rem, 6vw, 6rem);
+      margin-top: 2.5rem;
+    }
+    :global(.js-motion) .visit-step {
+      display: contents;
+    }
+    :global(.js-motion) .visit-figure {
+      grid-column: 1;
+      grid-row: 1;
+      aspect-ratio: auto;
+      height: min(56svh, 36rem);
+      opacity: 0;
+      transition: opacity var(--duration-slow) var(--ease-in-out-soft);
+    }
+    :global(.js-motion) .visit-text {
+      grid-column: 2;
+      grid-row: 1;
+      align-self: center;
+      opacity: 0;
+      transform: translateY(1.5rem);
+      transition:
+        opacity var(--duration-slow) var(--ease-out-soft),
+        transform var(--duration-slow) var(--ease-out-soft);
+    }
+    :global(.js-motion) .visit[data-step-active='0'] [data-step='0'] > *,
+    :global(.js-motion) .visit[data-step-active='1'] [data-step='1'] > *,
+    :global(.js-motion) .visit[data-step-active='2'] [data-step='2'] > *,
+    :global(.js-motion) .visit[data-step-active='3'] [data-step='3'] > * {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

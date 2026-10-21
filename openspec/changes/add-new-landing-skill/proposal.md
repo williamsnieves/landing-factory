@@ -13,8 +13,10 @@ The MVP goal is that **a single command** generates, from a niche and 0–3 refe
   4. **Design system**: `design-system/<slug>/MASTER.md` with ui-ux-pro-max, translated into CSS tokens.
   5. **Build**: original sections, original copy, openly licensed images (taste-skill) with `CREDITS.md`, motion layer.
   6. **QA loop**: `npm run qa` → fix → repeat until it passes or attempts run out; then impeccable critique/audit/polish.
-- `scripts/new-landing.sh <slug> --niche "..." [--refs a,b] [--auto]` that creates the site with `npm run new-site` (from `add-site-workspaces`) and runs Claude Code non-interactively.
+- `scripts/new-landing.sh <slug> --niche "..." [--refs a,b] [--auto] [--dry-run]` that runs a preflight, creates the site with `npm run new-site` (from `add-site-workspaces`) and runs Claude Code non-interactively (`claude -p`, from a terminal or a Claude session; not from GitHub Actions).
+- Scripts for the steps the pilot did by hand: `preflight.mjs` (network and Chromium), `find-images.mjs` (licensed Commons images through the proxy, into `sites/<slug>/assets.json`), `credits.mjs` (CREDITS.md and footer credits from the manifest) and `check-landing.mjs` (credits, photo repetition, tokens vs MASTER.md, diversity, copy originality).
 - Run log (`sites/<slug>/RUN.md`): decisions, QA attempts, approximate tokens/time.
+- Validation with one generated site (`sites/clinica-dental`); the three-niche diversity run is a follow-up pilot.
 
 ## Capabilities
 
@@ -29,4 +31,4 @@ The MVP goal is that **a single command** generates, from a niche and 0–3 refe
 - New: `.claude/skills/new-landing/`, `scripts/new-landing.sh`, `sites/<slug>/` workspaces (see design.md).
 - Uses everything before it: starter, design skills, QA, deployment and pattern sheets.
 - Cost: a full build with taste-skill takes 30–45 min and several hundred thousand tokens.
-- Must be implemented **after** the week-1 first manual run, to encode only what worked.
+- Implemented after the first manual run (pilot `sites/panaderia/`, PR #11); see design.md "Pilot notes".

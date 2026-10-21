@@ -1,0 +1,76 @@
+---
+import { Picture } from 'astro:assets';
+import { images, photoStyle } from '../../data/images';
+
+const strip = [
+  {
+    photo: images.clinicWaiting,
+    cls: 'sm:col-span-5 sm:mt-0',
+    ratio: 'aspect-[4/5]',
+  },
+  {
+    photo: images.clinicPlants,
+    cls: 'sm:col-span-4 sm:mt-16',
+    ratio: 'aspect-[3/4]',
+  },
+  {
+    photo: images.clinicValencia,
+    cls: 'sm:col-span-3 sm:mt-6',
+    ratio: 'aspect-[3/4]',
+  },
+];
+---
+
+<section
+  id="clinica"
+  aria-labelledby="clinica-title"
+  class="scroll-mt-16 px-(--gutter) pb-(--section-y)"
+>
+  <div class="mx-auto max-w-[90rem]">
+    <div class="grid gap-6 lg:grid-cols-12 lg:gap-16">
+      <h2
+        id="clinica-title"
+        data-reveal
+        class="font-display text-3xl font-medium text-balance lg:col-span-6"
+      >
+        Una clínica pequeña, con citas sin prisas.
+      </h2>
+      <p
+        data-reveal
+        data-reveal-delay="0.1"
+        class="max-w-[48ch] text-lg lg:col-span-5 lg:col-start-8"
+      >
+        Somos un equipo reducido y damos tiempo a cada persona. Preferimos
+        hablar un poco más que ir deprisa. Las fotos de esta página son imágenes
+        de archivo con ambientes parecidos, no de nuestra clínica.
+      </p>
+    </div>
+
+    <ul class="mt-12 grid list-none items-start gap-6 p-0 sm:grid-cols-12 md:mt-16">
+      {strip.map((s) => (
+        <li class={s.cls}>
+          <div
+            class={`rounded-frame bg-surface relative overflow-hidden ${s.ratio}`}
+          >
+            <div
+              data-parallax="0.08"
+              class="absolute inset-x-0 -top-[10%] h-[120%]"
+            >
+              <Picture
+                src={s.photo.src}
+                alt={s.photo.alt}
+                formats={['avif', 'webp']}
+                widths={[480, 720, 960]}
+                sizes="(min-width: 640px) 40vw, 92vw"
+                loading="lazy"
+                decoding="async"
+                class="h-full w-full object-cover"
+                style={photoStyle(s.photo)}
+              />
+            </div>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

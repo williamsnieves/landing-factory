@@ -1,0 +1,102 @@
+---
+import { credits } from '../../data/images';
+import { site } from '../../data/site';
+
+const links = [
+  ['#tratamientos', 'Tratamientos'],
+  ['#primera-visita', 'La primera visita'],
+  ['#preguntas', 'Preguntas'],
+  ['#pedir-cita', 'Pedir cita'],
+];
+---
+
+<footer class="bg-ink text-paper pt-20 md:pt-28">
+  <div class="mx-auto grid max-w-[90rem] gap-10 px-(--gutter) sm:grid-cols-2 lg:grid-cols-3">
+    <div>
+      <h2 class="font-display text-xl font-semibold">Dónde estamos</h2>
+      <p class="mt-3">
+        {site.street}
+        <br />
+        {site.area}
+      </p>
+    </div>
+    <div>
+      <h2 class="font-display text-xl font-semibold">Escríbenos o llámanos</h2>
+      <ul class="mt-3 list-none space-y-1 p-0">
+        <li>
+          <a
+            href={`mailto:${site.email}`}
+            class="inline-flex min-h-11 items-center underline underline-offset-4 hover:no-underline"
+          >
+            {site.email}
+          </a>
+        </li>
+        <li>
+          <a
+            href={site.phoneHref}
+            class="inline-flex min-h-11 items-center underline underline-offset-4 hover:no-underline"
+          >
+            {site.phone}
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <h2 class="font-display text-xl font-semibold">En esta página</h2>
+      <ul class="mt-3 list-none space-y-1 p-0">
+        {links.map(([href, label]) => (
+          <li>
+            <a
+              href={href}
+              class="inline-flex min-h-11 items-center underline-offset-4 hover:underline"
+            >
+              {label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+
+  <div class="wordmark-wrap mt-16 md:mt-24">
+    <p
+      class="wordmark font-display text-wordmark px-(--gutter) text-center font-semibold select-none"
+      aria-hidden="true"
+    >
+      Dental Azahar
+    </p>
+  </div>
+
+  <div class="mx-auto max-w-[90rem] px-(--gutter) pt-8 pb-10 text-sm">
+    <p>
+      Datos de ejemplo: la dirección, el teléfono, el correo y el horario no son
+      reales. Las fotografías son imágenes de archivo, no de la clínica. Fotos:{' '}
+      {credits.map((c, i) => (
+        <>
+          {i > 0 ? ', ' : ''}
+          <a
+            href={c.url}
+            rel="noopener"
+            class="underline underline-offset-2 hover:no-underline"
+          >
+            {c.author}
+          </a>{' '}
+          ({c.license})
+        </>
+      ))}
+      . Licencias y fuentes en CREDITS.md.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .wordmark-wrap {
+    overflow-x: clip;
+  }
+  .wordmark {
+    margin: 0;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    white-space: nowrap;
+  }
+</style>

@@ -1,0 +1,425 @@
+{
+  "batchcomplete": true,
+  "query": {
+    "pages": [
+      {
+        "pageid": 1001,
+        "ns": 6,
+        "title": "File:Cc zero loaf.jpg",
+        "index": 1,
+        "imagerepository": "local",
+        "imageinfo": [
+          {
+            "size": 100000,
+            "width": 3000,
+            "height": 2000,
+            "thumburl": "x",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Cc_zero_loaf.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:Cc_zero_loaf.jpg",
+            "mime": "image/jpeg",
+            "extmetadata": {
+              "ImageDescription": {
+                "value": "A <b>test</b> photo &amp; more"
+              },
+              "Artist": {
+                "value": "<a href=\"//commons.wikimedia.org/wiki/User:Ana\" title=\"User:Ana\">Ana &quot;Pan&quot; García</a>"
+              },
+              "LicenseShortName": {
+                "value": "CC0"
+              },
+              "UsageTerms": {
+                "value": "Creative Commons Zero, Public Domain Dedication"
+              },
+              "LicenseUrl": {
+                "value": "https://example.org/CC0"
+              },
+              "Restrictions": {
+                "value": ""
+              }
+            }
+          }
+        ]
+      },
+      {
+        "pageid": 1002,
+        "ns": 6,
+        "title": "File:Public domain bridge.jpg",
+        "index": 2,
+        "imagerepository": "local",
+        "imageinfo": [
+          {
+            "size": 100000,
+            "width": 2400,
+            "height": 1600,
+            "thumburl": "x",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Public_domain_bridge.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:Public_domain_bridge.jpg",
+            "mime": "image/jpeg",
+            "extmetadata": {
+              "ImageDescription": {
+                "value": "A <b>test</b> photo &amp; more"
+              },
+              "Artist": {
+                "value": "<span>Unknown <br/>author</span>"
+              },
+              "LicenseShortName": {
+                "value": "Public domain"
+              },
+              "UsageTerms": {
+                "value": "Public domain"
+              },
+              "LicenseUrl": {
+                "value": "https://example.org/Public-domain"
+              },
+              "Restrictions": {
+                "value": ""
+              }
+            }
+          }
+        ]
+      },
+      {
+        "pageid": 1003,
+        "ns": 6,
+        "title": "File:By loaf.jpg",
+        "index": 3,
+        "imagerepository": "local",
+        "imageinfo": [
+          {
+            "size": 100000,
+            "width": 1200,
+            "height": 1800,
+            "thumburl": "x",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/By_loaf.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:By_loaf.jpg",
+            "mime": "image/jpeg",
+            "extmetadata": {
+              "ImageDescription": {
+                "value": "A <b>test</b> photo &amp; more"
+              },
+              "Artist": {
+                "value": "<a href=\"x\">Bo</a> &amp; <a href=\"y\">Cy</a>"
+              },
+              "LicenseShortName": {
+                "value": "CC BY 3.0"
+              },
+              "UsageTerms": {
+                "value": "Creative Commons Attribution 3.0"
+              },
+              "LicenseUrl": {
+                "value": "https://example.org/CC-BY-3.0"
+              },
+              "Restrictions": {
+                "value": ""
+              }
+            }
+          }
+        ]
+      },
+      {
+        "pageid": 1004,
+        "ns": 6,
+        "title": "File:Bysa square.png",
+        "index": 4,
+        "imagerepository": "local",
+        "imageinfo": [
+          {
+            "size": 100000,
+            "width": 1000,
+            "height": 1000,
+            "thumburl": "x",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Bysa_square.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:Bysa_square.png",
+            "mime": "image/png",
+            "extmetadata": {
+              "ImageDescription": {
+                "value": "A <b>test</b> photo &amp; more"
+              },
+              "Artist": {
+                "value": "Dee"
+              },
+              "LicenseShortName": {
+                "value": "CC BY-SA 2.5"
+              },
+              "UsageTerms": {
+                "value": "Creative Commons Attribution-Share Alike 2.5"
+              },
+              "LicenseUrl": {
+                "value": "https://example.org/CC-BY-SA-2.5"
+              },
+              "Restrictions": {
+                "value": ""
+              }
+            }
+          }
+        ]
+      },
+      {
+        "pageid": 1005,
+        "ns": 6,
+        "title": "File:Noncommercial.jpg",
+        "index": 5,
+        "imagerepository": "local",
+        "imageinfo": [
+          {
+            "size": 100000,
+            "width": 3000,
+            "height": 2000,
+            "thumburl": "x",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Noncommercial.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:Noncommercial.jpg",
+            "mime": "image/jpeg",
+            "extmetadata": {
+              "ImageDescription": {
+                "value": "A <b>test</b> photo &amp; more"
+              },
+              "Artist": {
+                "value": "Eve"
+              },
+              "LicenseShortName": {
+                "value": "CC BY-NC 4.0"
+              },
+              "UsageTerms": {
+                "value": "Creative Commons Attribution-NonCommercial 4.0"
+              },
+              "LicenseUrl": {
+                "value": "https://example.org/CC-BY-NC-4.0"
+              },
+              "Restrictions": {
+                "value": ""
+              }
+            }
+          }
+        ]
+      },
+      {
+        "pageid": 1006,
+        "ns": 6,
+        "title": "File:No derivs.jpg",
+        "index": 6,
+        "imagerepository": "local",
+        "imageinfo": [
+          {
+            "size": 100000,
+            "width": 3000,
+            "height": 2000,
+            "thumburl": "x",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/No_derivs.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:No_derivs.jpg",
+            "mime": "image/jpeg",
+            "extmetadata": {
+              "ImageDescription": {
+                "value": "A <b>test</b> photo &amp; more"
+              },
+              "Artist": {
+                "value": "Fay"
+              },
+              "LicenseShortName": {
+                "value": "CC BY-ND 2.0"
+              },
+              "UsageTerms": {
+                "value": "Creative Commons Attribution-NoDerivs 2.0"
+              },
+              "LicenseUrl": {
+                "value": "https://example.org/CC-BY-ND-2.0"
+              },
+              "Restrictions": {
+                "value": ""
+              }
+            }
+          }
+        ]
+      },
+      {
+        "pageid": 1007,
+        "ns": 6,
+        "title": "File:Gfdl only.jpg",
+        "index": 7,
+        "imagerepository": "local",
+        "imageinfo": [
+          {
+            "size": 100000,
+            "width": 3000,
+            "height": 2000,
+            "thumburl": "x",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Gfdl_only.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:Gfdl_only.jpg",
+            "mime": "image/jpeg",
+            "extmetadata": {
+              "ImageDescription": {
+                "value": "A <b>test</b> photo &amp; more"
+              },
+              "Artist": {
+                "value": "Gus"
+              },
+              "LicenseShortName": {
+                "value": "GFDL"
+              },
+              "UsageTerms": {
+                "value": "GNU Free Documentation License"
+              },
+              "LicenseUrl": {
+                "value": "https://example.org/GFDL"
+              },
+              "Restrictions": {
+                "value": ""
+              }
+            }
+          }
+        ]
+      },
+      {
+        "pageid": 1008,
+        "ns": 6,
+        "title": "File:Unknown license.jpg",
+        "index": 8,
+        "imagerepository": "local",
+        "imageinfo": [
+          {
+            "size": 100000,
+            "width": 3000,
+            "height": 2000,
+            "thumburl": "x",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Unknown_license.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:Unknown_license.jpg",
+            "mime": "image/jpeg",
+            "extmetadata": {
+              "ImageDescription": {
+                "value": "A <b>test</b> photo &amp; more"
+              },
+              "Artist": {
+                "value": "Hal"
+              },
+              "LicenseShortName": {
+                "value": ""
+              },
+              "UsageTerms": {
+                "value": ""
+              },
+              "LicenseUrl": {
+                "value": "https://example.org/"
+              },
+              "Restrictions": {
+                "value": ""
+              }
+            }
+          }
+        ]
+      },
+      {
+        "pageid": 1009,
+        "ns": 6,
+        "title": "File:By without author.jpg",
+        "index": 9,
+        "imagerepository": "local",
+        "imageinfo": [
+          {
+            "size": 100000,
+            "width": 3000,
+            "height": 2000,
+            "thumburl": "x",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/By_without_author.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:By_without_author.jpg",
+            "mime": "image/jpeg",
+            "extmetadata": {
+              "ImageDescription": {
+                "value": "A <b>test</b> photo &amp; more"
+              },
+              "Artist": {
+                "value": ""
+              },
+              "LicenseShortName": {
+                "value": "CC BY 4.0"
+              },
+              "UsageTerms": {
+                "value": "Creative Commons Attribution 4.0"
+              },
+              "LicenseUrl": {
+                "value": "https://example.org/CC-BY-4.0"
+              },
+              "Restrictions": {
+                "value": ""
+              }
+            }
+          }
+        ]
+      },
+      {
+        "pageid": 1010,
+        "ns": 6,
+        "title": "File:Vector drawing.svg",
+        "index": 10,
+        "imagerepository": "local",
+        "imageinfo": [
+          {
+            "size": 100000,
+            "width": 800,
+            "height": 600,
+            "thumburl": "x",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Vector_drawing.svg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:Vector_drawing.svg",
+            "mime": "image/svg+xml",
+            "extmetadata": {
+              "ImageDescription": {
+                "value": "A <b>test</b> photo &amp; more"
+              },
+              "Artist": {
+                "value": "Ivy"
+              },
+              "LicenseShortName": {
+                "value": "CC0"
+              },
+              "UsageTerms": {
+                "value": "CC0"
+              },
+              "LicenseUrl": {
+                "value": "https://example.org/CC0"
+              },
+              "Restrictions": {
+                "value": ""
+              }
+            }
+          }
+        ]
+      },
+      {
+        "pageid": 1011,
+        "ns": 6,
+        "title": "File:Small by.jpg",
+        "index": 11,
+        "imagerepository": "local",
+        "imageinfo": [
+          {
+            "size": 100000,
+            "width": 600,
+            "height": 400,
+            "thumburl": "x",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Small_by.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:Small_by.jpg",
+            "mime": "image/jpeg",
+            "extmetadata": {
+              "ImageDescription": {
+                "value": "A <b>test</b> photo &amp; more"
+              },
+              "Artist": {
+                "value": "Jon"
+              },
+              "LicenseShortName": {
+                "value": "CC BY 4.0"
+              },
+              "UsageTerms": {
+                "value": "Creative Commons Attribution 4.0"
+              },
+              "LicenseUrl": {
+                "value": "https://example.org/CC-BY-4.0"
+              },
+              "Restrictions": {
+                "value": ""
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

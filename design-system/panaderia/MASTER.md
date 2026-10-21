@@ -141,3 +141,14 @@ Don't:
 - Don't parallax text, pin more than one section, or leave motion on under reduced motion.
 - Don't hard-code sizes for the big type; use the `clamp` tokens.
 - Don't request fonts from Google at runtime.
+
+## 9. Landing meta
+
+Machine-readable summary read by `scripts/check-landing.mjs` (tokens check and the diversity rule across sites). Keep it in sync with sections 4 and 5.
+
+```landing-meta
+primary: #92400e
+display-font: Fraunces
+body-font: Inter
+hero: full-bleed-photo
+```

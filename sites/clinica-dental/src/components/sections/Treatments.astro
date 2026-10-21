@@ -1,0 +1,89 @@
+---
+import { Picture } from 'astro:assets';
+import { images, photoStyle } from '../../data/images';
+import { site } from '../../data/site';
+
+const ask = (topic: string) =>
+  `mailto:${site.email}?subject=${encodeURIComponent(`Pregunta sobre ${topic}`)}`;
+
+const treatments = [
+  {
+    title: 'Odontología general',
+    text: 'Revisiones y el cuidado de tu boca día a día. Te explicamos lo que vemos y qué opciones hay, sin prisa.',
+    photo: images.general,
+    topic: 'odontología general',
+  },
+  {
+    title: 'Higiene dental',
+    text: 'Limpiezas y consejos para cuidar dientes y encías en casa, con calma y a tu ritmo.',
+    photo: images.hygiene,
+    topic: 'higiene dental',
+  },
+  {
+    title: 'Ortodoncia invisible',
+    text: 'Alineadores transparentes para mover los dientes poco a poco. El dentista decide tras una revisión si encaja contigo.',
+    photo: images.aligners,
+    topic: 'ortodoncia invisible',
+  },
+  {
+    title: 'Implantes',
+    text: 'Una opción para reponer dientes que faltan. Tras una exploración te contamos si es posible en tu caso y cómo sería.',
+    photo: images.implants,
+    topic: 'implantes',
+  },
+];
+---
+
+<section
+  id="tratamientos"
+  aria-labelledby="tratamientos-title"
+  class="scroll-mt-16 px-(--gutter) pb-(--section-y)"
+>
+  <div class="mx-auto grid max-w-[90rem] gap-12 lg:grid-cols-12 lg:gap-14">
+    <div class="lg:col-span-4">
+      <h2
+        id="tratamientos-title"
+        data-reveal
+        class="font-display text-3xl font-medium text-balance"
+      >
+        Lo que hacemos, en pocas palabras.
+      </h2>
+      <p
+        data-reveal
+        data-reveal-delay="0.1"
+        class="text-ink-soft mt-5 max-w-[34ch]"
+      >
+        Cada boca es distinta. Lo que necesitas lo decidimos juntos después de
+        mirarte.
+      </p>
+    </div>
+    <ul class="grid list-none gap-x-8 gap-y-12 p-0 sm:grid-cols-2 lg:col-span-8">
+      {treatments.map((t, i) => (
+        <li data-reveal data-reveal-delay={String((i % 2) * 0.1)}>
+          <div class="rounded-lg bg-surface aspect-[4/3] overflow-hidden">
+            <Picture
+              src={t.photo.src}
+              alt={t.photo.alt}
+              formats={['avif', 'webp']}
+              widths={[480, 720, 960]}
+              sizes="(min-width: 1024px) 28vw, (min-width: 640px) 44vw, 92vw"
+              loading="lazy"
+              decoding="async"
+              class="h-full w-full object-cover"
+              style={photoStyle(t.photo)}
+            />
+          </div>
+          <h3 class="font-display mt-5 text-xl font-semibold">{t.title}</h3>
+          <p class="mt-2 max-w-[38ch]">{t.text}</p>
+          <a
+            href={ask(t.topic)}
+            aria-label={`Pregúntanos sobre ${t.topic}`}
+            class="text-primary decoration-primary mt-2 inline-flex min-h-11 items-center font-medium underline underline-offset-4 hover:no-underline"
+          >
+            Pregúntanos
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

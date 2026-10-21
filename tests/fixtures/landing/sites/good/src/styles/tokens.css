@@ -1,0 +1,7 @@
+@theme {
+  --color-primary: #92400e;
+  --color-paper: #faf5ec;
+  --color-ink: #2b1d14;
+  --font-display: 'Fraunces Variable', ui-serif, Georgia, serif;
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+}

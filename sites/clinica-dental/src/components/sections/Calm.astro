@@ -1,0 +1,91 @@
+---
+const helps = [
+  'Música de fondo, si te apetece.',
+  'Pausas siempre que las pidas.',
+  'Una explicación antes de cada paso.',
+];
+---
+
+<section
+  id="calma"
+  aria-labelledby="calma-title"
+  class="px-(--gutter) pb-(--section-y)"
+>
+  <div class="mx-auto grid max-w-[90rem] items-center gap-12 md:grid-cols-2 md:gap-16">
+    <div class="calm-stage">
+      <div class="calm-ring" aria-hidden="true"></div>
+      <h2
+        id="calma-title"
+        class="calm-text font-display text-calm font-medium text-balance"
+      >
+        Respira. Vamos a tu ritmo.
+      </h2>
+    </div>
+
+    <div data-reveal>
+      <p class="font-display text-xl font-semibold">Lo que suele ayudar</p>
+      <ul class="mt-4 list-none space-y-3 p-0 text-lg">
+        {helps.map((h) => (
+          <li class="flex gap-3">
+            <span
+              class="bg-accent mt-3 size-2 shrink-0 rounded-full"
+              aria-hidden="true"
+            />
+            <span>{h}</span>
+          </li>
+        ))}
+      </ul>
+      <p class="text-ink-soft mt-6 max-w-[44ch]">
+        Cuéntanos al pedir cita qué te preocupa y lo tendremos en cuenta.
+      </p>
+      <a
+        href="#pedir-cita"
+        class="bg-primary text-primary-contrast rounded-pill hover:bg-primary-hover mt-8 inline-flex min-h-12 items-center px-7 font-semibold transition-colors duration-(--duration-fast)"
+      >
+        Pedir cita
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .calm-stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: min(100%, 28rem);
+    aspect-ratio: 1 / 1;
+    margin-inline: auto;
+  }
+  .calm-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    border: 3px solid var(--color-accent);
+  }
+  .calm-text {
+    position: relative;
+    max-width: 11ch;
+    margin: 0;
+    padding: 2rem;
+    text-align: center;
+    line-height: 1.15;
+  }
+  /* The one playful moment: a slow CSS breath. Static when motion is reduced. */
+  @media (prefers-reduced-motion: no-preference) {
+    .calm-ring {
+      animation: breathe var(--duration-breathe) var(--ease-in-out-soft)
+        infinite;
+    }
+  }
+  @keyframes breathe {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.12);
+    }
+  }
+</style>

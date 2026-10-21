@@ -14,6 +14,7 @@ import { join, resolve } from 'node:path';
 import { after, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import {
+  RUN_PHASES,
   SHARED_DEPENDENCIES,
   SHARED_DEV_DEPENDENCIES,
   jsString,
@@ -31,7 +32,10 @@ const readJson = (file) => JSON.parse(readFileSync(file, 'utf8'));
 
 const EXPECTED_FILES = [
   'CREDITS.md',
+  'PROPOSAL.md',
   'README.md',
+  'RUN.md',
+  'assets.json',
   'astro.config.mjs',
   'package.json',
   'public/_headers',
@@ -77,6 +81,34 @@ test('scaffolding writes exactly the expected files and never the starter pages 
   assert.ok(!existsSync(join(site, 'src/components/sections')));
   assert.ok(!existsSync(join(site, 'src/pages/islands.astro')));
   assert.ok(!existsSync(join(site, 'src/pages/_README.md')));
+});
+
+test('the planning templates follow the skill: proposal sections, one RUN.md row per phase, empty manifest', () => {
+  const sitesDir = freshSites();
+  scaffoldSite({ slug: 'cafeteria', sitesDir, title: 'Cafetería Sol' });
+  const site = join(sitesDir, 'cafeteria');
+  const proposal = readFileSync(join(site, 'PROPOSAL.md'), 'utf8');
+  assert.match(proposal, /^# Proposal: Cafetería Sol/);
+  for (const heading of [
+    'Brief',
+    'References used',
+    'Page map',
+    'Motion plan',
+    'Visual direction',
+    'Quality targets',
+    'Out of scope',
+    'Decisions',
+  ])
+    assert.match(proposal, new RegExp(`^## ${heading}$`, 'm'), heading);
+  assert.match(proposal, /\bsites\/cafeteria\//);
+  const run = readFileSync(join(site, 'RUN.md'), 'utf8');
+  assert.match(run, /^# Run log: cafeteria/);
+  assert.match(run, /^Result: pending$/m);
+  for (const phase of RUN_PHASES)
+    assert.match(run, new RegExp(`^\\| ${phase} +\\| pending `, 'm'), phase);
+  for (const heading of ['Inputs', 'Phases', 'QA attempts', 'Final check'])
+    assert.match(run, new RegExp(`^## ${heading}$`, 'm'), heading);
+  assert.deepEqual(readJson(join(site, 'assets.json')), { images: [] });
 });
 
 test('the site manifest is private, named site-<slug> and pins the root versions exactly', () => {
@@ -192,6 +224,9 @@ test('--allow-existing-docs scaffolds around planning docs and never overwrites 
   assert.ok(!created.includes('README.md'));
   assert.equal(readFileSync(join(site, 'PROPOSAL.md'), 'utf8'), 'my proposal');
   assert.equal(readFileSync(join(site, 'README.md'), 'utf8'), 'my readme');
+  // The templates that were not there are still written.
+  assert.ok(created.includes('RUN.md'));
+  assert.ok(created.includes('assets.json'));
 });
 
 test('--allow-existing-docs still refuses folders with anything but top-level Markdown', () => {
@@ -255,4 +290,21 @@ test('a scaffolded site is already Prettier-formatted', () => {
     { cwd: ROOT, encoding: 'utf8' },
   );
   assert.equal(r.status, 0, r.stdout + r.stderr);
+});
+
+test('LANDING_FACTORY_ROOT moves only where the site is created, never touching the real sites/', () => {
+  const root = mkdtempSync(join(tmp, 'factory-'));
+  const r = spawnSync(
+    process.execPath,
+    ['scripts/new-site.mjs', 'zz-env-root'],
+    {
+      cwd: ROOT,
+      encoding: 'utf8',
+      env: { ...process.env, LANDING_FACTORY_ROOT: root },
+    },
+  );
+  assert.equal(r.status, 0, r.stderr);
+  assert.ok(existsSync(join(root, 'sites/zz-env-root/PROPOSAL.md')));
+  assert.ok(existsSync(join(root, 'sites/zz-env-root/src/styles/tokens.css')));
+  assert.ok(!existsSync(join(ROOT, 'sites/zz-env-root')));
 });

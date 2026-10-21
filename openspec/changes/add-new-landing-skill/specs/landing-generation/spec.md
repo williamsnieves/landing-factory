@@ -34,9 +34,20 @@ All site copy MUST be original, and every external image or component MUST have 
 - **WHEN** the site contains an external image not listed in `CREDITS.md`
 - **THEN** the generation's final check fails naming the image
 
+#### Scenario: Photo overused
+- **WHEN** the same source photo is used in more than two places on the site
+- **THEN** the final check fails naming the photo and its uses
+
 #### Scenario: Copy from a reference
 - **WHEN** a sentence on the site literally matches text from a reference site used
 - **THEN** generation is not considered done until it is rewritten
+
+### Requirement: Preflight before generation
+Before creating anything, the command SHALL check that the package registry and the image sources answer (through the configured proxy when one is set), that a Chromium for QA is available and that the slug is free, and MUST exit non-zero naming every missing item when a check fails.
+
+#### Scenario: Image host blocked
+- **WHEN** the image source host is not reachable from the environment
+- **THEN** the command exits non-zero before creating the site folder and names the host to allow
 
 ### Requirement: QA loop until passing
 After building, the system SHALL run QA, fix the reported failures and repeat until it passes or a configurable maximum of attempts is reached; if attempts run out, it MUST end in a failed state with a summary of what is left.
@@ -62,3 +73,7 @@ Sites generated for different niches SHALL be visually different: different pale
 #### Scenario: Three niches
 - **WHEN** sites are generated for three different niches
 - **THEN** no pair of sites shares palette, main font family and hero type all at once
+
+#### Scenario: Same look as an existing site
+- **WHEN** a new site's primary color, display font and hero type all match an existing site in `sites/`
+- **THEN** the final check fails naming the existing site

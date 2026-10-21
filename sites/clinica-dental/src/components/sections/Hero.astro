@@ -1,0 +1,69 @@
+---
+import { Picture } from 'astro:assets';
+import { heroWidths, images, photoStyle } from '../../data/images';
+---
+
+<section
+  id="top"
+  aria-labelledby="hero-title"
+  class="px-(--gutter) pt-8 pb-(--section-y) md:pt-12"
+>
+  <div class="mx-auto grid max-w-[90rem] items-center gap-10 lg:grid-cols-12 lg:gap-16">
+    <div class="lg:col-span-6">
+      <p
+        data-reveal
+        class="text-ink-soft flex items-center gap-3 text-sm font-medium"
+      >
+        <span class="bg-accent size-2 rounded-full" aria-hidden="true"></span>
+        Sin prisas, sin juicios
+      </p>
+      <h1
+        id="hero-title"
+        data-reveal
+        data-reveal-delay="0.1"
+        class="font-display text-4xl mt-5 max-w-[16ch] font-medium text-balance"
+      >
+        Ir al dentista con calma.
+      </h1>
+      <p data-reveal data-reveal-delay="0.2" class="mt-6 max-w-[46ch] text-lg">
+        Somos una clínica pequeña de Valencia. Te explicamos cada paso antes de
+        darlo y vamos a tu ritmo.
+      </p>
+      <div
+        data-reveal
+        data-reveal-delay="0.3"
+        class="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3"
+      >
+        <a
+          href="#pedir-cita"
+          class="bg-primary text-primary-contrast rounded-pill hover:bg-primary-hover inline-flex min-h-12 items-center px-7 font-semibold transition-colors duration-(--duration-fast)"
+        >
+          Pedir cita
+        </a>
+        <a
+          href="#primera-visita"
+          class="text-primary decoration-primary inline-flex min-h-12 items-center font-medium underline decoration-2 underline-offset-8 hover:no-underline"
+        >
+          Cómo es la primera visita
+        </a>
+      </div>
+    </div>
+
+    <figure class="m-0 lg:col-span-6">
+      <div class="rounded-frame bg-surface aspect-[4/3] overflow-hidden lg:aspect-[5/6]">
+        <Picture
+          src={images.hero.src}
+          alt={images.hero.alt}
+          formats={['avif', 'webp']}
+          widths={heroWidths}
+          sizes="(min-width: 1024px) 46vw, 92vw"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+          class="h-full w-full object-cover"
+          style={photoStyle(images.hero)}
+        />
+      </div>
+    </figure>
+  </div>
+</section>
