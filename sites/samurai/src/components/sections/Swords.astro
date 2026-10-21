@@ -1,0 +1,125 @@
+---
+import Scene3D from '../three/Scene3D.astro';
+import bladePoster from '../../assets/blade-poster.jpg';
+
+const steps = [
+  {
+    key: 'tipos',
+    title: 'Tipos',
+    body: 'El <i>tachi</i> se colgaba del cinto con el filo hacia abajo y es el más antiguo. La <i>katana</i> (tradición del <i>uchigatana</i>) se pasa por el cinto con el filo hacia arriba y es habitual a partir de la época Muromachi. El <i>wakizashi</i> es la espada corta.',
+  },
+  {
+    key: 'forja',
+    title: 'Forja',
+    body: 'El acero, <i>tamahagane</i>, sale de los hornos <i>tatara</i>. El herrero lo calienta, lo dobla y lo suelda sobre sí mismo. Antes del temple (<i>yakiire</i>) cubre la hoja con arcilla de forma desigual: el filo queda más duro y esa diferencia dibuja la línea ondulada del <i>hamon</i>. Un pulidor especializado termina la pieza.',
+  },
+  {
+    key: 'cuidado',
+    title: 'Cuidado',
+    body: 'Una hoja se toca lo mínimo: se maneja con un paño limpio, sin poner los dedos sobre el acero. Contra el óxido se usa una capa muy fina de aceite (por ejemplo, aceite de <i>choji</i>) y, de forma tradicional, un polvo llamado <i>uchiko</i>. Es información general: una pieza antigua se confía a especialistas.',
+  },
+];
+---
+
+<section
+  id="espadas"
+  data-pin
+  data-pin-distance="200%"
+  data-pin-min="md"
+  aria-labelledby="espadas-title"
+  class="bg-paper relative md:flex md:min-h-svh md:items-center md:py-24"
+>
+  <div class="mx-auto grid w-full max-w-[110rem] gap-10 px-(--gutter) py-(--section-y) md:grid-cols-12 md:items-center md:py-0">
+    <div id="swords-steps" class="md:col-span-6 lg:col-span-5">
+      <p
+        data-reveal
+        class="text-ink-soft text-xs font-medium tracking-[0.2em] uppercase"
+      >
+        Capítulo III
+      </p>
+      <h2
+        id="espadas-title"
+        data-reveal
+        data-reveal-delay="0.1"
+        class="font-display mt-2 flex items-baseline gap-4 text-3xl leading-[1.05] font-normal tracking-[-0.02em]"
+      >
+        <span aria-hidden="true" class="text-primary text-4xl font-light">
+          III
+        </span>
+        Espadas
+      </h2>
+      <ol class="mt-8 grid list-none gap-7 p-0">
+        {steps.map((s, i) => (
+          <li data-step={s.key} data-reveal data-reveal-delay={String(i * 0.1)}>
+            <h3 class="step-title font-display text-xl leading-tight font-normal">
+              <span class="text-primary text-base" aria-hidden="true">
+                {i + 1}
+              </span>
+              {s.title}
+            </h3>
+            <p class="step-body mt-2 max-w-[58ch] text-sm" set:html={s.body} />
+          </li>
+        ))}
+      </ol>
+    </div>
+
+    <div class="md:col-span-6 md:col-start-7 lg:col-span-6 lg:col-start-7">
+      <div class="relative mx-auto aspect-[4/5] w-full md:w-[min(100%,calc(68svh*0.8))]">
+        <Scene3D
+          scene="blade"
+          poster={bladePoster}
+          scrub
+          alt="Esquema de una katana sobre fondo oscuro: hoja curva con una línea más clara en el filo, guardamano y empuñadura con cordón en rombos."
+          sizes="(min-width: 768px) 50vw, 94vw"
+          aspect="4/5"
+          class="absolute! inset-0 h-full w-full"
+        />
+      </div>
+      <p class="text-ink-soft mx-auto mt-3 max-w-[52ch] text-xs">
+        Esquema dibujado en código: una katana simplificada, no un objeto real.
+        Los objetos reales son las fotografías del museo, justo debajo.
+      </p>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  /* Live step highlight: only when the scene scrubs the pinned section. */
+  #swords-steps[data-steps-live] li:not([data-active]) .step-title,
+  #swords-steps[data-steps-live] li:not([data-active]) .step-body {
+    color: var(--color-ink-soft);
+  }
+  #swords-steps li .step-title span {
+    margin-right: 0.6rem;
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    // The pinned stage runs from "top top" for the pin distance (200% of the viewport).
+    var section = document.getElementById('espadas');
+    if (!section) return;
+    var fig = section.querySelector('[data-scene-scrub]');
+    var steps = document.getElementById('swords-steps');
+    var wide = window.matchMedia('(min-width: 768px)').matches;
+    var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!fig || !steps || !wide || calm) return;
+    fig.setAttribute('data-scene-start', 'top top');
+    fig.setAttribute('data-scene-end', '+=200%');
+    var items = steps.querySelectorAll('li');
+    steps.setAttribute('data-steps-live', '');
+    var apply = function () {
+      var p = parseFloat(fig.getAttribute('data-scene-progress') || '0');
+      var idx = Math.min(items.length - 1, Math.floor(p * items.length));
+      items.forEach(function (li, i) {
+        if (i === idx) li.setAttribute('data-active', '');
+        else li.removeAttribute('data-active');
+      });
+    };
+    new MutationObserver(apply).observe(fig, {
+      attributes: true,
+      attributeFilter: ['data-scene-progress'],
+    });
+    apply();
+  })();
+</script>

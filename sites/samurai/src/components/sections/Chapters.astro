@@ -1,0 +1,113 @@
+---
+const chapters = [
+  {
+    href: '#origenes',
+    numeral: 'I',
+    name: 'Orígenes',
+    statement: 'Cómo unos guerreros de provincia acabaron mandando.',
+    caption: 'De la época Heian a la paz Tokugawa',
+  },
+  {
+    href: '#armadura',
+    numeral: 'II',
+    name: 'Armadura',
+    statement:
+      'Láminas, cordones y laca: cuatro piezas para entender el conjunto.',
+    caption: 'Dō, kabuto, mempō y la gran armadura',
+  },
+  {
+    href: '#espadas',
+    numeral: 'III',
+    name: 'Espadas',
+    statement: 'Tachi, katana y wakizashi, del horno al cuidado de la hoja.',
+    caption: 'Con un modelo que gira al avanzar',
+  },
+  {
+    href: '#vida',
+    numeral: 'IV',
+    name: 'Vida y bushidō',
+    statement: 'Una idea que se escribió tarde y una vida de pincel y de té.',
+    caption: 'Bushidō, caligrafía y té',
+  },
+  {
+    href: '#fin',
+    numeral: 'V',
+    name: 'Fin de la clase',
+    statement:
+      'Del cambio de gobierno de 1868 a la prohibición de las espadas.',
+    caption: 'Era Meiji: 1868 a 1877',
+  },
+];
+---
+
+<section
+  id="capitulos"
+  aria-labelledby="capitulos-title"
+  class="bg-paper py-(--section-y)"
+>
+  <div class="mx-auto max-w-[110rem] px-(--gutter)">
+    <div class="grid gap-x-8 gap-y-4 md:grid-cols-12">
+      <h2
+        id="capitulos-title"
+        data-reveal
+        class="font-display text-3xl leading-[1.05] font-normal tracking-[-0.02em] text-balance md:col-span-6 md:col-start-6"
+      >
+        Cinco capítulos, un solo hilo
+      </h2>
+      <p
+        data-reveal
+        data-reveal-delay="0.1"
+        class="text-ink-soft max-w-[52ch] md:col-span-6 md:col-start-6"
+      >
+        Se pueden leer en orden o saltar de uno a otro. Cada capítulo se apoya
+        en objetos de museo y dice solo lo que esos objetos permiten decir.
+      </p>
+    </div>
+
+    <ul class="mt-14 grid list-none gap-x-6 gap-y-10 p-0 sm:grid-cols-2 lg:grid-cols-5">
+      {chapters.map((c, i) => (
+        <li
+          data-reveal
+          data-reveal-delay={String(i * 0.08)}
+          class:list={[i === 4 && 'sm:col-span-2 lg:col-span-1']}
+        >
+          <a
+            href={c.href}
+            class="group block h-full min-h-11 outline-offset-8"
+            aria-label={`Capítulo ${c.numeral}, ${c.name}. ${c.statement}`}
+          >
+            <p class="text-ink-soft text-xs font-medium tracking-[0.2em] uppercase">
+              Capítulo
+            </p>
+            <p
+              aria-hidden="true"
+              class="font-display text-primary group-hover:text-primary-hover mt-2 text-4xl leading-none font-light tracking-[-0.02em] transition-colors duration-(--duration-fast)"
+            >
+              {c.numeral}
+            </p>
+            <p class="font-display mt-4 text-xl leading-tight">{c.statement}</p>
+            <hr class="border-line mt-5 border-0 border-t" />
+            <p class="text-ink-soft mt-3 text-xs">{c.caption}</p>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <div
+      data-reveal
+      class="bg-surface mt-20 grid items-center gap-6 p-6 md:grid-cols-12 md:p-10"
+    >
+      <p class="font-display text-2xl leading-tight md:col-span-8">
+        Empieza por el principio: quiénes eran y cómo se formó la clase.
+      </p>
+      <div class="md:col-span-4 md:justify-self-end">
+        <a
+          href="#origenes"
+          class="bg-primary text-primary-contrast rounded-md hover:bg-primary-hover inline-flex min-h-12 items-center px-6 text-sm font-semibold transition-colors duration-(--duration-fast)"
+        >
+          Explorar los capítulos
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

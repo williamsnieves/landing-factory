@@ -1,0 +1,80 @@
+---
+import ChapterHead from './ChapterHead.astro';
+import Photo from './Photo.astro';
+import { photos } from '../../data/images';
+
+const steps = [
+  {
+    when: 'Época Heian · antes de 1185',
+    title: 'Guerreros de provincia',
+    body: 'Lejos de la corte imperial de Kioto, familias de guerreros defendían tierras y servían a señores poderosos. Todavía no se puede hablar de una clase cerrada.',
+  },
+  {
+    when: 'Hacia 1185 · Kamakura',
+    title: 'El primer shogunato',
+    body: 'Se establece el shogunato de Kamakura, que dura hasta 1333. El <i>shōgun</i> (jefe militar) gobierna de hecho mientras el emperador sigue en la corte de Kioto: el poder efectivo pasa a manos guerreras.',
+  },
+  {
+    when: 'Siglos siguientes · Sengoku',
+    title: 'Un poder repartido',
+    body: 'Tras Kamakura, durante siglos el poder estuvo fragmentado. En el periodo llamado Sengoku, «de los estados en guerra», señores regionales (<i>daimyō</i>) compiten entre sí.',
+  },
+  {
+    when: '1603 a 1868 · Tokugawa',
+    title: 'La paz larga',
+    body: 'El shogunato Tokugawa trae una paz duradera. Muchos samuráis pasan de combatir a servir a su señor como administradores y funcionarios; la espada sigue siendo un arma, y además un signo de rango.',
+  },
+];
+---
+
+<section
+  id="origenes"
+  aria-labelledby="origenes-title"
+  class="bg-surface py-(--section-y)"
+>
+  <div class="mx-auto max-w-[110rem] px-(--gutter)">
+    <ChapterHead
+      numeral="I"
+      eyebrow="Capítulo I"
+      title="Orígenes"
+      id="origenes-title"
+    >
+      <p class="text-lg leading-snug">
+        La palabra <i>samurái</i> procede de un verbo japonés que significa
+        «servir»: en origen, un guerrero al servicio de alguien. Este recorrido
+        tiene cuatro etapas y solo da fechas donde están bien establecidas.
+      </p>
+    </ChapterHead>
+
+    <div class="mt-16 md:mt-24">
+      <Photo
+        photo={photos.yashima}
+        aspect="16/9"
+        sizes="(min-width: 1760px) 1650px, 94vw"
+        parallax
+      />
+    </div>
+
+    <ol class="mt-16 grid list-none gap-0 p-0 md:mt-24">
+      {steps.map((s, i) => (
+        <li
+          data-reveal
+          class="border-line grid gap-x-8 gap-y-3 border-t py-8 md:grid-cols-12 md:py-10"
+        >
+          <p class="text-ink-soft text-xs font-medium tracking-[0.2em] uppercase md:col-span-5">
+            <span class="text-primary font-display mr-2 text-base tracking-normal normal-case">
+              {i + 1}
+            </span>
+            {s.when}
+          </p>
+          <div class="md:col-span-6 md:col-start-6">
+            <h3 class="font-display text-2xl leading-tight font-normal">
+              {s.title}
+            </h3>
+            <p class="mt-3 max-w-[56ch]" set:html={s.body} />
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>

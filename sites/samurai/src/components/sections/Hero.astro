@@ -1,0 +1,72 @@
+---
+import Scene3D from '../three/Scene3D.astro';
+import inkPoster from '../../assets/ink-poster.jpg';
+---
+
+<section
+  id="top"
+  class="relative isolate flex min-h-svh flex-col justify-end overflow-x-clip"
+  aria-labelledby="hero-title"
+>
+  <Scene3D
+    scene="ink"
+    poster={inkPoster}
+    priority
+    alt="Partículas de tinta roja y grisácea que flotan despacio sobre un fondo casi negro."
+    class="absolute! inset-0 -z-10 h-full w-full"
+  />
+  <p class="scene-note text-ink-soft absolute top-24 right-(--gutter) hidden max-w-[28ch] text-right text-xs">
+    Imagen fija: la animación de tinta no se carga con movimiento reducido o sin
+    WebGL.
+  </p>
+
+  <div class="mx-auto w-full max-w-[110rem] px-(--gutter) pt-36 pb-12 md:pb-16">
+    <p class="text-primary text-xs font-semibold tracking-[0.2em] uppercase">
+      Capítulo 0 · Introducción
+    </p>
+    <div class="overflow-x-clip">
+      <h1
+        id="hero-title"
+        class="font-display text-hero-word pt-[0.22em] leading-[0.85] font-light tracking-[-0.03em] whitespace-nowrap"
+      >
+        Samuráis
+      </h1>
+    </div>
+
+    <div class="mt-8 grid gap-8 md:grid-cols-12 md:gap-x-8">
+      <p
+        data-reveal
+        data-reveal-delay="0.2"
+        class="text-lg leading-snug md:col-span-6 md:col-start-6 lg:col-span-5 lg:col-start-6"
+      >
+        Una guía en cinco capítulos sobre los guerreros de Japón: cómo
+        surgieron, qué vestían, cómo eran sus espadas y cómo terminó su clase.
+        Con objetos de museo como prueba.
+      </p>
+      <div
+        data-reveal
+        data-reveal-delay="0.3"
+        class="flex flex-wrap items-center gap-x-8 gap-y-3 md:col-span-6 md:col-start-6 lg:col-span-4 lg:col-start-11 lg:flex-col lg:items-start"
+      >
+        <a
+          href="#capitulos"
+          class="bg-primary text-primary-contrast rounded-md hover:bg-primary-hover inline-flex min-h-12 items-center px-6 text-sm font-semibold transition-colors duration-(--duration-fast)"
+        >
+          Explorar los capítulos
+        </a>
+        <a
+          href="#fuentes"
+          class="inline-flex min-h-11 items-center text-sm underline decoration-1 underline-offset-8 hover:no-underline"
+        >
+          Fuentes
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .scene3d[data-scene-state='poster'] ~ .scene-note {
+    display: block;
+  }
+</style>

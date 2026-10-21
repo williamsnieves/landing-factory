@@ -1,0 +1,76 @@
+---
+import ChapterHead from './ChapterHead.astro';
+import Photo from './Photo.astro';
+import { photos } from '../../data/images';
+
+const dates = [
+  {
+    year: '1868',
+    text: 'Restauración Meiji: el shogunato Tokugawa termina y el gobierno pasa a hablar en nombre del emperador.',
+  },
+  {
+    year: '1871',
+    text: 'Se abolen los dominios (<i>han</i>) de los antiguos señores, sustituidos por prefecturas.',
+  },
+  {
+    year: '1873',
+    text: 'Ley de conscripción: se forma un ejército con reclutas. Entre 1873 y 1876 los estipendios de los samuráis se conmutan, es decir, se cambian por otra forma de pago.',
+  },
+  {
+    year: '1876',
+    text: 'Prohibición de llevar espada en público (<i>haitōrei</i>): uno de los signos más visibles de la clase deja de estar permitido.',
+  },
+  {
+    year: '1877',
+    text: 'Rebelión de Satsuma: antiguos samuráis se alzan contra el gobierno y son derrotados.',
+  },
+];
+---
+
+<section
+  id="fin"
+  aria-labelledby="fin-title"
+  class="bg-surface py-(--section-y)"
+>
+  <div class="mx-auto max-w-[110rem] px-(--gutter)">
+    <ChapterHead
+      numeral="V"
+      eyebrow="Capítulo V"
+      title="Fin de la clase"
+      id="fin-title"
+    >
+      <p class="font-display text-2xl leading-tight text-balance">
+        En menos de diez años, la clase guerrera dejó de existir como grupo con
+        privilegios propios.
+      </p>
+    </ChapterHead>
+
+    <div class="mt-16 grid items-start gap-14 md:mt-24 md:grid-cols-12">
+      <ol class="m-0 list-none p-0 md:col-span-7 md:col-start-1">
+        {dates.map((d) => (
+          <li
+            data-reveal
+            class="border-line grid gap-x-6 gap-y-1 border-t py-6 sm:grid-cols-[7rem_1fr]"
+          >
+            <p class="font-display text-primary text-2xl leading-none font-light">
+              {d.year}
+            </p>
+            <p class="max-w-[56ch]" set:html={d.text} />
+          </li>
+        ))}
+      </ol>
+      <div class="grid gap-10 sm:grid-cols-2 md:col-span-5 md:grid-cols-1">
+        <Photo
+          photo={photos.actor}
+          aspect="4/5"
+          sizes="(min-width: 768px) 36vw, (min-width: 640px) 45vw, 94vw"
+        />
+        <Photo
+          photo={photos.infantry}
+          aspect="16/10"
+          sizes="(min-width: 768px) 36vw, (min-width: 640px) 45vw, 94vw"
+        />
+      </div>
+    </div>
+  </div>
+</section>

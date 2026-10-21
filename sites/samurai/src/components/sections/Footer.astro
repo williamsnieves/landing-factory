@@ -1,0 +1,63 @@
+---
+import { credits } from '../../data/images';
+---
+
+<footer class="bg-paper text-ink pt-20 md:pt-28">
+  <div class="mx-auto grid max-w-[110rem] gap-10 px-(--gutter) text-sm md:grid-cols-12">
+    <div class="md:col-span-5">
+      <h2 class="font-display text-xl font-normal">Atlas Bushi</h2>
+      <p class="text-ink-soft mt-3 max-w-[46ch]">
+        Atlas Bushi es una guía ficticia, creada para esta página de muestra. No
+        es un museo, una escuela ni una editorial, y no tiene datos de contacto.
+      </p>
+    </div>
+    <nav aria-label="En esta página" class="md:col-span-3 md:col-start-7">
+      <h2 class="font-display text-xl font-normal">En esta página</h2>
+      <ul class="m-0 mt-3 list-none space-y-0 p-0">
+        {[
+          ['#capitulos', 'Capítulos'],
+          ['#mitos', 'Mitos y realidad'],
+          ['#fuentes', 'Fuentes'],
+        ].map(([href, label]) => (
+          <li>
+            <a
+              href={href}
+              class="inline-flex min-h-11 items-center underline-offset-4 hover:underline"
+            >
+              {label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+
+  <div class="overflow-x-clip">
+    <p
+      aria-hidden="true"
+      class="font-display text-wordmark mt-16 w-full text-center leading-[0.85] font-light tracking-[-0.04em] whitespace-nowrap select-none md:mt-24"
+    >
+      Atlas Bushi
+    </p>
+  </div>
+
+  <div class="text-ink-soft mx-auto max-w-[110rem] px-(--gutter) pt-8 pb-10 text-xs">
+    <p>
+      Fotografías de The Metropolitan Museum of Art, Open Access:{' '}
+      {credits.map((c, i) => (
+        <>
+          {i > 0 ? ' · ' : ''}
+          <a
+            href={c.url}
+            rel="noopener"
+            class="underline underline-offset-2 hover:no-underline"
+          >
+            {c.author}
+          </a>{' '}
+          ({c.license})
+        </>
+      ))}
+      . Fuentes tipográficas con licencia SIL OFL 1.1. Detalle en CREDITS.md.
+    </p>
+  </div>
+</footer>

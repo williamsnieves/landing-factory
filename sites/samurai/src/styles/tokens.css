@@ -1,0 +1,65 @@
+/*
+ * Design tokens: the single source of truth for a site's theme.
+ * Tailwind v4 turns every --color-*, --font-*, --text-*, --spacing and
+ * --radius-* variable below into utilities (bg-primary, font-display, ...).
+ * To retheme a site, edit only this file. `@theme static` emits every variable
+ * (not only the used ones) so 3D scenes can read colors from the page.
+ *
+ * Atlas Bushi (samurai). Decisions and contrast ratios:
+ * design-system/samurai/MASTER.md (ui-ux-pro-max). Keep both in sync.
+ *
+ * DARK SITE: `paper` is the near-black lacquer ground and `ink` is the warm
+ * paper-white text, so the ink/paper pair is still "text on background".
+ */
+@theme static {
+  /* Colors. primary (shu) is the only action color; accent is its deep intensity. */
+  --color-primary: #e5543a; /* shu, bright: buttons, links, focus ring, numerals */
+  --color-primary-hover: #f0694f;
+  --color-primary-contrast: #0e0c0b; /* text on primary (dark lacquer) */
+  --color-accent: #bc351f; /* shu, deep: large shapes, strokes, 3D tint; never small text */
+  --color-ink: #f1eadc; /* text: warm paper-white */
+  --color-ink-soft: #b5aa98; /* secondary text, captions */
+  --color-paper: #0e0c0b; /* page ground: near-black lacquer */
+  --color-surface: #1a1613; /* raised panels, cards, footer */
+  --color-line: #3a322b; /* hairlines and dividers, never text */
+
+  /* Fonts (self-hosted variable fonts via @fontsource-variable, see global.css) */
+  --font-display:
+    'Newsreader Variable', ui-serif, Georgia, 'Times New Roman', serif;
+  --font-sans:
+    'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Roboto, sans-serif;
+
+  /* Type scale */
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.625rem;
+  --text-2xl: clamp(1.75rem, 3vw, 2.25rem);
+  --text-3xl: clamp(2.25rem, 4.5vw, 3.75rem); /* chapter headings */
+  --text-4xl: clamp(3rem, 9vw, 7rem); /* hero supporting statement */
+  --text-hero-word: clamp(5rem, 24vw, 22rem); /* giant hero word (SAMURÁI) */
+  --text-numeral: clamp(5rem, 14vw, 12rem); /* chapter numerals I-VI */
+  --text-wordmark: clamp(3rem, 15vw, 20rem); /* footer wordmark "Atlas Bushi" */
+
+  /* Spacing base unit: p-4 = 1rem, p-24 = 6rem, ... */
+  --spacing: 0.25rem;
+  --section-y: clamp(5rem, 12vw, 10rem); /* vertical rhythm between chapters */
+  --gutter: clamp(1.25rem, 4vw, 3rem); /* page side padding */
+  --measure: 62ch; /* reading column */
+
+  /* Radii: nearly square, print-like */
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-pill: 999px;
+
+  /* Motion (GSAP: ease-out-soft = expo.out, ease-in-out-soft = power3.inOut) */
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 180ms; /* hover, focus, press */
+  --duration-base: 320ms; /* header solid, small state changes */
+  --duration-reveal: 1000ms; /* data-reveal fade and rise */
+  --duration-slow: 1600ms; /* hero entrance, scene fade-in */
+}
