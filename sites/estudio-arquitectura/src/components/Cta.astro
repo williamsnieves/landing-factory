@@ -1,0 +1,19 @@
+---
+import { mailto, site } from '../data/site';
+
+interface Props {
+  /** "solid" is the main action; "outline" is the quiet header variant. */
+  variant?: 'solid' | 'outline';
+  class?: string;
+}
+
+const { variant = 'solid', class: className = '' } = Astro.props;
+---
+
+<a
+  href={mailto}
+  class:list={['btn', variant === 'outline' && 'btn-outline', className]}
+>
+  <span>{site.ctaLabel}</span>
+  <span aria-hidden="true">→</span>
+</a>

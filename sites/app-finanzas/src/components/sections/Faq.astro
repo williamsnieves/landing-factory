@@ -1,0 +1,66 @@
+---
+const faqs = [
+  {
+    q: '¿Cuánto cuesta Trazo?',
+    a: 'Puedes empezar con el plan Gratis. Premium cuesta 4,99 € al mes (precio de ejemplo) y añade más cuentas, objetivos sin límite y la comparación con meses anteriores.',
+  },
+  {
+    q: '¿Con qué bancos funciona?',
+    a: 'Trazo se conecta a cuentas de bancos que permiten la lectura de movimientos. La lista exacta aparecerá en la app antes de que conectes nada.',
+  },
+  {
+    q: '¿Qué datos lee Trazo?',
+    a: 'Los movimientos y el saldo de las cuentas que tú elijas. No guardamos las claves de tu banca online.',
+  },
+  {
+    q: '¿Puede Trazo mover mi dinero?',
+    a: 'No. La conexión es de solo lectura: Trazo no puede hacer pagos, transferencias ni cobros en tus cuentas.',
+  },
+  {
+    q: '¿Cómo cancelo Premium?',
+    a: 'Desde los ajustes de suscripciones de la App Store o de Google Play, cuando quieras. Seguirás con el plan Gratis.',
+  },
+  {
+    q: '¿Puedo borrar mis datos?',
+    a: 'Sí. Desde los ajustes de la app puedes exportar tus datos o pedir que se borren.',
+  },
+  {
+    q: '¿Sirve si comparto piso?',
+    a: 'Trazo es individual. Puedes crear una categoría para el piso con tu parte de los gastos y ponerle un límite como a cualquier otra.',
+  },
+];
+---
+
+<section
+  id="faq"
+  class="border-line border-t scroll-mt-4"
+  aria-labelledby="faq-t"
+>
+  <div class="mx-auto w-full max-w-6xl px-4 py-16 md:px-8 md:py-24">
+    <div class="grid gap-12 md:grid-cols-12">
+      <h2
+        id="faq-t"
+        class="font-display text-3xl leading-tight font-bold tracking-tight text-balance md:col-span-4"
+        data-reveal
+      >
+        Preguntas frecuentes
+      </h2>
+      <div class="md:col-span-7" data-reveal>
+        {faqs.map((f) => (
+          <details class="border-line group border-b">
+            <summary class="font-display flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-3 text-lg font-semibold [&::-webkit-details-marker]:hidden">
+              {f.q}
+              <span
+                aria-hidden="true"
+                class="text-primary text-xl transition-transform duration-150 group-open:rotate-45"
+              >
+                +
+              </span>
+            </summary>
+            <p class="text-ink-soft max-w-xl pb-5">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

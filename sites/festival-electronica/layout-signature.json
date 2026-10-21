@@ -1,0 +1,112 @@
+{
+  "site": "festival-electronica",
+  "version": 1,
+  "page": "/",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "features": {
+    "sectionCount": 10,
+    "cols1Share": 0.6,
+    "cols2Share": 0.3,
+    "cols3Share": 0.1,
+    "splitRatio": 0.71,
+    "fullBleedShare": 0.2,
+    "imageRadius": 0,
+    "buttonRadius": 0,
+    "buttonShape": "text",
+    "headingScale": 22.1,
+    "headingAlign": "left",
+    "headingCase": 1,
+    "eyebrowShare": 0.11,
+    "wordsPerScreen": 79,
+    "footerType": "columns",
+    "mediaPerScreen": 0.3,
+    "rotatedShare": 0,
+    "overlapShare": 0,
+    "stickyCount": 0
+  },
+  "sections": [
+    {
+      "id": "top",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": null,
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "lineup",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "escenarios",
+      "cols": 1,
+      "fullBleed": true,
+      "eyebrow": false
+    },
+    {
+      "id": "nave",
+      "cols": 1,
+      "fullBleed": true,
+      "eyebrow": false
+    },
+    {
+      "id": "horarios",
+      "cols": 3,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "entradas",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "llegar",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "normas",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "cierre",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    }
+  ],
+  "mobile": {
+    "screens": 15.69,
+    "wordsPerScreen": 60,
+    "sectionCount": 10
+  },
+  "hashes": [
+    "6b8471b22cb6b2b6",
+    "69d29293183a3a9b",
+    "5b981819995b9919",
+    "995299590ea0a298",
+    "d8988c66d0c8249c",
+    "9428824090906181",
+    "91b686c9c1207280",
+    "89a4a42d24240000",
+    "8289363649969669",
+    "2cac8cae8c8c6c08",
+    "6091927898188400",
+    "d3e837534bb584b4",
+    "e835534b4584b434"
+  ]
+}

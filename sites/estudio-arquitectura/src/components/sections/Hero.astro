@@ -1,0 +1,61 @@
+---
+import Plan from '../Plan.astro';
+import Cta from '../Cta.astro';
+import { chapters } from '../../data/site';
+---
+
+<section
+  class="wrap flex min-h-[calc(100svh-4.5rem)] flex-col justify-between pt-12 md:pt-20"
+  aria-labelledby="hero-title"
+>
+  <div class="grid grid-cols-12 items-center gap-x-4 gap-y-12 md:gap-x-6">
+    <h1
+      id="hero-title"
+      class="font-display col-span-12 max-w-[20ch] text-5xl leading-[1.04] font-medium tracking-tight text-balance"
+    >
+      Rehabilitamos viviendas y espacios de trabajo en Madrid.
+    </h1>
+    <div class="col-span-12 md:col-span-5">
+      <p class="text-ink-soft max-w-[34ch] text-lg">
+        Un estudio pequeño. Medimos el edificio, dibujamos con detalle y
+        dirigimos la obra hasta la última junta.
+      </p>
+      <div class="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
+        <Cta />
+        <a class="link" href="#proyectos">
+          Ver los proyectos
+        </a>
+      </div>
+    </div>
+
+    <figure class="col-span-12 md:col-span-7">
+      <div class="bg-surface border-line border p-3 md:p-5">
+        <Plan variant="hero" animate />
+      </div>
+      <figcaption class="text-ink-soft mt-3 text-sm">
+        Planta de una vivienda rehabilitada. Dibujo esquemático de muestra.
+      </figcaption>
+    </figure>
+  </div>
+
+  <nav class="mt-16 pb-8 md:mt-24" aria-label="Índice de capítulos">
+    <ol class="border-line grid grid-cols-3 gap-x-4 border-t pt-4 md:grid-cols-6">
+      {chapters.map((c) => (
+        <li>
+          <a
+            href={c.href}
+            class="text-ink-soft hover:text-primary flex items-baseline gap-3 py-2 text-sm"
+          >
+            <span
+              class="font-display text-primary tabular-nums"
+              aria-hidden="true"
+            >
+              {c.n}
+            </span>
+            <span>{c.label}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+</section>

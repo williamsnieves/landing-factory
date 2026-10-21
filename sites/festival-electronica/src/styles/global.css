@@ -1,0 +1,175 @@
+@import 'tailwindcss';
+@import './tokens.css';
+@import '@fontsource-variable/archivo/wdth.css';
+@import '@fontsource-variable/jetbrains-mono/wght.css';
+
+@layer base {
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    overflow-x: clip;
+    font-size: var(--text-base);
+    line-height: 1.6;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 3px;
+  }
+}
+
+/* TALLER 303 building blocks ---------------------------------------------
+ * Shared by the section components. Colors, fonts, sizes and rules come from
+ * tokens.css only.
+ */
+:root {
+  --gutter: clamp(1rem, 3.5vw, 3rem);
+  --header-h: 3.5rem;
+}
+
+html {
+  scroll-padding-top: var(--header-h);
+}
+
+.wrap {
+  padding-inline: var(--gutter);
+}
+
+/* Giant condensed display type (Archivo, width axis). */
+.display {
+  font-family: var(--font-display);
+  font-stretch: var(--display-stretch-condensed);
+  font-weight: var(--display-weight);
+  line-height: var(--display-leading);
+  letter-spacing: var(--display-tracking);
+  word-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Mono label: times, indexes, captions, table heads. */
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+
+/* A page section: thick full-width rule on top, uneven height set per section. */
+.section {
+  border-top: var(--rule-thick) solid var(--color-ink);
+  padding-block: clamp(3rem, 8vw, 8rem);
+}
+
+.section-title {
+  font-size: var(--text-3xl);
+  margin: 0;
+  text-wrap: balance;
+}
+
+/* Actions are type, not boxes: a bold mono link with a thick rule under it, instant inversion on hover. */
+.btn {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.125rem 0;
+  border: 0;
+  border-radius: 0;
+  text-decoration: underline;
+  text-decoration-thickness: var(--rule-thick);
+  text-underline-offset: 0.35em;
+  background: transparent;
+  color: var(--color-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition:
+    background-color var(--duration-fast) var(--ease-cut),
+    color var(--duration-fast) var(--ease-cut);
+}
+.btn:hover,
+.btn:focus-visible {
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+}
+.btn--solid {
+  font-size: var(--text-lg);
+}
+.btn--ink {
+  color: var(--color-primary-contrast);
+}
+.btn--ink:hover,
+.btn--ink:focus-visible {
+  background: var(--color-primary-contrast);
+  color: var(--color-primary);
+}
+
+/* Photos: plain rectangles, grayscale with a lime duotone, mono caption. */
+.photo {
+  position: relative;
+  overflow: hidden;
+  border: var(--rule-hair) solid var(--color-ink-soft);
+  background: var(--color-surface);
+}
+.photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.12) brightness(0.85);
+}
+.photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-primary);
+  mix-blend-mode: multiply;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.link-line {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+  text-decoration-thickness: 2px;
+}
+.link-line:hover {
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+}
+
+/* Motion layer -----------------------------------------------------------
+ * Hidden initial states apply ONLY when the .js-motion class is on <html>.
+ * That class is added by the inline script in <Motion /> when JavaScript runs
+ * and prefers-reduced-motion is not "reduce". Without it, everything is visible.
+ */
+.js-motion [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 2rem, 0);
+}
+
+/* Lenis recommended base styles */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}

@@ -1,0 +1,95 @@
+{
+  "site": "app-finanzas",
+  "version": 1,
+  "page": "/",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "features": {
+    "sectionCount": 8,
+    "cols1Share": 0.38,
+    "cols2Share": 0.63,
+    "cols3Share": 0,
+    "splitRatio": 0.47,
+    "fullBleedShare": 0,
+    "imageRadius": 0,
+    "buttonRadius": 8,
+    "buttonShape": "rect",
+    "headingScale": 4.5,
+    "headingAlign": "left",
+    "headingCase": 0,
+    "eyebrowShare": 0,
+    "wordsPerScreen": 107,
+    "footerType": "columns",
+    "mediaPerScreen": 0,
+    "rotatedShare": 0,
+    "overlapShare": 0,
+    "stickyCount": 1
+  },
+  "sections": [
+    {
+      "id": null,
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": null,
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "como-funciona",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": null,
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "seguridad",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "planes",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "faq",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "descarga",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    }
+  ],
+  "mobile": {
+    "screens": 13.45,
+    "wordsPerScreen": 63,
+    "sectionCount": 8
+  },
+  "hashes": [
+    "4936335b3333c330",
+    "34326b6b2bc4333b",
+    "2d3d33c1334b0b0b",
+    "333339cf0d53ac43",
+    "637337727b853b6b",
+    "6b0b4b64636b2b4d",
+    "4cb06d6dcd0818e4",
+    "c4c4c0c876561207"
+  ]
+}

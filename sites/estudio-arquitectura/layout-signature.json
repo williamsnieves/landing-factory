@@ -1,0 +1,99 @@
+{
+  "site": "estudio-arquitectura",
+  "version": 1,
+  "page": "/",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "features": {
+    "sectionCount": 8,
+    "cols1Share": 0.75,
+    "cols2Share": 0.13,
+    "cols3Share": 0.13,
+    "splitRatio": 0.32,
+    "fullBleedShare": 0.38,
+    "imageRadius": 6,
+    "buttonRadius": 2,
+    "buttonShape": "rect",
+    "headingScale": 6.7,
+    "headingAlign": "left",
+    "headingCase": 0,
+    "eyebrowShare": 0.29,
+    "wordsPerScreen": 101,
+    "footerType": "minimal",
+    "mediaPerScreen": 0.8,
+    "rotatedShare": 0,
+    "overlapShare": 0,
+    "stickyCount": 0
+  },
+  "sections": [
+    {
+      "id": null,
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "estudio",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": "proyectos",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "metodo",
+      "cols": 4,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "ambitos",
+      "cols": 1,
+      "fullBleed": true,
+      "eyebrow": false
+    },
+    {
+      "id": null,
+      "cols": 1,
+      "fullBleed": true,
+      "eyebrow": false
+    },
+    {
+      "id": "encargo",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": "contacto",
+      "cols": 1,
+      "fullBleed": true,
+      "eyebrow": false
+    }
+  ],
+  "mobile": {
+    "screens": 13.91,
+    "wordsPerScreen": 84,
+    "sectionCount": 8
+  },
+  "hashes": [
+    "c4387e2626c54149",
+    "cd4d0609228d8b97",
+    "96999d60609c9c92",
+    "929a3c71387479c9",
+    "6098981000608c8c",
+    "4c545a4c209899de",
+    "733f0f0d1f9b0b22",
+    "3d37373f2b2b9923",
+    "f0f8f8f8f89e9b0c",
+    "9c9c038b32989c1c",
+    "0106060606e99696",
+    "9696392540e1e5e4"
+  ]
+}

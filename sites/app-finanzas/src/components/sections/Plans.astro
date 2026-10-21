@@ -1,0 +1,104 @@
+---
+import StoreButtons from '../StoreButtons.astro';
+
+const rows: [string, string | boolean, string | boolean][] = [
+  ['Cuentas conectadas', '1', 'Hasta 5'],
+  ['Presupuestos automáticos', true, true],
+  ['Objetivos de ahorro', '2', 'Sin límite'],
+  ['Análisis de gastos del mes', true, true],
+  ['Comparar con meses anteriores', false, true],
+  ['Exportar tus datos', true, true],
+];
+---
+
+<section
+  id="planes"
+  class="border-line border-t scroll-mt-4"
+  aria-labelledby="planes-t"
+>
+  <div class="mx-auto w-full max-w-6xl px-4 py-16 md:px-8 md:py-24">
+    <div class="grid gap-12 md:grid-cols-12">
+      <div class="min-w-0 md:col-span-4">
+        <h2
+          id="planes-t"
+          class="font-display text-3xl leading-tight font-bold tracking-tight text-balance"
+          data-reveal
+        >
+          Empieza gratis, pasa a Premium si lo necesitas
+        </h2>
+        <p class="text-ink-soft mt-4" data-reveal data-reveal-delay="0.1">
+          Los precios y límites son de ejemplo y se confirman antes del
+          lanzamiento. Premium se cancela cuando quieras desde los ajustes de tu
+          tienda.
+        </p>
+      </div>
+      <div class="min-w-0 md:col-span-8" data-reveal>
+        <div>
+          <table
+            aria-label="Comparación entre el plan Gratis y el plan Premium"
+            class="w-full border-collapse text-left"
+          >
+            <thead>
+              <tr class="bg-surface align-bottom">
+                <th scope="col" class="px-2 py-4 font-semibold sm:px-4">
+                  Función
+                </th>
+                <th scope="col" class="px-2 py-4 sm:px-4">
+                  <span class="font-display block text-xl font-bold">
+                    Gratis
+                  </span>
+                  <span class="text-ink-soft block text-sm font-normal">
+                    0 €
+                  </span>
+                </th>
+                <th scope="col" class="px-2 py-4 sm:px-4">
+                  <span class="font-display text-primary block text-xl font-bold">
+                    Premium
+                  </span>
+                  <span class="text-ink-soft block text-sm font-normal">
+                    4,99 € al mes (ejemplo)
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map(([name, free, premium]) => (
+                <tr class="border-line border-b">
+                  <th scope="row" class="px-2 py-3 font-medium sm:px-4">
+                    {name}
+                  </th>
+                  {[free, premium].map((v) => (
+                    <td class="px-2 py-3 sm:px-4">
+                      {typeof v === 'string' ? (
+                        v
+                      ) : v ? (
+                        <span
+                          role="img"
+                          aria-label="Incluido"
+                          class="text-primary font-bold"
+                        >
+                          ✓
+                        </span>
+                      ) : (
+                        <span
+                          role="img"
+                          aria-label="No incluido"
+                          class="text-ink-soft"
+                        >
+                          –
+                        </span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-8">
+          <StoreButtons />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

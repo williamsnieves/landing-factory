@@ -1,0 +1,194 @@
+---
+import { plans, doorPath, windowPath, type PlanVariant } from '../data/plans';
+
+interface Props {
+  variant: PlanVariant;
+  /** Draw the lines in on load (CSS only; the final state is the default). */
+  animate?: boolean;
+  class?: string;
+}
+
+const { variant, animate = false, class: className = '' } = Astro.props;
+const def = plans[variant];
+const uid = `plan-${variant}`;
+
+const segments = 2;
+const segLen = (def.unitsPerM * def.meters) / segments;
+const scaleLabels = def.meters === 2 ? ['0', '1', '2 m'] : ['0', '0,5', '1 m'];
+const barX = 40;
+const barY = 318;
+
+const windowD = def.windows.map(windowPath).join('');
+const doorD = def.doors.map(doorPath).join('');
+---
+
+<svg
+  class:list={['plan', animate && 'plan--draw', className]}
+  viewBox="0 0 480 360"
+  role="img"
+  aria-labelledby={`${uid}-title`}
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <title id={`${uid}-title`}>{def.title}</title>
+  <defs>
+    <pattern
+      id={`${uid}-grid`}
+      width="20"
+      height="20"
+      patternUnits="userSpaceOnUse"
+    >
+      <path d="M20 0H0V20" class="grid"></path>
+    </pattern>
+  </defs>
+  <rect width="480" height="360" fill={`url(#${uid}-grid)`}></rect>
+
+  <g class="fit">
+    {def.fittings.map((d, i) => (
+      <path
+        d={d}
+        pathLength="1"
+        class="draw"
+        style={`--d:${(1 + i * 0.08).toFixed(2)}s`}
+      />
+    ))}
+  </g>
+  <g class="open">
+    <path d={windowD} pathLength="1" class="draw thin" style="--d:0.7s"></path>
+    <path d={doorD} pathLength="1" class="draw thin" style="--d:0.8s"></path>
+  </g>
+  {def.partitions.length > 0 && (
+    <g class="part">
+      {def.partitions.map((d) => (
+        <path d={d} pathLength="1" class="draw" style="--d:0.35s" />
+      ))}
+    </g>
+  )}
+  <g class="wall">
+    {def.walls.map((d) => (
+      <path d={d} pathLength="1" class="draw" style="--d:0s" />
+    ))}
+  </g>
+
+  <g class="text">
+    {def.labels.map((l) => (
+      <text x={l.x} y={l.y} text-anchor="middle">
+        {l.text}
+      </text>
+    ))}
+  </g>
+
+  <g class="scale">
+    {Array.from({ length: segments }, (_, i) => (
+      <rect
+        x={barX + i * segLen}
+        y={barY}
+        width={segLen}
+        height="5"
+        class={i % 2 === 0 ? 'solid' : 'hollow'}
+      />
+    ))}
+    <g class="text">
+      {scaleLabels.map((t, i) => (
+        <text
+          x={barX + i * segLen}
+          y={barY + 20}
+          text-anchor={i === 0 ? 'start' : 'middle'}
+        >
+          {t}
+        </text>
+      ))}
+    </g>
+    <path d="M460 322L467 346L460 341L453 346Z" class="north"></path>
+    <g class="text">
+      <text x="460" y="316" text-anchor="middle">
+        N
+      </text>
+    </g>
+  </g>
+</svg>
+
+<style>
+  .plan {
+    display: block;
+    width: 100%;
+    height: auto;
+    color: var(--color-primary);
+  }
+  .grid {
+    fill: none;
+    stroke: var(--color-line);
+    stroke-width: 0.6;
+    opacity: 0.6;
+  }
+  path {
+    fill: none;
+    stroke-linejoin: miter;
+  }
+  .wall path {
+    stroke: var(--color-primary);
+    stroke-width: 6;
+  }
+  .part path {
+    stroke: var(--color-primary);
+    stroke-width: 3.5;
+  }
+  .thin {
+    stroke: var(--color-primary);
+    stroke-width: 1.1;
+  }
+  .fit path {
+    stroke: var(--color-ink-soft);
+    stroke-width: 1.1;
+  }
+  .text text {
+    fill: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-variant-numeric: tabular-nums;
+  }
+  .scale .solid {
+    fill: var(--color-ink);
+  }
+  .scale .hollow {
+    fill: none;
+    stroke: var(--color-ink);
+    stroke-width: 1;
+  }
+  .north {
+    fill: var(--color-ink);
+    stroke: none;
+  }
+
+  /* Hero drawing: the paths draw themselves in once. The default state is the
+     finished drawing, so it is complete without JS and under reduced motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    .plan--draw .draw {
+      stroke-dasharray: 1;
+      animation: plan-draw 1.2s var(--d, 0s) cubic-bezier(0.45, 0, 0.25, 1) both;
+    }
+    .plan--draw .text {
+      animation: plan-fade 0.6s 1.7s ease both;
+    }
+    .plan--draw .scale .solid,
+    .plan--draw .scale .hollow,
+    .plan--draw .north {
+      animation: plan-fade 0.6s 1.4s ease both;
+    }
+  }
+  @keyframes plan-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes plan-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+</style>

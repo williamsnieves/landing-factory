@@ -1,0 +1,152 @@
+---
+import { Image } from 'astro:assets';
+import { stages } from '../../data/festival';
+import hall from '../../assets/images/turbine-hall.jpg';
+---
+
+<section id="escenarios" class="section stages" aria-labelledby="stages-title">
+  <div class="wrap head">
+    <h2 id="stages-title" class="display section-title" data-reveal>
+      Tres escenarios
+    </h2>
+    <p class="note" data-reveal data-reveal-delay="0.1">
+      Una nave grande, una sala caliente y un sótano. Pasa de uno a otro cuando
+      el cuerpo lo pida; la puerta no se cierra entre turnos.
+    </p>
+  </div>
+
+  <figure class="wrap fig">
+    <div class="photo frame">
+      <div data-parallax="0.15" class="layer">
+        <Image
+          src={hall}
+          alt="Una gran sala industrial con tuberías, pasarelas metálicas y cubierta de acero, en blanco y negro con un tono verde."
+          widths={[960, 1440, 1920]}
+          sizes="100vw"
+          loading="lazy"
+        />
+      </div>
+    </div>
+    <figcaption class="label cap">
+      Fig. 01 — Imagen representativa de una sala industrial. No es el recinto
+      del festival.
+    </figcaption>
+  </figure>
+
+  <div class="wrap">
+    <table class="ledger" aria-label="Escenarios: aforo, sonido y programación">
+      <thead>
+        <tr class="label">
+          <th scope="col">Escenario</th>
+          <th scope="col">Aforo</th>
+          <th scope="col">Sonido</th>
+          <th scope="col">Qué pasa</th>
+        </tr>
+      </thead>
+      <tbody>
+        {stages.map((s) => (
+          <tr>
+            <th scope="row" class="display stage-name">
+              {s.name}
+            </th>
+            <td data-label="Aforo" class="mono">
+              {s.capacity} <span class="label">personas (ejemplo)</span>
+            </td>
+            <td data-label="Sonido">{s.sound}</td>
+            <td data-label="Qué pasa">{s.what}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<style>
+  .head {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: clamp(2rem, 5vw, 4rem);
+  }
+  .note {
+    margin: 0;
+    max-width: 46ch;
+  }
+  .fig {
+    margin: 0 0 clamp(2rem, 5vw, 4rem);
+  }
+  .frame {
+    height: clamp(14rem, 52vw, 34rem);
+  }
+  .layer {
+    position: absolute;
+    inset-inline: 0;
+    top: -15%;
+    height: 130%;
+  }
+  .layer :global(img) {
+    object-position: 50% 55%;
+  }
+  .cap {
+    margin-top: 0.75rem;
+  }
+  .ledger {
+    width: 100%;
+    border-collapse: collapse;
+    border-top: var(--rule-thick) solid var(--color-ink);
+  }
+  .ledger thead {
+    display: none;
+  }
+  .ledger tr {
+    display: grid;
+    gap: 0.5rem;
+    padding-block: 1.25rem;
+    border-bottom: var(--rule-hair) solid var(--color-ink-soft);
+  }
+  .ledger th,
+  .ledger td {
+    padding: 0;
+    text-align: left;
+    font-weight: 400;
+  }
+  .stage-name {
+    font-size: var(--text-3xl);
+    line-height: 0.85;
+    color: var(--color-primary);
+  }
+  .ledger td[data-label]::before {
+    content: attr(data-label) ' ';
+    display: block;
+    font-size: var(--text-sm);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+  }
+  @media (min-width: 64rem) {
+    .ledger thead {
+      display: table-header-group;
+    }
+    .ledger thead th {
+      padding: 0.75rem 1rem 0.75rem 0;
+      text-align: left;
+      font-weight: 400;
+      border-bottom: var(--rule-hair) solid var(--color-ink-soft);
+    }
+    .ledger tr {
+      display: table-row;
+    }
+    .ledger tbody th,
+    .ledger tbody td {
+      display: table-cell;
+      padding: 1.5rem 1rem 1.5rem 0;
+      vertical-align: top;
+      border-bottom: var(--rule-hair) solid var(--color-ink-soft);
+    }
+    .ledger td[data-label]::before {
+      display: none;
+    }
+    .ledger tbody th {
+      width: 30%;
+    }
+  }
+</style>

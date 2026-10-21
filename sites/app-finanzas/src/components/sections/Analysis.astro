@@ -1,0 +1,148 @@
+---
+import {
+  categories,
+  eur,
+  goal,
+  pct,
+  totalBudget,
+  totalSpent,
+} from '../../data/march';
+
+const scale = 800;
+const stats = [
+  { value: eur(totalSpent), label: 'gastado en marzo' },
+  {
+    value: `${pct(totalSpent, totalBudget)} %`,
+    label: 'del presupuesto usado',
+  },
+  {
+    value: `${pct(goal.saved, goal.target)} %`,
+    label: `del objetivo «${goal.name}»`,
+  },
+];
+---
+
+<section class="border-line border-t" aria-labelledby="analisis">
+  <div class="mx-auto w-full max-w-6xl px-4 py-16 md:px-8 md:py-24">
+    <div class="grid gap-12 md:grid-cols-12">
+      <div class="min-w-0 md:col-span-4">
+        <h2
+          id="analisis"
+          class="font-display text-3xl leading-tight font-bold tracking-tight text-balance"
+          data-reveal
+        >
+          Mira en qué se va cada euro
+        </h2>
+        <p class="text-ink-soft mt-4" data-reveal data-reveal-delay="0.1">
+          Cada categoría muestra lo gastado, su límite y la diferencia. Las
+          barras y la tabla cuentan lo mismo.
+        </p>
+        <p class="text-ink-soft mt-4 text-sm">
+          Cómo leerlo: la barra es lo gastado y la marca vertical es el límite
+          de la categoría. Datos de ejemplo; no reflejan a ningún usuario real.
+        </p>
+      </div>
+      <div class="min-w-0 md:col-span-8" data-reveal>
+        <div>
+          <table
+            aria-label="Gasto de marzo por categoría frente a su límite, datos de ejemplo"
+            class="w-full border-collapse text-left text-sm"
+          >
+            <thead>
+              <tr class="bg-surface">
+                <th scope="col" class="px-3 py-3 font-semibold">
+                  Categoría
+                </th>
+                <th scope="col" class="px-3 py-3 text-right font-semibold">
+                  Gastado
+                </th>
+                <th scope="col" class="px-3 py-3 text-right font-semibold">
+                  Límite
+                </th>
+                <th
+                  scope="col"
+                  class="hidden px-3 py-3 font-semibold sm:table-cell"
+                >
+                  Gráfico
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {categories.map((c) => {
+                const over = c.spent > c.budget;
+                return (
+                  <tr class="border-line border-b">
+                    <th scope="row" class="px-3 py-3 font-medium">
+                      {c.name}
+                      {over && (
+                        <span class="bg-warn-soft text-warn rounded-xs mt-1 block w-fit px-2 py-0.5 text-xs font-semibold sm:mt-0 sm:ml-2 sm:inline-block">
+                          {eur(c.spent - c.budget)} por encima
+                        </span>
+                      )}
+                    </th>
+                    <td
+                      class:list={[
+                        'px-3 py-3 text-right',
+                        over && 'text-warn font-bold',
+                      ]}
+                    >
+                      {eur(c.spent)}
+                    </td>
+                    <td class="px-3 py-3 text-right">{eur(c.budget)}</td>
+                    <td class="hidden w-2/5 px-3 py-3 sm:table-cell">
+                      <div
+                        aria-hidden="true"
+                        class="bg-surface rounded-xs relative h-4"
+                      >
+                        <div
+                          class:list={[
+                            'rounded-xs h-4',
+                            over ? 'bg-accent' : 'bg-primary',
+                          ]}
+                          style={`width:${pct(c.spent, scale)}%`}
+                        />
+                        <div
+                          class="bg-ink absolute -top-1 h-6 w-0.5"
+                          style={`left:${pct(c.budget, scale)}%`}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr>
+                <th scope="row" class="px-3 py-3 font-semibold">
+                  Total
+                </th>
+                <td class="px-3 py-3 text-right font-bold">
+                  {eur(totalSpent)}
+                </td>
+                <td class="px-3 py-3 text-right font-bold">
+                  {eur(totalBudget)}
+                </td>
+                <td class="hidden sm:table-cell"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <dl class="border-line mt-16 grid gap-8 border-t pt-10 md:grid-cols-3">
+      {stats.map((s, i) => (
+        <div
+          class="flex flex-col-reverse justify-end gap-1"
+          data-reveal
+          data-reveal-delay={i * 0.1}
+        >
+          <dt class="text-ink-soft text-sm">
+            {s.label} <span class="text-ink">(datos de ejemplo)</span>
+          </dt>
+          <dd class="font-display text-3xl font-bold">{s.value}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>

@@ -1,0 +1,27 @@
+---
+interface Props {
+  n: string;
+  label: string;
+  /** "light" for chapters set on the primary color. */
+  tone?: 'default' | 'light';
+}
+const { n, label, tone = 'default' } = Astro.props;
+---
+
+<p
+  class:list={[
+    'flex items-baseline gap-3 text-sm md:block',
+    tone === 'light' ? 'text-primary-contrast' : 'text-ink-soft',
+  ]}
+>
+  <span
+    class:list={[
+      'font-display block text-2xl font-medium tabular-nums',
+      tone === 'light' ? 'text-primary-contrast' : 'text-primary',
+    ]}
+    aria-hidden="true"
+  >
+    {n}
+  </span>
+  <span class="tracking-[0.14em] uppercase">{label}</span>
+</p>

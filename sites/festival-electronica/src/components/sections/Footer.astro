@@ -1,0 +1,96 @@
+---
+import { nav } from '../../data/festival';
+import credits from '../../data/credits.json';
+
+interface Credit {
+  author: string;
+  license: string;
+  url: string;
+}
+const photos = credits as Credit[];
+---
+
+<footer class="foot">
+  <div class="wrap cols">
+    <div class="col">
+      <p class="label head">Taller 303</p>
+      <p>
+        Festival ficticio. Nombre, fechas, artistas, precios, dirección y
+        contacto son datos de ejemplo que se sustituirán antes del lanzamiento.
+      </p>
+      <p class="label">hola@example.com · +34 000 000 000 (ejemplo)</p>
+    </div>
+
+    <nav class="col" aria-label="Pie de página">
+      <p class="label head">Ir a</p>
+      <ul>
+        {nav.map((n) => (
+          <li>
+            <a href={n.href} class="link-line">
+              {n.label}
+            </a>
+          </li>
+        ))}
+        <li>
+          <a href="#entradas" class="link-line">
+            Entradas
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="col">
+      <p class="label head">Fotos</p>
+      <ul>
+        {photos.map((p) => (
+          <li>
+            <a href={p.url} class="link-line" rel="noopener noreferrer">
+              {p.author}
+            </a>
+            <span class="label"> · {p.license} · Wikimedia Commons</span>
+          </li>
+        ))}
+      </ul>
+      <p class="label">
+        Fotos de stock representativas, no del recinto del festival.
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .foot {
+    border-top: var(--rule-thick) solid var(--color-ink);
+    padding-block: clamp(2rem, 5vw, 4rem);
+  }
+  .cols {
+    display: grid;
+    gap: 2.5rem;
+  }
+  .col {
+    display: grid;
+    gap: 0.9rem;
+    align-content: start;
+  }
+  .col p,
+  .col ul {
+    margin: 0;
+  }
+  .col ul {
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+  .head {
+    color: var(--color-ink);
+    font-weight: 700;
+    padding-bottom: 0.5rem;
+    border-bottom: var(--rule-hair) solid var(--color-ink-soft);
+  }
+  @media (min-width: 56rem) {
+    .cols {
+      grid-template-columns: 5fr 3fr 4fr;
+      gap: 3rem;
+    }
+  }
+</style>

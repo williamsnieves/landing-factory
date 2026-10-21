@@ -24,23 +24,9 @@ Read this first in a new or compacted session. Last updated: 2026-10-21 (add-des
 
 ## Resume here (2026-10-21)
 
-Branch `change/add-design-archetypes`, pushed up to the allow-list fix (font install with `--no-audit --no-fund` first). Not committed yet, on purpose: the pilot sites and `package-lock.json` (commit them together once all three runs finish).
+Branch `change/add-design-archetypes`: tasks 1 to 4.1 done; the three pilot sites (`estudio-arquitectura`, `festival-electronica`, `app-finanzas`) are committed and the PR is open. Task 4.2 waits for the owner's review of the three previews. After merge and the owner's go-ahead: archive `add-design-archetypes` as the first commit of `change/add-brief-intake`.
 
-Three-niche pilot (task 4.1), one `npm run new-landing -- <slug> --niche "..." --auto --model sonnet` each, niches chosen by the owner's pick of my proposal:
-
-| Site | State | Blend (`landing-meta`) |
-| --- | --- | --- |
-| `festival-electronica` ("Taller 303", Bilbao) | passed, QA on the first run; reviewed: brutalist poster, neon lime on black, mono type, point-floor 3D scene | `brutalist-raw+typographic-poster` (marquee-type, giant-numerals) |
-| `app-finanzas` ("Trazo") | passed, QA after 2 fix rounds; reviewed: UI screens drawn in code, privacy table, plan comparison, no photos | `data-and-proof+swiss-grid-minimal` (split-sticky, flush-left-axis) |
-| `estudio-arquitectura` (Madrid) | first run stopped at the design-system phase (font install refused by the allow list; fixed in commit 0b69332). Regenerating from scratch; log in the session scratchpad, site log in `sites/estudio-arquitectura/.run.log` | first run chose `swiss-grid-minimal+bento-product-showcase` |
-
-If the session was compacted or the run was lost: check `sites/estudio-arquitectura/RUN.md` (`Result:`). If it is not `passed`, delete `sites/estudio-arquitectura` and `design-system/estudio-arquitectura`, run `npm install`, and rerun the command above with the same niche ("Estudio de arquitectura pequeño en Madrid especializado en rehabilitación de vivienda y espacios de trabajo; tono sobrio, preciso y culto; quiere mostrar 4-6 proyectos con planos y fotos, su método de trabajo y conseguir contactos para encargos; público: particulares con presupuesto medio-alto y pequeñas empresas").
-
-Then:
-
-1. For each new site: `node scripts/layout-signature.mjs --site <slug> --write` (if the run did not), `node scripts/check-landing.mjs --site <slug>`, and review `qa/<slug>/sections/*.png`. Record the pairwise layout distances of all six sites in tasks.md 4.1/4.2.
-2. Commit the three sites, their `design-system/<slug>/` and `package-lock.json`; run the full checks in a clean clone; open the PR (title `add-design-archetypes: ...`) with the three previews; check off 4.1; 4.2 waits for the owner's review of the previews.
-3. After merge and the owner's go-ahead: archive `add-design-archetypes` as the first commit of `change/add-brief-intake`.
+Pilot results: every pair involving a new site has layout distance >= 0.21 (threshold 0.2); three pairs sit close to the line (samurai/estudio 0.21, samurai/app 0.21, estudio/app 0.21), so the threshold may need raising after the owner's visual review.
 
 ## Owner decisions to keep (2026-10-21)
 
@@ -69,6 +55,8 @@ Follow `docs/product-plan.md`:
 Small fixes pending: panaderia process heading covered at 375 px; `new-landing.sh` final check without `--refs`.
 
 ## Known gaps and follow-ups
+
+- `section-shots.mjs` does not clear its output folder, so stale screenshots from earlier passes mix with new ones (seen on estudio-arquitectura). Clear `qa/<slug>/sections/` at the start of each run.
 
 - Layout diversity calibration (2026-10-21, `qa.config.json` `diversity`: `minLayoutDistance` 0.2, `maxHashMatch` 0.5, `hashHamming` 10): panaderia and clinica-dental are close (distance 0.13, they would fail `layout-diversity` against each other); samurai is far from both (0.35 and 0.34). Fixtures: same layout in new colors 0.00 with 100% matching slices, one-feature restyles 0.04 to 0.14, a brutalist page 0.56. CI does not run `check-landing`, so the existing sites do not fail anything; the rule applies to a site under check against the others.
 

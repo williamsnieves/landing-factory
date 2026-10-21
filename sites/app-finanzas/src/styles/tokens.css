@@ -1,0 +1,59 @@
+/*
+ * Design tokens: the single source of truth for a site's theme.
+ * Tailwind v4 turns every --color-*, --font-*, --text-*, --spacing and
+ * --radius-* variable below into utilities (bg-primary, font-display, ...).
+ * To retheme a site, edit only this file. `@theme static` emits every variable
+ * (not only the used ones) so 3D scenes can read colors from the page.
+ */
+@theme static {
+  /* Colors */
+  --color-primary: #4a35d4;
+  --color-primary-hover: #3b28b8;
+  --color-primary-contrast: #ffffff;
+  --color-primary-soft: #e9e6fb;
+  --color-accent: #b86e00;
+  --color-ink: #12142b;
+  --color-ink-soft: #4b4f6b;
+  --color-paper: #f6f7fb;
+  --color-surface: #eceef6;
+  --color-line: #d3d7e6;
+  --color-positive: #1f7a4d;
+  --color-positive-soft: #e1f2e8;
+  --color-warn: #8a5a00;
+  --color-warn-soft: #faefd2;
+
+  /* Fonts (variable, self-hosted through @fontsource-variable) */
+  --font-display:
+    'Manrope Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Roboto, sans-serif;
+  --font-sans:
+    'Onest Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Roboto, sans-serif;
+
+  /* Type scale (moderate contrast: data-and-proof, numbers carry emphasis) */
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --text-3xl: clamp(2.25rem, 4.4vw, 3.25rem);
+  --text-4xl: clamp(2.75rem, 6.4vw, 4.75rem);
+
+  /* Spacing base unit: p-4 = 1rem, p-24 = 6rem, ... */
+  --spacing: 0.25rem;
+
+  /* Radii: small, lightly rounded rectangles */
+  --radius-xs: 0.125rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --duration-fast: 150ms;
+  --duration-base: 240ms;
+  --duration-slow: 600ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+}

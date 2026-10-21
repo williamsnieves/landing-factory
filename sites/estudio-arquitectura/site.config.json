@@ -1,0 +1,6 @@
+{
+  "cloudflare": {
+    "pagesProject": "estudio-arquitectura",
+    "productionBranch": "main"
+  }
+}

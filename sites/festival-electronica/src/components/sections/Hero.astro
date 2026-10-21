@@ -1,0 +1,160 @@
+---
+import { TICKET_URL } from '../../data/festival';
+const cols = Array.from({ length: 12 });
+---
+
+<section id="top" class="hero" aria-labelledby="hero-title">
+  <div class="grid-lines" aria-hidden="true">
+    {cols.map((_, i) => (
+      <span class:list={[i >= 4 && 'extra']} />
+    ))}
+  </div>
+
+  <div class="wrap top">
+    <p class="label">
+      Turno 01 · Turno 02 · Turno 03<span class="dash"> — </span>
+      <span class="br">Bilbao, antigua fábrica</span>
+    </p>
+  </div>
+
+  <div class="wrap mid">
+    <p class="dates display" data-reveal>
+      12—14 junio 2027
+      <span class="label sample">Fechas de ejemplo</span>
+    </p>
+    <p class="intro" data-reveal data-reveal-delay="0.1">
+      Tres noches de música electrónica dentro de una nave industrial. Tres
+      escenarios, ruido a propósito y un turno por día.
+    </p>
+    <div class="cta" data-reveal data-reveal-delay="0.2">
+      <a
+        href={TICKET_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn btn--solid"
+      >
+        Comprar entradas ↗
+      </a>
+      <p class="label">Abre un sitio externo en otra pestaña</p>
+    </div>
+  </div>
+
+  <div class="wrap bottom">
+    <h1 id="hero-title" class="display wordmark">
+      Taller 303
+    </h1>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: clamp(2rem, 6vw, 4rem);
+    min-height: calc(100svh - var(--header-h));
+    padding-top: 1.25rem;
+    overflow-x: clip;
+  }
+  .grid-lines {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin-inline: var(--gutter);
+    pointer-events: none;
+  }
+  .grid-lines span {
+    border-left: var(--rule-hair) solid var(--color-line);
+  }
+  .grid-lines span:last-child {
+    border-right: var(--rule-hair) solid var(--color-line);
+  }
+  .grid-lines span.extra {
+    display: none;
+  }
+  .top,
+  .mid,
+  .bottom {
+    position: relative;
+  }
+  .dash,
+  .br {
+    display: none;
+  }
+  .mid {
+    display: grid;
+    gap: 1.5rem;
+    align-items: end;
+  }
+  .dates {
+    margin: 0;
+    font-size: var(--text-2xl);
+    color: var(--color-primary);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .sample {
+    font-family: var(--font-mono);
+    font-stretch: 100%;
+    font-weight: 400;
+    word-spacing: normal;
+  }
+  .intro {
+    margin: 0;
+    max-width: 34ch;
+    font-size: var(--text-lg);
+    line-height: 1.5;
+  }
+  .cta {
+    display: grid;
+    gap: 0.75rem;
+    justify-items: start;
+  }
+  .cta p {
+    margin: 0;
+  }
+  .bottom {
+    padding-bottom: 0.5rem;
+  }
+  .wordmark {
+    margin: 0;
+    /* Sized to span the content width: a multiple of the giant step. */
+    font-size: calc(var(--text-4xl) * 1.1);
+    line-height: 0.8;
+    white-space: nowrap;
+    color: var(--color-ink);
+  }
+  @media (min-width: 48rem) {
+    .wordmark {
+      font-size: calc(var(--text-4xl) * 1.15);
+    }
+    .grid-lines {
+      grid-template-columns: repeat(12, 1fr);
+    }
+    .grid-lines span.extra {
+      display: block;
+    }
+    .dash,
+    .br {
+      display: inline;
+    }
+    .mid {
+      grid-template-columns: repeat(12, 1fr);
+      column-gap: 0;
+    }
+    .dates {
+      grid-column: 1 / span 4;
+    }
+    .intro {
+      grid-column: 6 / span 4;
+      padding-inline: 1rem;
+    }
+    .cta {
+      grid-column: 10 / span 3;
+      padding-inline: 1rem;
+    }
+  }
+</style>

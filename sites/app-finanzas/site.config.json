@@ -1,0 +1,6 @@
+{
+  "cloudflare": {
+    "pagesProject": "app-finanzas",
+    "productionBranch": "main"
+  }
+}

@@ -1,0 +1,68 @@
+/*
+ * Design tokens: the single source of truth for a site's theme.
+ * Tailwind v4 turns every --color-*, --font-*, --text-*, --spacing and
+ * --radius-* variable below into utilities (bg-primary, font-display, ...).
+ * To retheme a site, edit only this file. `@theme static` emits every variable
+ * (not only the used ones) so 3D scenes can read colors from the page.
+ * Derived from design-system/festival-electronica/MASTER.md.
+ */
+@theme static {
+  /* Colors: nocturnal blue-black ground, off-white ink, one acid lime */
+  --color-primary: #c8ff2e;
+  --color-primary-contrast: #0b0e14;
+  --color-accent: #e6ff85;
+  --color-ink: #f2f0e8;
+  --color-ink-soft: #a9b0bf;
+  --color-paper: #0b0e14;
+  --color-surface: #131824;
+  --color-line: #2b3346;
+
+  /* Fonts (variable, self-hosted via @fontsource-variable) */
+  --font-display:
+    'Archivo Variable', 'Arial Narrow', ui-sans-serif, system-ui, sans-serif;
+  --font-sans:
+    'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, Consolas,
+    monospace;
+  --font-mono:
+    'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, Consolas,
+    monospace;
+
+  /* Type scale: two far-apart sizes (giant display, small mono) */
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2.5rem;
+  --text-3xl: clamp(3rem, 9vw, 7rem);
+  --text-4xl: clamp(4.5rem, 20vw, 20rem);
+
+  /* Display type settings (use with font-stretch / font-variation-settings) */
+  --display-stretch-condensed: 62%;
+  --display-stretch-wide: 125%;
+  --display-weight: 800;
+  --display-leading: 0.82;
+  --display-tracking: -0.02em;
+
+  /* Spacing base unit: p-4 = 1rem, p-24 = 6rem, ... */
+  --spacing: 0.25rem;
+
+  /* Radii: hard rectangles */
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-pill: 0;
+
+  /* Rules (visible grid) */
+  --rule-hair: 1px;
+  --rule-thick: 4px;
+
+  /* Motion: near-instant cuts, one marquee */
+  --duration-instant: 0ms;
+  --duration-fast: 90ms;
+  --duration-base: 160ms;
+  --duration-slow: 480ms;
+  --duration-marquee: 28s;
+  --ease-cut: steps(1, end);
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+}

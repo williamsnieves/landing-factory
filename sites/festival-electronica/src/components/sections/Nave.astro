@@ -1,0 +1,159 @@
+---
+import Scene3D from '../three/Scene3D.astro';
+import poster from '../../assets/field-poster.jpg';
+
+const chapters = [
+  { n: '1', text: 'Una nave que fabricaba piezas y ahora fabrica graves.' },
+  { n: '2', text: 'Cada punto del suelo responde a lo que suena.' },
+  { n: '3', text: 'Tres noches sin luz de día. Ven con ganas de ruido.' },
+];
+---
+
+<section id="nave" class="section nave" aria-labelledby="nave-title">
+  <div class="wrap head">
+    <h2 id="nave-title" class="display section-title" data-reveal>
+      La nave
+    </h2>
+    <p class="note" data-reveal data-reveal-delay="0.1">
+      Así imaginamos el suelo de la nave cuando suena: una rejilla de puntos que
+      sube y baja con el grave.
+    </p>
+  </div>
+
+  <div class="stage">
+    <Scene3D
+      scene="field"
+      poster={poster}
+      alt="Una rejilla de puntos verdes sobre fondo negro que forma ondas, como el suelo de una sala cuando suena un bajo."
+      scrub
+      aspect="4/3"
+      class="field !aspect-[4/3] lg:!aspect-[16/9]"
+    />
+    <span class="bracket tl" aria-hidden="true"></span>
+    <span class="bracket tr" aria-hidden="true"></span>
+    <span class="bracket bl" aria-hidden="true"></span>
+    <span class="bracket br" aria-hidden="true"></span>
+
+    <ol class="chapters">
+      {chapters.map((c) => (
+        <li class={`chapter c${c.n}`} data-reveal>
+          <span class="label">Tramo {c.n} de 3</span>
+          <p class="statement display">{c.text}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+
+  <p class="wrap label cap">
+    Imagen generada por código, no una foto del recinto. En tu navegador
+    reacciona al scroll si hay movimiento activado.
+  </p>
+</section>
+
+<style>
+  .head {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: clamp(2rem, 5vw, 4rem);
+  }
+  .note {
+    margin: 0;
+    max-width: 46ch;
+  }
+  .stage {
+    position: relative;
+    margin-inline: var(--gutter);
+    border: var(--rule-hair) solid var(--color-ink-soft);
+  }
+  .field {
+    display: block;
+    width: 100%;
+  }
+  .bracket {
+    position: absolute;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 0 solid var(--color-primary);
+    pointer-events: none;
+  }
+  .tl {
+    top: 0.75rem;
+    left: 0.75rem;
+    border-top-width: 3px;
+    border-left-width: 3px;
+  }
+  .tr {
+    top: 0.75rem;
+    right: 0.75rem;
+    border-top-width: 3px;
+    border-right-width: 3px;
+  }
+  .bl {
+    bottom: 0.75rem;
+    left: 0.75rem;
+    border-bottom-width: 3px;
+    border-left-width: 3px;
+  }
+  .br {
+    bottom: 0.75rem;
+    right: 0.75rem;
+    border-bottom-width: 3px;
+    border-right-width: 3px;
+  }
+  .chapters {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    border-top: var(--rule-hair) solid var(--color-ink-soft);
+  }
+  .chapter {
+    display: grid;
+    gap: 0.5rem;
+    padding: 1.25rem 1rem;
+    border-bottom: var(--rule-hair) solid var(--color-line);
+  }
+  .chapter:last-child {
+    border-bottom: 0;
+  }
+  .statement {
+    margin: 0;
+    font-size: var(--text-2xl);
+    line-height: 0.95;
+    max-width: 18ch;
+  }
+  .cap {
+    margin-top: 0.75rem;
+  }
+  @media (min-width: 64rem) {
+    .chapters {
+      position: absolute;
+      inset: 0;
+      display: block;
+      border: 0;
+      pointer-events: none;
+    }
+    .chapter {
+      position: absolute;
+      max-width: 22rem;
+      padding: 1rem 1.25rem;
+      border: 2px solid var(--color-ink);
+      background: var(--color-paper);
+      pointer-events: auto;
+    }
+    .chapter:last-child {
+      border: 2px solid var(--color-ink);
+    }
+    .c1 {
+      top: 12%;
+      left: 4%;
+    }
+    .c2 {
+      top: 40%;
+      right: 4%;
+    }
+    .c3 {
+      bottom: 10%;
+      left: 12%;
+    }
+  }
+</style>

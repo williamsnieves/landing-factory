@@ -1,0 +1,126 @@
+---
+import { Image } from 'astro:assets';
+import stationPhoto from '../../assets/images/bilbao-metro.jpg';
+
+const ways = [
+  {
+    label: 'Metro',
+    text: 'Estación de ejemplo a 8 minutos a pie. Consulta el servicio nocturno de la red antes de salir.',
+  },
+  {
+    label: 'Tranvía',
+    text: 'Parada de ejemplo a 5 minutos. Frecuencias y horarios en la web del operador.',
+  },
+  {
+    label: 'Bus',
+    text: 'Línea nocturna de ejemplo con parada a 3 minutos de la puerta A.',
+  },
+  {
+    label: 'Bici',
+    text: 'Aparcabicis vigilado junto a la puerta B, 200 plazas (ejemplo). Se llega por el paseo de la ría.',
+  },
+  {
+    label: 'Taxi',
+    text: 'Parada señalizada en la puerta A y punto de recogida a la salida.',
+  },
+];
+---
+
+<section id="llegar" class="section directions" aria-labelledby="dir-title">
+  <div class="wrap grid">
+    <div class="copy">
+      <h2 id="dir-title" class="display section-title" data-reveal>
+        Cómo llegar
+      </h2>
+      <address class="addr" data-reveal data-reveal-delay="0.1">
+        Calle Ejemplo 303, 48000 Bilbao
+        <br />
+        <span class="label">Dirección de ejemplo</span>
+      </address>
+      <ul class="ways">
+        {ways.map((w, i) => (
+          <li
+            class="way"
+            data-reveal
+            data-reveal-delay={String(Math.min(i * 0.06, 0.3))}
+          >
+            <span class="label key">{w.label}</span>
+            <span>{w.text}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <figure class="fig">
+      <div class="photo frame">
+        <Image
+          src={stationPhoto}
+          alt="Un andén de metro con bóveda metálica, tubos de luz y torniquetes al fondo, en blanco y negro con un tono verde."
+          widths={[640, 960, 1280]}
+          sizes="(min-width: 64rem) 45vw, 100vw"
+          loading="lazy"
+        />
+      </div>
+      <figcaption class="label cap">
+        Fig. 02 — Imagen representativa de una estación de metro de Bilbao.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .grid {
+    display: grid;
+    gap: 2.5rem;
+  }
+  .copy {
+    display: grid;
+    gap: 2rem;
+    align-content: start;
+  }
+  .addr {
+    margin: 0;
+    font-style: normal;
+    font-size: var(--text-lg);
+  }
+  .ways {
+    margin: 0;
+    padding: 0;
+    border-top: var(--rule-thick) solid var(--color-ink);
+  }
+  .way {
+    display: grid;
+    gap: 0.25rem;
+    padding-block: 0.9rem;
+    border-bottom: var(--rule-hair) solid var(--color-ink-soft);
+  }
+  .key {
+    color: var(--color-primary);
+    font-weight: 700;
+  }
+  .fig {
+    margin: 0;
+    align-self: start;
+  }
+  .frame {
+    aspect-ratio: 4 / 5;
+  }
+  .frame :global(img) {
+    object-position: 50% 60%;
+  }
+  .cap {
+    margin-top: 0.75rem;
+  }
+  @media (min-width: 40rem) {
+    .way {
+      grid-template-columns: 6rem minmax(0, 1fr);
+      gap: 1rem;
+    }
+  }
+  @media (min-width: 64rem) {
+    .grid {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: 3rem;
+    }
+  }
+</style>

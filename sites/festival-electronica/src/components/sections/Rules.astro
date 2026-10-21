@@ -1,0 +1,85 @@
+---
+const rules = [
+  {
+    title: 'Documento',
+    text: 'DNI o pasaporte en vigor, con foto. Sin documento no se entra.',
+  },
+  {
+    title: 'Bolso',
+    text: 'Pequeño: máximo 30 × 20 × 10 cm. Las mochilas grandes se quedan fuera.',
+  },
+  {
+    title: 'Oídos',
+    text: 'El volumen es alto. Recomendamos llevar tapones; habrá a la venta en barra.',
+  },
+  {
+    title: 'Reentrada',
+    text: 'Con la pulsera puedes salir y volver a entrar durante tu turno.',
+  },
+  {
+    title: 'Fotos',
+    text: 'Móvil sí. Cámaras profesionales y trípodes, no.',
+  },
+  {
+    title: 'Edad',
+    text: 'Acceso a partir de 18 años, con documento.',
+  },
+];
+---
+
+<section id="normas" class="section rules" aria-labelledby="rules-title">
+  <div class="wrap">
+    <h2 id="rules-title" class="display section-title" data-reveal>
+      Normas
+    </h2>
+    <ol class="list">
+      {rules.map((r, i) => (
+        <li class="rule" data-reveal data-reveal-delay={String((i % 2) * 0.08)}>
+          <span class="idx display" aria-hidden="true">
+            {String(i + 1).padStart(2, '0')}
+          </span>
+          <div>
+            <h3 class="label name">{r.title}</h3>
+            <p class="text">{r.text}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .list {
+    display: grid;
+    margin: clamp(2rem, 5vw, 4rem) 0 0;
+    padding: 0;
+    border-top: var(--rule-thick) solid var(--color-ink);
+  }
+  .rule {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 1rem;
+    padding-block: 1.25rem;
+    border-bottom: var(--rule-hair) solid var(--color-ink-soft);
+  }
+  .idx {
+    font-size: var(--text-2xl);
+    line-height: 0.9;
+    color: var(--color-primary);
+  }
+  .name {
+    margin: 0 0 0.25rem;
+    color: var(--color-ink);
+    font-weight: 700;
+  }
+  .text {
+    margin: 0;
+    max-width: 44ch;
+  }
+  @media (min-width: 56rem) {
+    .list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 3rem;
+    }
+  }
+</style>

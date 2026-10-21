@@ -1,0 +1,6 @@
+{
+  "cloudflare": {
+    "pagesProject": "festival-electronica",
+    "productionBranch": "main"
+  }
+}

@@ -1,0 +1,36 @@
+---
+const links = [
+  { href: '#como-funciona', label: 'Cómo funciona' },
+  { href: '#seguridad', label: 'Seguridad' },
+  { href: '#planes', label: 'Planes' },
+  { href: '#faq', label: 'FAQ' },
+];
+---
+
+<header class="border-line border-b">
+  <div class="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-8 gap-y-2 px-4 py-3 md:px-8">
+    <a href="/" class="font-display text-xl font-extrabold tracking-tight">
+      Trazo
+    </a>
+    <nav aria-label="Principal" class="order-3 w-full md:order-2 md:w-auto">
+      <ul class="flex flex-wrap gap-x-6 gap-y-1 text-sm">
+        {links.map((l) => (
+          <li>
+            <a
+              href={l.href}
+              class="hover:text-primary inline-block py-2 transition-colors duration-150"
+            >
+              {l.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <a
+      href="#descarga"
+      class="bg-primary text-primary-contrast hover:bg-primary-hover rounded-md order-2 inline-flex min-h-11 items-center px-5 text-sm font-semibold transition-colors duration-150 md:order-3"
+    >
+      Descargar la app
+    </a>
+  </div>
+</header>
