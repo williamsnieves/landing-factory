@@ -24,6 +24,7 @@ export const COPIED_PATHS = [
   'tsconfig.json',
   'src/layouts',
   'src/components/motion',
+  'src/components/three',
   'src/styles',
   'src/env.d.ts',
   'public/_headers',
@@ -40,6 +41,7 @@ export const SHARED_DEPENDENCIES = [
   'react',
   'react-dom',
   'tailwindcss',
+  'three',
 ];
 
 /** Dev dependencies needed so `astro check` works inside the site. */
@@ -47,6 +49,7 @@ export const SHARED_DEV_DEPENDENCIES = [
   '@astrojs/check',
   '@types/react',
   '@types/react-dom',
+  '@types/three',
   'typescript',
 ];
 
@@ -197,6 +200,13 @@ Reduced motion: no pin, no scrub, no parallax, no smooth scroll; all content vis
 - **Hero type:** one of the types listed in the new-landing skill (full-bleed-photo, split, typographic, video, illustration, collage).
 - **Imagery:** openly licensed photos only; every one recorded in \`assets.json\` and \`CREDITS.md\`. No images from the references.
 
+## 3D
+
+None, or up to two scenes (\`<Scene3D />\`, built from code, no external models). For each scene: purpose, poster (rendered with \`scripts/render-poster.mjs\` or a credited museum image), scroll behavior (\`scrub\` or a looping clock), and the reduced-motion fallback (the poster; no canvas, no JavaScript, no WebGL). Default: none.
+
+| Scene | Purpose | Poster | Scroll behavior | Reduced-motion fallback |
+| ----- | ------- | ------ | --------------- | ----------------------- |
+
 ## Quality targets
 
 Lighthouse >= 90 (performance, accessibility, SEO), no overflow at 375/768/1440, reduced motion respected, content visible without JS, no major impeccable findings.
@@ -341,6 +351,8 @@ export function scaffoldSite({
     'PROPOSAL.md': proposalFile(slug, title),
     'RUN.md': runFile(slug),
     'assets.json': assetsFile(),
+    // Scene modules of <Scene3D /> live here (see src/components/three/README.md).
+    'src/scenes/.gitkeep': '',
     'README.md': readmeFile(slug),
     'src/pages/index.astro': placeholderPage({
       title: pageTitle,
@@ -387,7 +399,7 @@ const HELP = `Usage: npm run new-site -- <slug> [options]
 Creates sites/<slug>/ from the starter: layout, motion layer, styles, headers
 and configuration, plus a placeholder home page, CREDITS.md, README.md, the
 planning templates PROPOSAL.md and RUN.md, and an empty assets.json (image manifest).
-The starter's demo pages and sections are never copied.
+The 3D layer (src/components/three/) is copied with an empty src/scenes/. The starter's demo pages, demo scene and sections are never copied.
 
   <slug>                    lowercase letters, digits, single hyphens
   --title <text>            title and heading of the placeholder page (default: the slug)

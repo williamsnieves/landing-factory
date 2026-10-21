@@ -1,0 +1,6 @@
+{
+  "cloudflare": {
+    "pagesProject": "samurai",
+    "productionBranch": "main"
+  }
+}

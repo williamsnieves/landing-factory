@@ -125,12 +125,32 @@ export async function initMotion(
         return () => trigger.kill();
       });
     });
+
+    // Scene scrub: data-scene-scrub on a <Scene3D /> figure. Writes the progress (0..1)
+    // of the enclosing <section> to data-scene-progress; the 3D runtime reads it.
+    // Optional data-scene-start / data-scene-end take ScrollTrigger positions.
+    root.querySelectorAll<HTMLElement>('[data-scene-scrub]').forEach((el) => {
+      const write = (self: { progress: number }) => {
+        el.dataset.sceneProgress = self.progress.toFixed(4);
+      };
+      el.dataset.sceneScrubSource = 'scrolltrigger';
+      ScrollTrigger.create({
+        trigger: el.closest('section') ?? el,
+        start: el.dataset.sceneStart ?? 'top bottom',
+        end: el.dataset.sceneEnd ?? 'bottom top',
+        onUpdate: write,
+        onRefresh: write,
+      });
+    });
   }, document.documentElement);
 
   ScrollTrigger.refresh();
 
   return {
     destroy() {
+      root
+        .querySelectorAll<HTMLElement>('[data-scene-scrub]')
+        .forEach((el) => delete el.dataset.sceneScrubSource);
       mm.revert();
       ctx.revert();
       teardownLenis?.();

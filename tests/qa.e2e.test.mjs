@@ -125,3 +125,107 @@ test('an invalid config is a run error (exit 2), not a pass', () => {
   assert.equal(r.status, 2);
   assert.match(r.stderr, /Invalid QA config/);
 });
+
+// --- 3D scene checks (design.md Decision 5) -----------------------------------------
+
+const SCENES = ['--skip', 'lighthouse,impeccable,layout'];
+const sceneFailures = (r, check) =>
+  r.report.failures.filter((f) => f.check === check);
+
+test('a page with a well-behaved scene passes every scene check', () => {
+  const r = runQa('scene-ok', SCENES);
+  assert.equal(r.status, 0, r.stderr);
+  const scenes = r.report.pages[0].scenes;
+  assert.deepEqual(scenes.names, ['demo']);
+  assert.equal(scenes.reducedMotion.pass, true);
+  assert.equal(scenes.noJs.pass, true);
+  assert.equal(scenes.runtime.pass, true);
+  assert.equal(scenes.budget.chunks.length, 1);
+  assert.match(scenes.budget.chunks[0].url, /three-chunk\.js$/);
+  assert.match(
+    readFileSync(join(r.latest, 'report.md'), 'utf8'),
+    /3D budget: pass/,
+  );
+});
+
+test('a canvas under reduced motion fails scene-reduced-motion naming the scene', () => {
+  const r = runQa('scene-canvas-reduced', SCENES);
+  assert.equal(r.status, 1, r.stderr);
+  const f = sceneFailures(r, 'scene-reduced-motion').find(
+    (x) => x.metric === 'canvas',
+  );
+  assert.ok(f, 'expected a scene-reduced-motion canvas failure');
+  assert.equal(f.selector, '[data-scene="demo"]');
+  assert.match(f.message, /scene "demo" created a canvas/);
+});
+
+test('a scene without a poster fails with and without JavaScript', () => {
+  const r = runQa('scene-no-poster', SCENES);
+  assert.equal(r.status, 1, r.stderr);
+  assert.ok(sceneFailures(r, 'scene-no-js').length > 0, 'no-js failure');
+  assert.ok(
+    sceneFailures(r, 'scene-reduced-motion').some((f) => f.metric === 'poster'),
+    'reduced-motion poster failure',
+  );
+});
+
+test('a scene that throws fails scene-runtime with the error message', () => {
+  const r = runQa('scene-throws', SCENES);
+  assert.equal(r.status, 1, r.stderr);
+  const runtime = sceneFailures(r, 'scene-runtime');
+  assert.ok(
+    runtime.some(
+      (f) => f.metric === 'error' && /WebGLRenderer/.test(f.message),
+    ),
+    'page error reported',
+  );
+  assert.ok(
+    runtime.some((f) => f.metric === 'canvas'),
+    'missing canvas reported',
+  );
+});
+
+test('an oversized 3D chunk fails scene-budget with measured size and budget', () => {
+  const dist = mkdtempSync(join(out, 'oversized-'));
+  const fixture = join(ROOT, 'tests/fixtures/qa/scene-ok');
+  writeFileSync(
+    join(dist, 'index.html'),
+    readFileSync(join(fixture, 'index.html')),
+  );
+  // Incompressible filler: the chunk keeps the three marker and weighs well over 20 KB gzip.
+  let seed = 7;
+  let filler = '';
+  for (let i = 0; i < 40000; i++) {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    filler += seed.toString(36);
+  }
+  writeFileSync(
+    join(dist, 'three-chunk.js'),
+    `// WebGLRenderer\nwindow.__blob="${filler}";\n`,
+  );
+  const config = join(out, 'budget.json');
+  writeFileSync(config, JSON.stringify({ threeD: { maxGzipKb: 20 } }));
+  const r = spawnSync(
+    process.execPath,
+    [
+      'scripts/qa.mjs',
+      '--dist',
+      dist,
+      '--out',
+      join(out, 'budget-run'),
+      '--config',
+      config,
+      ...SCENES,
+    ],
+    { cwd: ROOT, encoding: 'utf8', timeout: 240000 },
+  );
+  assert.equal(r.status, 1, r.stderr);
+  const report = JSON.parse(
+    readFileSync(join(out, 'budget-run', 'latest', 'report.json'), 'utf8'),
+  );
+  const f = report.failures.find((x) => x.check === 'scene-budget');
+  assert.ok(f, 'expected a scene-budget failure');
+  assert.equal(f.threshold, 20);
+  assert.ok(f.measured > 20, `measured ${f.measured}`);
+  assert.match(f.message, /KB gzip \(budget 20 KB\)/);
+});

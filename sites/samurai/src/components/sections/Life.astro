@@ -1,0 +1,97 @@
+---
+import ChapterHead from './ChapterHead.astro';
+import Photo from './Photo.astro';
+import { photos } from '../../data/images';
+
+const arts = [
+  {
+    name: 'Caligrafía',
+    body: 'Muchos guerreros cultivaron la escritura con pincel, un arte muy apreciado en el Japón de la época. El rollo de la foto es de mediados del siglo XVII.',
+    photo: photos.calligraphy,
+    aspect: '3/4',
+  },
+  {
+    name: 'Ceremonia del té',
+    body: 'El té fue practicado también por guerreros y señores. El cuenco de la foto es raku negro, de principios del siglo XVII.',
+    photo: photos.raku,
+    aspect: '4/3',
+  },
+  {
+    name: 'Teatro noh',
+    body: 'Esta forma de teatro contó con el apoyo de señores guerreros en distintas épocas. Esta guía no incluye foto.',
+    photo: null,
+    aspect: '',
+  },
+];
+---
+
+<section
+  id="vida"
+  aria-labelledby="vida-title"
+  class="bg-paper py-(--section-y)"
+>
+  <div class="mx-auto max-w-[110rem] px-(--gutter)">
+    <ChapterHead
+      numeral="IV"
+      eyebrow="Capítulo IV"
+      title="Vida y bushidō"
+      id="vida-title"
+    >
+      <p class="text-lg leading-snug">
+        Entre la espada y el pincel: una idea famosa que tiene menos años de los
+        que parece, y una vida diaria que dependía mucho del rango.
+      </p>
+    </ChapterHead>
+
+    <div class="mt-16 grid items-start gap-14 md:mt-24 md:grid-cols-12">
+      <div class="md:col-span-5">
+        <h3
+          data-reveal
+          class="font-display text-2xl leading-tight font-normal text-balance"
+        >
+          <i>Bushidō</i>: una idea que se escribió tarde
+        </h3>
+        <p data-reveal class="mt-5">
+          La palabra <i>bushidō</i> significa «camino del guerrero». Pero no era
+          un código antiguo y único: se fue escribiendo y reformulando sobre
+          todo en el periodo Edo, cuando la paz obligó a preguntarse qué debía
+          ser un guerrero sin guerra, y se popularizó en la era Meiji. Conviene
+          leerlo como una idea que cambió con el tiempo, no como un reglamento
+          medieval.
+        </p>
+        <p data-reveal class="mt-5">
+          La vida diaria dependía del rango y del señor: había grandes señores y
+          también guerreros de bajo rango, con estipendios modestos.
+        </p>
+        <Photo
+          photo={photos.yokohama}
+          aspect="4/5"
+          sizes="(min-width: 768px) 40vw, 94vw"
+          class="mt-10"
+        />
+      </div>
+
+      <ul class="grid list-none gap-x-6 gap-y-12 p-0 sm:grid-cols-2 md:col-span-6 md:col-start-7">
+        {arts.map((a, i) => (
+          <li
+            data-reveal
+            data-reveal-delay={String((i % 2) * 0.1)}
+            class:list={[i === 1 && 'sm:mt-16', i === 2 && 'sm:col-span-2']}
+          >
+            {a.photo ? (
+              <Photo
+                photo={a.photo}
+                aspect={a.aspect}
+                sizes="(min-width: 768px) 24vw, (min-width: 640px) 45vw, 94vw"
+              />
+            ) : null}
+            <h3 class="font-display mt-4 text-xl leading-tight font-normal">
+              {a.name}
+            </h3>
+            <p class="mt-2 max-w-[44ch] text-sm">{a.body}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>

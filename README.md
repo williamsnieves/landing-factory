@@ -18,6 +18,7 @@ npm run validate:patterns  # check patterns/*.md (structure, no site content)
 npm run qa        # build + screenshots, overflow, reduced motion, Lighthouse, impeccable -> qa/latest/report.md
 npm run new-site -- <slug>        # scaffold sites/<slug>/ from the starter (then `npm install`)
 npm run qa -- --site <slug>       # full QA for one site -> qa/<slug>/latest/report.md
+node scripts/render-poster.mjs --page /3d/ --scene demo --out src/assets/3d-demo-poster.jpg  # render a 3D scene's poster
 npm run new-landing -- <slug> --niche "..."  # generate a whole landing with Claude (see "Generating a landing")
 npm run setup:agent   # install/verify Claude Code tooling (MCP config, design skills); idempotent
 npm run setup:verify  # fast offline check of that tooling
@@ -25,7 +26,7 @@ npm run setup:verify  # fast offline check of that tooling
 
 Each landing lives in its own workspace under `sites/<slug>/` with its own build, QA and Cloudflare Pages project; see [sites/README.md](sites/README.md). The root is the starter demo and the template that `new-site` copies from.
 
-Agent rules and conventions: [CLAUDE.md](CLAUDE.md). Motion primitives: [src/components/motion/README.md](src/components/motion/README.md).
+Agent rules and conventions: [CLAUDE.md](CLAUDE.md). Motion primitives: [src/components/motion/README.md](src/components/motion/README.md). 3D scenes (opt-in Three.js, poster first, QA budgets): [src/components/three/README.md](src/components/three/README.md), demo at `/3d/`.
 
 ## Deployment
 
@@ -78,7 +79,7 @@ scripts/new-landing.sh clinica-dental --niche "..." --auto [--max-attempts 5] [-
 scripts/new-landing.sh clinica-dental --niche "..." --dry-run
 ```
 
-The run leaves `sites/<slug>/RUN.md` (inputs, phase times, QA attempts, decisions, what to confirm before launch) and a git-ignored `.run.log`. Afterwards review the diff, commit and open a PR; CI builds, checks and deploys the preview. Helper scripts, each with `--help`: `npm run preflight` (hosts, Chromium, free slug), `npm run find-images` (licensed Commons photos into `assets.json`), `npm run credits -- --site <slug>` (CREDITS.md and footer credits), `npm run check-landing -- --site <slug>` (credits, photo reuse, tokens, diversity, copy originality). See [scripts/README.md](scripts/README.md).
+The run leaves `sites/<slug>/RUN.md` (inputs, phase times, QA attempts, decisions, what to confirm before launch) and a git-ignored `.run.log`. Afterwards review the diff, commit and open a PR; CI builds, checks and deploys the preview. Helper scripts, each with `--help`: `npm run preflight` (hosts, Chromium, free slug), `npm run find-images` (licensed Commons photos, and with `--source met` public-domain Met objects, into `assets.json`), `node scripts/render-poster.mjs` (poster image of a 3D scene), `npm run credits -- --site <slug>` (CREDITS.md and footer credits), `npm run check-landing -- --site <slug>` (credits, photo reuse, tokens, diversity, copy originality). See [scripts/README.md](scripts/README.md).
 
 ## Analyzing reference sites
 

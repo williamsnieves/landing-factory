@@ -16,47 +16,50 @@ All documentation, comments, commit messages and pull request descriptions MUST 
 - Tailwind CSS v4 via `@tailwindcss/vite`; tokens as CSS variables in `src/styles/tokens.css` (`@theme`)
 - React islands (`@astrojs/react`), only where interaction is needed
 - Motion: GSAP + ScrollTrigger and Lenis, vanilla TypeScript, driven by `data-*` attributes
-- Three.js / R3F only when a landing needs 3D (later change)
+- Three.js (`three`, vanilla, no R3F) only where a landing needs 3D: opt-in `<Scene3D />` scenes built from code, poster first, lazy-loaded (see "3D scenes")
 - TypeScript strict, `astro check`, Prettier (with `prettier-plugin-astro`)
 - Deployment: Cloudflare Pages via GitHub Actions (`wrangler pages deploy`), per-branch previews, production from `main`
 
 ## Commands
 
-| Command                                       | Purpose                                                                            |
-| --------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `npm ci`                                      | Install exact dependencies                                                         |
-| `npm run dev`                                 | Dev server with hot reload                                                         |
-| `npm run build`                               | Static build into `dist/`                                                          |
-| `npm run preview`                             | Serve the built `dist/`                                                            |
-| `npm run check`                               | `astro check` for the root starter (`sites/` is excluded in `tsconfig.json`)       |
-| `npm run check:sites`                         | `astro check` in every site workspace                                              |
-| `npm run new-site -- <slug>`                  | Scaffold `sites/<slug>/` from the starter (see "Sites")                            |
-| `npm run new-landing -- <slug> --niche "..."` | Generate a whole landing with `claude -p` (see "Generating a landing")             |
-| `npm run preflight`                           | Check npm and Commons reachability, Chromium and a free slug                       |
-| `npm run find-images -- ...`                  | Search and download licensed Commons photos into `sites/<slug>/assets.json`        |
-| `npm run credits -- --site <slug>`            | Write the photo credits (`CREDITS.md`, `src/data/credits.json`) from `assets.json` |
-| `npm run check-landing -- --site <slug>`      | Final check: credits, photo reuse, tokens, diversity, copy originality             |
-| `npm run format`                              | Format with Prettier (`format:check` to verify)                                    |
-| `npm run setup:agent`                         | Install/verify agent tooling (design skills, telemetry opt-out)                    |
-| `npm run setup:verify`                        | Fast, offline, read-only check of the agent tooling                                |
-| `npm test`                                    | Unit and fixture tests (QA script, analyze-reference scripts, validator)           |
-| `npm run validate:patterns`                   | Validate `patterns/*.md` sheets (structure, no site content); runs in CI           |
-| `npm run qa`                                  | Build, serve and verify every page; writes `qa/latest/`; exit 0 = pass             |
-| `npm run qa -- --site <slug>`                 | Same checks for one site; writes `qa/<slug>/latest/`                               |
-| `npx wrangler ...`                            | Pinned Cloudflare CLI; CI uses it to deploy `dist/` (do not deploy locally)        |
+| Command                                                           | Purpose                                                                                                                   |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `npm ci`                                                          | Install exact dependencies                                                                                                |
+| `npm run dev`                                                     | Dev server with hot reload                                                                                                |
+| `npm run build`                                                   | Static build into `dist/`                                                                                                 |
+| `npm run preview`                                                 | Serve the built `dist/`                                                                                                   |
+| `npm run check`                                                   | `astro check` for the root starter (`sites/` is excluded in `tsconfig.json`)                                              |
+| `npm run check:sites`                                             | `astro check` in every site workspace                                                                                     |
+| `npm run new-site -- <slug>`                                      | Scaffold `sites/<slug>/` from the starter (see "Sites")                                                                   |
+| `npm run new-landing -- <slug> --niche "..."`                     | Generate a whole landing with `claude -p` (see "Generating a landing")                                                    |
+| `npm run preflight`                                               | Check npm and Commons reachability, Chromium and a free slug                                                              |
+| `npm run find-images -- ...`                                      | Search and download licensed Commons (and, with `--source met`, Met public-domain) images into `sites/<slug>/assets.json` |
+| `node scripts/render-poster.mjs --page ... --scene ... --out ...` | Render a 3D scene's poster image from the scene itself (see "3D scenes")                                                  |
+| `npm run credits -- --site <slug>`                                | Write the photo credits (`CREDITS.md`, `src/data/credits.json`) from `assets.json`                                        |
+| `npm run check-landing -- --site <slug>`                          | Final check: credits, photo reuse, tokens, diversity, copy originality                                                    |
+| `npm run format`                                                  | Format with Prettier (`format:check` to verify)                                                                           |
+| `npm run setup:agent`                                             | Install/verify agent tooling (design skills, telemetry opt-out)                                                           |
+| `npm run setup:verify`                                            | Fast, offline, read-only check of the agent tooling                                                                       |
+| `npm test`                                                        | Unit and fixture tests (QA script, analyze-reference scripts, validator)                                                  |
+| `npm run validate:patterns`                                       | Validate `patterns/*.md` sheets (structure, no site content); runs in CI                                                  |
+| `npm run qa`                                                      | Build, serve and verify every page; writes `qa/latest/`; exit 0 = pass                                                    |
+| `npm run qa -- --site <slug>`                                     | Same checks for one site; writes `qa/<slug>/latest/`                                                                      |
+| `npx wrangler ...`                                                | Pinned Cloudflare CLI; CI uses it to deploy `dist/` (do not deploy locally)                                               |
 
 ## Folder structure
 
 ```text
 src/components/sections/   page sections (.astro first, React islands only if interactive)
 src/components/motion/     motion layer: initMotion(), <Motion />, README with primitives
+src/components/three/      3D layer: <Scene3D />, runtime, scene helpers and types, README with the scene contract
+src/scenes/                scene modules (<name>.ts) loaded lazily by <Scene3D scene="name">; demo.ts is the starter's demo
 src/layouts/               BaseLayout (SEO, skip link, <main id="main">)
 src/pages/                 routes
 src/styles/                global.css and tokens.css (single source of the theme)
 sites/<slug>/              one self-contained Astro site per landing (npm workspace `site-<slug>`)
 patterns/                  abstract pattern sheets from references (no assets, copy or code)
 design-system/             per-niche design decisions, translated into tokens.css
-scripts/                   pipeline automation (qa.mjs, new-site.mjs, new-landing.sh, preflight.mjs, find-images.mjs, credits.mjs, check-landing.mjs, changed-sites.mjs, validate-pattern.mjs, parse-wrangler-output.mjs, setup-agent.sh)
+scripts/                   pipeline automation (qa.mjs, new-site.mjs, new-landing.sh, preflight.mjs, find-images.mjs, render-poster.mjs, credits.mjs, check-landing.mjs, changed-sites.mjs, validate-pattern.mjs, parse-wrangler-output.mjs, setup-agent.sh)
 public/_headers            Cloudflare Pages cache and security headers (lands in dist/_headers)
 site.config.json           per-site Cloudflare settings: Pages project name and production branch
 .github/workflows/ci.yml   CI: qa job, then deploy job (needs: qa)
@@ -68,7 +71,7 @@ docs/                      roadmap and project docs
 
 Each landing is a complete static Astro site in `sites/<slug>/` (slug rule `^[a-z0-9]+(-[a-z0-9]+)*$`), registered as the npm workspace `site-<slug>` through `"workspaces": ["sites/*"]` in the root `package.json`. One `npm ci` at the root installs everything; one root `package-lock.json`. Details and conventions: `sites/README.md`.
 
-- Create: `npm run new-site -- <slug> [--title ... --lang ... --message ...]` copies `astro.config.mjs`, `tsconfig.json`, `src/layouts/`, `src/components/motion/`, `src/styles/`, `src/env.d.ts`, `public/_headers` and `public/favicon.svg` from the root, and writes `package.json` (same dependency ranges as the root), `site.config.json` (`pagesProject: <slug>`), `CREDITS.md`, `README.md`, the planning templates `PROPOSAL.md` and `RUN.md`, an empty `assets.json` (image manifest) and a `noindex` placeholder `src/pages/index.astro`. It never copies the starter's pages or sections, and refuses invalid slugs and existing folders (`--allow-existing-docs` accepts a folder holding only `*.md` planning docs such as `PROPOSAL.md` and never overwrites them). Then run `npm install` once and commit the updated `package-lock.json`.
+- Create: `npm run new-site -- <slug> [--title ... --lang ... --message ...]` copies `astro.config.mjs`, `tsconfig.json`, `src/layouts/`, `src/components/motion/`, `src/components/three/`, `src/styles/`, `src/env.d.ts`, `public/_headers` and `public/favicon.svg` from the root, and writes `package.json` (same dependency ranges as the root), `site.config.json` (`pagesProject: <slug>`), `CREDITS.md`, `README.md`, the planning templates `PROPOSAL.md` and `RUN.md`, an empty `assets.json` (image manifest), an empty `src/scenes/` and a `noindex` placeholder `src/pages/index.astro`. `three` and `@types/three` join the shared dependencies. It never copies the starter's pages or sections, and refuses invalid slugs and existing folders (`--allow-existing-docs` accepts a folder holding only `*.md` planning docs such as `PROPOSAL.md` and never overwrites them). Then run `npm install` once and commit the updated `package-lock.json`.
 - Build and check one site: `npm run build -w site-<slug>`, `npm run check -w site-<slug>` (`npm run check:sites` for all).
 - QA one site: `npm run qa -- --site <slug>` builds and serves `sites/<slug>`, checks its pages, runs impeccable on `sites/<slug>/src` and writes `qa/<slug>/<timestamp>/` (`qa/<slug>/latest`). A `sites/<slug>/qa.config.json` overrides the root `qa.config.json` for that site; never lower a threshold to get a pass.
 - Sites copy the starter at creation and may diverge; nothing is shared at runtime. The root `src/styles/global.css` excludes `sites/` and `scripts/` from Tailwind's class scan so a site never changes the starter's CSS.
@@ -78,8 +81,8 @@ Each landing is a complete static Astro site in `sites/<slug>/` (slug rule `^[a-
 
 `scripts/new-landing.sh <slug> --niche "..." [--refs a,b] [--auto] [--dry-run] [--resume] [--max-attempts N] [--model M]` runs `scripts/preflight.mjs`, `npm run new-site`, `npm install`, then `claude -p "/new-landing ..."` (skill: `.claude/skills/new-landing/SKILL.md`) and writes `sites/<slug>/.run.log`. Phases: brief, synthesis (`PROPOSAL.md`), checkpoint (stops unless `--auto`), design system (`design-system/<slug>/MASTER.md` with a `landing-meta` block, ui-ux-pro-max only), build (design-taste-frontend for art direction, palette and type fixed), QA loop (`npm run qa -- --site <slug>` until it passes or attempts run out), impeccable polish once, final check, `RUN.md`. Outcome is the `Result:` line of `sites/<slug>/RUN.md`; the script exits non-zero on `failed`.
 
-- Images: only `node scripts/find-images.mjs` (Commons API through the proxy, throttled, CC0 / public domain / CC BY / CC BY-SA). Each file is recorded in `sites/<slug>/assets.json`; `node scripts/credits.mjs --site <slug>` regenerates the photo table of `CREDITS.md` (between `<!-- credits:start -->` and `<!-- credits:end -->`) and `src/data/credits.json` for the footer. Do not hand-edit those. The vendored taste-skill `assets.mjs` ignores the proxy and is not used.
-- Final check: `node scripts/check-landing.mjs --site <slug> [--refs urls]` fails on an uncredited image, stale credits, a source photo referenced from more than two places, a MASTER.md palette color or font missing from `tokens.css`, a standard text token pair (ink/paper, primary-contrast/primary, ...) below 4.5:1, a site that matches another on primary color, display font and hero type, or (with `--refs`) 8 words in a row copied from a reference read in memory. Exit 0 passed, 1 failed, 2 the run broke.
+- Images: only `node scripts/find-images.mjs` (Commons API through the proxy, throttled, CC0 / public domain / CC BY / CC BY-SA; with `--source commons,met` also The Met Open Access, public-domain objects, recorded with `source: "met"` and the museum's `creditLine`, `credit: true`; `new-landing.sh --sources commons,met` for historical or cultural niches). Each file is recorded in `sites/<slug>/assets.json`; `node scripts/credits.mjs --site <slug>` regenerates the photo table of `CREDITS.md` (between `<!-- credits:start -->` and `<!-- credits:end -->`) and `src/data/credits.json` for the footer. Do not hand-edit those. The vendored taste-skill `assets.mjs` ignores the proxy and is not used.
+- Final check: `node scripts/check-landing.mjs --site <slug> [--refs urls]` fails on an uncredited image, stale credits, a source photo referenced from more than two places, a MASTER.md palette color or font missing from `tokens.css`, a standard text token pair (ink/paper, primary-contrast/primary, ...) below 4.5:1, a site that matches another on primary color, display font and hero type, a `[data-scene]` in the built pages without a poster recorded in `assets.json` (or more than 2 scenes), or (with `--refs`) 8 words in a row copied from a reference read in memory. Exit 0 passed, 1 failed, 2 the run broke.
 - `design-system/<slug>/MASTER.md` ends with a fenced `landing-meta` block: `primary: #rrggbb`, `display-font`, optional `body-font`, `hero: full-bleed-photo|split|typographic|video|illustration|collage`.
 - Auto mode runs with `--permission-mode acceptEdits`; the commands the skill needs are allowed in `.claude/settings.json`. Generation never commits, pushes or deploys.
 
@@ -151,6 +154,7 @@ Keep changes small and reviewable. Every task states how it is verified. Validat
 - horizontal overflow and clipped-text detection at each width;
 - a `prefers-reduced-motion: reduce` load (at 1440 px): every `[data-reveal]` must be visible, `<html>` must not carry a `lenis` class, and there must be no ScrollTrigger `.pin-spacer`;
 - Lighthouse on mobile and desktop (worst of the two per category); performance, accessibility and SEO must be >= 90, best-practices is only reported;
+- on pages with a 3D scene (`[data-scene]`): a reduced-motion load and a JavaScript-disabled load must show the poster and create no canvas, a normal load at 1440 px scrolled to each scene must create the canvas without console errors or page errors mentioning WebGL, THREE or the scene (scrubbed scenes must also move `data-scene-progress`), and the gzip size of the JS chunks containing Three.js must stay within `threeD.maxGzipKb` (default 200);
 - `npx impeccable@4.6.0 detect --json src/`; findings mapped to major/minor/info in `qa.config.json`, and any major finding fails. If the detector cannot run (for example offline on first use), the check fails with the reason; it never passes silently.
 
 Exit code: `0` all checks passed, `1` at least one check failed, `2` the run itself broke (bad config, build error, no Chromium). Options: `npm run qa -- --help` (`--dist <dir>` to skip the build and serve prebuilt HTML, `--skip lighthouse,impeccable`, `--runs 3` for the median of 3 Lighthouse runs, `--config <file>`). Chromium comes from Playwright; set `QA_CHROME_PATH` (or `CHROME_PATH`) to use another binary, for example `/opt/pw-browsers/chromium-*/chrome-linux/chrome` in a cloud session. Thresholds live in `qa.config.json`; with no file the roadmap defaults apply. Never lower a threshold to get a pass.
@@ -160,8 +164,9 @@ Output goes to `qa/<ISO-timestamp>/` (colons replaced by `-`) with `report.json`
 ### Reading `report.json`
 
 - `verdict`: `"passed"` or `"failed"`. `skipped` lists checks that were not run.
-- `failures[]`: one entry per problem. Fields: `check` (`overflow`, `clipped-text`, `reduced-motion`, `lighthouse`, `impeccable`, `page-load`), `page` (URL path, `null` for impeccable), `viewport` (width in px, or `mobile`/`desktop` for Lighthouse), `metric`, `measured`, `threshold`, `message`, plus `selector` (CSS selector of the offending element), `file` and `line` (impeccable) or `topAudits` (Lighthouse: the highest-impact failing audits).
+- `failures[]`: one entry per problem. Fields: `check` (`overflow`, `clipped-text`, `reduced-motion`, `scene-reduced-motion`, `scene-no-js`, `scene-runtime`, `scene-budget`, `lighthouse`, `impeccable`, `page-load`), `page` (URL path, `null` for impeccable), `viewport` (width in px, or `mobile`/`desktop` for Lighthouse), `metric`, `measured`, `threshold`, `message`, plus `selector` (CSS selector of the offending element), `file` and `line` (impeccable) or `topAudits` (Lighthouse: the highest-impact failing audits).
 - `pages[]`: per page, `viewports["375"|"768"|"1440"]` (`documentScrollWidth`, `overflowing[]`, `clipped[]`, `screenshot`), `reducedMotion`, and `lighthouse` (`presets[]` with scores and `topAudits`, `worst` per category).
+- `pages[].scenes` (pages with a scene): `names`, `reducedMotion`, `noJs`, `runtime` (per scene: `canvas` created, `state`, `reason`, scrub `progress` samples) and `budget` (`gzipKb`, `maxGzipKb`, `chunks`). `scene-reduced-motion` has metrics `canvas`, `poster` and `three-downloaded`; `scene-no-js` has `poster`; `scene-runtime` has `canvas`, `error` and `scrub`; `scene-budget` has `gzip-kb`. `--skip scenes` skips them.
 - `impeccable`: all findings with `rule`, `severity` (raw), `level` (mapped), `file`, `line`, `snippet`.
 
 ### QA -> fix -> QA
@@ -174,6 +179,10 @@ Clipped text that is intentional (for example a truncated card title with `text-
 
 Tests for the QA script itself live in `tests/` (`npm test`). Failing-case fixtures (overflow at 375 px, invisible `[data-reveal]`, clipped text) are tiny static pages in `tests/fixtures/qa/`, served with `--dist`; they are never part of the site build.
 
+## 3D scenes
+
+A landing may use up to two Three.js scenes (`<Scene3D />`, `src/components/three/README.md` has the props and the scene module contract). They are opt-in, built from code (no model files, no R3F), and poster first: the poster is real HTML (the LCP candidate and the fallback), and only when JavaScript runs, WebGL exists, reduced motion is not requested and the figure is within one viewport does the runtime lazy-load Three.js and the scene module after `load` and fade a canvas in. `scrub` links a scene to the scroll progress (0..1) of its section through the motion layer's ScrollTrigger setup. The render loop pauses off-screen and in hidden tabs, DPR is capped (2, or 1.5 under 768 px) and everything is disposed on `astro:before-swap`. Scenes import from `three` by name and read colors from the tokens (`@theme static` keeps every `--color-*` in the CSS). Budgets: 3D JavaScript <= 200 KB gzip per page (`threeD.maxGzipKb`), Lighthouse unchanged. Every scene needs a poster recorded in `assets.json`: render it with `node scripts/render-poster.mjs` (`source: "self"`) or use a credited museum or Commons image. The starter's demo is `/3d/` (noindex, `src/scenes/demo.ts`); `new-site` does not copy it. Historical or cultural pages must not invent quotes or facts: check claims against the museum records of the images used and label myths as such.
+
 ## Quality budgets
 
 A landing is done only when all of these hold:
@@ -181,10 +190,10 @@ A landing is done only when all of these hold:
 - Lighthouse >= 90 in performance, accessibility and SEO
 - No horizontal overflow at 375, 768 and 1440 px
 - `prefers-reduced-motion` respected: no smooth scroll, pin or parallax; reveal content is visible
-- Content is visible and usable without JavaScript
+- Content is visible and usable without JavaScript (a 3D scene shows its poster)
 - Original copy and assets; no major findings in impeccable detect
 
-Motion rules: pages are static HTML by default; load GSAP/Lenis only through `<Motion />`; hydrate React only with an explicit `client:*` directive.
+Motion rules: pages are static HTML by default; load GSAP/Lenis only through `<Motion />`; load Three.js only through `<Scene3D />`; hydrate React only with an explicit `client:*` directive.
 
 ## Extract patterns, don't clone
 

@@ -11,6 +11,8 @@
 //   contrast           a standard text pair of tokens.css (ink/paper, primary-contrast/primary, ...) is below 4.5:1
 //   landing-meta       MASTER.md has no valid `landing-meta` block
 //   diversity          another site matches on primary color, display font and hero type all at once
+//   scenes             a built [data-scene] has no poster <img>, a poster not recorded in assets.json (a museum
+//                      or Commons image, or a self-rendered one with source "self"), or the site has more than 2 scenes
 //   copy-match         (--refs) 8 words in a row of the built page text also appear in a reference page
 //
 // Exit codes: 0 all checks passed, 1 at least one failed, 2 the run itself broke (unknown site, missing
@@ -642,6 +644,91 @@ export function builtPages(siteDir) {
     }));
 }
 
+// --------------------------------------------------------------------------------------------------
+// Rule: every 3D scene has a recorded poster (design: add-3d-scenes, Decision 7)
+
+export const MAX_SCENES = 2;
+
+/** Poster `<img>` of every `<figure data-scene>` in an HTML string: [{ name, src }] (src null when missing). */
+export function scenesInHtml(html) {
+  const scenes = [];
+  const figure =
+    /<figure\b[^>]*\bdata-scene\s*=\s*["']([^"']+)["'][^>]*>([\s\S]*?)<\/figure>/gi;
+  for (const match of html.matchAll(figure)) {
+    const img = /<img\b[^>]*\bsrc\s*=\s*["']([^"']+)["']/i.exec(match[2]);
+    scenes.push({ name: match[1], src: img ? img[1] : null });
+  }
+  return scenes;
+}
+
+/**
+ * Does a built image URL come from the manifest file? Astro names optimized images
+ * `<stem>.<hash>[_<hash>].<ext>`; images in public/ keep their name.
+ */
+export function posterMatchesFile(src, file) {
+  const built = basename(src.split(/[?#]/)[0]);
+  const stem = file.replace(/\.[^.]+$/, '');
+  return built === file || built.startsWith(`${stem}.`);
+}
+
+export function checkScenes(siteDir, manifest) {
+  const dist = join(siteDir, 'dist');
+  const usesScene3D = walk(join(siteDir, 'src'), (path) =>
+    path.endsWith('.astro'),
+  ).some((path) => /<Scene3D\b/.test(readFileSync(path, 'utf8')));
+  if (!existsSync(dist)) {
+    return usesScene3D
+      ? [
+          failure(
+            'scenes',
+            'dist',
+            `the site uses <Scene3D /> but sites/${basename(siteDir)}/dist does not exist; build first so the posters can be checked`,
+          ),
+        ]
+      : [];
+  }
+  const failures = [];
+  const names = new Set();
+  const pages = walk(dist, (path) => path.endsWith('.html'));
+  for (const path of pages) {
+    const page = `/${posix(relative(dist, path))}`;
+    for (const scene of scenesInHtml(readFileSync(path, 'utf8'))) {
+      names.add(scene.name);
+      const item = `${page}#${scene.name}`;
+      if (!scene.src) {
+        failures.push(
+          failure(
+            'scenes',
+            item,
+            `scene "${scene.name}" on ${page} has no poster <img>; pass poster to <Scene3D />`,
+          ),
+        );
+        continue;
+      }
+      const entry = manifest.images.find((e) =>
+        posterMatchesFile(scene.src, e.file),
+      );
+      if (!entry)
+        failures.push(
+          failure(
+            'scenes',
+            item,
+            `the poster of scene "${scene.name}" on ${page} (${basename(scene.src)}) is not in assets.json; record a museum or Commons image with find-images, or render one with scripts/render-poster.mjs`,
+          ),
+        );
+    }
+  }
+  if (names.size > MAX_SCENES)
+    failures.push(
+      failure(
+        'scenes',
+        [...names].join(', '),
+        `the site has ${names.size} scenes (${[...names].join(', ')}); at most ${MAX_SCENES} are allowed`,
+      ),
+    );
+  return failures;
+}
+
 /** Fetch reference pages into memory only. Nothing is written to disk. */
 export async function fetchReferences(urls, fetchFn = globalThis.fetch) {
   const references = [];
@@ -696,6 +783,7 @@ export async function runChecks({
     ['tokens', () => checkTokens(slug, root)],
     ['contrast', () => checkContrast(slug, root)],
     ['diversity', () => checkDiversity(slug, root)],
+    ['scenes', () => checkScenes(siteDir, manifest)],
   ].map(([name, run]) => ({ name, failures: run() }));
 
   if (refs.length) {
@@ -740,6 +828,7 @@ Final check of sites/<slug>/ after site QA passes. Fails, naming the item, when:
   contrast          a standard text token pair in tokens.css is below 4.5:1 (WCAG)
   landing-meta      MASTER.md has no valid \`landing-meta\` block (primary, display-font, hero)
   diversity         another site has the same primary color, display font and hero type
+  scenes            a built [data-scene] has no poster, a poster missing from assets.json, or the site has more than ${MAX_SCENES} scenes
   copy-match        (--refs) ${SHINGLE_WORDS} words in a row of the built page also occur in a reference
 
   --site <slug>     the site (required)

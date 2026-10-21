@@ -25,11 +25,16 @@ import {
   getImage,
   lookupParams,
   main,
+  parseMetRef,
   parseRetryAfter,
   pickWidth,
+  searchAll,
   searchImages,
+  searchMet,
   stripHtml,
+  toMetCandidate,
 } from '../scripts/find-images.mjs';
+import { creditList } from '../scripts/credits.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const fixture = (name) =>
@@ -552,4 +557,178 @@ test('CLI usage errors exit 2 and a failing request exits 1', async () => {
   );
   assert.equal(help.status, 0);
   assert.match(help.stdout, /CC BY-SA/);
+});
+
+// --- The Met Open Access source (recorded response shapes in tests/fixtures/met) -------------
+
+const metFixture = (name) =>
+  JSON.parse(readFileSync(join(ROOT, 'tests/fixtures/met', name), 'utf8'));
+const metAnswers = (url) => {
+  if (
+    url.startsWith(
+      'https://collectionapi.metmuseum.org/public/collection/v1.1/search?',
+    )
+  )
+    return json(metFixture('search.json'));
+  const object = /\/v1\/objects\/(\d+)$/.exec(url);
+  if (object) {
+    const file = `object-${object[1]}.json`;
+    return existsSync(join(ROOT, 'tests/fixtures/met', file))
+      ? json(metFixture(file))
+      : new Response('{}', { status: 404 });
+  }
+  throw new Error(`unexpected URL ${url}`);
+};
+
+test('Met candidates keep only public-domain objects with an image and carry the museum credit line', () => {
+  const ok = toMetCandidate(metFixture('object-894743.json'));
+  assert.equal(ok.source, 'met');
+  assert.equal(ok.title, 'Armor (Rokumai-Dō Gusoku) with Box');
+  assert.equal(ok.author, 'Japanese', 'culture stands in for a missing artist');
+  assert.equal(ok.license, 'Public domain (museum open access)');
+  assert.equal(ok.credit, true);
+  assert.equal(ok.creditLine, 'Gift of Example Donor, 2023');
+  assert.equal(
+    ok.sourcePage,
+    'https://www.metmuseum.org/art/collection/search/894743',
+  );
+  assert.equal(toMetCandidate(metFixture('object-40001.json')), null);
+  assert.equal(toMetCandidate(metFixture('object-40002.json')), null);
+  assert.equal(toMetCandidate(null), null);
+});
+
+test('Met refs: met:<id> and collection URLs; anything else is not a Met ref', () => {
+  assert.equal(parseMetRef('met:894743'), 894743);
+  assert.equal(
+    parseMetRef('https://www.metmuseum.org/art/collection/search/40003'),
+    40003,
+  );
+  assert.equal(parseMetRef('File:Sample.jpg'), null);
+  assert.equal(
+    parseMetRef('https://commons.wikimedia.org/wiki/File:X.jpg'),
+    null,
+  );
+  assert.equal(parseMetRef('12345'), null);
+});
+
+test('searchMet uses the v1.1 search endpoint, then reads each object and skips unusable ones', async () => {
+  const client = clientWith(metAnswers);
+  const result = await searchMet(client, 'samurai armor', { limit: 5 });
+  assert.deepEqual(
+    result.usable.map((c) => c.objectId),
+    [894743, 40003],
+  );
+  assert.equal(result.filtered, 2);
+  const search = new URL(client.calls[0].url);
+  assert.equal(search.pathname, '/public/collection/v1.1/search');
+  assert.equal(search.searchParams.get('q'), 'samurai armor');
+  assert.equal(search.searchParams.get('isPublicDomain'), 'true');
+  assert.equal(search.searchParams.get('hasImages'), 'true');
+  assert.match(
+    client.calls[0].init.headers['user-agent'],
+    /^landing-factory\//,
+  );
+  // Stops once the limit is reached.
+  const limited = await searchMet(clientWith(metAnswers), 'x', { limit: 1 });
+  assert.equal(limited.usable.length, 1);
+});
+
+test('searchAll without a source stays on Commons; --source met never calls Commons', async () => {
+  const client = clientWith(metAnswers);
+  const result = await searchAll(client, 'armor', {
+    sources: ['met'],
+    limit: 2,
+  });
+  assert.ok(result.usable.every((c) => c.source === 'met'));
+  assert.ok(client.calls.every((c) => c.url.includes('metmuseum.org')));
+});
+
+test('getImage downloads a Met object as a web JPEG and records source, credit line and credit', async () => {
+  const { default: sharp } = await import('sharp');
+  const big = await sharp({
+    create: { width: 3000, height: 2000, channels: 3, background: '#884422' },
+  })
+    .jpeg()
+    .toBuffer();
+  const root = mkdtempSync(join(tmp, 'met-root-'));
+  mkdirSync(join(root, 'sites/demo'), { recursive: true });
+  const client = clientWith((url) =>
+    url.startsWith('https://images.metmuseum.org/')
+      ? new Response(big, { headers: { 'content-type': 'image/jpeg' } })
+      : metAnswers(url),
+  );
+  const result = await getImage(client, {
+    slug: 'demo',
+    ref: 'met:894743',
+    as: 'armor',
+    width: 1280,
+    note: 'Armor, hero crop',
+    root,
+    now: new Date('2026-10-21T00:00:00Z'),
+  });
+  assert.equal(result.width, 1280);
+  const meta = await sharp(
+    join(root, 'sites/demo/src/assets/images/armor.jpg'),
+  ).metadata();
+  assert.equal(meta.width, 1280);
+  const manifest = JSON.parse(
+    readFileSync(join(root, 'sites/demo/assets.json'), 'utf8'),
+  );
+  assert.deepEqual(manifest.images[0], {
+    file: 'armor.jpg',
+    title: 'Armor (Rokumai-Dō Gusoku) with Box',
+    sourcePage: 'https://www.metmuseum.org/art/collection/search/894743',
+    author: 'Japanese',
+    license: 'Public domain (museum open access)',
+    licenseUrl:
+      'https://www.metmuseum.org/about-the-met/policies-and-documents/open-access',
+    credit: true,
+    source: 'met',
+    objectId: 894743,
+    creditLine: 'Gift of Example Donor, 2023',
+    retrievedAt: '2026-10-21T00:00:00.000Z',
+    note: 'Armor, hero crop',
+  });
+});
+
+test('getImage rejects a Met object that is not public domain, before downloading anything', async () => {
+  const root = mkdtempSync(join(tmp, 'met-root-'));
+  mkdirSync(join(root, 'sites/demo'), { recursive: true });
+  const client = clientWith(metAnswers);
+  await assert.rejects(
+    getImage(client, { slug: 'demo', ref: 'met:40001', root }),
+    /not in the public domain/,
+  );
+  assert.ok(client.calls.every((c) => !c.url.startsWith('https://images.')));
+});
+
+test('credits list the museum credit line with the author', () => {
+  const entries = [
+    {
+      file: 'armor.jpg',
+      title: 'Armor',
+      sourcePage: 'https://www.metmuseum.org/art/collection/search/894743',
+      author: 'Japanese',
+      license: 'Public domain (museum open access)',
+      credit: true,
+      creditLine: 'Gift of Example Donor, 2023',
+    },
+  ];
+  assert.deepEqual(creditList(entries), [
+    {
+      author: 'Japanese. Gift of Example Donor, 2023',
+      license: 'Public domain (museum open access)',
+      url: 'https://www.metmuseum.org/art/collection/search/894743',
+    },
+  ]);
+});
+
+test('--source rejects unknown sources with exit code 2', async () => {
+  const errors = [];
+  const code = await main(['search', 'armor', '--source', 'artic'], {
+    log() {},
+    error: (m) => errors.push(m),
+  });
+  assert.equal(code, 2);
+  assert.match(errors[0], /--source must be a comma list of commons, met/);
 });

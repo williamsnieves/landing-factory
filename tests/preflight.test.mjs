@@ -189,3 +189,44 @@ test('the CLI prints help and exits 2 on bad usage', () => {
   const extra = run('stray');
   assert.equal(extra.status, 2);
 });
+
+test('--sources met adds the Met hosts; the default checks Commons only', async () => {
+  const plain = stubFetch();
+  await runPreflight({ fetch: plain, chromium: okChromium });
+  assert.ok(plain.calls.every((c) => !c.url.includes('metmuseum')));
+
+  const fetch = stubFetch({ 'collectionapi.metmuseum.org': 403 });
+  const result = await runPreflight({
+    sources: ['commons', 'met'],
+    fetch,
+    chromium: okChromium,
+  });
+  assert.equal(result.checks.length, HOST_CHECKS.length + 2 + 1);
+  assert.equal(result.ok, false);
+  const report = formatReport(result);
+  assert.match(report, /collectionapi\.metmuseum\.org answered HTTP 403/);
+  assert.match(report, /allow collectionapi\.metmuseum\.org/);
+  assert.ok(result.checks.find((c) => c.name === 'The Met image host').ok);
+  assert.ok(
+    fetch.calls.some((c) => c.url.startsWith('https://images.metmuseum.org/')),
+  );
+  assert.ok(fetch.calls.every((c) => !c.url.includes('artic.edu')));
+});
+
+test('an unknown source is rejected', async () => {
+  await assert.rejects(
+    runPreflight({
+      sources: ['artic'],
+      fetch: stubFetch(),
+      chromium: okChromium,
+    }),
+    /unknown source "artic"/,
+  );
+  const bad = spawnSync(
+    process.execPath,
+    ['scripts/preflight.mjs', '--sources', 'artic'],
+    { cwd: ROOT, encoding: 'utf8' },
+  );
+  assert.equal(bad.status, 2);
+  assert.match(bad.stderr, /unknown source "artic"/);
+});

@@ -1,0 +1,174 @@
+---
+import Photo from './Photo.astro';
+import { photos } from '../../data/images';
+
+const rows = [
+  {
+    name: 'Tachi',
+    wear: 'Colgada del cinto, con el filo hacia abajo.',
+    when: 'La más antigua de las tres.',
+    photo: 'Hoja del siglo XVI; montura de mediados del siglo XIX.',
+  },
+  {
+    name: 'Katana',
+    wear: 'Pasada por el cinto, con el filo hacia arriba.',
+    when: 'Habitual a partir de la época Muromachi.',
+    photo: 'Hoja del siglo XVI; montura de mediados a finales del siglo XIX.',
+  },
+  {
+    name: 'Wakizashi',
+    wear: 'Espada corta; se llevaba junto a la katana, y el par se llama daishō.',
+    when: 'El par con la katana es típico del periodo Edo.',
+    photo: 'Hoja del siglo XVI; montura del siglo XIX.',
+  },
+];
+---
+
+<section
+  id="espadas-detalle"
+  aria-labelledby="espadas-detalle-title"
+  class="bg-surface py-(--section-y)"
+>
+  <div class="mx-auto max-w-[110rem] px-(--gutter)">
+    <div class="grid gap-x-8 gap-y-4 md:grid-cols-12">
+      <h3
+        id="espadas-detalle-title"
+        data-reveal
+        class="font-display text-2xl leading-tight font-normal text-balance md:col-span-6 md:col-start-6"
+      >
+        Tres espadas, vistas de cerca
+      </h3>
+      <p
+        data-reveal
+        data-reveal-delay="0.1"
+        class="text-ink-soft max-w-[52ch] md:col-span-6 md:col-start-6"
+      >
+        Las tres fotografías son de objetos del museo. En todas, la hoja y la
+        montura (empuñadura, guardamano, vaina) son de épocas distintas, como
+        indican sus fichas.
+      </p>
+    </div>
+
+    <div class="mt-14 grid items-start gap-6 md:grid-cols-4 md:gap-px">
+      <Photo
+        photo={photos.tachi}
+        aspect="16/10"
+        sizes="(min-width: 768px) 48vw, 94vw"
+        class="md:col-span-2"
+      />
+      <Photo
+        photo={photos.katana}
+        aspect="4/5"
+        sizes="(min-width: 768px) 24vw, 94vw"
+      />
+      <Photo
+        photo={photos.wakizashi}
+        aspect="4/5"
+        fit="contain"
+        sizes="(min-width: 768px) 24vw, 94vw"
+      />
+    </div>
+
+    <div class="mt-20 grid items-start gap-10 md:mt-28 md:grid-cols-12">
+      <Photo
+        photo={photos.tsuba}
+        aspect="1/1"
+        sizes="(min-width: 768px) 36vw, 94vw"
+        class="md:col-span-4"
+      />
+      <div class="md:col-span-7 md:col-start-6">
+        <p class="text-ink-soft text-xs font-medium tracking-[0.2em] uppercase">
+          Comparación
+        </p>
+        <table
+          class="cmp mt-4 w-full border-collapse text-left text-sm"
+          aria-label="Comparación entre tachi, katana y wakizashi: cómo se lleva, cuándo es habitual y la pieza del museo mostrada"
+        >
+          <thead>
+            <tr class="border-line border-b">
+              <th
+                scope="col"
+                class="text-ink-soft py-3 pr-4 text-xs font-medium tracking-[0.15em] uppercase"
+              >
+                Espada
+              </th>
+              <th
+                scope="col"
+                class="text-ink-soft py-3 pr-4 text-xs font-medium tracking-[0.15em] uppercase"
+              >
+                Cómo se lleva
+              </th>
+              <th
+                scope="col"
+                class="text-ink-soft py-3 pr-4 text-xs font-medium tracking-[0.15em] uppercase"
+              >
+                Cuándo
+              </th>
+              <th
+                scope="col"
+                class="text-ink-soft py-3 text-xs font-medium tracking-[0.15em] uppercase"
+              >
+                Pieza del museo
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr class="border-line border-b align-top">
+                <th
+                  scope="row"
+                  class="font-display py-4 pr-4 text-lg font-normal"
+                >
+                  <i>{r.name}</i>
+                </th>
+                <td data-label="Cómo se lleva" class="py-4 pr-4">
+                  {r.wear}
+                </td>
+                <td data-label="Cuándo" class="py-4 pr-4">
+                  {r.when}
+                </td>
+                <td data-label="Pieza del museo" class="text-ink-soft py-4">
+                  {r.photo}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p class="mt-8 max-w-[52ch]">
+          El guardamano (<i>tsuba</i>) separa la mano de la hoja y, además, es
+          un objeto decorado. El de la foto es de finales del siglo XVII, de
+          hierro y cobre, con motivos vegetales calados.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  @media (max-width: 767px) {
+    .cmp thead {
+      display: none;
+    }
+    .cmp tr,
+    .cmp th[scope='row'],
+    .cmp td {
+      display: block;
+    }
+    .cmp tbody tr {
+      padding: 1rem 0;
+    }
+    .cmp td {
+      padding: 0.25rem 0 !important;
+    }
+    .cmp th[scope='row'] {
+      padding: 0 0 0.25rem !important;
+    }
+    .cmp td::before {
+      content: attr(data-label) ': ';
+      color: var(--color-ink-soft);
+      font-size: var(--text-xs);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+  }
+</style>

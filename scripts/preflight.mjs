@@ -40,6 +40,26 @@ export const HOST_CHECKS = [
   },
 ];
 
+/** Extra hosts per image source named in --sources (Commons is always checked). */
+export const SOURCE_HOST_CHECKS = {
+  met: [
+    {
+      name: 'The Met collection API',
+      host: 'collectionapi.metmuseum.org',
+      url: 'https://collectionapi.metmuseum.org/public/collection/v1/departments',
+      method: 'GET',
+    },
+    {
+      name: 'The Met image host',
+      host: 'images.metmuseum.org',
+      // Any answer proves the host is reachable; a missing file (404) is fine.
+      url: 'https://images.metmuseum.org/CRDImages/as/original/preflight.jpg',
+      method: 'HEAD',
+    },
+  ],
+};
+export const SOURCES = ['commons', ...Object.keys(SOURCE_HOST_CHECKS)];
+
 const FETCH_TIMEOUT_MS = 12_000;
 
 /** Statuses that prove the host answered. 429 means reachable but throttled. */
@@ -190,10 +210,20 @@ export async function runPreflight({
   sitesDir = join(ROOT, 'sites'),
   chromium,
   timeoutMs,
+  sources = ['commons'],
 } = {}) {
+  const unknown = sources.filter((name) => !SOURCES.includes(name));
+  if (unknown.length)
+    throw new Error(
+      `unknown source "${unknown[0]}" (allowed: ${SOURCES.join(', ')})`,
+    );
+  const hosts = [
+    ...HOST_CHECKS,
+    ...sources.flatMap((name) => SOURCE_HOST_CHECKS[name] ?? []),
+  ];
   const checks = [
     ...(await Promise.all(
-      HOST_CHECKS.map((check) => checkHost(check, fetchFn, timeoutMs)),
+      hosts.map((check) => checkHost(check, fetchFn, timeoutMs)),
     )),
     await checkChromium(chromium),
   ];
@@ -215,7 +245,7 @@ export function formatReport(result) {
   return lines.join('\n');
 }
 
-const HELP = `Usage: node scripts/preflight.mjs [--slug <slug>] [--json] [--chromium-path]
+const HELP = `Usage: node scripts/preflight.mjs [--slug <slug>] [--sources <list>] [--json] [--chromium-path]
 
 Checks before generating a landing, naming every failure in one message:
   - registry.npmjs.org, commons.wikimedia.org (API) and upload.wikimedia.org answer over HTTPS
@@ -225,6 +255,8 @@ Checks before generating a landing, naming every failure in one message:
   - with --slug: the slug is valid and sites/<slug> is absent (or holds only *.md planning docs)
 
   --slug <slug>       also check the slug
+  --sources <list>    image sources to check, comma separated (default commons; met adds
+                      collectionapi.metmuseum.org and images.metmuseum.org)
   --json              print the result as JSON
   --chromium-path     print only the Chromium path found (exit 1 when there is none)
   --help              show this help
@@ -239,6 +271,7 @@ export async function main(argv, io = console) {
       allowPositionals: true,
       options: {
         slug: { type: 'string' },
+        sources: { type: 'string' },
         json: { type: 'boolean' },
         'chromium-path': { type: 'boolean' },
         help: { type: 'boolean' },
@@ -263,9 +296,21 @@ export async function main(argv, io = console) {
     io.log(found.path);
     return 0;
   }
+  const sources = (values.sources ?? 'commons')
+    .split(',')
+    .map((name) => name.trim().toLowerCase())
+    .filter(Boolean);
+  const badSource = sources.find((name) => !SOURCES.includes(name));
+  if (badSource) {
+    io.error(
+      `preflight: unknown source "${badSource}" (allowed: ${SOURCES.join(', ')})\n\n${HELP}`,
+    );
+    return 2;
+  }
   const override = process.env.LANDING_FACTORY_ROOT;
   const result = await runPreflight({
     slug: values.slug,
+    sources,
     ...(override ? { sitesDir: join(resolve(override), 'sites') } : {}),
   });
   io.log(values.json ? JSON.stringify(result, null, 2) : formatReport(result));

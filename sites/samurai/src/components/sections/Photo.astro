@@ -1,0 +1,69 @@
+---
+import { Image } from 'astro:assets';
+import type { Photo } from '../../data/images';
+
+interface Props {
+  photo: Photo;
+  /** CSS aspect ratio of the frame, e.g. "4/5". */
+  aspect: string;
+  sizes: string;
+  /** Slow parallax on the picture (photos only). */
+  parallax?: boolean;
+  /** `fit` shows the whole photo (letterboxed on the ground color). */
+  fit?: 'cover' | 'contain';
+  class?: string;
+  /** Hide the caption (the text next to the photo already says it). */
+  noCaption?: boolean;
+}
+
+const {
+  photo,
+  aspect,
+  sizes,
+  parallax = false,
+  fit = 'cover',
+  class: className,
+  noCaption = false,
+} = Astro.props;
+const fitClass = fit === 'contain' ? 'object-contain' : 'object-cover';
+---
+
+<figure class:list={['m-0', className]}>
+  <div
+    class="bg-surface relative overflow-hidden"
+    style={`aspect-ratio:${aspect}`}
+  >
+    {parallax ? (
+      <div data-parallax="0.08" class="absolute inset-x-0 -top-[10%] h-[120%]">
+        <Image
+          src={photo.src}
+          alt={photo.alt}
+          widths={[480, 800, 1200, 1600]}
+          sizes={sizes}
+          format="webp"
+          loading="lazy"
+          decoding="async"
+          class={`h-full w-full ${fitClass}`}
+          style={`object-position:${photo.position}`}
+        />
+      </div>
+    ) : (
+      <Image
+        src={photo.src}
+        alt={photo.alt}
+        widths={[480, 800, 1200, 1600]}
+        sizes={sizes}
+        format="webp"
+        loading="lazy"
+        decoding="async"
+        class={`absolute inset-0 h-full w-full ${fitClass}`}
+        style={`object-position:${photo.position}`}
+      />
+    )}
+  </div>
+  {!noCaption && (
+    <figcaption class="text-ink-soft mt-3 max-w-[52ch] text-xs leading-normal">
+      {photo.caption}
+    </figcaption>
+  )}
+</figure>

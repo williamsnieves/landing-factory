@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Motion from '../components/motion/Motion.astro';
+import Header from '../components/sections/Header.astro';
+import Hero from '../components/sections/Hero.astro';
+import Chapters from '../components/sections/Chapters.astro';
+import Origins from '../components/sections/Origins.astro';
+import Armor from '../components/sections/Armor.astro';
+import Swords from '../components/sections/Swords.astro';
+import SwordsDetail from '../components/sections/SwordsDetail.astro';
+import Life from '../components/sections/Life.astro';
+import End from '../components/sections/End.astro';
+import Myths from '../components/sections/Myths.astro';
+import Closing from '../components/sections/Closing.astro';
+import Footer from '../components/sections/Footer.astro';
+
+import displayFont from '@fontsource-variable/newsreader/files/newsreader-latin-opsz-normal.woff2?url';
+
+const title = 'Samuráis · Guía ilustrada en cinco capítulos | Atlas Bushi';
+const description =
+  'Quiénes fueron los samuráis, cómo eran su armadura y sus espadas, qué es el bushidō y cómo terminó la clase en la era Meiji. Una guía en cinco capítulos con objetos de museo.';
+---
+
+<BaseLayout title={title} description={description} lang="es">
+  <link
+    slot="head"
+    rel="preload"
+    as="font"
+    type="font/woff2"
+    href={displayFont}
+    crossorigin
+  />
+  <Motion slot="head" smooth />
+  <Header slot="header" />
+  <Hero />
+  <Chapters />
+  <Origins />
+  <Armor />
+  <Swords />
+  <SwordsDetail />
+  <Life />
+  <End />
+  <Myths />
+  <Closing />
+  <Footer slot="footer" />
+</BaseLayout>

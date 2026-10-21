@@ -2,9 +2,10 @@
  * Design tokens: the single source of truth for a site's theme.
  * Tailwind v4 turns every --color-*, --font-*, --text-*, --spacing and
  * --radius-* variable below into utilities (bg-primary, font-display, ...).
- * To retheme a site, edit only this file.
+ * To retheme a site, edit only this file. `@theme static` emits every variable
+ * (not only the used ones) so 3D scenes can read colors from the page.
  */
-@theme {
+@theme static {
   /* Colors */
   --color-primary: #c2410c;
   --color-primary-contrast: #ffffff;

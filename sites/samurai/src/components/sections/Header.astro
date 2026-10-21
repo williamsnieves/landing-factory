@@ -1,0 +1,62 @@
+---
+const chapters = [
+  ['#origenes', 'I', 'Orígenes'],
+  ['#armadura', 'II', 'Armadura'],
+  ['#espadas', 'III', 'Espadas'],
+  ['#vida', 'IV', 'Vida y bushidō'],
+  ['#fin', 'V', 'Fin de la clase'],
+];
+---
+
+<!-- Absolute over the hero; the inline script makes it fixed and solid once the
+     page scrolls. Without JS it simply sits on top. -->
+<header
+  id="site-header"
+  class="text-ink absolute inset-x-0 top-0 z-40 transition-colors duration-(--duration-base) ease-(--ease-in-out-soft) data-[solid=true]:bg-paper"
+>
+  <div class="mx-auto flex max-w-[110rem] items-center justify-between gap-4 px-(--gutter) py-3">
+    <a
+      href="#top"
+      class="font-display flex min-h-11 items-center text-xl font-medium tracking-tight"
+      aria-label="Atlas Bushi, inicio"
+    >
+      Atlas Bushi
+    </a>
+    <nav aria-label="Capítulos" class="flex items-center gap-2 lg:gap-6">
+      <ul class="m-0 hidden list-none items-center gap-1 p-0 lg:flex">
+        {chapters.map(([href, numeral, label]) => (
+          <li>
+            <a
+              href={href}
+              class="hover:text-primary-hover flex min-h-11 items-center gap-2 px-3 text-sm underline-offset-8 hover:underline"
+            >
+              <span class="text-primary font-display" aria-hidden="true">
+                {numeral}
+              </span>
+              {label}
+            </a>
+          </li>
+        ))}
+      </ul>
+      <a
+        href="#capitulos"
+        class="bg-primary text-primary-contrast rounded-pill hover:bg-primary-hover inline-flex min-h-11 items-center px-5 text-sm font-semibold transition-colors duration-(--duration-fast)"
+      >
+        <span class="sm:hidden">Capítulos</span>
+        <span class="hidden sm:inline">Explorar los capítulos</span>
+      </a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const header = document.getElementById('site-header');
+  if (header) {
+    header.classList.remove('absolute');
+    header.classList.add('fixed');
+    const update = () =>
+      header.setAttribute('data-solid', String(window.scrollY > 40));
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+  }
+</script>

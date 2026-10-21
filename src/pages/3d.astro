@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Motion from '../components/motion/Motion.astro';
+import Scene3D from '../components/three/Scene3D.astro';
+import poster from '../assets/3d-demo-poster.jpg';
+---
+
+<BaseLayout
+  title="3D scene test"
+  description="Test page with one code-built Three.js scene, a poster fallback and scroll-linked progress."
+  noindex
+>
+  <Motion slot="head" smooth />
+
+  <section class="mx-auto max-w-6xl px-6 pt-24 pb-10">
+    <p class="text-ink-soft mb-4 text-sm tracking-widest uppercase">3D layer</p>
+    <h1 class="font-display max-w-3xl text-4xl leading-tight text-balance">
+      A scene that waits for its turn.
+    </h1>
+    <p class="text-ink-soft mt-6 max-w-2xl text-lg">
+      The poster is plain HTML. Three.js loads only when this scene is near the
+      viewport, JavaScript runs, WebGL exists and motion is welcome.
+    </p>
+  </section>
+
+  <section class="mx-auto max-w-6xl px-6 pb-24">
+    <Scene3D
+      scene="demo"
+      poster={poster}
+      alt="A brushed steel blade tilted against a dark background, with orange and amber petals drifting past."
+      scrub
+      aspect="16/9"
+    />
+    <p class="text-ink-soft mt-4 max-w-2xl text-sm">
+      Scroll: the blade turns with the progress of this section. Reduced motion,
+      no JavaScript or no WebGL: the poster above stays.
+    </p>
+  </section>
+
+  <section class="bg-surface px-6 py-24">
+    <div class="mx-auto max-w-2xl">
+      <h2 class="font-display text-2xl">Budgeted, themed, disposable.</h2>
+      <p class="text-ink-soft mt-4">
+        Colors come from the design tokens, the render loop pauses off-screen
+        and in hidden tabs, and the GPU resources are released when the page is
+        left.
+      </p>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,103 @@
+---
+import ChapterHead from './ChapterHead.astro';
+import Photo from './Photo.astro';
+import { photos } from '../../data/images';
+
+const parts = [
+  {
+    name: 'Ō-yoroi',
+    gloss: '«gran armadura»',
+    body: 'Armadura pesada de láminas, asociada con los guerreros a caballo de las primeras épocas del mundo samurái.',
+    photo: null,
+  },
+  {
+    name: 'Dō',
+    gloss: 'la coraza del tronco',
+    body: 'En el dō-maru de la foto, la coraza envuelve el cuerpo y está hecha de láminas pequeñas unidas con cordones de seda de colores.',
+    photo: photos.domaru,
+  },
+  {
+    name: 'Kabuto',
+    gloss: 'el casco',
+    body: 'El de la foto es de hierro y lleva un cubrenuca de láminas que cuelgan por detrás y por los lados.',
+    photo: photos.kabuto,
+  },
+  {
+    name: 'Mempō',
+    gloss: 'la máscara facial',
+    body: 'Cubre el rostro, aquí con una gola de láminas para la garganta. Los rasgos son exagerados: arrugas y dientes de metal.',
+    photo: photos.menpo,
+  },
+];
+---
+
+<section
+  id="armadura"
+  aria-labelledby="armadura-title"
+  class="bg-paper py-(--section-y)"
+>
+  <div class="mx-auto max-w-[110rem] px-(--gutter)">
+    <ChapterHead
+      numeral="II"
+      eyebrow="Capítulo II"
+      title="Armadura"
+      id="armadura-title"
+    >
+      <p class="text-lg leading-snug">
+        Una armadura no era una pieza, sino un conjunto: láminas pequeñas de
+        hierro o cuero, unidas con cordones de seda y cubiertas de laca. Cuatro
+        partes bastan para reconocerlo.
+      </p>
+    </ChapterHead>
+
+    <div class="mt-16 grid items-start gap-10 md:mt-24 md:grid-cols-12">
+      <Photo
+        photo={photos.rokumai}
+        aspect="3/4"
+        sizes="(min-width: 768px) 40vw, 94vw"
+        parallax
+        class="md:col-span-5"
+      />
+      <div class="md:col-span-6 md:col-start-7 md:pt-10">
+        <p data-reveal class="font-display text-2xl leading-tight text-balance">
+          La armadura de la foto es de finales del siglo XVII: yelmo con cimera
+          dorada, máscara roja y coraza de láminas oscuras.
+        </p>
+        <p data-reveal class="text-ink-soft mt-6 max-w-[52ch]">
+          Las armaduras siguieron fabricándose y conservándose durante el
+          periodo Edo. Un objeto así se estudia pieza a pieza, como en las
+          cuatro tarjetas de abajo.
+        </p>
+      </div>
+    </div>
+
+    <ol class="mt-20 grid list-none gap-x-6 gap-y-14 p-0 sm:grid-cols-2 lg:grid-cols-4">
+      {parts.map((p, i) => (
+        <li data-reveal data-reveal-delay={String((i % 2) * 0.1)}>
+          {p.photo ? (
+            <Photo
+              photo={p.photo}
+              aspect="4/5"
+              sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 94vw"
+            />
+          ) : (
+            <div
+              class="bg-surface text-ink-soft flex items-end p-5 text-xs"
+              style="aspect-ratio:4/5"
+            >
+              Esta guía no incluye una foto de esta pieza.
+            </div>
+          )}
+          <p class="text-ink-soft mt-5 text-xs font-medium tracking-[0.2em] uppercase">
+            Parte {i + 1} de 4
+          </p>
+          <h3 class="font-display mt-1 text-xl leading-tight">
+            <i>{p.name}</i>
+            <span class="text-ink-soft font-sans text-sm"> · {p.gloss}</span>
+          </h3>
+          <p class="mt-2 max-w-[44ch] text-sm">{p.body}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>

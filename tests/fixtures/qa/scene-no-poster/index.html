@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fixture scene-no-poster</title>
+    <meta
+      name="description"
+      content="QA fixture page: Fixture scene-no-poster."
+    />
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        color: #111;
+        background: #fff;
+      }
+      figure {
+        position: relative;
+        margin: 0;
+      }
+      img,
+      canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      canvas {
+        position: absolute;
+        inset: 0;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="main">
+      <h1>Fixture scene-no-poster</h1>
+      <figure data-scene="demo">
+        <div data-scene-mount></div>
+      </figure>
+    </main>
+    <script>
+      var fig = document.querySelector('[data-scene]');
+      var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduced) {
+        var s = document.createElement('script');
+        s.src = 'three-chunk.js';
+        s.onload = function () {
+          fig
+            .querySelector('[data-scene-mount]')
+            .appendChild(document.createElement('canvas'));
+          fig.dataset.sceneState = 'running';
+        };
+        document.body.appendChild(s);
+      }
+    </script>
+  </body>
+</html>

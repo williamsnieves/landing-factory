@@ -61,6 +61,7 @@ export function groupBySource(entries) {
         license: entry.license,
         licenseUrl: entry.licenseUrl ?? '',
         credit: entry.credit,
+        creditLine: entry.creditLine ?? '',
         files: [],
         notes: [],
       });
@@ -72,12 +73,16 @@ export function groupBySource(entries) {
   return [...groups.values()];
 }
 
+/** Author as credited: museum images add the museum's credit line. */
+const creditedAuthor = (group) =>
+  group.creditLine ? `${group.author}. ${group.creditLine}` : group.author;
+
 /** The footer list: one {author, license, url} per credited source photo. */
 export function creditList(entries) {
   return groupBySource(entries)
     .filter((group) => group.credit)
     .map((group) => ({
-      author: group.author,
+      author: creditedAuthor(group),
       license: group.license,
       url: group.sourcePage,
     }));
@@ -111,7 +116,7 @@ export function renderPhotoTable(entries) {
   const rows = groupBySource(entries).map((group) => [
     group.files.map((file) => `\`${file}\``).join(', '),
     group.sourcePage,
-    group.author,
+    creditedAuthor(group),
     group.licenseUrl ? `${group.license}, ${group.licenseUrl}` : group.license,
     group.credit ? 'yes' : 'no',
     group.notes.map((note) => note.replace(/\.$/, '')).join('; '),
@@ -131,7 +136,7 @@ export function renderPhotoTable(entries) {
 
 const APPENDED_INTRO = `## Photographs
 
-Photographs come from Wikimedia Commons (renditions served by \`upload.wikimedia.org\`, or crops of them). Authors and licenses were read from the Commons file metadata. The table below is generated from \`assets.json\` by \`node scripts/credits.mjs --site <slug>\`; edit the manifest, not the table. Photos under a license that requires attribution are credited in the page footer.`;
+Photographs come from Wikimedia Commons (renditions served by \`upload.wikimedia.org\`, or crops of them) or from The Met's Open Access collection (public domain; the museum's credit line is kept). Authors and licenses were read from the Commons file metadata or the museum's record. The table below is generated from \`assets.json\` by \`node scripts/credits.mjs --site <slug>\`; edit the manifest, not the table. Photos under a license that requires attribution are credited in the page footer.`;
 
 /**
  * New CREDITS.md text: the block between the markers is replaced; without markers a "Photographs"

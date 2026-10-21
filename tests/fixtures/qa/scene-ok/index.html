@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fixture scene-ok</title>
+    <meta name="description" content="QA fixture page: Fixture scene-ok." />
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        color: #111;
+        background: #fff;
+      }
+      figure {
+        position: relative;
+        margin: 0;
+      }
+      img,
+      canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      canvas {
+        position: absolute;
+        inset: 0;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="main">
+      <h1>Fixture scene-ok</h1>
+      <figure data-scene="demo">
+        <img
+          alt="A blade on a dark field"
+          width="640"
+          height="360"
+          src="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27640%27 height=%27360%27%3E%3Crect width=%27640%27 height=%27360%27 fill=%27%23222%27/%3E%3C/svg%3E"
+        />
+        <div data-scene-mount></div>
+      </figure>
+    </main>
+    <script>
+      var fig = document.querySelector('[data-scene]');
+      var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduced) {
+        var s = document.createElement('script');
+        s.src = 'three-chunk.js';
+        s.onload = function () {
+          fig
+            .querySelector('[data-scene-mount]')
+            .appendChild(document.createElement('canvas'));
+          fig.dataset.sceneState = 'running';
+        };
+        document.body.appendChild(s);
+      }
+    </script>
+  </body>
+</html>
