@@ -1,8 +1,8 @@
 ---
 name: new-landing
-description: 'Generate a complete, original landing in sites/<slug>/ from a niche and 0-3 pattern sheets: brief, proposal (PROPOSAL.md) with a review checkpoint, per-niche design system (MASTER.md and tokens), build with openly licensed Commons photos and credits, a QA loop until `npm run qa -- --site <slug>` passes, impeccable polish, final check and a run log (RUN.md). Use when the user runs /new-landing <slug> --niche "..." [--refs a,b] [--auto] [--dry-run] [--resume] [--max-attempts N] [--lang es], or asks to generate, build or create a whole landing page for a niche. Normally started by scripts/new-landing.sh. Not for editing an existing landing or for analyzing a reference (use analyze-reference).'
+description: 'Generate a complete, original landing in sites/<slug>/ from a niche and 0-3 pattern sheets: brief, proposal (PROPOSAL.md) with a review checkpoint, per-niche design system (MASTER.md and tokens), build with openly licensed Commons photos and credits, a QA loop until `npm run qa -- --site <slug>` passes, impeccable polish, final check and a run log (RUN.md). Use when the user runs /new-landing <slug> --niche "..." [--refs a,b] [--auto] [--dry-run] [--resume] [--max-attempts N] [--lang es] [--sources commons,met], or asks to generate, build or create a whole landing page for a niche. Normally started by scripts/new-landing.sh. Not for editing an existing landing or for analyzing a reference (use analyze-reference).'
 user-invocable: true
-argument-hint: '<slug> --niche "..." [--refs a,b] [--auto] [--dry-run] [--resume] [--max-attempts N] [--lang es]'
+argument-hint: '<slug> --niche "..." [--refs a,b] [--auto] [--dry-run] [--resume] [--max-attempts N] [--lang es] [--sources commons,met]'
 ---
 
 # new-landing
@@ -13,7 +13,7 @@ Read `CLAUDE.md` first (language, extract-patterns-don't-clone, licensing, quali
 
 ## Arguments
 
-`<slug>` (required, `^[a-z0-9]+(-[a-z0-9]+)*$`), `--niche "..."` (required), `--refs a,b` (slugs of `patterns/<slug>.md`, 0 to 3), `--auto` (do not stop at the checkpoint), `--dry-run` (stop after the design system), `--resume`, `--max-attempts N` (default 5), `--lang` (default `es`).
+`<slug>` (required, `^[a-z0-9]+(-[a-z0-9]+)*$`), `--niche "..."` (required), `--refs a,b` (slugs of `patterns/<slug>.md`, 0 to 3), `--auto` (do not stop at the checkpoint), `--dry-run` (stop after the design system), `--resume`, `--max-attempts N` (default 5), `--lang` (default `es`), `--sources commons,met` (image sources, default `commons`; use `met` for historical or cultural niches).
 
 `scripts/new-landing.sh` has already run the preflight and `npm run new-site -- <slug>`, so `sites/<slug>/` exists with `PROPOSAL.md`, `RUN.md` and `assets.json` templates. If it does not (the skill was typed by hand), run `node scripts/preflight.mjs --slug <slug>` and `npm run new-site -- <slug> --lang <lang>` then `npm install --no-audit --no-fund`, and stop on any failure with its message.
 
@@ -57,6 +57,8 @@ Write `sites/<slug>/PROPOSAL.md` from the template already in the folder; keep i
 - Visual direction: type and palette in words (the design system step fixes values), the hero type (one of `full-bleed-photo`, `split`, `typographic`, `video`, `illustration`, `collage`) and the imagery plan (photos from Commons only).
 - Diversity: list the other sites' choices with `grep -A6 landing-meta design-system/*/MASTER.md` and pick a primary color family, display font and hero type that do not repeat any single site's trio; prefer differing in all three.
 - Regulated niches (health, dental, legal, finance, supplements): the copy makes no promise of results, no diagnosis or treatment claims, no invented reviews, ratings, testimonials, awards, certifications or "years of experience" figures. Say in Decisions what the page does instead (services described plainly, "ask us" calls to action).
+- 3D: fill the "3D" section of the proposal. Default is none. A niche may plan at most two scenes (`<Scene3D />`, see `sites/<slug>/src/components/three/README.md`) when 3D tells the story (an object that turns with the scroll, a field of particles); each scene states its purpose, its poster, its scroll behavior and its reduced-motion fallback (the poster). Never plan a scene for decoration only, and never plan external 3D models: scenes are built from code.
+- Historical or cultural niches (history, martial arts, museums, crafts, religion): the copy must be historically careful. No invented quotes or attributions, no dates or facts that the sources used do not support (check them against the museum records of the images you use), myths and legends labeled as such, no romanticized claims presented as fact. List the sources (museum object pages) in the proposal. Plan images from `--sources met` as well as Commons.
 - Add to Decisions: the page uses stock photos and sample data to replace before launch.
 
 Run `npx prettier --write sites/<slug>/PROPOSAL.md`, set `Status: **proposed**` in it, mark synthesis `done`.
@@ -81,7 +83,7 @@ Spawn a subagent with this brief: the `Direction in one line` and the Visual dir
    ```
    ````
 
-3. Translate it into `sites/<slug>/src/styles/tokens.css` (same shape as `sites/panaderia/src/styles/tokens.css`: `@theme` colors, fonts, type scale, spacing, radii, motion) and the font imports in `src/styles/global.css`. Install the font packages with `npm install -w site-<slug> @fontsource-variable/<name>`. Add each font to the fonts table in `sites/<slug>/CREDITS.md` (source URL, author, SIL OFL 1.1).
+3. Translate it into `sites/<slug>/src/styles/tokens.css` (same shape as `sites/panaderia/src/styles/tokens.css`: `@theme static` colors (keep `static`, so 3D scenes can read every color token), fonts, type scale, spacing, radii, motion) and the font imports in `src/styles/global.css`. Install the font packages with `npm install -w site-<slug> @fontsource-variable/<name>`. Add each font to the fonts table in `sites/<slug>/CREDITS.md` (source URL, author, SIL OFL 1.1).
 4. Verify: `node scripts/check-landing.mjs --site <slug> --json` shows `tokens`, `contrast`, `landing-meta` and `diversity` ok (other checks may still fail before the build). Fix MASTER.md or tokens until they are.
 
 Mark the phase `done`. With `--dry-run`: set `Result: dry-run-done`, write the Totals section and stop here.
@@ -91,12 +93,19 @@ Mark the phase `done`. With `--dry-run`: set `Result: dry-run-done`, write the T
 Spawn a subagent with: `PROPOSAL.md`, `MASTER.md` and `tokens.css` as fixed inputs, and this role split: design-taste-frontend gives art direction (composition, section rhythm, type usage, photo treatment); palette, fonts and the page map are not up for debate. It runs `node .claude/skills/design-taste-frontend/scripts/draw.mjs ... --keep palette,type` (see that skill), and wherever its rules disagree with the proposal or MASTER.md (for example it discourages a cream ground, pill buttons or photos under headlines), the proposal and MASTER.md win; each disagreement goes into RUN.md "Design decisions". Do not use the skill's `assets.mjs` (it ignores the proxy); photos come from our script.
 
 **Images**
-- Search and download only with `node scripts/find-images.mjs search "<query>" --min-width 1600 --orientation landscape` and `... get <slug> "<title>" --as <name>` (see `--help`). One process at a time: the Commons rate limit is shared, and the script throttles and backs off on its own. Note waits in RUN.md.
+- Search and download only with `node scripts/find-images.mjs search "<query>" --min-width 1600 --orientation landscape` and `... get <slug> "<title>" --as <name>` (see `--help`). With `--sources met` (historical or cultural niches) also use The Met Open Access collection: `search "<query>" --source commons,met` lists public-domain Met objects (`get <slug> met:<objectID> --as <name>`; the entry carries the museum's credit line and `credit: true`, so the footer shows it). Met search is slow (one request per hit): ask for few results and refine the query. Read the museum record (title, date, culture, medium) before writing about an object, and caption it only with what the record says. One process at a time: the Commons rate limit is shared, and the script throttles and backs off on its own. Note waits in RUN.md.
 - One image need per section, product or step. Open every downloaded file with the Read tool and look at it before using it. Reject photos with readable signs, brands, watermarks or identifiable faces; pick another candidate instead of cropping files. Crop with CSS (`object-fit`, `object-position`, `aspect-ratio`).
 - The photo must show what the text names: a product tile uses a photo of that product. Dietary or technical variants ("sin gluten") need their own matching photo or no photo.
 - Each source photo is used at most twice on the page and never twice in one section; check what you reference with `node scripts/check-landing.mjs --site <slug>` while building.
 - After every change to `assets.json` run `node scripts/credits.mjs --site <slug>`. The footer imports `src/data/credits.json` and shows author, license and a link per credited photo (see `sites/panaderia/src/components/sections/Footer.astro`).
 - Representative stock is fine but never present it as the client's own work: no photo of a named real place or person unless the file is of that.
+
+**3D scenes** (only when the approved proposal plans them; at most two, never more)
+- Code only: each scene is a TypeScript module `src/scenes/<name>.ts` that exports `create` (contract in `src/components/three/README.md`), built from geometry, materials, particles or shaders, with colors read from the tokens (`theme`). No downloaded or external models, textures or HDRIs, no React Three Fiber, no postprocessing. Import from `three` by name (`import { Mesh, ... } from 'three'`), never `import * as THREE`, and use `createRenderer`/`themeColor` from `src/components/three/helpers`.
+- Every scene is a `<Scene3D scene="<name>" poster={...} alt="..." />` in a section with real HTML content around it. A poster is required: render it from the scene with `node scripts/render-poster.mjs --site <slug> --page / --scene <name> --out sites/<slug>/src/assets/<name>-poster.jpg` (it records the file in `assets.json` as `source: "self"`), or use a credited museum or Commons image. Run it after the page builds and the scene works; rebuild before final QA. Look at the poster with the Read tool.
+- `scrub` links the scene to the scroll of its section (needs `<Motion />` on the page). Under reduced motion, without JavaScript or without WebGL only the poster shows: write the poster so the page still makes sense, and never hide content behind the scene.
+- Budget: the 3D JavaScript of a page stays within `threeD.maxGzipKb` (200 KB gzip). Keep geometry light (instancing, a few hundred particles), no per-frame allocations, no more than one `WebGLRenderer` per scene.
+- Use `priority` on the poster only for a hero scene; the poster is the LCP, the canvas loads after.
 
 **Page**
 - Replace the placeholder `src/pages/index.astro`: no `noindex`, a real title and description, `<Motion />` in the head slot, sections in `src/components/sections/` (`.astro` first; React islands only for real interaction with `client:*`).
@@ -110,7 +119,7 @@ Mark the phase `done` only when `node scripts/credits.mjs --site <slug> --check`
 
 `--max-attempts N` is the number of fix-and-rerun rounds after the first run, so QA runs at most N + 1 times (N = 0: one run, no fixes).
 
-Each attempt: `npm run qa -- --site <slug>`. If it exits 2 with "Chromium not found", run `node scripts/preflight.mjs --chromium-path` and retry with `QA_CHROME_PATH=<that path>` in front. Read `qa/<slug>/latest/report.json` (`failures` first) and the failing `screens/*.png`. Exit 0 ends the loop. Otherwise fix the cause in `sites/<slug>/src/` using each failure's `selector`, `file` and `line`, in this order: overflow, clipped text, reduced motion, accessibility, SEO, performance, impeccable. Never lower a threshold in `qa.config.json`. Append a row to the RUN.md QA attempts table: number, verdict, failure counts by check, what was fixed.
+Each attempt: `npm run qa -- --site <slug>`. If it exits 2 with "Chromium not found", run `node scripts/preflight.mjs --chromium-path` and retry with `QA_CHROME_PATH=<that path>` in front. Read `qa/<slug>/latest/report.json` (`failures` first) and the failing `screens/*.png`. Exit 0 ends the loop. Otherwise fix the cause in `sites/<slug>/src/` using each failure's `selector`, `file` and `line`, in this order: overflow, clipped text, reduced motion, accessibility, SEO, performance, impeccable. Pages with a scene also get the 3D checks (`scene-reduced-motion`, `scene-no-js`, `scene-runtime`, `scene-budget` in `report.json`): a canvas under reduced motion, a missing poster, a console or page error mentioning WebGL, THREE or the scene, or 3D JavaScript over budget fails the run; fix the scene, not the threshold. Never lower a threshold in `qa.config.json`. Append a row to the RUN.md QA attempts table: number, verdict, failure counts by check, what was fixed.
 
 If attempts run out: write the remaining failures (check, page, metric, message) under QA attempts, set `Result: failed`, mark qa `failed`, write Totals and stop. Do not polish a failing site.
 
@@ -135,7 +144,7 @@ Run, and fix until all pass:
 
 1. `npx prettier --write sites/<slug> design-system/<slug>` then `npx prettier --check .`
 2. `node scripts/credits.mjs --site <slug> --check`
-3. `node scripts/check-landing.mjs --site <slug> --refs <the url: values from the used sheets' frontmatter>` (only if sheets were used; needs `sites/<slug>/dist/`, which the last QA run built). A `copy-match` failure means a sentence must be rewritten.
+3. `node scripts/check-landing.mjs --site <slug> --refs <the url: values from the used sheets' frontmatter>` (only if sheets were used; needs `sites/<slug>/dist/`, which the last QA run built). A `copy-match` failure means a sentence must be rewritten. The `scenes` rule fails when a built scene has no poster recorded in `assets.json` or the site has more than two scenes.
 4. `npm run check:sites`
 5. `npm run qa -- --site <slug>` once more if any file changed after the last QA pass.
 

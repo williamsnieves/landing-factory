@@ -59,6 +59,10 @@ Moves a layer by `±speed × its own height` while its parent crosses the viewpo
 
 - `data-parallax`: speed factor (default `0.2`)
 
+### Scene scrub
+
+`data-scene-scrub` on a `<Scene3D />` figure (set by its `scrub` prop) creates one ScrollTrigger on the enclosing `<section>` and writes its progress (0..1) to `data-scene-progress`; the 3D runtime reads it. Optional `data-scene-start` / `data-scene-end` take ScrollTrigger positions (default `top bottom` / `bottom top`). See [../three/README.md](../three/README.md).
+
 ## Accessibility and fallbacks
 
 - Under `prefers-reduced-motion: reduce`: no Lenis, no pin, no parallax; reveal elements are shown in their final state.

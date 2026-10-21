@@ -44,10 +44,17 @@ const EXPECTED_FILES = [
   'src/components/motion/Motion.astro',
   'src/components/motion/README.md',
   'src/components/motion/index.ts',
+  'src/components/three/README.md',
+  'src/components/three/Scene3D.astro',
+  'src/components/three/gating.ts',
+  'src/components/three/helpers.ts',
+  'src/components/three/runtime.ts',
+  'src/components/three/types.ts',
   'src/env.d.ts',
   'src/layouts/BaseLayout.astro',
   'src/layouts/README.md',
   'src/pages/index.astro',
+  'src/scenes/.gitkeep',
   'src/styles/global.css',
   'src/styles/tokens.css',
   'tsconfig.json',
@@ -81,6 +88,14 @@ test('scaffolding writes exactly the expected files and never the starter pages 
   assert.ok(!existsSync(join(site, 'src/components/sections')));
   assert.ok(!existsSync(join(site, 'src/pages/islands.astro')));
   assert.ok(!existsSync(join(site, 'src/pages/_README.md')));
+  // The 3D layer is copied, the demo scene, demo page and poster are not.
+  assert.ok(existsSync(join(site, 'src/components/three/Scene3D.astro')));
+  assert.ok(!existsSync(join(site, 'src/scenes/demo.ts')));
+  assert.ok(!existsSync(join(site, 'src/pages/3d.astro')));
+  assert.ok(!existsSync(join(site, 'src/assets')));
+  const deps = readJson(join(site, 'package.json'));
+  assert.ok(deps.dependencies.three, 'three is a site dependency');
+  assert.ok(deps.devDependencies['@types/three']);
 });
 
 test('the planning templates follow the skill: proposal sections, one RUN.md row per phase, empty manifest', () => {
@@ -94,6 +109,7 @@ test('the planning templates follow the skill: proposal sections, one RUN.md row
     'References used',
     'Page map',
     'Motion plan',
+    '3D',
     'Visual direction',
     'Quality targets',
     'Out of scope',

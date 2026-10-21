@@ -48,3 +48,14 @@ test('the impeccable version in qa.config.json matches agent-tooling.lock.json',
   const pin = lock.tools.find((t) => t.name === 'impeccable').cli;
   assert.equal(`impeccable@${read('qa.config.json').impeccable.version}`, pin);
 });
+
+test('threeD defaults to a 200 KB gzip budget and is validated', () => {
+  assert.equal(DEFAULT_CONFIG.threeD.maxGzipKb, 200);
+  assert.deepEqual(validateConfig(structuredClone(DEFAULT_CONFIG)), []);
+  const bad = structuredClone(DEFAULT_CONFIG);
+  bad.threeD.maxGzipKb = 0;
+  bad.threeD.extra = true;
+  const errors = validateConfig(bad);
+  assert.ok(errors.some((e) => e.startsWith('threeD.maxGzipKb')));
+  assert.ok(errors.some((e) => e.startsWith('threeD.extra')));
+});

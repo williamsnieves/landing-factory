@@ -85,6 +85,27 @@ export function renderMarkdown(report) {
         '',
       );
     }
+    if (page.scenes) {
+      const sc = page.scenes;
+      out.push(`3D scenes: ${sc.names.join(', ')}`, '');
+      if (sc.reducedMotion)
+        out.push(
+          `- Reduced motion (${sc.reducedMotion.viewportWidth}px): ${mark(sc.reducedMotion.pass)}; canvases: ${sc.reducedMotion.scenes.reduce((n, s) => n + s.canvases, 0)}, 3D scripts downloaded: ${sc.reducedMotion.threeDownloaded.length}`,
+        );
+      if (sc.noJs)
+        out.push(
+          `- Without JavaScript: ${mark(sc.noJs.pass)}; posters visible: ${sc.noJs.scenes.filter((s) => s.posterVisible).length}/${sc.noJs.scenes.length}`,
+        );
+      if (sc.runtime)
+        out.push(
+          `- Runtime (${sc.runtime.viewportWidth}px): ${mark(sc.runtime.pass)}; ${sc.runtime.scenes.map((s) => `${s.name}: ${s.canvas ? 'canvas' : 'no canvas'}${s.progress ? `, progress ${s.progress.join(' / ')}` : ''}`).join('; ')}; errors: ${sc.runtime.errors.length}`,
+        );
+      if (sc.budget)
+        out.push(
+          `- 3D budget: ${mark(sc.budget.pass)}; ${sc.budget.gzipKb} KB gzip of ${sc.budget.maxGzipKb} KB (${sc.budget.chunks.map((c) => c.url.split('/').pop()).join(', ') || 'no chunk with Three.js loaded'})`,
+        );
+      out.push('');
+    }
     if (page.lighthouse) {
       const lh = page.lighthouse;
       const cats = Object.keys(lh.worst);

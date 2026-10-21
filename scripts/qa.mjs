@@ -17,6 +17,7 @@ import {
   runPreset,
   worstScores,
 } from './qa/lighthouse.mjs';
+import { WEBGL_ARGS, runSceneChecks, sceneNames } from './qa/scene-checks.mjs';
 import { renderMarkdown } from './qa/report.mjs';
 import { resolveImpeccableTarget, resolveQaPaths } from './qa/site.mjs';
 import {
@@ -27,7 +28,13 @@ import {
 } from './qa/server.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const CHECKS = ['layout', 'reduced-motion', 'lighthouse', 'impeccable'];
+const CHECKS = [
+  'layout',
+  'reduced-motion',
+  'scenes',
+  'lighthouse',
+  'impeccable',
+];
 
 const HELP = `Usage: npm run qa -- [options]
 
@@ -156,14 +163,20 @@ async function main() {
       url: `${server.baseUrl}${p.path}`,
       viewports: {},
       reducedMotion: null,
+      scenes: null,
       lighthouse: null,
       pageErrors: [],
     }));
 
-    if (!skip.has('layout') || !skip.has('reduced-motion')) {
-      const browser = await chromium.launch(
-        envChrome ? { executablePath: envChrome } : {},
-      );
+    if (
+      !skip.has('layout') ||
+      !skip.has('reduced-motion') ||
+      !skip.has('scenes')
+    ) {
+      const browser = await chromium.launch({
+        ...(envChrome ? { executablePath: envChrome } : {}),
+        args: WEBGL_ARGS,
+      });
       cleanups.push(() => browser.close());
       for (const [i, p] of pages.entries()) {
         const report = pageReports[i];
@@ -318,6 +331,24 @@ async function main() {
             }
           } finally {
             await context.close();
+          }
+        }
+        if (!skip.has('scenes') && !report.loadError) {
+          // Pages with a 3D scene ([data-scene]) get the scene checks.
+          const html = await fetch(report.url).then((r) => r.text());
+          const names = sceneNames(html);
+          if (names.length) {
+            log(`scenes ${p.path}: ${names.join(', ')}`);
+            report.scenes = {
+              names,
+              ...(await runSceneChecks({
+                browser,
+                url: report.url,
+                path: p.path,
+                config,
+                failures,
+              })),
+            };
           }
         }
       }

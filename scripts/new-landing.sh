@@ -16,6 +16,8 @@ sites/<slug>/.run.log. Without --auto the run stops after the proposal so you ca
   <slug>                  lowercase letters, digits, single hyphens (also the folder under sites/)
   --niche "<text>"        what the landing is for, in your words (required)
   --refs a,b              slugs of patterns/<slug>.md sheets to draw from (0-3, optional)
+  --sources a,b           image sources: commons (default) and/or met (The Met Open Access, public domain;
+                          for historical or cultural niches). Preflight checks their hosts.
   --auto                  do not stop at the proposal checkpoint; build, QA and finish
   --dry-run               stop after PROPOSAL.md, design-system/<slug>/MASTER.md and tokens.css
   --max-attempts N        QA fix attempts before the run fails (default 5; 0 fails at the first red QA)
@@ -53,6 +55,7 @@ MAX_ATTEMPTS=5
 MODEL=""
 LANG_TAG="es"
 TITLE=""
+SOURCES=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -63,6 +66,7 @@ while [ $# -gt 0 ]; do
     --model) [ $# -ge 2 ] || die_usage "--model needs a value"; MODEL="$2"; shift 2 ;;
     --lang) [ $# -ge 2 ] || die_usage "--lang needs a value"; LANG_TAG="$2"; shift 2 ;;
     --title) [ $# -ge 2 ] || die_usage "--title needs a value"; TITLE="$2"; shift 2 ;;
+    --sources) [ $# -ge 2 ] || die_usage "--sources needs a value"; SOURCES="$2"; shift 2 ;;
     --auto) AUTO=1; shift ;;
     --dry-run) DRY_RUN=1; shift ;;
     --resume) RESUME=1; shift ;;
@@ -79,6 +83,7 @@ done
 case "$NICHE" in *$'\n'*) die_usage "--niche must be a single line" ;; esac
 [[ "$MAX_ATTEMPTS" =~ ^[0-9]+$ ]] || die_usage "--max-attempts must be a non-negative integer, got \"$MAX_ATTEMPTS\""
 [[ "$LANG_TAG" =~ ^[a-z]{2,3}(-[A-Za-z0-9]+)*$ ]] || die_usage "--lang must be a language tag such as es or en, got \"$LANG_TAG\""
+[ -z "$SOURCES" ] || [[ "$SOURCES" =~ ^(commons|met)(,(commons|met))*$ ]] || die_usage "--sources takes a comma list of commons, met, got \"$SOURCES\""
 if [ -n "$REFS" ]; then
   IFS=',' read -r -a REF_LIST <<< "$REFS"
   [ "${#REF_LIST[@]}" -le 3 ] || die_usage "--refs takes at most 3 pattern sheets"
@@ -102,9 +107,9 @@ fi
 if skipped preflight; then
   echo "new-landing: preflight skipped (NEW_LANDING_SKIP)"
 elif [ "$RESUME" -eq 1 ]; then
-  node scripts/preflight.mjs || { echo "new-landing: preflight failed; nothing was changed" >&2; exit 1; }
+  node scripts/preflight.mjs ${SOURCES:+--sources "$SOURCES"} || { echo "new-landing: preflight failed; nothing was changed" >&2; exit 1; }
 else
-  node scripts/preflight.mjs --slug "$SLUG" || { echo "new-landing: preflight failed; nothing was created" >&2; exit 1; }
+  node scripts/preflight.mjs --slug "$SLUG" ${SOURCES:+--sources "$SOURCES"} || { echo "new-landing: preflight failed; nothing was created" >&2; exit 1; }
 fi
 
 # 2. Scaffold the site and register the workspace.
@@ -124,6 +129,7 @@ fi
 quoted_niche="${NICHE//\"/\\\"}"
 PROMPT="/new-landing $SLUG --niche \"$quoted_niche\""
 [ -z "$REFS" ] || PROMPT+=" --refs $REFS"
+[ -z "$SOURCES" ] || PROMPT+=" --sources $SOURCES"
 [ "$AUTO" -eq 0 ] || PROMPT+=" --auto"
 [ "$DRY_RUN" -eq 0 ] || PROMPT+=" --dry-run"
 [ "$RESUME" -eq 0 ] || PROMPT+=" --resume"

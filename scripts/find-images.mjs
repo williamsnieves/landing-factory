@@ -1,9 +1,10 @@
 #!/usr/bin/env node
-// Find and download openly licensed images from Wikimedia Commons into a site, recording each one in
+// Find and download openly licensed images from Wikimedia Commons and, with --source met, The Met's
+// Open Access collection (public-domain objects), into a site, recording each one in
 // sites/<slug>/assets.json (the manifest scripts/credits.mjs and scripts/check-landing.mjs read).
 //
-//   node scripts/find-images.mjs search "<query>" [--limit N] [--min-width W] [--orientation O] [--json]
-//   node scripts/find-images.mjs get <site-slug> <commons-title|page-id|url> [--as file] [--width W] [--note text]
+//   node scripts/find-images.mjs search "<query>" [--source commons,met] [--limit N] [--min-width W] [--orientation O] [--json]
+//   node scripts/find-images.mjs get <site-slug> <commons-title|page-id|url|met:<id>|Met url> [--as file] [--width W] [--note text]
 //
 // Requests go through HTTPS_PROXY when it is set (same re-exec as the analyze-reference scripts), are
 // throttled (>= 1 s apart), retry HTTP 429/503 honoring Retry-After with a capped exponential backoff,
@@ -37,6 +38,12 @@ export const MIME_EXTENSIONS = {
   'image/webp': '.webp',
 };
 export const ORIENTATIONS = ['landscape', 'portrait', 'square'];
+export const SOURCES = ['commons', 'met'];
+
+export const MET_API = 'https://collectionapi.metmuseum.org/public/collection';
+export const MET_LICENSE = 'Public domain (museum open access)';
+export const MET_LICENSE_URL =
+  'https://www.metmuseum.org/about-the-met/policies-and-documents/open-access';
 
 const METADATA_KEYS =
   'Artist|LicenseShortName|LicenseUrl|UsageTerms|Copyrighted|ObjectName|ImageDescription|Credit|AttributionRequired|Restrictions';
@@ -352,6 +359,22 @@ export async function searchImages(client, query, options = {}) {
   return { ...result, usable: result.usable.slice(0, limit) };
 }
 
+/** Search the chosen sources (default Commons). Results of every source are concatenated, Commons first. */
+export async function searchAll(client, query, options = {}) {
+  const sources = options.sources ?? ['commons'];
+  const merged = { usable: [], rejected: [], filtered: 0 };
+  for (const source of sources) {
+    const result =
+      source === 'met'
+        ? await searchMet(client, query, options)
+        : await searchImages(client, query, options);
+    merged.usable.push(...result.usable.map((c) => ({ source, ...c })));
+    merged.rejected.push(...result.rejected);
+    merged.filtered += result.filtered;
+  }
+  return merged;
+}
+
 /** "File:X.jpg", "X.jpg", a page id, or a commons.wikimedia.org/wiki/File:X.jpg URL -> API params. */
 export function lookupParams(ref) {
   const text = String(ref).trim();
@@ -373,6 +396,112 @@ export async function lookupImage(client, ref) {
   if (!candidate || json.query.pages[0]?.missing)
     throw new Error(`no such file on Commons: ${ref}`);
   return candidate;
+}
+
+// --------------------------------------------------------------------------------------------------
+// The Met Open Access API (public-domain objects only)
+
+/**
+ * An object record of `/public/collection/v1/objects/{id}` -> a normalized candidate, or null when it is
+ * not usable: not public domain, or no image. The museum asks to be credited, so `credit` is true and the
+ * museum's credit line is kept. The API gives no pixel size, so width and height are null.
+ */
+export function toMetCandidate(object) {
+  if (!object || object.isPublicDomain !== true || !object.primaryImage)
+    return null;
+  const title = stripHtml(object.title) || 'Untitled';
+  const author =
+    stripHtml(object.artistDisplayName) ||
+    stripHtml(object.culture) ||
+    'Unknown artist';
+  return {
+    source: 'met',
+    objectId: object.objectID,
+    title,
+    sourcePage:
+      object.objectURL ||
+      `https://www.metmuseum.org/art/collection/search/${object.objectID}`,
+    width: null,
+    height: null,
+    orientation: null,
+    mime: 'image/jpeg',
+    originalUrl: object.primaryImage,
+    smallUrl: object.primaryImageSmall || '',
+    author,
+    license: MET_LICENSE,
+    licenseUrl: MET_LICENSE_URL,
+    credit: true,
+    creditLine: stripHtml(object.creditLine),
+    date: stripHtml(object.objectDate),
+    description: [title, stripHtml(object.objectDate), stripHtml(object.medium)]
+      .filter(Boolean)
+      .join(', ')
+      .slice(0, 200),
+    allowed: true,
+    rejection: '',
+  };
+}
+
+/** Object id from "met:436535" or a metmuseum.org collection URL; null for anything else. */
+export function parseMetRef(ref) {
+  const text = String(ref).trim();
+  const short = /^met:(\d+)$/i.exec(text);
+  if (short) return Number(short[1]);
+  if (/^https?:\/\//i.test(text)) {
+    try {
+      const url = new URL(text);
+      if (/(^|\.)metmuseum\.org$/.test(url.hostname)) {
+        const id = /\/(\d+)\/?$/.exec(url.pathname);
+        if (id) return Number(id[1]);
+      }
+    } catch {
+      // not a URL
+    }
+  }
+  return null;
+}
+
+async function metJson(client, url) {
+  const response = await client.request(url, {
+    headers: { accept: 'application/json' },
+  });
+  if (response.status === 404) return null;
+  if (!response.ok)
+    throw new RequestError(
+      `The Met API answered HTTP ${response.status}: ${url}`,
+      response.status,
+    );
+  return response.json();
+}
+
+export async function metObject(client, id) {
+  return metJson(client, `${MET_API}/v1/objects/${id}`);
+}
+
+/**
+ * Search the Met's public-domain objects that have images. The search endpoint is v1.1 (v1 was retired);
+ * every hit is then read from the objects endpoint, one request each, until `limit` are usable.
+ */
+export async function searchMet(client, query, options = {}) {
+  const limit = options.limit ?? 10;
+  const params = new URLSearchParams({
+    q: query,
+    hasImages: 'true',
+    isPublicDomain: 'true',
+    offset: '0',
+    limit: String(Math.min(100, limit * 2)),
+  });
+  const found = await metJson(client, `${MET_API}/v1.1/search?${params}`);
+  const ids = Array.isArray(found?.objectIDs) ? found.objectIDs : [];
+  const usable = [];
+  let skipped = 0;
+  for (const id of ids) {
+    if (usable.length >= limit) break;
+    const candidate = toMetCandidate(await metObject(client, id));
+    if (candidate) usable.push(candidate);
+    else skipped += 1;
+  }
+  return { usable, rejected: [], filtered: skipped, total: found?.total ?? 0 };
 }
 
 // --------------------------------------------------------------------------------------------------
@@ -452,13 +581,59 @@ export function manifestEntry(
     license: candidate.license,
     licenseUrl: candidate.licenseUrl,
     credit: candidate.credit,
+    ...(candidate.source === 'met'
+      ? {
+          source: 'met',
+          objectId: candidate.objectId,
+          creditLine: candidate.creditLine,
+        }
+      : {}),
     retrievedAt: now.toISOString(),
     note,
   };
 }
 
+async function lookupMet(client, id) {
+  const object = await metObject(client, id);
+  if (!object) throw new Error(`no such object at The Met: ${id}`);
+  const candidate = toMetCandidate(object);
+  if (!candidate)
+    throw new Error(
+      `Met object ${id} rejected: ${object.isPublicDomain === true ? 'it has no image' : 'it is not in the public domain (Open Access)'}`,
+    );
+  return candidate;
+}
+
+/** Download the primary image, resize it to at most `width` px wide (default 1920) as JPEG, write it. */
+async function downloadMet(client, candidate, target, requestedWidth) {
+  const width = pickWidth(requestedWidth);
+  const response = await client.request(candidate.originalUrl, {
+    headers: { accept: 'image/*' },
+  });
+  if (!response.ok)
+    throw new RequestError(
+      `download failed: HTTP ${response.status} for ${candidate.originalUrl}`,
+      response.status,
+    );
+  const type = response.headers.get('content-type') ?? '';
+  if (!type.startsWith('image/'))
+    throw new Error(`download is not an image (${type || 'no content type'})`);
+  const source = Buffer.from(await response.arrayBuffer());
+  if (!source.length) throw new Error('download is empty');
+  // The Met's originals can weigh many MB: keep a web-sized JPEG in the repo.
+  const { default: sharp } = await import('sharp');
+  const { data, info } = await sharp(source)
+    .rotate()
+    .resize({ width, withoutEnlargement: true })
+    .jpeg({ quality: 85, mozjpeg: true })
+    .toBuffer({ resolveWithObject: true });
+  mkdirSync(dirname(target), { recursive: true });
+  writeFileSync(target, data);
+  return { bytes: data.length, width: info.width };
+}
+
 /**
- * Download one Commons file into sites/<slug>/src/assets/images/ and append its manifest entry.
+ * Download one file (Commons, or a Met object) into sites/<slug>/src/assets/images/ and append its manifest entry.
  * Rejects licenses outside the allow-list before downloading anything.
  */
 export async function getImage(
@@ -473,7 +648,11 @@ export async function getImage(
       `sites/${slug} does not exist; run npm run new-site -- ${slug} first`,
     );
 
-  const candidate = await lookupImage(client, ref);
+  const metId = parseMetRef(ref);
+  const candidate =
+    metId === null
+      ? await lookupImage(client, ref)
+      : await lookupMet(client, metId);
   if (!candidate.allowed)
     throw new Error(`${candidate.title} rejected: ${candidate.rejection}`);
 
@@ -485,6 +664,14 @@ export async function getImage(
     throw new Error(
       `${file} already exists in sites/${slug}; pick another name with --as`,
     );
+
+  if (candidate.source === 'met') {
+    const saved = await downloadMet(client, candidate, target, width);
+    const entry = manifestEntry(candidate, file, { note, now });
+    manifest.images.push(entry);
+    writeManifest(manifestPath, manifest);
+    return { entry, path: target, ...saved, original: false };
+  }
 
   const download = downloadTarget(candidate, width);
   const response = await client.request(download.url, {
@@ -519,21 +706,28 @@ export async function getImage(
 // CLI
 
 const HELP = `Usage:
-  node scripts/find-images.mjs search "<query>" [--limit N] [--min-width W] [--orientation O] [--json]
-  node scripts/find-images.mjs get <site-slug> <commons-title|page-id|url> [--as <file>] [--width W] [--note <text>] [--json]
+  node scripts/find-images.mjs search "<query>" [--source commons,met] [--limit N] [--min-width W] [--orientation O] [--json]
+  node scripts/find-images.mjs get <site-slug> <ref> [--as <file>] [--width W] [--note <text>] [--json]
 
-search   Search Wikimedia Commons. Lists usable photos with size, orientation, license and author.
+search   Search Wikimedia Commons (default) and/or The Met Open Access collection. Lists usable images with
+         size, orientation, license and author.
+           --source LIST      commons, met or commons,met (default commons). Met results are public-domain
+                              objects with images; they carry no pixel size, so --min-width and
+                              --orientation do not apply to them. Each needs one request, so it is slow.
            --limit N          results to show (default 10)
            --min-width W      original width at least W px
            --orientation O    landscape, portrait or square
 get      Download one file into sites/<site-slug>/src/assets/images/ and append its entry
          (file, title, sourcePage, author, license, licenseUrl, credit, retrievedAt, note) to
          sites/<site-slug>/assets.json. Run scripts/credits.mjs afterwards.
+           <ref>              a Commons title, page id or URL; or met:<objectID> / a metmuseum.org collection
+                              URL for The Met (resized to a web JPEG; entry gets source "met" and the
+                              museum's creditLine, credit true)
            --as <file>        file name (default: slug of the Commons title)
            --width W          960, 1280 or 1920 (default 1920; the original is used when it is smaller)
            --note <text>      free text stored in the manifest (what the photo shows, crop plans)
 
-Licenses kept: CC0, public domain, CC BY, CC BY-SA. NonCommercial, NoDerivatives and unknown licenses are
+Licenses kept: CC0, public domain, CC BY, CC BY-SA; Met objects flagged public domain (Open Access). NonCommercial, NoDerivatives and unknown licenses are
 rejected with the reason. Requests are throttled (1 s apart) and retried on HTTP 429/503 with backoff.
 Exit codes: 0 ok, 1 nothing usable / rejected / request failed, 2 bad usage.`;
 
@@ -549,6 +743,7 @@ export async function main(argv, io = console, clientOptions = {}) {
         limit: { type: 'string' },
         'min-width': { type: 'string' },
         orientation: { type: 'string' },
+        source: { type: 'string' },
         json: { type: 'boolean' },
         as: { type: 'string' },
         width: { type: 'string' },
@@ -589,6 +784,13 @@ export async function main(argv, io = console, clientOptions = {}) {
   if (values.orientation && !ORIENTATIONS.includes(values.orientation))
     return usage(`--orientation must be one of ${ORIENTATIONS.join(', ')}`);
 
+  const sources = (values.source ?? 'commons')
+    .split(',')
+    .map((x) => x.trim().toLowerCase())
+    .filter(Boolean);
+  if (!sources.length || sources.some((x) => !SOURCES.includes(x)))
+    return usage(`--source must be a comma list of ${SOURCES.join(', ')}`);
+
   const client = createClient({ log: stderrLog, ...clientOptions });
   const waits = () => {
     if (client.stats.retries)
@@ -601,17 +803,23 @@ export async function main(argv, io = console, clientOptions = {}) {
     if (command === 'search') {
       if (args.length !== 1 || !args[0].trim())
         return usage('search needs exactly one query, in quotes');
-      const result = await searchImages(client, args[0], {
+      const result = await searchAll(client, args[0], {
         limit,
         minWidth,
         orientation: values.orientation,
+        sources,
       });
       waits();
       if (values.json) io.log(JSON.stringify(result.usable, null, 2));
       else {
         result.usable.forEach((c, i) => {
+          const size = c.width
+            ? `${c.width}x${c.height} ${c.orientation}`
+            : 'size unknown';
+          const ref =
+            c.source === 'met' ? `   get ref: met:${c.objectId}\n` : '';
           io.log(
-            `${i + 1}. ${c.title}\n   ${c.width}x${c.height} ${c.orientation}, ${c.license}${c.credit ? ' (credit required)' : ''}, author: ${c.author}\n   ${c.sourcePage}${c.description ? `\n   ${c.description}` : ''}`,
+            `${i + 1}. ${c.source === 'commons' ? '' : `[${c.source}] `}${c.title}\n   ${size}, ${c.license}${c.credit ? ' (credit required)' : ''}, author: ${c.author}\n${ref}   ${c.sourcePage}${c.description ? `\n   ${c.description}` : ''}`,
           );
         });
         io.log(
@@ -631,6 +839,10 @@ export async function main(argv, io = console, clientOptions = {}) {
         as: values.as,
         width,
         note: values.note,
+        // Tests only: keep sites/ in another folder.
+        ...(process.env.LANDING_FACTORY_ROOT
+          ? { root: resolve(process.env.LANDING_FACTORY_ROOT) }
+          : {}),
       });
       waits();
       if (values.json) io.log(JSON.stringify(result.entry, null, 2));

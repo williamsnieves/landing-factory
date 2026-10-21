@@ -23,6 +23,15 @@ User decisions (2026-10-21): 3D comes before the three-niche pilot; scenes are b
 7. **Generation.** The proposal template gains a "3D" section: none, or up to two scenes, each with purpose, poster image, scroll behavior and reduced-motion fallback. The design-system phase is unchanged; the build phase writes scenes from code only. `check-landing` gains a `scenes` rule: every `[data-scene]` element has a poster whose file is in `assets.json` or is a self-rendered image recorded as `source: "self"`.
 8. **Validation landing.** `sites/samurai` (Spanish copy, editorial and educational, not a business): who the samurai were, armor (ō-yoroi, dō, kabuto, mempō), swords (katana, wakizashi, tachi; forging and care), way of life (bushidō in its historical context, daily life, arts), and an end to the class in the Meiji era. One hero scene (a katana built in code that turns with scroll, with ink or petal particles) and at most one more. Museum photographs of real armor and blades and ukiyo-e prints, credited. Content must be historically careful: no invented quotes, dates checked against the museum records used, myths labeled as such.
 
+## Implementation notes (deviations)
+
+- Scene contract: the context has no `three` namespace; scenes import `three` by name and create the renderer through `createRenderer(ctx)` (a namespace object would defeat tree-shaking and blow the budget). Demo chunk: 137.6 KB gzip.
+- The runtime starts loading after `window.load` plus an idle callback, in addition to the viewport observer, to keep Three.js off the Lighthouse critical path.
+- Tokens use `@theme static` so every `--color-*` variable exists at runtime for scenes (Tailwind v4 otherwise emits only the variables utilities use).
+- The poster fades out under a running canvas but stays in the DOM (alt text) and comes back if the scene fails; "WebGL unavailable" is a warning, any other scene exception an error that QA catches.
+- QA adds two checks beyond Decision 5: no 3D chunk is downloaded under reduced motion, and a scrubbed scene's progress changes while scrolling.
+- `sharp` is declared as a root dev dependency (it resizes Met images; Astro already depends on it).
+
 ## Risks / Trade-offs
 
 - [Lighthouse performance with WebGL] → poster is the LCP, 3D loads after first paint and only near the viewport; budget on the 3D chunk; scene work paused off-screen.

@@ -245,3 +245,25 @@ test('a failing preflight stops before anything is created or claude is started'
   assert.match(r.stdout, /FAIL Site slug: sites\/panaderia already exists/);
   assert.ok(!existsSync(argsFile));
 });
+
+test('--sources is validated and passed to the skill', () => {
+  const bad = run([slug, '--niche', 'samurai', '--sources', 'artic']);
+  assert.equal(bad.status, 2);
+  assert.match(bad.stderr, /--sources takes a comma list of commons, met/);
+  const ok = run(
+    [
+      slug,
+      '--niche',
+      'samurai',
+      '--sources',
+      'commons,met',
+      '--dry-run',
+      '--resume',
+    ],
+    {
+      STUB_RESULT: 'dry-run-done',
+    },
+  );
+  assert.equal(ok.status, 0, ok.stderr);
+  assert.ok(recorded()[1].includes('--sources commons,met'));
+});

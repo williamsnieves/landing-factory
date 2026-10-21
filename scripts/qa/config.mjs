@@ -22,6 +22,9 @@ export const DEFAULT_CONFIG = Object.freeze({
     severityMap: { error: 'major', warning: 'minor', advisory: 'info' },
     failOn: ['major'],
   },
+  // Pages with [data-scene]: budget for the JS chunks that contain Three.js (gzip KB)
+  // and how long to wait for the canvas after scrolling to a scene.
+  threeD: { maxGzipKb: 200, canvasTimeoutMs: 15000 },
 });
 
 const LIGHTHOUSE_CATEGORIES = [
@@ -60,7 +63,14 @@ export function validateConfig(config) {
   if (!isObject(config)) return ['config: must be an object'];
   known(
     config,
-    ['viewports', 'pages', 'reducedMotion', 'lighthouse', 'impeccable'],
+    [
+      'viewports',
+      'pages',
+      'reducedMotion',
+      'lighthouse',
+      'impeccable',
+      'threeD',
+    ],
     'config',
   );
 
@@ -175,6 +185,17 @@ export function validateConfig(config) {
         `must be an array of ${SEVERITY_LEVELS.join(' | ')}`,
       );
     }
+  }
+
+  const td = config.threeD;
+  if (!isObject(td)) {
+    err('threeD', 'must be an object');
+  } else {
+    known(td, ['maxGzipKb', 'canvasTimeoutMs'], 'threeD');
+    if (typeof td.maxGzipKb !== 'number' || !(td.maxGzipKb > 0))
+      err('threeD.maxGzipKb', 'must be a number > 0');
+    if (!Number.isInteger(td.canvasTimeoutMs) || td.canvasTimeoutMs < 1000)
+      err('threeD.canvasTimeoutMs', 'must be an integer >= 1000');
   }
   return errors;
 }

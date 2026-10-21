@@ -425,3 +425,84 @@ test('the real panaderia site passes the final check', async () => {
   const result = await runChecks({ slug: 'panaderia', root: ROOT });
   assert.deepEqual(result.failures, []);
 });
+
+// --- scenes rule (add-3d-scenes, Decision 7) ---------------------------------------------
+
+const sceneFigure = (name, img) =>
+  `<figure data-scene="${name}" class="x">${img ? `<picture><img alt="a" src="${img}" /></picture>` : ''}<div data-scene-mount></div></figure>`;
+
+const withDist = (root, html) => {
+  mkdirSync(site(root, 'dist'), { recursive: true });
+  writeFileSync(
+    site(root, 'dist/index.html'),
+    `<html><body>${html}</body></html>`,
+  );
+};
+
+test('scenes: a poster recorded in assets.json passes, with Astro hashed names', async () => {
+  const root = freshRoot();
+  withDist(
+    root,
+    sceneFigure('hero', '/_astro/hero.BCLsWVUo_Z1hYIWH.jpg') +
+      sceneFigure('crest', '/team.jpg'),
+  );
+  assert.deepEqual(await failuresOf(root, 'scenes'), []);
+});
+
+test('scenes: a scene without a poster img, or with a poster missing from assets.json, fails naming the scene', async () => {
+  const root = freshRoot();
+  withDist(
+    root,
+    sceneFigure('hero', null) +
+      sceneFigure('crest', '/_astro/unknown.AAA_BBB.jpg'),
+  );
+  const failures = await failuresOf(root, 'scenes');
+  assert.equal(failures.length, 2);
+  assert.match(failures[0].message, /scene "hero".*no poster/);
+  assert.match(
+    failures[1].message,
+    /scene "crest".*unknown\.AAA_BBB\.jpg.*not in assets\.json/,
+  );
+});
+
+test('scenes: a self-rendered poster recorded with source "self" passes', async () => {
+  const root = freshRoot();
+  edit(site(root, 'assets.json'), (text) => {
+    const manifest = JSON.parse(text);
+    manifest.images.push({
+      file: 'hero-poster.jpg',
+      title: 'Poster of the "hero" 3D scene',
+      sourcePage: 'site code: src/scenes/hero.ts',
+      author: 'Original',
+      license: 'Original (rendered from site code)',
+      credit: false,
+      source: 'self',
+      retrievedAt: '2026-10-21T00:00:00.000Z',
+    });
+    return JSON.stringify(manifest);
+  });
+  mkdirSync(site(root, 'src/assets/images'), { recursive: true });
+  writeFileSync(site(root, 'src/assets/images/hero-poster.jpg'), 'x');
+  withDist(root, sceneFigure('hero', '/_astro/hero-poster.CCC_DDD.jpg'));
+  assert.deepEqual(await failuresOf(root, 'scenes'), []);
+});
+
+test('scenes: more than two distinct scenes fail; a site using <Scene3D /> without dist fails', async () => {
+  const root = freshRoot();
+  withDist(
+    root,
+    ['a', 'b', 'c'].map((n) => sceneFigure(n, '/team.jpg')).join(''),
+  );
+  const many = await failuresOf(root, 'scenes');
+  assert.equal(many.length, 1);
+  assert.match(many[0].message, /3 scenes.*at most 2/);
+
+  const other = freshRoot();
+  writeFileSync(
+    site(other, 'src/pages/index.astro'),
+    '---\n---\n<Scene3D scene="x" />\n',
+  );
+  const noDist = await failuresOf(other, 'scenes');
+  assert.equal(noDist.length, 1);
+  assert.match(noDist[0].message, /does not exist; build first/);
+});

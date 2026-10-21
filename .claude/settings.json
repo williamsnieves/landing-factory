@@ -27,6 +27,7 @@
       "Bash(node scripts/find-images.mjs *)",
       "Bash(node scripts/credits.mjs *)",
       "Bash(node scripts/check-landing.mjs *)",
+      "Bash(node scripts/render-poster.mjs *)",
       "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py *)",
       "Bash(node .claude/skills/design-taste-frontend/scripts/*)",
       "Bash(date *)",
