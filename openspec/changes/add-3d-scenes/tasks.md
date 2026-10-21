@@ -25,9 +25,9 @@
 
 ## 4. Validation
 
-- [ ] 4.1 Generate `sites/samurai` with one `scripts/new-landing.sh samurai --niche "..." --refs crazy-studio,experience2026-funtech-inc --auto` command; verify site QA (including the 3D checks) and `check-landing` pass with no touch-ups
+- [x] 4.1 Generate `sites/samurai` with one `scripts/new-landing.sh samurai --niche "..." --refs crazy-studio,experience2026-funtech-inc --auto` command; verify site QA (including the 3D checks) and `check-landing` pass with no touch-ups (verified: one `--auto` run, about 32 min; QA passed on attempt 4 after three mobile-performance fix rounds, Lighthouse 93 mobile / 100 desktop, 3D 137 KB gzip; `check-landing` passed including `scenes`)
 - [ ] 4.2 Review the scene on the preview on a real device (user) and record the result; verify the preview deploys on the PR
-- [ ] 4.3 Update `CLAUDE.md`, `README.md`, `sites/README.md`, `scripts/README.md`, `docs/status.md`; verify the docs describe the 3D layer, its budgets and fallbacks
+- [x] 4.3 Update `CLAUDE.md`, `README.md`, `sites/README.md`, `scripts/README.md`, `docs/status.md`; verify the docs describe the 3D layer, its budgets and fallbacks (CLAUDE.md, README.md, sites/README.md, scripts/README.md, motion and three READMEs, docs/status.md)
 
 ## Workflow follow-up
 

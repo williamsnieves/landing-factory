@@ -19,7 +19,7 @@ Read this first in a new or compacted session. Last updated: 2026-10-18 (add-new
 | Pilot step 1-2: bakery references analyzed, landing proposal approved | Merged (PR #9): `patterns/{sonomabakery,blackstarbakery,bernicebakery}-com.md`, `sites/panaderia/PROPOSAL.md` |
 | Pilot step 3-6: build the bakery landing in `sites/panaderia/` | Merged (PR #11), production https://panaderia-a3o.pages.dev; lessons in `docs/pilot-panaderia-lessons.md` |
 | add-new-landing-skill (`/new-landing`, one command per landing) | Merged (PR #12) and archived; `sites/clinica-dental` in production at https://clinica-dental-9pd.pages.dev |
-| add-3d-scenes (opt-in Three.js scenes, 3D QA budgets, museum images), validated with a samurai landing | In progress on `change/add-3d-scenes` |
+| add-3d-scenes (opt-in Three.js scenes, 3D QA budgets, Met images), validated with `sites/samurai` | On `change/add-3d-scenes`, PR open; scene still to be checked on a real device (task 4.2) |
 
 ## How to generate a landing
 
@@ -36,6 +36,10 @@ Without `--auto` it stops after `sites/<slug>/PROPOSAL.md`; continue with `--res
 2. Follow-up pilot (roadmap MVP check): three different niches with `new-landing.sh --auto`, one PR, checked for diversity by `check-landing`.
 
 ## Known gaps and follow-ups
+
+- `new-landing.sh`'s own final check runs `check-landing` without `--refs` (it receives pattern slugs, not URLs), so originality is only checked when the skill passes the sheets' source URLs. Map sheet slugs to their source URL in the script.
+- 3D: headless QA renders WebGL with SwiftShader; it checks errors, fallbacks and budgets, not looks. Mobile performance with scenes sits near the limit (samurai: 93).
+- `sites/samurai`: historical copy should get an expert read before any public use (Muromachi dating of the katana, the ninja/samurai myth row, "in less than ten years" for 1868-1876); `src/data/sources.ts` is hand-written next to `assets.json`.
 
 - panaderia at 375 px: the process heading "Cuatro pasos, ningún atajo." is partly covered by the arch photo (found with `section-shots`; QA does not catch it). Small site fix.
 - clinica-dental (generated, kept as is for the validation): the "Llamar" button text wraps at 375 px; the aligners photo is weak; only 7 distinct photos because of Commons rate limits.
