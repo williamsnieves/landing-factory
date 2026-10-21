@@ -2,7 +2,7 @@
 
 ## 0. Prerequisites
 
-- [ ] 0.1 Network: the user allows `crazy.studio`, `experience2026.funtech.inc` (plus any CDN hosts recon reports), `collectionapi.metmuseum.org`, `images.metmuseum.org`, `api.artic.edu` and `www.artic.edu`; verify with `npm run preflight` extended to the museum hosts
+- [x] 0.1 Network: the user allows `crazy.studio`, `experience2026.funtech.inc` (plus any CDN hosts recon reports), `collectionapi.metmuseum.org` and `images.metmuseum.org`; verify (done 2026-10-21: both references and the Met answer; the Art Institute of Chicago image host returns a bot challenge, so that source is dropped) with `npm run preflight` extended to the museum hosts
 - [ ] 0.2 Analyze both references with `/analyze-reference` (`--focus` on 3D storytelling, scroll-linked scenes and typography) into `patterns/crazy-studio.md` and `patterns/experience2026-funtech-inc.md`; verify `npm run validate:patterns` and that `.cache/analyze/` is cleaned up. If a site disallows analysis (robots, TDM reservation), record that and continue with the other
 
 ## 1. 3D layer in the starter
@@ -19,7 +19,7 @@
 
 ## 3. Images and generation
 
-- [ ] 3.1 `find-images.mjs --source commons,met,artic`: Met and AIC open-access search and download through the proxy, public-domain filter, museum credit lines in `assets.json`, `credits.mjs` output; verify with recorded API fixtures and one live search per museum
+- [ ] 3.1 `find-images.mjs --source commons,met`: Met open-access search and download through the proxy, public-domain filter, museum credit lines in `assets.json`, `credits.mjs` output; verify with recorded API fixtures and one live Met search
 - [ ] 3.2 `preflight.mjs`: museum hosts checked when `--sources` includes them; verify with tests
 - [ ] 3.3 `/new-landing`: PROPOSAL template "3D" section, SKILL.md rules for scenes (code only, poster required, at most two, reduced-motion fallback, budget), build-phase guidance; `new-site` copies `src/components/three/`; verify a scaffolded site builds and passes QA
 

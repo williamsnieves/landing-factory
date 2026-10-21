@@ -9,7 +9,7 @@ The roadmap's stack names Three.js "only when a landing needs 3D". The next land
 - **3D layer in the starter** (`src/components/three/`): a `<Scene3D />` component that renders a static poster image as real HTML, then, only when JavaScript runs, WebGL is available, reduced motion is not requested and the scene is near the viewport, lazy-loads Three.js and the site's scene module and replaces the poster with a canvas. Scenes are plain TypeScript modules (`create(ctx) → { update(progress, time), resize(), dispose() }`) built from code (geometry, materials, particles, shaders); an optional scroll link drives `progress` through ScrollTrigger. Vanilla Three.js, no React Three Fiber, to keep the bundle small.
 - **Starter demo page** `/3d/` (noindex) with one small code-built scene, so the layer is covered by QA and CI.
 - **QA rules for 3D**: under reduced motion and without JavaScript no canvas is created and the poster is visible; no WebGL console errors; a size budget for the 3D chunk; Lighthouse budgets unchanged (≥ 90), which forces lazy loading after first paint.
-- **Museum images**: `find-images.mjs` gains public-domain open-access sources (The Met and the Art Institute of Chicago APIs) next to Commons, recorded in `assets.json` with the museum's credit line.
+- **Museum images**: `find-images.mjs` gains public-domain open-access sources (The Met Collection API) next to Commons, recorded in `assets.json` with the museum's credit line.
 - **`/new-landing` support**: the proposal may plan at most one or two scenes (with a poster each); the build phase uses the 3D layer; `check-landing` checks that every scene has a poster and a credited or self-made source.
 - **Validation**: a samurai landing (`sites/samurai`) generated with `new-landing.sh --auto` from pattern sheets of the two references, passing site QA, `check-landing` and deploying its preview.
 
@@ -28,5 +28,5 @@ The roadmap's stack names Three.js "only when a landing needs 3D". The next land
 
 - New: `src/components/three/`, `src/pages/3d.astro`, scene README, QA checks, museum sources in `find-images.mjs`, `sites/samurai/`, `patterns/crazy-studio.md`, `patterns/experience2026-funtech-inc.md`.
 - Dependency: `three` (MIT) in the root and site dependency ranges; tree-shaken out of pages that do not use `<Scene3D />`.
-- Network: the two reference sites and the museum APIs must be allowed in the cloud environment.
+- Network: the two reference sites and the Met API must be allowed in the cloud environment (done).
 - Out of scope: React Three Fiber, downloaded 3D models (glTF), physics, audio, postprocessing stacks.
