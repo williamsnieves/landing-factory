@@ -22,6 +22,8 @@
       "Bash(npm install --no-audit --no-fund)",
       "Bash(npm install -w site-* @fontsource-variable/*)",
       "Bash(npm install -w site-* @fontsource/*)",
+      "Bash(npm install --no-audit --no-fund -w site-* @fontsource/*)",
+      "Bash(npm install --no-audit --no-fund -w site-* @fontsource-variable/*)",
       "Bash(npm view *)",
       "Bash(node scripts/preflight.mjs *)",
       "Bash(node scripts/find-images.mjs *)",

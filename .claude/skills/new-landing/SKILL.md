@@ -90,7 +90,7 @@ Spawn a subagent with this brief: the `Direction in one line` and the Visual dir
 
    `archetype` and `traits` repeat the proposal's blend (`custom` and `ref:<sheet>/<trait>` are valid).
 
-3. Translate it into `sites/<slug>/src/styles/tokens.css` (edit the file the scaffold copied from the starter and keep its shape: `@theme static` colors (keep `static`, so 3D scenes can read every color token), fonts, type scale, spacing, radii, motion) and the font imports in `src/styles/global.css`. Install the font packages with `npm install -w site-<slug> @fontsource-variable/<name>`. Add each font to the fonts table in `sites/<slug>/CREDITS.md` (source URL, author, SIL OFL 1.1).
+3. Translate it into `sites/<slug>/src/styles/tokens.css` (edit the file the scaffold copied from the starter and keep its shape: `@theme static` colors (keep `static`, so 3D scenes can read every color token), fonts, type scale, spacing, radii, motion) and the font imports in `src/styles/global.css`. Install the font packages with exactly `npm install -w site-<slug> @fontsource-variable/<name> [@fontsource-variable/<other>]` (or `@fontsource/<name>`): only this form, with `-w` first and no other flags, is allowed in automatic mode. Add each font to the fonts table in `sites/<slug>/CREDITS.md` (source URL, author, SIL OFL 1.1).
 4. Verify: `node scripts/check-landing.mjs --site <slug> --json` shows `tokens`, `contrast`, `landing-meta` and `diversity` ok (`layout-diversity` needs the built page and runs in the final check) (other checks may still fail before the build). Fix MASTER.md or tokens until they are.
 
 Mark the phase `done`. With `--dry-run`: set `Result: dry-run-done`, write the Totals section and stop here.
