@@ -1,0 +1,100 @@
+{
+  "site": "panaderia",
+  "version": 1,
+  "page": "/",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "features": {
+    "sectionCount": 8,
+    "cols1Share": 0.5,
+    "cols2Share": 0.25,
+    "cols3Share": 0.25,
+    "splitRatio": 0.91,
+    "fullBleedShare": 0.13,
+    "imageRadius": 210.7,
+    "buttonRadius": 23.4,
+    "buttonShape": "pill",
+    "headingScale": 4.2,
+    "headingAlign": "left",
+    "headingCase": 0,
+    "eyebrowShare": 0,
+    "wordsPerScreen": 39,
+    "footerType": "wordmark",
+    "mediaPerScreen": 1.2,
+    "rotatedShare": 0,
+    "overlapShare": 0,
+    "stickyCount": 1
+  },
+  "sections": [
+    {
+      "id": "top",
+      "cols": 1,
+      "fullBleed": true,
+      "eyebrow": false
+    },
+    {
+      "id": null,
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "horno",
+      "cols": 3,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": null,
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "proceso",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": null,
+      "cols": 3,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "visitanos",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "encargar",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    }
+  ],
+  "mobile": {
+    "screens": 14.85,
+    "wordsPerScreen": 31,
+    "sectionCount": 8
+  },
+  "hashes": [
+    "6dddceb99898db5b",
+    "c0476c0d410d0000",
+    "946969494b6d8d61",
+    "4a4d5b5b5f5b6400",
+    "9c8c6cc12c3c7a5f",
+    "d02d3c7e5b1b1a58",
+    "d06d343e7f797a00",
+    "d04db43e3f3b3a48",
+    "383bc82892392b2b",
+    "cb4f3031011a6565",
+    "e6a5e5c518846171",
+    "c405426a46baaea8",
+    "c005424e56baaea8"
+  ]
+}

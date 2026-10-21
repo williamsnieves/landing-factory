@@ -15,6 +15,7 @@ npm run check     # type and Astro diagnostics (root starter)
 npm run check:sites   # the same for every site under sites/
 npm test          # unit and fixture tests (QA script, reference-analysis scripts, pattern validator)
 npm run validate:patterns  # check patterns/*.md (structure, no site content)
+npm run validate:archetypes  # check design-archetypes/*.md (fields, vocabularies, ranges)
 npm run qa        # build + screenshots, overflow, reduced motion, Lighthouse, impeccable -> qa/latest/report.md
 npm run new-site -- <slug>        # scaffold sites/<slug>/ from the starter (then `npm install`)
 npm run qa -- --site <slug>       # full QA for one site -> qa/<slug>/latest/report.md
@@ -79,7 +80,7 @@ scripts/new-landing.sh clinica-dental --niche "..." --auto [--max-attempts 5] [-
 scripts/new-landing.sh clinica-dental --niche "..." --dry-run
 ```
 
-The run leaves `sites/<slug>/RUN.md` (inputs, phase times, QA attempts, decisions, what to confirm before launch) and a git-ignored `.run.log`. Afterwards review the diff, commit and open a PR; CI builds, checks and deploys the preview. Helper scripts, each with `--help`: `npm run preflight` (hosts, Chromium, free slug), `npm run find-images` (licensed Commons photos, and with `--source met` public-domain Met objects, into `assets.json`), `node scripts/render-poster.mjs` (poster image of a 3D scene), `npm run credits -- --site <slug>` (CREDITS.md and footer credits), `npm run check-landing -- --site <slug>` (credits, photo reuse, tokens, diversity, copy originality). See [scripts/README.md](scripts/README.md).
+The run leaves `sites/<slug>/RUN.md` (inputs, phase times, QA attempts, decisions, what to confirm before launch) and a git-ignored `.run.log`. Afterwards review the diff, commit and open a PR; CI builds, checks and deploys the preview. Helper scripts, each with `--help`: `npm run preflight` (hosts, Chromium, free slug), `npm run find-images` (licensed Commons photos, and with `--source met` public-domain Met objects, into `assets.json`), `node scripts/render-poster.mjs` (poster image of a 3D scene), `npm run credits -- --site <slug>` (CREDITS.md and footer credits), `npm run check-landing -- --site <slug>` (credits, photo reuse, tokens, diversity, layout diversity, copy originality), `node scripts/pick-archetypes.mjs --site <slug>` (archetype blends from the brief signals and reference sheets) and `node scripts/layout-signature.mjs --site <slug> --write` (measure the built layout). Each landing starts from a blend of the composition archetypes in [design-archetypes/](design-archetypes/README.md), chosen from its requirement and its references: a starting grammar, not a template. See [scripts/README.md](scripts/README.md).
 
 ## Analyzing reference sites
 

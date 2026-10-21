@@ -110,6 +110,7 @@ test('the planning templates follow the skill: proposal sections, one RUN.md row
     'Page map',
     'Motion plan',
     '3D',
+    'Archetype blend',
     'Visual direction',
     'Quality targets',
     'Out of scope',
@@ -117,6 +118,10 @@ test('the planning templates follow the skill: proposal sections, one RUN.md row
   ])
     assert.match(proposal, new RegExp(`^## ${heading}$`, 'm'), heading);
   assert.match(proposal, /\bsites\/cafeteria\//);
+  // The synthesis fills a Signals line and the blend; the templates point to no generated site.
+  assert.match(proposal, /^- \*\*Signals:\*\*/m);
+  assert.match(proposal, /pick-archetypes\.mjs --site cafeteria/);
+  assert.match(proposal, /Lent traits/);
   const run = readFileSync(join(site, 'RUN.md'), 'utf8');
   assert.match(run, /^# Run log: cafeteria/);
   assert.match(run, /^Result: pending$/m);
@@ -125,6 +130,13 @@ test('the planning templates follow the skill: proposal sections, one RUN.md row
   for (const heading of ['Inputs', 'Phases', 'QA attempts', 'Final check'])
     assert.match(run, new RegExp(`^## ${heading}$`, 'm'), heading);
   assert.deepEqual(readJson(join(site, 'assets.json')), { images: [] });
+  for (const file of ['PROPOSAL.md', 'RUN.md'])
+    assert.doesNotMatch(
+      readFileSync(join(site, file), 'utf8'),
+      /panaderia|clinica-dental|samurai/i,
+      `${file} must not anchor on another site`,
+    );
+  assert.match(run, /Every deviation from the chosen archetype sheets/);
 });
 
 test('the site manifest is private, named site-<slug> and pins the root versions exactly', () => {
