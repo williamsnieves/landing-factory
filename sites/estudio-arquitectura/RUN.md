@@ -16,16 +16,16 @@ Written by the /new-landing skill. `Result:` ends as one of `checkpoint` (waitin
 
 ## Phases
 
-| Phase         | Status      | Started              | Finished             | Notes                                                                |
-| ------------- | ----------- | -------------------- | -------------------- | -------------------------------------------------------------------- |
-| brief         | done        | 2026-10-21T17:22:55Z | 2026-10-21T17:23:30Z | goal: commission enquiries; audience private clients and small firms |
-| synthesis     | done        | 2026-10-21T17:23:30Z | 2026-10-21T17:27:00Z | swiss-grid-minimal+horizontal-chapter-story                          |
-| checkpoint    | done        | 2026-10-21T17:27:00Z | 2026-10-21T17:27:00Z | --auto                                                               |
-| design-system | done        | 2026-10-21T17:27:00Z | 2026-10-21T17:30:00Z | primary #17356b, Schibsted Grotesk + Hanken Grotesk                  |
-| build         | done        | 2026-10-21T17:30:00Z | 2026-10-21T17:57:57Z | 6 photos, 6 SVG plans                                                |
-| qa            | done        | 2026-10-21T17:57:57Z | 2026-10-21T18:00:00Z | passed on run 2 (768 px overflow in the project index fixed)         |
-| polish        | done        | 2026-10-21T18:00:00Z | 2026-10-21T18:00:30Z | impeccable detect: no findings; no edits needed                      |
-| final-check   | done        | 2026-10-21T18:00:30Z | 2026-10-21T18:07:43Z | layout-diversity needed a recomposition; QA re-run passed            |
+| Phase         | Status | Started              | Finished             | Notes                                                                |
+| ------------- | ------ | -------------------- | -------------------- | -------------------------------------------------------------------- |
+| brief         | done   | 2026-10-21T17:22:55Z | 2026-10-21T17:23:30Z | goal: commission enquiries; audience private clients and small firms |
+| synthesis     | done   | 2026-10-21T17:23:30Z | 2026-10-21T17:27:00Z | swiss-grid-minimal+horizontal-chapter-story                          |
+| checkpoint    | done   | 2026-10-21T17:27:00Z | 2026-10-21T17:27:00Z | --auto                                                               |
+| design-system | done   | 2026-10-21T17:27:00Z | 2026-10-21T17:30:00Z | primary #17356b, Schibsted Grotesk + Hanken Grotesk                  |
+| build         | done   | 2026-10-21T17:30:00Z | 2026-10-21T17:57:57Z | 6 photos, 6 SVG plans                                                |
+| qa            | done   | 2026-10-21T17:57:57Z | 2026-10-21T18:00:00Z | passed on run 2 (768 px overflow in the project index fixed)         |
+| polish        | done   | 2026-10-21T18:00:00Z | 2026-10-21T18:00:30Z | impeccable detect: no findings; no edits needed                      |
+| final-check   | done   | 2026-10-21T18:00:30Z | 2026-10-21T18:07:43Z | layout-diversity needed a recomposition; QA re-run passed            |
 
 ## Design decisions
 
@@ -79,11 +79,11 @@ Not found: a brick or stone restoration photograph and a Madrid courtyard; Commo
 
 ## QA attempts
 
-| #   | Verdict | Failures by check | Fixed | Notes |
-| --- | ------- | ----------------- | ----- | ----- |
-| 1   | failed  | overflow: 6 (768 px) | Project index row used a 5-column grid from `md`; moved to `lg` | index row 64 px wider than its column at 768 px |
-| 2   | passed  | none | - | Lighthouse and impeccable green |
-| 3   | passed  | none | - | re-run after the final-check recomposition (see below) |
+| #   | Verdict | Failures by check    | Fixed                                                           | Notes                                                  |
+| --- | ------- | -------------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
+| 1   | failed  | overflow: 6 (768 px) | Project index row used a 5-column grid from `md`; moved to `lg` | index row 64 px wider than its column at 768 px        |
+| 2   | passed  | none                 | -                                                               | Lighthouse and impeccable green                        |
+| 3   | passed  | none                 | -                                                               | re-run after the final-check recomposition (see below) |
 
 ## Final check
 
