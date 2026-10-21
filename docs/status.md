@@ -19,7 +19,8 @@ Read this first in a new or compacted session. Last updated: 2026-10-18 (add-new
 | Pilot step 1-2: bakery references analyzed, landing proposal approved | Merged (PR #9): `patterns/{sonomabakery,blackstarbakery,bernicebakery}-com.md`, `sites/panaderia/PROPOSAL.md` |
 | Pilot step 3-6: build the bakery landing in `sites/panaderia/` | Merged (PR #11), production https://panaderia-a3o.pages.dev; lessons in `docs/pilot-panaderia-lessons.md` |
 | add-new-landing-skill (`/new-landing`, one command per landing) | Merged (PR #12) and archived; `sites/clinica-dental` in production at https://clinica-dental-9pd.pages.dev |
-| add-3d-scenes (opt-in Three.js scenes, 3D QA budgets, Met images), validated with `sites/samurai` | On `change/add-3d-scenes`, PR open; scene still to be checked on a real device (task 4.2) |
+| add-3d-scenes (opt-in Three.js scenes, 3D QA budgets, Met images), validated with `sites/samurai` | Merged (PR #13) and archived; production https://samurai-1v4.pages.dev |
+| Product plan (`docs/product-plan.md`): archetypes, intake, report, deploy adapters, agent interface, 3D models | Agreed 2026-10-21; step 1 `add-design-archetypes` in progress |
 
 ## How to generate a landing
 
@@ -32,12 +33,18 @@ Without `--auto` it stops after `sites/<slug>/PROPOSAL.md`; continue with `--res
 
 ## Next
 
-1. `add-3d-scenes`: 3D support validated with a samurai landing (references: crazy.studio, experience2026.funtech.inc; 3D modeled in code, public-domain museum images). Decided 2026-10-21: 3D before the three-niche pilot.
-2. Follow-up pilot (roadmap MVP check): three different niches with `new-landing.sh --auto`, one PR, checked for diversity by `check-landing`.
+Follow `docs/product-plan.md`:
+
+1. `add-design-archetypes` (archetype blends steered by the requirement, real diversity measure), validated by the three-niche pilot.
+2. `add-brief-intake`; then the owner's digital-products landing as the first real customer test.
+3. `add-landing-report`, `add-deploy-adapters`, `add-agent-interface`, `add-3d-models`; one landing per repository introduced gradually (export first).
+
+Small fixes pending: panaderia process heading covered at 375 px; `new-landing.sh` final check without `--refs`.
 
 ## Known gaps and follow-ups
 
 - `new-landing.sh`'s own final check runs `check-landing` without `--refs` (it receives pattern slugs, not URLs), so originality is only checked when the skill passes the sheets' source URLs. Map sheet slugs to their source URL in the script.
+- samurai review (2026-10-21, owner): looks good; the sword was the only clearly 3D element; a navigable 3D samurai needs real models (`add-3d-models`).
 - 3D: headless QA renders WebGL with SwiftShader; it checks errors, fallbacks and budgets, not looks. Mobile performance with scenes sits near the limit (samurai: 93).
 - `sites/samurai`: historical copy should get an expert read before any public use (Muromachi dating of the katana, the ninja/samurai myth row, "in less than ten years" for 1868-1876); `src/data/sources.ts` is hand-written next to `assets.json`.
 
