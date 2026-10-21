@@ -71,6 +71,7 @@ Small fixes pending: panaderia process heading covered at 375 px; `new-landing.s
 - `claude -p` ignores `.claude/settings.json` permissions in an untrusted folder; `new-landing.sh` passes them with `--allowedTools`. Keep that list reviewed.
 
 - `/analyze-reference` cannot scroll wheel-driven virtual scrollers (main element clipped, content moved by `transform`, as on sonomabakery.com): recon reports `document` and captures one screen. Needs a recon change (drive scrolling with wheel events when scrollTop does not move).
+- CI Lighthouse variance (2026-10-21): festival-electronica scored 67 mobile performance in one CI run while it measures 97 to 99 locally (90 even at 3x the CPU slowdown); site jobs now take the median of 3 runs (`--runs 3`).
 - Deploy task 2.1 (a commit with failing QA must not deploy) is not yet exercised on a real PR.
 - Astro Docs MCP (`mcp.docs.astro.build`) may be blocked by the cloud network policy; add it to the environment's allowed domains if needed.
 - The pattern validator rejects quoted `focus` values longer than 12 words: keep `focus` short.
