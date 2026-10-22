@@ -1,0 +1,119 @@
+{
+  "site": "samurai",
+  "version": 1,
+  "page": "/",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "features": {
+    "sectionCount": 10,
+    "cols1Share": 0.5,
+    "cols2Share": 0.5,
+    "cols3Share": 0,
+    "splitRatio": 0.7,
+    "fullBleedShare": 0.2,
+    "imageRadius": 0,
+    "buttonRadius": 4,
+    "buttonShape": "rect",
+    "headingScale": 20.3,
+    "headingAlign": "left",
+    "headingCase": 0,
+    "eyebrowShare": 0.4,
+    "wordsPerScreen": 106,
+    "footerType": "wordmark",
+    "mediaPerScreen": 0.9,
+    "rotatedShare": 0,
+    "overlapShare": 0,
+    "stickyCount": 1
+  },
+  "sections": [
+    {
+      "id": "top",
+      "cols": 1,
+      "fullBleed": true,
+      "eyebrow": true
+    },
+    {
+      "id": "capitulos",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "origenes",
+      "cols": 2,
+      "fullBleed": true,
+      "eyebrow": true
+    },
+    {
+      "id": "armadura",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "espadas",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": "espadas-detalle",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "vida",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "fin",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": "mitos",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "fuentes",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    }
+  ],
+  "mobile": {
+    "screens": 28.91,
+    "wordsPerScreen": 72,
+    "sectionCount": 10
+  },
+  "hashes": [
+    "43454ecef1d4d2f2",
+    "23b8313452524696",
+    "3a82010c3034a8b0",
+    "fbe09292d28e61b8",
+    "23b038b030b03003",
+    "2b1032988a0a2829",
+    "2b2c09666065666a",
+    "62e0092196840ccd",
+    "330496848c898c8c",
+    "330696848c8d888c",
+    "0b8c33a078a1e1a1",
+    "a1a09a42dc4c9032",
+    "3300383499989898",
+    "8b88888886882890",
+    "2330393cce8c8ecc",
+    "2e8c2c2b2b2e0400",
+    "3bb8301012b89092",
+    "33920c4833309093",
+    "3b98123818c3a7a0",
+    "33101a13d4e8e2a6"
+  ]
+}

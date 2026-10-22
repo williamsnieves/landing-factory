@@ -1,0 +1,41 @@
+---
+import Cta from '../Cta.astro';
+import { site } from '../../data/site';
+---
+
+<header class="border-line border-b">
+  <div class="wrap grid grid-cols-12 items-center gap-x-4 py-4 md:gap-x-6">
+    <a
+      href="#"
+      class="text-ink col-span-5 text-sm leading-snug font-medium md:col-span-4"
+      aria-label={`${site.name}, inicio`}
+    >
+      {site.shortName}
+    </a>
+    <nav
+      class="col-span-5 hidden items-center gap-8 text-sm md:flex"
+      aria-label="Principal"
+    >
+      <a class="text-ink-soft hover:text-primary" href="#proyectos">
+        Proyectos
+      </a>
+      <a class="text-ink-soft hover:text-primary" href="#metodo">
+        Método
+      </a>
+      <a class="text-ink-soft hover:text-primary" href="#contacto">
+        Contacto
+      </a>
+    </nav>
+    <div class="col-span-7 flex justify-end md:col-span-3">
+      <Cta variant="outline" class="header-cta" />
+    </div>
+  </div>
+</header>
+
+<style>
+  .header-cta {
+    min-height: calc(var(--spacing) * 11);
+    padding: calc(var(--spacing) * 2) calc(var(--spacing) * 4);
+    font-size: var(--text-sm);
+  }
+</style>

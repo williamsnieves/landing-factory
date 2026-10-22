@@ -1,0 +1,93 @@
+---
+const words = [
+  'Vie 12',
+  'Turno 01',
+  'Sáb 13',
+  'Turno 02',
+  'Dom 14',
+  'Turno 03',
+  'Nave',
+  'Caldera',
+  'Foso',
+];
+---
+
+<section
+  class="marquee"
+  aria-label="Tres turnos, tres escenarios"
+  data-qa-allow-clip
+>
+  <div class="track">
+    <ul class="run">
+      {words.map((w) => (
+        <li class="display">
+          {w}
+          <span class="sep" aria-hidden="true">
+            ■
+          </span>
+        </li>
+      ))}
+    </ul>
+    <ul class="run" aria-hidden="true">
+      {words.map((w) => (
+        <li class="display">
+          {w}
+          <span class="sep">■</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .marquee {
+    overflow: hidden;
+    border-block: var(--rule-thick) solid var(--color-ink);
+    background: var(--color-primary);
+    color: var(--color-primary-contrast);
+  }
+  .track {
+    display: flex;
+    width: max-content;
+    animation: marquee var(--duration-marquee) linear infinite;
+  }
+  .run {
+    display: flex;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+  }
+  .run li {
+    display: flex;
+    align-items: center;
+    gap: clamp(1rem, 3vw, 2.5rem);
+    padding: clamp(0.6rem, 1.6vw, 1.1rem) 0 clamp(0.6rem, 1.6vw, 1.1rem)
+      clamp(1rem, 3vw, 2.5rem);
+    font-size: var(--text-2xl);
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .sep {
+    font-size: var(--text-lg);
+  }
+  @keyframes marquee {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .track {
+      animation: none;
+      width: auto;
+    }
+    .run {
+      flex-wrap: wrap;
+    }
+    .run[aria-hidden='true'] {
+      display: none;
+    }
+  }
+</style>

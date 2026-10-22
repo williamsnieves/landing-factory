@@ -1,0 +1,99 @@
+{
+  "site": "clinica-dental",
+  "version": 1,
+  "page": "/",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "features": {
+    "sectionCount": 8,
+    "cols1Share": 0.25,
+    "cols2Share": 0.63,
+    "cols3Share": 0.13,
+    "splitRatio": 0.69,
+    "fullBleedShare": 0.13,
+    "imageRadius": 40,
+    "buttonRadius": 24,
+    "buttonShape": "pill",
+    "headingScale": 4.9,
+    "headingAlign": "left",
+    "headingCase": 0,
+    "eyebrowShare": 0,
+    "wordsPerScreen": 54,
+    "footerType": "wordmark",
+    "mediaPerScreen": 1,
+    "rotatedShare": 0,
+    "overlapShare": 0,
+    "stickyCount": 1
+  },
+  "sections": [
+    {
+      "id": "top",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "miedo",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "tratamientos",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "primera-visita",
+      "cols": 1,
+      "fullBleed": true,
+      "eyebrow": false
+    },
+    {
+      "id": "calma",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "clinica",
+      "cols": 3,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "preguntas",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "pedir-cita",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    }
+  ],
+  "mobile": {
+    "screens": 14.52,
+    "wordsPerScreen": 42,
+    "sectionCount": 8
+  },
+  "hashes": [
+    "c223ae2a63e3e725",
+    "c4134131597d4b4b",
+    "e0cd454b4b1b040d",
+    "cc0b1b148860783a",
+    "c421783a7f7b7b58",
+    "c4615a5a3e3b7a78",
+    "c461785a5f7b7b1a",
+    "747b5a3826362725",
+    "c433717971757576",
+    "74314e4e4c0c4933",
+    "5475757309302424",
+    "c41b24244db4aca2"
+  ]
+}

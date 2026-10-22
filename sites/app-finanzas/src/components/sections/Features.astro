@@ -1,0 +1,86 @@
+---
+import { categories, goal, pct } from '../../data/march';
+
+const items = [
+  {
+    title: 'Presupuestos automáticos',
+    text: 'Trazo clasifica tus movimientos y los reparte en categorías con un límite mensual que tú ajustas. Ves cuánto te queda sin hacer cuentas.',
+  },
+  {
+    title: 'Objetivos de ahorro',
+    text: 'Ponle nombre a lo que quieres pagar, fija una cantidad y una fecha. Trazo te enseña el avance y cuánto toca apartar cada mes.',
+  },
+  {
+    title: 'Análisis de gastos',
+    text: 'Compara categorías y meses para ver dónde cambia tu gasto y qué partidas se salen del presupuesto.',
+  },
+];
+const max = Math.max(...categories.map((c) => c.spent));
+---
+
+<section class="border-line border-t" aria-labelledby="que-hace">
+  <div class="mx-auto w-full max-w-6xl px-4 py-16 md:px-8 md:py-24">
+    <h2
+      id="que-hace"
+      class="font-display text-3xl leading-tight font-bold tracking-tight text-balance md:max-w-2xl"
+      data-reveal
+    >
+      Tres tareas que Trazo hace por ti
+    </h2>
+    <ul class="mt-12 grid gap-6 md:grid-cols-3">
+      {items.map((it, i) => (
+        <li
+          class="border-line bg-surface rounded-md flex flex-col gap-6 border p-6"
+          data-reveal
+          data-reveal-delay={i * 0.12}
+        >
+          <div aria-hidden="true" class="bg-paper rounded-sm min-h-28 p-4">
+            {i === 0 && (
+              <div class="flex flex-col gap-3">
+                {categories.slice(0, 3).map((c) => (
+                  <div class="bg-line rounded-xs h-2">
+                    <div
+                      class="bg-primary rounded-xs h-2"
+                      style={`width:${Math.min(100, pct(c.spent, c.budget))}%`}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+            {i === 1 && (
+              <div>
+                <p class="font-display text-xl font-bold">
+                  {pct(goal.saved, goal.target)} %
+                </p>
+                <div class="bg-line rounded-xs mt-2 h-2">
+                  <div
+                    class="bg-positive rounded-xs h-2"
+                    style={`width:${pct(goal.saved, goal.target)}%`}
+                  />
+                </div>
+                <p class="text-ink-soft mt-2 text-xs">{goal.name}</p>
+              </div>
+            )}
+            {i === 2 && (
+              <div class="flex h-20 items-end gap-2">
+                {categories.map((c) => (
+                  <div
+                    class:list={[
+                      'rounded-xs flex-1',
+                      c.spent > c.budget ? 'bg-accent' : 'bg-primary',
+                    ]}
+                    style={`height:${pct(c.spent, max)}%`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+          <div>
+            <h3 class="font-display text-xl font-bold">{it.title}</h3>
+            <p class="text-ink-soft mt-2">{it.text}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

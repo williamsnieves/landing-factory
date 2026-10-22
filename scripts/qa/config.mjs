@@ -25,6 +25,10 @@ export const DEFAULT_CONFIG = Object.freeze({
   // Pages with [data-scene]: budget for the JS chunks that contain Three.js (gzip KB)
   // and how long to wait for the canvas after scrolling to a scene.
   threeD: { maxGzipKb: 200, canvasTimeoutMs: 15000 },
+  // Layout diversity between sites (scripts/check-landing.mjs, scripts/lib/layout-core.mjs): the weighted
+  // feature distance must be at least minLayoutDistance (0 identical .. 1 opposite) and at most maxHashMatch
+  // of the viewport slices may match another site's within hashHamming bits (of 64).
+  diversity: { minLayoutDistance: 0.2, maxHashMatch: 0.5, hashHamming: 10 },
 });
 
 const LIGHTHOUSE_CATEGORIES = [
@@ -70,6 +74,7 @@ export function validateConfig(config) {
       'lighthouse',
       'impeccable',
       'threeD',
+      'diversity',
     ],
     'config',
   );
@@ -196,6 +201,35 @@ export function validateConfig(config) {
       err('threeD.maxGzipKb', 'must be a number > 0');
     if (!Number.isInteger(td.canvasTimeoutMs) || td.canvasTimeoutMs < 1000)
       err('threeD.canvasTimeoutMs', 'must be an integer >= 1000');
+  }
+
+  const dv = config.diversity;
+  if (!isObject(dv)) {
+    err('diversity', 'must be an object');
+  } else {
+    known(
+      dv,
+      ['minLayoutDistance', 'maxHashMatch', 'hashHamming'],
+      'diversity',
+    );
+    if (
+      typeof dv.minLayoutDistance !== 'number' ||
+      dv.minLayoutDistance < 0 ||
+      dv.minLayoutDistance > 1
+    )
+      err('diversity.minLayoutDistance', 'must be a number between 0 and 1');
+    if (
+      typeof dv.maxHashMatch !== 'number' ||
+      dv.maxHashMatch < 0 ||
+      dv.maxHashMatch > 1
+    )
+      err('diversity.maxHashMatch', 'must be a number between 0 and 1');
+    if (
+      !Number.isInteger(dv.hashHamming) ||
+      dv.hashHamming < 0 ||
+      dv.hashHamming > 32
+    )
+      err('diversity.hashHamming', 'must be an integer between 0 and 32');
   }
   return errors;
 }

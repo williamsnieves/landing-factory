@@ -1,0 +1,84 @@
+---
+import { TICKET_URL } from '../../data/festival';
+---
+
+<section id="cierre" class="closing" aria-labelledby="closing-title">
+  <div class="wrap inner">
+    <h2 id="closing-title" class="display lead" data-reveal>
+      Última llamada para el turno
+    </h2>
+    <p class="sentence" data-reveal data-reveal-delay="0.1">
+      Tres noches, tres escenarios, una nave. Las entradas se compran en un
+      sitio externo y se abre en otra pestaña.
+    </p>
+    <a
+      href={TICKET_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="giant display"
+      aria-label="Entradas (abre un sitio externo en otra pestaña)"
+    >
+      Entradas
+      <span class="arrow" aria-hidden="true">
+        ↗
+      </span>
+    </a>
+  </div>
+</section>
+
+<style>
+  .closing {
+    border-top: var(--rule-thick) solid var(--color-ink);
+    background: var(--color-primary);
+    color: var(--color-primary-contrast);
+    padding-block: clamp(3rem, 8vw, 7rem) clamp(1.5rem, 3vw, 2.5rem);
+    overflow-x: clip;
+  }
+  .inner {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .lead {
+    margin: 0;
+    font-size: var(--text-2xl);
+    max-width: 14ch;
+  }
+  .sentence {
+    margin: 0;
+    max-width: 46ch;
+  }
+  .giant {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: clamp(2rem, 8vw, 6rem);
+    padding-bottom: 0.1em;
+    border-bottom: var(--rule-thick) solid var(--color-primary-contrast);
+    color: var(--color-primary-contrast);
+    font-size: calc(var(--text-4xl) * 1.1);
+    line-height: 0.8;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      background-color var(--duration-fast) var(--ease-cut),
+      color var(--duration-fast) var(--ease-cut);
+  }
+  .giant:hover,
+  .giant:focus-visible {
+    background: var(--color-primary-contrast);
+    color: var(--color-primary);
+  }
+  .giant:focus-visible {
+    outline-color: var(--color-primary-contrast);
+  }
+  .arrow {
+    font-family: var(--font-mono);
+    font-stretch: 100%;
+    font-size: 0.6em;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .giant {
+      transition: none;
+    }
+  }
+</style>

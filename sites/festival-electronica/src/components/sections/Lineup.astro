@@ -1,0 +1,160 @@
+---
+import { turnos, stageName } from '../../data/festival';
+
+const ordered = turnos.map((t) => ({
+  ...t,
+  // Headliner first (it sets the size), then the rest by start order.
+  acts: [...t.acts].sort(
+    (a, b) => Number(!!b.headliner) - Number(!!a.headliner),
+  ),
+}));
+---
+
+<section id="lineup" class="section lineup" aria-labelledby="lineup-title">
+  <div class="wrap head">
+    <h2 id="lineup-title" class="display section-title" data-reveal>
+      Line-up por turnos
+    </h2>
+    <p class="note" data-reveal data-reveal-delay="0.1">
+      Cada día es un turno de fábrica: se abre, se trabaja, se cierra de
+      madrugada. Artistas inventados para esta maqueta.
+    </p>
+  </div>
+
+  <div class="turnos">
+    {ordered.map((t) => (
+      <article class="turno wrap" aria-labelledby={`turno-${t.n}`}>
+        <div class="side" data-reveal>
+          <p class="numeral display" aria-hidden="true">
+            {t.n}
+          </p>
+          <h3 id={`turno-${t.n}`} class="label day">
+            Turno {t.n} · {t.weekday} {t.date}
+          </h3>
+          <p class="label hours">
+            Puertas {t.doors} · Cierre {t.close}
+          </p>
+        </div>
+        <ol class="acts">
+          {t.acts.map((a, i) => (
+            <li
+              class:list={['act', a.headliner && 'headliner']}
+              data-reveal
+              data-reveal-delay={String(Math.min(i * 0.06, 0.3))}
+            >
+              <a href={`#horarios-${t.n}`} class="artist">
+                <span class="label time">{a.time}</span>
+                <span class="name display">{a.name}</span>
+                <span class="label stage">{stageName(a.stage)}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </article>
+    ))}
+  </div>
+</section>
+
+<style>
+  .head {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: clamp(2.5rem, 6vw, 5rem);
+  }
+  .note {
+    margin: 0;
+    max-width: 44ch;
+  }
+  .turno {
+    display: grid;
+    gap: 1.5rem;
+    padding-block: clamp(2rem, 5vw, 3.5rem);
+    border-top: var(--rule-hair) solid var(--color-ink-soft);
+  }
+  .side {
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+  }
+  .numeral {
+    margin: 0;
+    font-size: var(--text-4xl);
+    line-height: 0.78;
+    color: var(--color-primary);
+  }
+  .day {
+    margin: 0.75rem 0 0;
+    color: var(--color-ink);
+    font-weight: 700;
+  }
+  .hours {
+    margin: 0;
+  }
+  .acts {
+    margin: 0;
+    padding: 0;
+  }
+  .act {
+    border-top: var(--rule-hair) solid var(--color-line);
+  }
+  .act:first-child {
+    border-top: 0;
+  }
+  .artist {
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.7rem 0.5rem;
+    color: var(--color-ink);
+    transition:
+      transform var(--duration-fast) var(--ease-cut),
+      background-color var(--duration-fast) var(--ease-cut),
+      color var(--duration-fast) var(--ease-cut);
+  }
+  .artist:hover,
+  .artist:focus-visible {
+    background: var(--color-primary);
+    color: var(--color-primary-contrast);
+    transform: translateX(0.75rem);
+  }
+  .artist:hover .label,
+  .artist:focus-visible .label {
+    color: var(--color-primary-contrast);
+  }
+  .name {
+    font-size: var(--text-2xl);
+    line-height: 0.9;
+    overflow-wrap: anywhere;
+  }
+  .headliner .name {
+    font-size: var(--text-3xl);
+    color: inherit;
+  }
+  .headliner .artist {
+    padding-block: 0.4rem 1.1rem;
+  }
+  @media (min-width: 48rem) {
+    .artist {
+      grid-template-columns: 4.5rem minmax(0, 1fr) auto;
+      align-items: baseline;
+      gap: 1rem;
+    }
+    .headliner .artist {
+      align-items: end;
+    }
+  }
+  @media (min-width: 64rem) {
+    .turno {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      column-gap: 2rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .artist {
+      transition: none;
+    }
+    .artist:hover,
+    .artist:focus-visible {
+      transform: none;
+    }
+  }
+</style>

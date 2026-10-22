@@ -267,3 +267,37 @@ test('--sources is validated and passed to the skill', () => {
   assert.equal(ok.status, 0, ok.stderr);
   assert.ok(recorded()[1].includes('--sources commons,met'));
 });
+
+test('the skill is not anchored on a generated site and drives the archetype flow', () => {
+  const skill = readFileSync(
+    join(ROOT, '.claude/skills/new-landing/SKILL.md'),
+    'utf8',
+  );
+  assert.doesNotMatch(skill, /panaderia|clinica-dental|samurai/i);
+  for (const needle of [
+    'node scripts/pick-archetypes.mjs --site <slug>',
+    'Signals: a, b, c',
+    'Archetype blend',
+    'archetype: primary+secondary',
+    'archetype: custom',
+    'node scripts/layout-signature.mjs --site <slug> --write',
+    'starting grammar, not a template',
+    'design-system/_template.md',
+  ])
+    assert.ok(skill.includes(needle), needle);
+  assert.ok(existsSync(join(ROOT, 'design-system/_template.md')));
+  // The scripts the skill runs are allowed for headless runs, and nothing broader.
+  const settings = JSON.parse(
+    readFileSync(join(ROOT, '.claude/settings.json'), 'utf8'),
+  );
+  for (const script of [
+    'pick-archetypes',
+    'layout-signature',
+    'validate-archetypes',
+  ])
+    assert.ok(
+      settings.permissions.allow.includes(`Bash(node scripts/${script}.mjs *)`),
+      script,
+    );
+  assert.ok(!settings.permissions.allow.some((p) => /^Bash\(node \*/.test(p)));
+});

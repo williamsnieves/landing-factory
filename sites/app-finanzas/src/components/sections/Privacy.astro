@@ -1,0 +1,73 @@
+---
+const rows = [
+  [
+    'Leemos tus movimientos en modo solo lectura para clasificarlos.',
+    'No podemos mover, enviar ni cobrar dinero de tus cuentas.',
+  ],
+  [
+    'Te pedimos permiso antes de cada conexión con un banco.',
+    'No guardamos las claves de tu banca online.',
+  ],
+  [
+    'Protegemos el acceso a tu cuenta de Trazo con verificación en dos pasos.',
+    'No vendemos tus datos ni los compartimos con anunciantes.',
+  ],
+  [
+    'Puedes exportar o borrar tus datos desde los ajustes.',
+    'No te pedimos más datos de los que necesita la app.',
+  ],
+];
+---
+
+<section
+  id="seguridad"
+  class="border-line border-t scroll-mt-4"
+  aria-labelledby="seguridad-t"
+>
+  <div class="mx-auto w-full max-w-6xl px-4 py-16 md:px-8 md:py-24">
+    <div class="grid gap-12 md:grid-cols-12">
+      <div class="md:col-span-4">
+        <h2
+          id="seguridad-t"
+          class="font-display text-3xl leading-tight font-bold tracking-tight text-balance"
+          data-reveal
+        >
+          Qué hacemos con tus datos, y qué no
+        </h2>
+        <p class="text-ink-soft mt-4" data-reveal data-reveal-delay="0.1">
+          Tus movimientos son tuyos. Esto es lo que Trazo hace con ellos y lo
+          que nunca hará.
+        </p>
+      </div>
+      <div class="md:col-span-8" data-reveal>
+        <table
+          aria-label="Lo que Trazo hace y no hace con tus datos"
+          class="w-full border-collapse text-left"
+        >
+          <thead>
+            <tr class="bg-surface">
+              <th scope="col" class="w-1/2 px-4 py-3 font-semibold">
+                Lo que hacemos
+              </th>
+              <th scope="col" class="w-1/2 px-4 py-3 font-semibold">
+                Lo que no hacemos
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(([yes, no]) => (
+              <tr class="border-line border-b align-top">
+                <td class="px-4 py-4">{yes}</td>
+                <td class="text-ink-soft px-4 py-4">{no}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p class="text-ink-soft mt-6 max-w-2xl text-sm">
+          Nota de método: este texto es de ejemplo. Antes de lanzar la app, el
+          equipo legal debe revisar esta página y la política de privacidad.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,37 @@
+{
+  "images": [
+    {
+      "file": "bilbao-metro.jpg",
+      "title": "File:Bilbao - Casco Viejo Metro Station (28718831953).jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Bilbao_-_Casco_Viejo_Metro_Station_(28718831953).jpg",
+      "author": "Fred Romero from Paris, France",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "credit": true,
+      "retrievedAt": "2026-10-21T16:52:04.658Z",
+      "note": "Representative Bilbao metro station, how to get there"
+    },
+    {
+      "file": "turbine-hall.jpg",
+      "title": "File:Waste block turbine and generator in Iru Thermal Power Plant.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Waste_block_turbine_and_generator_in_Iru_Thermal_Power_Plant.jpg",
+      "author": "Lauri Veerde",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": true,
+      "retrievedAt": "2026-10-21T16:53:04.857Z",
+      "note": "Representative industrial turbine hall, stages section"
+    },
+    {
+      "file": "field-poster.jpg",
+      "title": "Poster of the \"field\" 3D scene",
+      "sourcePage": "site code: src/scenes/field.ts (page /)",
+      "author": "Original",
+      "license": "Original (rendered from site code)",
+      "credit": false,
+      "source": "self",
+      "retrievedAt": "2026-10-21T16:59:20.545Z",
+      "note": "Rendered with scripts/render-poster.mjs from the \"field\" scene."
+    }
+  ]
+}

@@ -1,0 +1,163 @@
+---
+import {
+  categories,
+  eur,
+  fund,
+  goal,
+  month,
+  pct,
+  totalBudget,
+  totalSpent,
+} from '../data/march';
+
+interface Props {
+  screen: 'budget' | 'connect' | 'goals' | 'analysis';
+  label: string;
+  class?: string;
+}
+const { screen, label, class: extra = '' } = Astro.props;
+const left = totalBudget - totalSpent;
+const rows = categories.slice(0, 3);
+const over = categories.find((c) => c.spent > c.budget)!;
+---
+
+<div
+  role="img"
+  aria-label={label}
+  class:list={[
+    'bg-paper border-ink-soft rounded-lg mx-auto flex min-h-[32rem] w-72 flex-col gap-4 border p-4 text-left',
+    extra,
+  ]}
+>
+  <div class="flex items-center justify-between gap-2">
+    <span class="font-display text-lg font-bold">{month}</span>
+    <span class="bg-primary-soft text-primary rounded-xs px-2 py-0.5 text-xs font-semibold">
+      Datos de ejemplo
+    </span>
+  </div>
+
+  {screen === 'budget' && (
+    <>
+      <div class="bg-surface rounded-md p-4">
+        <p class="text-ink-soft text-xs">Te quedan este mes</p>
+        <p class="font-display text-3xl leading-none font-bold">{eur(left)}</p>
+        <p class="text-ink-soft mt-1 text-xs">
+          de {eur(totalBudget)} de presupuesto
+        </p>
+        <div class="bg-line rounded-xs mt-3 h-2">
+          <div
+            class="bg-primary rounded-xs h-2"
+            style={`width:${pct(totalSpent, totalBudget)}%`}
+          />
+        </div>
+      </div>
+      <ul class="flex flex-col gap-3">
+        {rows.map((c) => (
+          <li>
+            <div class="flex justify-between text-sm">
+              <span>{c.name}</span>
+              <span class:list={[c.spent > c.budget && 'text-warn font-bold']}>
+                {eur(c.spent)}
+              </span>
+            </div>
+            <div class="bg-line rounded-xs mt-1 h-1.5">
+              <div
+                class:list={[
+                  'rounded-xs h-1.5',
+                  c.spent > c.budget ? 'bg-accent' : 'bg-primary',
+                ]}
+                style={`width:${Math.min(100, pct(c.spent, c.budget))}%`}
+              />
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p class="bg-warn-soft text-warn rounded-md mt-auto px-3 py-2 text-sm font-semibold">
+        {over.name}: {eur(over.spent - over.budget)} por encima del límite
+      </p>
+    </>
+  )}
+
+  {screen === 'connect' && (
+    <>
+      <p class="font-display text-xl leading-tight font-bold">
+        Conecta tu cuenta
+      </p>
+      <p class="text-ink-soft text-sm">
+        Trazo solo lee tus movimientos. No puede mover dinero.
+      </p>
+      <ul class="flex flex-col gap-2">
+        <li class="border-line rounded-md flex items-center justify-between border px-3 py-3 text-sm">
+          <span>Cuenta nómina</span>
+          <span class="text-primary font-semibold">Solo lectura</span>
+        </li>
+        <li class="border-line rounded-md flex items-center justify-between border px-3 py-3 text-sm">
+          <span>Cuenta compartida</span>
+          <span class="text-ink-soft">Sin conectar</span>
+        </li>
+      </ul>
+      <p class="bg-primary text-primary-contrast rounded-md mt-auto px-4 py-3 text-center text-sm font-semibold">
+        Conectar con mi banco
+      </p>
+    </>
+  )}
+
+  {screen === 'goals' && (
+    <>
+      <p class="font-display text-xl leading-tight font-bold">Tus objetivos</p>
+      {[goal, fund].map((g, i) => (
+        <div class="border-line rounded-md border p-3">
+          <p class="text-sm font-semibold">{g.name}</p>
+          <p class="font-display text-xl font-bold">
+            {eur(g.saved)}
+            <span class="text-ink-soft text-xs font-normal">
+              {' de '}
+              {eur(g.target)}
+            </span>
+          </p>
+          <div class="bg-line rounded-xs mt-2 h-2">
+            <div
+              class="bg-positive rounded-xs h-2"
+              style={`width:${pct(g.saved, g.target)}%`}
+            />
+          </div>
+          <p class="text-positive mt-2 text-sm font-bold">
+            {pct(g.saved, g.target)} % del objetivo
+          </p>
+          {i === 0 && (
+            <p class="text-ink-soft mt-1 text-xs">
+              Aportación mensual: {eur(160)}
+            </p>
+          )}
+        </div>
+      ))}
+    </>
+  )}
+
+  {screen === 'analysis' && (
+    <>
+      <p class="font-display text-xl leading-tight font-bold">
+        Dónde se va el mes
+      </p>
+      <ul class="flex flex-col gap-3">
+        {categories.map((c) => (
+          <li class="flex items-center gap-2 text-sm">
+            <span class="w-28 shrink-0">{c.name}</span>
+            <span class="bg-line rounded-xs h-2 flex-1">
+              <span
+                class:list={[
+                  'rounded-xs block h-2',
+                  c.spent > c.budget ? 'bg-accent' : 'bg-primary',
+                ]}
+                style={`width:${pct(c.spent, 720)}%`}
+              />
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p class="bg-warn-soft text-warn rounded-md mt-auto px-3 py-2 text-sm font-semibold">
+        {over.name} se sale del límite
+      </p>
+    </>
+  )}
+</div>

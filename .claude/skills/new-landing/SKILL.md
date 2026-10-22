@@ -9,7 +9,9 @@ argument-hint: '<slug> --niche "..." [--refs a,b] [--auto] [--dry-run] [--resume
 
 One command, one landing. This skill is the orchestrator: it runs the phases below in order, delegates the design system, build and QA to subagents (one design skill each), and writes every phase result to disk so a run can resume. It never edits another site, the root starter, or the vendored skills under `.claude/skills/{ui-ux-pro-max,design-taste-frontend,impeccable}/`.
 
-Read `CLAUDE.md` first (language, extract-patterns-don't-clone, licensing, quality budgets, QA loop). All files, comments and RUN.md entries are in English; the page copy is in `--lang` (default `es`).
+Read `CLAUDE.md` first (language, extract-patterns-don't-clone, licensing, quality budgets, QA loop). No generated site is a model for another: structure comes from the archetype sheets in `design-archetypes/` (read its README) and from the reference sheets, never from copying a site in `sites/`.
+
+**Archetypes are a starting grammar, not a template.** The build may deviate from any archetype rule when the requirement or a reference justifies it; every deviation is written in RUN.md "Design decisions". The only hard rules are the quality budgets, licensing and originality, and the layout diversity rule of the final check. The archetype `signature` comparison is a warning, never a failure. All files, comments and RUN.md entries are in English; the page copy is in `--lang` (default `es`).
 
 ## Arguments
 
@@ -30,13 +32,13 @@ With `--resume` (or when RUN.md already has finished phases), skip a phase only 
 | Phase         | Artifact that must exist                                                                                      |
 | ------------- | ------------------------------------------------------------------------------------------------------------- |
 | brief         | RUN.md Inputs table filled                                                                                    |
-| synthesis     | `PROPOSAL.md` with no empty section and `Status:` no longer `draft`                                           |
+| synthesis     | `PROPOSAL.md` with no empty section, a `Signals:` line, an "Archetype blend" section and `Status:` no longer `draft` |
 | checkpoint    | passed when `--auto` or `--dry-run` is given, or the user re-ran with `--resume --auto`                       |
-| design-system | `design-system/<slug>/MASTER.md` with a valid `landing-meta` block, and the site's `tokens.css` derived from it |
+| design-system | `design-system/<slug>/MASTER.md` with a valid `landing-meta` block (including `archetype`), and the site's `tokens.css` derived from it |
 | build         | a real `src/pages/index.astro` (no `noindex`), `assets.json` with images, `node scripts/credits.mjs --site <slug> --check` passing |
 | qa            | `qa/<slug>/latest/report.json` with verdict `passed`                                                          |
 | polish        | row `done`                                                                                                    |
-| final-check   | row `done`                                                                                                    |
+| final-check   | row `done` and `sites/<slug>/layout-signature.json` written                                                    |
 
 A row left `in-progress` or an artifact that is missing means: redo that phase from its start, keeping the files that are already good. Never delete the user's edits to `PROPOSAL.md`: on resume, the proposal on disk is the approved plan.
 
@@ -48,20 +50,21 @@ Fill the RUN.md Inputs table (niche, references, mode, max attempts, start time)
 
 ### 2. Synthesis
 
-Write `sites/<slug>/PROPOSAL.md` from the template already in the folder; keep its headings. `sites/panaderia/PROPOSAL.md` is the worked example.
+Write `sites/<slug>/PROPOSAL.md` from the template already in the folder; keep its headings. The template is neutral: fill it from this brief and the references, not from another site.
 
 - Brand: a fictional business name and city if the niche gives none. Contact data is placeholder and the proposal says so.
-- References: a table of what is taken from each sheet and what is left, plus a "Direction in one line".
+- References: a table of what is taken from each sheet (name it as `patterns/<slug>.md` so `pick-archetypes` finds it) and what is left, plus a "Direction in one line".
 - Page map: 7 to 10 sections with height, purpose and layout idea. One conversion action named in the brief, repeated in header, a mid-page block and the closing section.
 - Motion plan: only primitives in `sites/<slug>/src/components/motion/README.md` (reveal, pin, parallax, ...). At most one pinned section and one playful moment. State the reduced-motion and no-JS behavior.
 - Visual direction: type and palette in words (the design system step fixes values), the hero type (one of `full-bleed-photo`, `split`, `typographic`, `video`, `illustration`, `collage`) and the imagery plan (photos from Commons only).
-- Diversity: list the other sites' choices with `grep -A6 landing-meta design-system/*/MASTER.md` and pick a primary color family, display font and hero type that do not repeat any single site's trio; prefer differing in all three.
+- Signals and archetype blend (this is what steers the layout): 1) In the Brief, write one line `Signals: a, b, c` using only the closed vocabulary of `design-archetypes/README.md` (personality, audience, offer, tone, and the assets available: `photo-rich` or `few-assets`). 2) Run `node scripts/pick-archetypes.mjs --site <slug>` (it reads the signals, the reference sheets named in RUN.md and the References table, and skips blends other sites already use; `--refs a,b` overrides the sheets). 3) Read the sheets of the candidates in `design-archetypes/` and choose one blend: prefer the top candidate unless the brief clearly argues otherwise, and say why in one or two sentences. 4) A clear reference direction can lead instead: the candidate list then offers `archetype: custom`; choose it only when the references give the layout grammar, and write which reference drives which part (archetypes only fill gaps). 5) Add one twist that comes from the requirement itself (a product's texture, a ritual of the business, a number the customer is proud of). 6) Fill the "Archetype blend" section of the proposal: primary, secondary, the one or two lent traits (and any `ref:<sheet>/<trait>`), the signals that led there, the twist, and the deviations you already plan. The blend is recorded again in `landing-meta` (`archetype`, `traits`).
+- Diversity: list the other sites' choices with `grep -A8 landing-meta design-system/*/MASTER.md` and pick a primary color family, display font and hero type that do not repeat any single site's trio; prefer differing in all three. The final check also compares the built layout with every other site (`layout-diversity`), so a new palette on the same composition fails.
 - Regulated niches (health, dental, legal, finance, supplements): the copy makes no promise of results, no diagnosis or treatment claims, no invented reviews, ratings, testimonials, awards, certifications or "years of experience" figures. Say in Decisions what the page does instead (services described plainly, "ask us" calls to action).
 - 3D: fill the "3D" section of the proposal. Default is none. A niche may plan at most two scenes (`<Scene3D />`, see `sites/<slug>/src/components/three/README.md`) when 3D tells the story (an object that turns with the scroll, a field of particles); each scene states its purpose, its poster, its scroll behavior and its reduced-motion fallback (the poster). Never plan a scene for decoration only, and never plan external 3D models: scenes are built from code.
 - Historical or cultural niches (history, martial arts, museums, crafts, religion): the copy must be historically careful. No invented quotes or attributions, no dates or facts that the sources used do not support (check them against the museum records of the images you use), myths and legends labeled as such, no romanticized claims presented as fact. List the sources (museum object pages) in the proposal. Plan images from `--sources met` as well as Commons.
 - Add to Decisions: the page uses stock photos and sample data to replace before launch.
 
-Run `npx prettier --write sites/<slug>/PROPOSAL.md`, set `Status: **proposed**` in it, mark synthesis `done`.
+Run `npx prettier --write sites/<slug>/PROPOSAL.md`, check that `node scripts/pick-archetypes.mjs --site <slug> --top 1` still reads the `Signals:` line, set `Status: **proposed**` in it, mark synthesis `done`.
 
 ### 3. Checkpoint
 
@@ -69,10 +72,10 @@ If neither `--auto` nor `--dry-run` was given: set `Result: checkpoint` in RUN.m
 
 ### 4. Design system (subagent, ui-ux-pro-max only)
 
-Spawn a subagent with this brief: the `Direction in one line` and the Visual direction section of the proposal, the niche, the language, the other sites' `landing-meta` to avoid, and the instruction to use only the `ui-ux-pro-max` skill (not design-taste-frontend, not impeccable). It must:
+Spawn a subagent with this brief: the `Direction in one line` and the Visual direction section of the proposal, the "Archetype blend" section with the sheets of the chosen primary and secondary archetypes (and the reference sheets for a `custom` blend), the niche, the language, the other sites' `landing-meta` to avoid, and the instruction to use only the `ui-ux-pro-max` skill (not design-taste-frontend, not impeccable). It must:
 
 1. Query the skill with the direction, not just the niche: `python3 .claude/skills/ui-ux-pro-max/scripts/search.py "<niche + direction keywords>" --design-system -p "<Brand>"`, then `--domain color`, `--domain typography`, `--domain style`. Record the queries.
-2. Write `design-system/<slug>/MASTER.md` following `design-system/panaderia/MASTER.md`: queries run, conflicts between the skill and the proposal (the approved proposal wins; list each), chosen style, a Palette section whose table holds every color as `#RRGGBB` plus the WCAG contrast of each pair used (text >= 4.5, large text and non-text >= 3; do not compute ratios by hand: `node scripts/check-landing.mjs --site <slug>` checks the standard text pairs of `tokens.css` and names any pair under 4.5), typography (open-licensed families that exist as `@fontsource-variable/<name>`, or `@fontsource/<name>`; check with `npm view <package> version`), type scale, spacing and radii, motion tokens, do/don't for the build, and a final fenced block:
+2. Write `design-system/<slug>/MASTER.md` following the headings of `design-system/_template.md`: queries run, conflicts between the skill and the proposal (the approved proposal wins; list each), chosen style, a Palette section whose table holds every color as `#RRGGBB` plus the WCAG contrast of each pair used (text >= 4.5, large text and non-text >= 3; do not compute ratios by hand: `node scripts/check-landing.mjs --site <slug>` checks the standard text pairs of `tokens.css` and names any pair under 4.5), typography (open-licensed families that exist as `@fontsource-variable/<name>`, or `@fontsource/<name>`; check with `npm view <package> version`), type scale, spacing and radii, motion tokens, do/don't for the build, and a final fenced block. ui-ux-pro-max still owns palette and fonts; the archetype sheets constrain the radius family, the type contrast between heading and body, and the density tokens (a Swiss or brutalist blend means near-zero radii and flush-left type, a collage or local-service blend may round), and the conflicts section lists any place where the skill's style disagrees with them:
 
    ````
    ```landing-meta
@@ -80,24 +83,28 @@ Spawn a subagent with this brief: the `Direction in one line` and the Visual dir
    display-font: Family
    body-font: Family
    hero: full-bleed-photo
+   archetype: primary+secondary
+   traits: lent-trait-a, lent-trait-b
    ```
    ````
 
-3. Translate it into `sites/<slug>/src/styles/tokens.css` (same shape as `sites/panaderia/src/styles/tokens.css`: `@theme static` colors (keep `static`, so 3D scenes can read every color token), fonts, type scale, spacing, radii, motion) and the font imports in `src/styles/global.css`. Install the font packages with `npm install -w site-<slug> @fontsource-variable/<name>`. Add each font to the fonts table in `sites/<slug>/CREDITS.md` (source URL, author, SIL OFL 1.1).
-4. Verify: `node scripts/check-landing.mjs --site <slug> --json` shows `tokens`, `contrast`, `landing-meta` and `diversity` ok (other checks may still fail before the build). Fix MASTER.md or tokens until they are.
+   `archetype` and `traits` repeat the proposal's blend (`custom` and `ref:<sheet>/<trait>` are valid).
+
+3. Translate it into `sites/<slug>/src/styles/tokens.css` (edit the file the scaffold copied from the starter and keep its shape: `@theme static` colors (keep `static`, so 3D scenes can read every color token), fonts, type scale, spacing, radii, motion) and the font imports in `src/styles/global.css`. Install the font packages with exactly `npm install -w site-<slug> @fontsource-variable/<name> [@fontsource-variable/<other>]` (or `@fontsource/<name>`): only this form, with `-w` first and no other flags, is allowed in automatic mode. Add each font to the fonts table in `sites/<slug>/CREDITS.md` (source URL, author, SIL OFL 1.1).
+4. Verify: `node scripts/check-landing.mjs --site <slug> --json` shows `tokens`, `contrast`, `landing-meta` and `diversity` ok (`layout-diversity` needs the built page and runs in the final check) (other checks may still fail before the build). Fix MASTER.md or tokens until they are.
 
 Mark the phase `done`. With `--dry-run`: set `Result: dry-run-done`, write the Totals section and stop here.
 
 ### 5. Build (subagent, design-taste-frontend for art direction)
 
-Spawn a subagent with: `PROPOSAL.md`, `MASTER.md` and `tokens.css` as fixed inputs, and this role split: design-taste-frontend gives art direction (composition, section rhythm, type usage, photo treatment); palette, fonts and the page map are not up for debate. It runs `node .claude/skills/design-taste-frontend/scripts/draw.mjs ... --keep palette,type` (see that skill), and wherever its rules disagree with the proposal or MASTER.md (for example it discourages a cream ground, pill buttons or photos under headlines), the proposal and MASTER.md win; each disagreement goes into RUN.md "Design decisions". Do not use the skill's `assets.mjs` (it ignores the proxy); photos come from our script.
+Spawn a subagent with: `PROPOSAL.md` (with its "Archetype blend"), `MASTER.md`, `tokens.css` and the sheets of the chosen archetypes (and the reference sheets) as fixed inputs, and this role split: design-taste-frontend gives art direction (composition, section rhythm, type usage, photo treatment); palette, fonts and the page map are not up for debate. It runs `node .claude/skills/design-taste-frontend/scripts/draw.mjs ... --keep palette,type` (see that skill), and wherever its rules disagree with the proposal or MASTER.md (for example it discourages a cream ground, pill buttons or photos under headlines), the proposal and MASTER.md win; each disagreement goes into RUN.md "Design decisions". The page follows the primary archetype's layout grammar (grid, section patterns, header, footer, density, hero type) and the lent traits, and explicitly avoids the shared grammar (a small uppercase eyebrow over a large heading, a rounded photo beside text, pill buttons, a giant wordmark footer) wherever the sheet's "Don't" list rules it out. The sheets are a base, not a template: deviate when the requirement or a reference justifies it, and write each deviation in RUN.md "Design decisions". Do not use the skill's `assets.mjs` (it ignores the proxy); photos come from our script.
 
 **Images**
 - Search and download only with `node scripts/find-images.mjs search "<query>" --min-width 1600 --orientation landscape` and `... get <slug> "<title>" --as <name>` (see `--help`). With `--sources met` (historical or cultural niches) also use The Met Open Access collection: `search "<query>" --source commons,met` lists public-domain Met objects (`get <slug> met:<objectID> --as <name>`; the entry carries the museum's credit line and `credit: true`, so the footer shows it). Met search is slow (one request per hit): ask for few results and refine the query. Read the museum record (title, date, culture, medium) before writing about an object, and caption it only with what the record says. One process at a time: the Commons rate limit is shared, and the script throttles and backs off on its own. Note waits in RUN.md.
 - One image need per section, product or step. Open every downloaded file with the Read tool and look at it before using it. Reject photos with readable signs, brands, watermarks or identifiable faces; pick another candidate instead of cropping files. Crop with CSS (`object-fit`, `object-position`, `aspect-ratio`).
 - The photo must show what the text names: a product tile uses a photo of that product. Dietary or technical variants ("sin gluten") need their own matching photo or no photo.
 - Each source photo is used at most twice on the page and never twice in one section; check what you reference with `node scripts/check-landing.mjs --site <slug>` while building.
-- After every change to `assets.json` run `node scripts/credits.mjs --site <slug>`. The footer imports `src/data/credits.json` and shows author, license and a link per credited photo (see `sites/panaderia/src/components/sections/Footer.astro`).
+- After every change to `assets.json` run `node scripts/credits.mjs --site <slug>`. The footer imports `src/data/credits.json` (written by `credits.mjs`) and shows author, license and a link per credited photo.
 - Representative stock is fine but never present it as the client's own work: no photo of a named real place or person unless the file is of that.
 
 **3D scenes** (only when the approved proposal plans them; at most two, never more)
@@ -125,7 +132,7 @@ If attempts run out: write the remaining failures (check, page, metric, message)
 
 After a pass, look at the result like a reviewer. Full-page screenshots show pinned sections as empty space and hide per-viewport problems, so run `node scripts/section-shots.mjs --site <slug>` (it serves `sites/<slug>/dist` itself and always stops its server) and open the images in `qa/<slug>/sections/` with the Read tool: one viewport per section (`section[id]`, header, footer) at 375, 768 and 1440 px. Check: repeated photos, photo-text mismatch, cramped, clipped or overlapping type, unreadable contrast over images, empty areas. Fix findings and re-run QA (counts as an attempt). Never leave a server running: do not start `astro preview` or `astro dev` by hand; if you must, run it as a background task and stop it with the task tool.
 
-Known fixes from the pilot (`docs/pilot-panaderia-lessons.md`):
+Known fixes from earlier runs:
 - Do: `aria-label` on a table instead of an `sr-only` caption (QA flags the caption as clipped text).
 - Do: put `data-qa-allow-clip` only on a deliberately clipped marquee word, never to hide an overflow bug.
 - Do: outlined giant type with `-webkit-text-stroke` on a variable font: fill with the page color and use a doubled stroke with `paint-order: stroke fill` to avoid overlapping contours.
@@ -144,7 +151,7 @@ Run, and fix until all pass:
 
 1. `npx prettier --write sites/<slug> design-system/<slug>` then `npx prettier --check .`
 2. `node scripts/credits.mjs --site <slug> --check`
-3. `node scripts/check-landing.mjs --site <slug> --refs <the url: values from the used sheets' frontmatter>` (only if sheets were used; needs `sites/<slug>/dist/`, which the last QA run built). A `copy-match` failure means a sentence must be rewritten. The `scenes` rule fails when a built scene has no poster recorded in `assets.json` or the site has more than two scenes.
+3. `node scripts/layout-signature.mjs --site <slug> --write` (serves `sites/<slug>/dist`, which the last QA run built, and writes `sites/<slug>/layout-signature.json`), then `node scripts/check-landing.mjs --site <slug> --refs <the url: values from the used sheets' frontmatter>` (always run it; `--refs` only if sheets were used; needs `sites/<slug>/dist/`, which the last QA run built). A `copy-match` failure means a sentence must be rewritten. A `layout-diversity` failure means the composition is too close to another site: change the section patterns, grid, radii, buttons or footer (not only colors and fonts), rebuild, re-measure and re-run. An `archetype-target` warning is not a failure: either bring the page closer to the archetype or list the deliberate deviation in RUN.md "Design decisions". The `scenes` rule fails when a built scene has no poster recorded in `assets.json` or the site has more than two scenes.
 4. `npm run check:sites`
 5. `npm run qa -- --site <slug>` once more if any file changed after the last QA pass.
 

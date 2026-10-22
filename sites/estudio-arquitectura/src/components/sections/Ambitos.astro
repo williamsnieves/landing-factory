@@ -1,0 +1,98 @@
+---
+import Chapter from '../Chapter.astro';
+import Photo from '../Photo.astro';
+import photoHousing from '../../assets/images/cocina-escalera.jpg';
+import photoWork from '../../assets/images/oficina-reforma.jpg';
+
+const areas = [
+  {
+    title: 'Vivienda',
+    photo: photoHousing,
+    alt: 'Estar de una vivienda con armarios de colores, mesa de madera y una escalera metálica a un altillo.',
+    position: '40% 50%',
+    caption: 'Una vivienda con altillo. Imagen de archivo.',
+    text: 'Pisos y casas en edificios existentes. Redistribuimos, renovamos instalaciones y reparamos lo que el tiempo ha cansado, con la comunidad de propietarios cuando hace falta.',
+    list: [
+      'Estudio de viabilidad y nueva distribución',
+      'Instalaciones y mejora del aislamiento',
+      'Carpintería y cocinas dibujadas a medida',
+      'Licencia y permisos de la comunidad',
+    ],
+  },
+  {
+    title: 'Espacios de trabajo',
+    photo: photoWork,
+    alt: 'Oficina diáfana con mesas corridas, conductos vistos en el techo y grandes ventanales.',
+    position: '85% 50%',
+    caption: 'Una oficina reformada. Imagen de archivo.',
+    text: 'Oficinas, estudios y pequeños locales. Ordenamos puestos, salas y servicios, cuidamos la luz y el ruido y ajustamos los plazos a una actividad que no puede parar.',
+    list: [
+      'Programa de puestos, salas y almacenaje',
+      'Luz natural, acústica y ventilación',
+      'Obra por fases con la actividad en marcha',
+      'Licencia de actividad y puesta en servicio',
+    ],
+  },
+];
+---
+
+<section
+  id="ambitos"
+  class="border-line scroll-mt-4 border-t"
+  aria-labelledby="ambitos-title"
+>
+  <div class="wrap grid grid-cols-12 gap-x-4 gap-y-8 pt-24 pb-12 md:gap-x-6 md:pt-40 md:pb-16">
+    <div class="col-span-12 md:col-span-3">
+      <Chapter n="IV" label="Ámbitos" />
+    </div>
+    <div class="col-span-12 md:col-span-9">
+      <h2
+        id="ambitos-title"
+        class="font-display max-w-[24ch] text-3xl leading-[1.15] font-medium tracking-tight text-balance"
+        data-reveal
+      >
+        Dos tipos de encargo, el mismo cuidado.
+      </h2>
+    </div>
+  </div>
+
+  {areas.map((a) => (
+    <article class="pb-16 md:pb-24">
+      <figure data-reveal>
+        <Photo
+          src={a.photo}
+          alt={a.alt}
+          ratio="21 / 9"
+          position={a.position}
+          sizes="100vw"
+          class="ambito-photo"
+        />
+        <figcaption class="wrap text-ink-soft mt-2 text-sm">
+          {a.caption}
+        </figcaption>
+      </figure>
+      <div class="wrap mt-10 grid grid-cols-12 gap-x-4 gap-y-6 md:gap-x-6">
+        <h3 class="font-display col-span-12 text-xl font-medium tracking-tight md:col-span-3">
+          {a.title}
+        </h3>
+        <p class="col-span-12 max-w-[46ch] md:col-span-5">{a.text}</p>
+        <ul class="border-line col-span-12 border-t text-sm md:col-span-4">
+          {a.list.map((item) => (
+            <li class="border-line border-b py-3">{item}</li>
+          ))}
+        </ul>
+      </div>
+    </article>
+  ))}
+</section>
+
+<style>
+  .ambito-photo {
+    border-radius: 0;
+  }
+  @media (max-width: 767px) {
+    .ambito-photo {
+      aspect-ratio: 4 / 3 !important;
+    }
+  }
+</style>

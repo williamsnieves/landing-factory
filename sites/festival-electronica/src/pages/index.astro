@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Motion from '../components/motion/Motion.astro';
+import Header from '../components/sections/Header.astro';
+import Hero from '../components/sections/Hero.astro';
+import Marquee from '../components/sections/Marquee.astro';
+import Lineup from '../components/sections/Lineup.astro';
+import Stages from '../components/sections/Stages.astro';
+import Nave from '../components/sections/Nave.astro';
+import Schedule from '../components/sections/Schedule.astro';
+import Tickets from '../components/sections/Tickets.astro';
+import Directions from '../components/sections/Directions.astro';
+import Rules from '../components/sections/Rules.astro';
+import Closing from '../components/sections/Closing.astro';
+import Footer from '../components/sections/Footer.astro';
+
+const title = 'TALLER 303 · Festival de música electrónica en Bilbao';
+const description =
+  'Tres turnos de música electrónica en una antigua fábrica de Bilbao: line-up, escenarios, horarios, entradas y cómo llegar. Fechas y datos de ejemplo.';
+---
+
+<BaseLayout title={title} description={description} lang="es">
+  <Motion slot="head" />
+  <Header slot="header" />
+  <Hero />
+  <Marquee />
+  <Lineup />
+  <Stages />
+  <Nave />
+  <Schedule />
+  <Tickets />
+  <Directions />
+  <Rules />
+  <Closing />
+  <Footer slot="footer" />
+</BaseLayout>

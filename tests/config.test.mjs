@@ -59,3 +59,21 @@ test('threeD defaults to a 200 KB gzip budget and is validated', () => {
   assert.ok(errors.some((e) => e.startsWith('threeD.maxGzipKb')));
   assert.ok(errors.some((e) => e.startsWith('threeD.extra')));
 });
+
+test('diversity thresholds default to the calibrated values and are validated', () => {
+  assert.deepEqual(DEFAULT_CONFIG.diversity, {
+    minLayoutDistance: 0.2,
+    maxHashMatch: 0.5,
+    hashHamming: 10,
+  });
+  const bad = structuredClone(DEFAULT_CONFIG);
+  bad.diversity.minLayoutDistance = 2;
+  bad.diversity.maxHashMatch = -1;
+  bad.diversity.hashHamming = 2.5;
+  bad.diversity.extra = true;
+  const errors = validateConfig(bad).join('\n');
+  assert.match(errors, /diversity\.minLayoutDistance/);
+  assert.match(errors, /diversity\.maxHashMatch/);
+  assert.match(errors, /diversity\.hashHamming/);
+  assert.match(errors, /diversity\.extra/);
+});

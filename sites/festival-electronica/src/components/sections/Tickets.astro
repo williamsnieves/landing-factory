@@ -1,0 +1,95 @@
+---
+import { tickets, TICKET_URL } from '../../data/festival';
+---
+
+<section id="entradas" class="section tickets" aria-labelledby="tickets-title">
+  <div class="wrap head">
+    <h2 id="tickets-title" class="display section-title" data-reveal>
+      Entradas
+    </h2>
+    <p class="note" data-reveal data-reveal-delay="0.1">
+      Precios de ejemplo, en euros. La venta se hace en un sitio externo: cada
+      botón abre otra pestaña.
+    </p>
+  </div>
+
+  <ul class="rows">
+    {tickets.map((t, i) => (
+      <li
+        class:list={['row wrap', t.primary && 'primary']}
+        data-reveal
+        data-reveal-delay={String(i * 0.1)}
+      >
+        <h3 class="name display">{t.name}</h3>
+        <p class="includes">{t.includes}</p>
+        <p class="price display">{t.price}</p>
+        <a
+          href={TICKET_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          class:list={['btn', t.primary ? 'btn--ink' : '']}
+          aria-label={`Comprar ${t.name}, ${t.price} (abre un sitio externo en otra pestaña)`}
+        >
+          Comprar ↗
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .head {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: clamp(2rem, 5vw, 4rem);
+  }
+  .note {
+    margin: 0;
+    max-width: 46ch;
+  }
+  .rows {
+    margin: 0;
+    padding: 0;
+    border-top: var(--rule-thick) solid var(--color-ink);
+  }
+  .row {
+    display: grid;
+    gap: 0.75rem;
+    justify-items: start;
+    padding-block: clamp(1.5rem, 4vw, 2.5rem);
+    border-bottom: var(--rule-hair) solid var(--color-ink-soft);
+  }
+  .row.primary {
+    background: var(--color-primary);
+    color: var(--color-primary-contrast);
+    border-bottom: 0;
+  }
+  .name {
+    margin: 0;
+    font-size: var(--text-2xl);
+    line-height: 0.9;
+  }
+  .includes {
+    margin: 0;
+    max-width: 36ch;
+  }
+  .price {
+    margin: 0;
+    font-size: var(--text-3xl);
+    line-height: 0.85;
+    color: var(--color-primary);
+  }
+  .primary .price {
+    color: var(--color-primary-contrast);
+  }
+  @media (min-width: 64rem) {
+    .row {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 4fr) minmax(0, 2fr) auto;
+      align-items: center;
+      column-gap: 2rem;
+    }
+    .price {
+      justify-self: end;
+    }
+  }
+</style>

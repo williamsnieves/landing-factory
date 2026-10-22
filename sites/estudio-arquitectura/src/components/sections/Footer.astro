@@ -1,0 +1,61 @@
+---
+import credits from '../../data/credits.json';
+import { chapters, site } from '../../data/site';
+---
+
+<footer class="border-line border-t">
+  <div class="wrap text-ink-soft grid grid-cols-12 gap-x-4 gap-y-10 py-12 text-sm md:gap-x-6 md:py-16">
+    <div class="col-span-12 md:col-span-5">
+      <p class="text-ink font-medium">{site.name}</p>
+      <p class="mt-2 max-w-[46ch]">
+        Rehabilitación de viviendas y espacios de trabajo en Madrid.
+      </p>
+      <p class="text-ink mt-8 font-medium">Datos de muestra</p>
+      <p class="mt-2 max-w-[46ch]">
+        El nombre del estudio, la dirección, el teléfono, el correo, los
+        proyectos, las superficies y los años son ficticios y están pensados
+        para sustituirse. Las fotografías son imágenes de archivo con licencia
+        abierta; no muestran obra del estudio.
+      </p>
+    </div>
+
+    <div class="col-span-12 md:col-span-6 md:col-start-7">
+      <nav aria-label="Capítulos">
+        <ul class="flex flex-wrap gap-x-6">
+          {chapters.map((c) => (
+            <li>
+              <a class="hover:text-primary inline-block py-1" href={c.href}>
+                <span class="tabular-nums">{c.n}</span>
+                <span class="ml-2">{c.label}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <p class="mt-6">
+        <a class="hover:text-primary" href={`mailto:${site.email}`}>
+          {site.email}
+        </a>
+        <span aria-hidden="true"> · </span>
+        <a class="hover:text-primary tabular-nums" href={site.phoneHref}>
+          {site.phone}
+        </a>
+        <span aria-hidden="true"> · </span>
+        {site.addressLines.join(', ')}
+      </p>
+
+      <p class="text-ink mt-8 font-medium">Fotografías</p>
+      <ul class="mt-2 space-y-1">
+        {credits.map((c) => (
+          <li>
+            {c.author},{' '}
+            <a class="link" href={c.url} rel="noopener">
+              {c.license}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</footer>

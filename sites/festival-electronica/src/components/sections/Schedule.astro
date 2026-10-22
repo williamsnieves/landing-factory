@@ -1,0 +1,134 @@
+---
+import { turnos, stageName } from '../../data/festival';
+
+// Production-log rows: doors, every act in time order, close.
+const logs = turnos.map((t) => ({
+  ...t,
+  rows: [
+    {
+      time: t.doors,
+      what: 'Apertura de puertas',
+      where: 'Entrada',
+      mark: true,
+    },
+    ...t.acts.map((a) => ({
+      time: a.time,
+      what: a.name,
+      where: stageName(a.stage),
+      mark: false,
+    })),
+    { time: t.close, what: 'Cierre de la nave', where: 'Todo', mark: true },
+  ],
+}));
+---
+
+<section id="horarios" class="section schedule" aria-labelledby="sched-title">
+  <div class="wrap head">
+    <h2 id="sched-title" class="display section-title" data-reveal>
+      Horarios
+    </h2>
+    <p class="note" data-reveal data-reveal-delay="0.1">
+      El registro de producción de las tres noches. Hora local de Bilbao.
+      Horarios de ejemplo, sujetos a cambios. Un turno cierra pasada la
+      medianoche: las horas 00:00 a 05:00 son ya el día siguiente.
+    </p>
+  </div>
+
+  <div class="wrap logs">
+    {logs.map((t) => (
+      <div class="log" id={`horarios-${t.n}`} data-reveal>
+        <h3 class="label log-title">
+          Turno {t.n} · {t.weekday} {t.date}
+        </h3>
+        <table aria-label={`Horario del turno ${t.n}, ${t.weekday} ${t.date}`}>
+          <thead>
+            <tr class="label">
+              <th scope="col">Hora</th>
+              <th scope="col">Acto</th>
+              <th scope="col">Escenario</th>
+            </tr>
+          </thead>
+          <tbody>
+            {t.rows.map((r) => (
+              <tr class:list={[r.mark && 'mark']}>
+                <td class="time">{r.time}</td>
+                <td class="what">{r.what}</td>
+                <td class="where">{r.where}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .head {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: clamp(2rem, 5vw, 4rem);
+  }
+  .note {
+    margin: 0;
+    max-width: 56ch;
+  }
+  .logs {
+    display: grid;
+    gap: 3rem 2rem;
+  }
+  .log-title {
+    margin: 0 0 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: var(--rule-thick) solid var(--color-primary);
+    color: var(--color-ink);
+    font-weight: 700;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+  }
+  thead th {
+    padding: 0.4rem 0.5rem 0.4rem 0;
+    text-align: left;
+    font-weight: 400;
+    border-bottom: var(--rule-hair) solid var(--color-ink-soft);
+  }
+  td {
+    padding: 0.7rem 0.5rem 0.7rem 0;
+    border-bottom: var(--rule-hair) solid var(--color-line);
+    vertical-align: baseline;
+  }
+  .time {
+    width: 4.25rem;
+    color: var(--color-primary);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .what {
+    color: var(--color-ink);
+  }
+  .where {
+    color: var(--color-ink-soft);
+    text-align: right;
+    padding-right: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .mark .what,
+  .mark .where {
+    color: var(--color-ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  thead th:last-child {
+    text-align: right;
+    padding-right: 0;
+  }
+  @media (min-width: 64rem) {
+    .logs {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

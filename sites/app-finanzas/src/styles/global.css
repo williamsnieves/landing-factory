@@ -1,0 +1,46 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/manrope';
+@import '@fontsource-variable/onest';
+@import './tokens.css';
+
+@layer base {
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    overflow-x: clip;
+    font-size: var(--text-base);
+    line-height: 1.6;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 3px;
+  }
+}
+
+/* Motion layer -----------------------------------------------------------
+ * Hidden initial states apply ONLY when the .js-motion class is on <html>.
+ * That class is added by the inline script in <Motion /> when JavaScript runs
+ * and prefers-reduced-motion is not "reduce". Without it, everything is visible.
+ */
+.js-motion [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 2rem, 0);
+}
+
+/* Lenis recommended base styles */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}

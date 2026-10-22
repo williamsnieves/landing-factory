@@ -1,0 +1,69 @@
+---
+import Phone from '../Phone.astro';
+
+const steps = [
+  {
+    title: 'Conecta tu cuenta',
+    text: 'Autoriza la lectura de tus movimientos desde la app de tu banco. Trazo solo lee: no puede mover dinero. Puedes desconectar cuando quieras.',
+    screen: 'connect' as const,
+    label:
+      'Pantalla de la app para conectar una cuenta en modo solo lectura. Datos de ejemplo.',
+  },
+  {
+    title: 'Fija límites y objetivos',
+    text: 'Revisa los presupuestos que Trazo propone según tus últimos movimientos, cambia los límites y crea un objetivo con cantidad y fecha.',
+    screen: 'goals' as const,
+    label:
+      'Pantalla de la app con dos objetivos: Viaje de verano, 640,00 de 1.200,00 euros, y Fondo para imprevistos, 900,00 de 2.000,00 euros. Datos de ejemplo.',
+  },
+  {
+    title: 'Mira qué cambia',
+    text: 'Cada semana ves cómo vas frente a tu presupuesto y qué categoría se sale. Tú decides qué ajustar.',
+    screen: 'analysis' as const,
+    label:
+      'Pantalla de la app con el gasto de marzo por categorías; Comida se sale del límite. Datos de ejemplo.',
+  },
+];
+---
+
+<section
+  id="como-funciona"
+  class="border-line border-t scroll-mt-4"
+  aria-labelledby="como-funciona-t"
+>
+  <div class="mx-auto w-full max-w-6xl px-4 py-16 md:px-8 md:py-24">
+    <div class="grid gap-12 md:grid-cols-12">
+      <div class="self-start md:sticky md:top-12 md:col-span-5">
+        <h2
+          id="como-funciona-t"
+          class="font-display text-3xl leading-tight font-bold tracking-tight text-balance"
+          data-reveal
+        >
+          Cómo funciona, en tres pasos
+        </h2>
+        <p
+          class="text-ink-soft mt-4 max-w-md"
+          data-reveal
+          data-reveal-delay="0.1"
+        >
+          Las pantallas usan el mismo mes de ejemplo, marzo, para que veas cómo
+          encajan los números de un paso al siguiente.
+        </p>
+      </div>
+      <ol class="flex flex-col gap-16 md:col-span-7 md:gap-24">
+        {steps.map((s, i) => (
+          <li class="grid gap-6 lg:grid-cols-2 lg:items-center" data-reveal>
+            <div>
+              <p class="font-display text-primary text-3xl font-extrabold">
+                {i + 1}
+              </p>
+              <h3 class="font-display mt-2 text-xl font-bold">{s.title}</h3>
+              <p class="text-ink-soft mt-2">{s.text}</p>
+            </div>
+            <Phone screen={s.screen} label={s.label} />
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>

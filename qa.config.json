@@ -34,5 +34,10 @@
   "threeD": {
     "maxGzipKb": 200,
     "canvasTimeoutMs": 15000
+  },
+  "diversity": {
+    "minLayoutDistance": 0.2,
+    "maxHashMatch": 0.5,
+    "hashHamming": 10
   }
 }

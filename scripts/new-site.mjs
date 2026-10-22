@@ -171,6 +171,7 @@ Status: **draft**. Fill every section; the checkpoint waits for approval unless 
 - **Goal of the page:** primary action and secondary action.
 - **Audience:**
 - **Tone:**
+- **Signals:** (comma-separated words from the closed vocabulary of design-archetypes/README.md; the synthesis writes them)
 - **Language:** the copy language (default Spanish unless the brief says otherwise).
 - **Site location:** \`sites/${slug}/\`, its own Cloudflare Pages project.
 
@@ -180,6 +181,17 @@ Status: **draft**. Fill every section; the checkpoint waits for approval unless 
 | ----- | ------------ | ------------- |
 
 **Direction in one line:**
+
+## Archetype blend
+
+Chosen from \`node scripts/pick-archetypes.mjs --site ${slug}\` (signals of the Brief, the reference sheets above, blends other sites already use). The archetype sheets in \`design-archetypes/\` are a starting grammar, not a template: any deviation goes in RUN.md "Design decisions".
+
+- **Primary:** (owns the layout grammar; or \`custom\` when the references lead)
+- **Secondary:** (optional)
+- **Lent traits:** (one or two; \`ref:<sheet>/<trait>\` when a reference supplies one)
+- **Why:** the signals and references that led here, and why the top candidate was or was not taken.
+- **Twist from the requirement:** one idea that comes from this business, not from a catalog.
+- **Planned deviations:**
 
 ## Page map
 
@@ -249,7 +261,7 @@ ${rows.join('\n')}
 
 ## Design decisions
 
-Skill conflicts and how they were resolved (the approved proposal wins).
+Skill conflicts and how they were resolved (the approved proposal wins). Every deviation from the chosen archetype sheets, with the requirement or reference that justifies it.
 
 ## Images
 

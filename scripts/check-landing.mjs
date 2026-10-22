@@ -11,9 +11,14 @@
 //   contrast           a standard text pair of tokens.css (ink/paper, primary-contrast/primary, ...) is below 4.5:1
 //   landing-meta       MASTER.md has no valid `landing-meta` block
 //   diversity          another site matches on primary color, display font and hero type all at once
+//   layout-diversity   another site's layout signature (scripts/layout-signature.mjs) is closer than diversity.minLayoutDistance
+//                      or shares more than diversity.maxHashMatch of its screenshot hashes (thresholds in qa.config.json)
 //   scenes             a built [data-scene] has no poster <img>, a poster not recorded in assets.json (a museum
 //                      or Commons image, or a self-rendered one with source "self"), or the site has more than 2 scenes
 //   copy-match         (--refs) 8 words in a row of the built page text also appear in a reference page
+//
+// Warnings (never failures): archetype-target, the built layout signature is outside the ranges of the primary
+// archetype in landing-meta (the archetypes are a base, not a template).
 //
 // Exit codes: 0 all checks passed, 1 at least one failed, 2 the run itself broke (unknown site, missing
 // dist/ with --refs, a reference that cannot be fetched).
@@ -24,6 +29,13 @@ import { parseArgs } from 'node:util';
 
 import { reexecWithEnvProxy } from '../.claude/skills/analyze-reference/scripts/proxy.mjs';
 import { syncCredits } from './credits.mjs';
+import {
+  archetypeMetaProblems,
+  loadCatalog,
+  readArchetypeMeta,
+} from './lib/archetypes.mjs';
+import { compareSignatures, targetWarnings } from './lib/layout-core.mjs';
+import { loadConfig } from './qa/config.mjs';
 import { SLUG_PATTERN, listSites } from './lib/sites.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -276,11 +288,14 @@ export function parseLandingMeta(markdown) {
     const pair = /^\s*([a-z-]+)\s*:\s*(.+?)\s*$/i.exec(line);
     if (pair) values[pair[1].toLowerCase()] = pair[2];
   }
+  const { archetype, traits } = readArchetypeMeta(markdown);
   return {
     primary: values.primary ?? '',
     displayFont: values['display-font'] ?? '',
     bodyFont: values['body-font'] ?? '',
     hero: values.hero ?? '',
+    archetype,
+    traits,
   };
 }
 
@@ -455,7 +470,7 @@ export function checkContrast(slug, root) {
   return failures;
 }
 
-export function validateLandingMeta(meta) {
+export function validateLandingMeta(meta, archetypeNames = []) {
   if (!meta)
     return ['no ```landing-meta block (keys: primary, display-font, hero)'];
   const problems = [];
@@ -468,6 +483,7 @@ export function validateLandingMeta(meta) {
     problems.push(
       `hero must be one of ${HERO_TYPES.join(', ')}, got "${meta.hero}"`,
     );
+  problems.push(...archetypeMetaProblems(meta, archetypeNames));
   return problems;
 }
 
@@ -476,6 +492,7 @@ export function checkLandingMeta(slug, root) {
   if (!existsSync(masterPath)) return []; // checkTokens already reports the missing file
   const problems = validateLandingMeta(
     parseLandingMeta(readFileSync(masterPath, 'utf8')),
+    loadCatalog(root).map((a) => a.name),
   );
   return problems.map((problem) =>
     failure('landing-meta', `design-system/${slug}/MASTER.md`, problem),
@@ -511,6 +528,104 @@ export function checkDiversity(slug, root) {
       );
   }
   return failures;
+}
+
+// --------------------------------------------------------------------------------------------------
+// Rule: layout diversity (design: add-design-archetypes, Decisions 6 and 7)
+
+export const signatureFile = (root, slug) =>
+  join(root, 'sites', slug, 'layout-signature.json');
+
+function readSignature(root, slug) {
+  const path = signatureFile(root, slug);
+  if (!existsSync(path)) return null;
+  try {
+    const data = JSON.parse(readFileSync(path, 'utf8'));
+    return data && data.features && Array.isArray(data.hashes) ? data : null;
+  } catch {
+    return null;
+  }
+}
+
+const formatValue = (v) => (v === null || v === undefined ? '-' : String(v));
+
+/**
+ * Fails when this site's layout is too close to another site's: weighted feature distance under
+ * `minLayoutDistance`, or more than `maxHashMatch` of the viewport slices matching within `hashHamming` bits.
+ * Sites without a signature are not compared. A missing signature for this site fails when there is
+ * another site to compare with (run scripts/layout-signature.mjs --site <slug> --write after the build; this
+ * check never starts a browser itself).
+ */
+export function checkLayoutDiversity(slug, root, thresholds) {
+  const others = listSites(join(root, 'sites')).filter(
+    (name) => name !== slug && readSignature(root, name),
+  );
+  if (!others.length) return [];
+  const mine = readSignature(root, slug);
+  if (!mine)
+    return [
+      failure(
+        'layout-diversity',
+        `sites/${slug}/layout-signature.json`,
+        `sites/${slug}/layout-signature.json is missing or invalid, so the layout cannot be compared with ${others.join(', ')}; build the site and run node scripts/layout-signature.mjs --site ${slug} --write`,
+      ),
+    ];
+  const failures = [];
+  for (const other of others) {
+    const result = compareSignatures(mine, readSignature(root, other), {
+      hashHamming: thresholds.hashHamming,
+    });
+    const tooClose = result.distance < thresholds.minLayoutDistance;
+    const sameShots = result.hashMatch > thresholds.maxHashMatch;
+    if (!tooClose && !sameShots) continue;
+    const shared = result.shared
+      .slice(0, 4)
+      .map((p) => `${p.name} ${formatValue(p.a)}`)
+      .join(', ');
+    const why = [
+      tooClose
+        ? `layout distance ${result.distance.toFixed(2)} is under ${thresholds.minLayoutDistance}`
+        : null,
+      sameShots
+        ? `${Math.round(result.hashMatch * 100)}% of the viewport screenshots match (limit ${Math.round(thresholds.maxHashMatch * 100)}%)`
+        : null,
+    ]
+      .filter(Boolean)
+      .join('; ');
+    failures.push(
+      failure(
+        'layout-diversity',
+        other,
+        `same layout as sites/${other}: ${why}; shared features: ${shared || 'none close'}; change the composition (another archetype or section patterns), not only colors and fonts`,
+      ),
+    );
+  }
+  return failures;
+}
+
+/** Warnings: measured features outside the ranges of the primary archetype named in landing-meta. */
+export function archetypeWarnings(slug, root) {
+  const masterPath = join(root, 'design-system', slug, 'MASTER.md');
+  const signature = readSignature(root, slug);
+  if (!existsSync(masterPath) || !signature) return [];
+  const meta = readArchetypeMeta(readFileSync(masterPath, 'utf8'));
+  if (!meta?.primary || meta.primary === 'custom') return [];
+  const sheet = loadCatalog(root).find((a) => a.name === meta.primary);
+  if (!sheet) return [];
+  const misses = targetWarnings(signature.features, sheet.signature);
+  if (!misses.length) return [];
+  return [
+    {
+      rule: 'archetype-target',
+      item: meta.primary,
+      message: `outside the ${meta.primary} ranges (a deviation needs a line in RUN.md "Design decisions"): ${misses
+        .map(
+          (m) =>
+            `${m.feature} ${formatValue(m.value)} (expected ${m.expected})`,
+        )
+        .join('; ')}`,
+    },
+  ];
 }
 
 // --------------------------------------------------------------------------------------------------
@@ -783,6 +898,15 @@ export async function runChecks({
     ['tokens', () => checkTokens(slug, root)],
     ['contrast', () => checkContrast(slug, root)],
     ['diversity', () => checkDiversity(slug, root)],
+    [
+      'layout-diversity',
+      () =>
+        checkLayoutDiversity(
+          slug,
+          root,
+          loadConfig(join(root, 'qa.config.json')).diversity,
+        ),
+    ],
     ['scenes', () => checkScenes(siteDir, manifest)],
   ].map(([name, run]) => ({ name, failures: run() }));
 
@@ -801,6 +925,7 @@ export async function runChecks({
     checks: results.map((r) => ({ name: r.name, ok: !r.failures.length })),
     skipped: refs.length ? [] : ['originality'],
     failures,
+    warnings: archetypeWarnings(slug, root),
   };
 }
 
@@ -815,6 +940,10 @@ export function formatReport(result) {
     lines.push('', 'Failures:');
     for (const f of result.failures) lines.push(`  - [${f.rule}] ${f.message}`);
   }
+  if (result.warnings?.length) {
+    lines.push('', 'Warnings:');
+    for (const w of result.warnings) lines.push(`  - [${w.rule}] ${w.message}`);
+  }
   return lines.join('\n');
 }
 
@@ -828,6 +957,7 @@ Final check of sites/<slug>/ after site QA passes. Fails, naming the item, when:
   contrast          a standard text token pair in tokens.css is below 4.5:1 (WCAG)
   landing-meta      MASTER.md has no valid \`landing-meta\` block (primary, display-font, hero)
   diversity         another site has the same primary color, display font and hero type
+  layout-diversity  the layout signature (scripts/layout-signature.mjs) is too close to another site's (qa.config.json: diversity)
   scenes            a built [data-scene] has no poster, a poster missing from assets.json, or the site has more than ${MAX_SCENES} scenes
   copy-match        (--refs) ${SHINGLE_WORDS} words in a row of the built page also occur in a reference
 
@@ -837,6 +967,7 @@ Final check of sites/<slug>/ after site QA passes. Fails, naming the item, when:
   --json            print the result as JSON
   --help            show this help
 
+Warning (not a failure): archetype-target, the signature is outside the primary archetype's ranges.
 Hero types: ${HERO_TYPES.join(', ')}.
 Exit codes: 0 passed, 1 failed, 2 the run broke (unknown site, no dist/ with --refs, unreadable reference).`;
 

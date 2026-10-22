@@ -1,0 +1,146 @@
+---
+import { nav, TICKET_URL } from '../../data/festival';
+---
+
+<header class="site-header">
+  <div class="bar wrap">
+    <a href="#top" class="brand label" aria-label="TALLER 303, inicio">
+      <span class="brand-mark" aria-hidden="true"></span>
+      Taller 303
+    </a>
+
+    <nav class="links" aria-label="Principal">
+      {nav.map((item) => (
+        <a href={item.href} class="label link">
+          {item.label}
+        </a>
+      ))}
+    </nav>
+
+    <div class="actions">
+      <details class="menu">
+        <summary class="label">Menú</summary>
+        <nav aria-label="Menú móvil">
+          {nav.map((item) => (
+            <a href={item.href} class="label">
+              {item.label}
+            </a>
+          ))}
+        </nav>
+      </details>
+      <a
+        href={TICKET_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn btn--solid ticket"
+        aria-label="Entradas (abre un sitio externo en otra pestaña)"
+      >
+        Entradas ↗
+      </a>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: relative;
+    z-index: 20;
+    border-bottom: var(--rule-thick) solid var(--color-ink);
+    background: var(--color-paper);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    height: var(--header-h);
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--color-ink);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .brand-mark {
+    width: 0.8rem;
+    height: 0.8rem;
+    background: var(--color-primary);
+  }
+  .links {
+    display: none;
+  }
+  .link {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.3em;
+    text-decoration-thickness: 2px;
+  }
+  .link:hover,
+  .link:focus-visible {
+    color: var(--color-primary);
+    text-decoration-color: var(--color-primary);
+  }
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .ticket {
+    min-height: 2.5rem;
+    align-items: center;
+    padding: 0.4rem 0;
+  }
+  .menu {
+    position: relative;
+  }
+  .menu summary {
+    display: flex;
+    align-items: center;
+    min-height: 2.5rem;
+    padding: 0.4rem 0.9rem;
+    border: 2px solid var(--color-ink);
+    color: var(--color-ink);
+    cursor: pointer;
+    list-style: none;
+  }
+  .menu summary::-webkit-details-marker {
+    display: none;
+  }
+  .menu[open] summary {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .menu nav {
+    position: absolute;
+    top: calc(100% + 0.6rem);
+    right: 0;
+    display: grid;
+    min-width: 14rem;
+    border: 2px solid var(--color-ink);
+    background: var(--color-paper);
+  }
+  .menu nav a {
+    padding: 0.9rem 1rem;
+    color: var(--color-ink);
+  }
+  .menu nav a + a {
+    border-top: var(--rule-hair) solid var(--color-line);
+  }
+  .menu nav a:hover,
+  .menu nav a:focus-visible {
+    background: var(--color-primary);
+    color: var(--color-primary-contrast);
+  }
+  @media (min-width: 64rem) {
+    .links {
+      display: flex;
+      gap: 2rem;
+    }
+    .menu {
+      display: none;
+    }
+  }
+</style>

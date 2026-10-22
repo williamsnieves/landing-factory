@@ -1,0 +1,70 @@
+{
+  "images": [
+    {
+      "file": "vivienda-salon.jpg",
+      "title": "File:Lounge, Interior of apartment in Brisbane, 2025,.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Lounge,_Interior_of_apartment_in_Brisbane,_2025,.jpg",
+      "author": "Chris Olszewski",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": true,
+      "retrievedAt": "2026-10-21T17:26:07.125Z",
+      "note": "apartment lounge"
+    },
+    {
+      "file": "escalera.jpg",
+      "title": "File:Staircase of the BGK Building (26620981474).jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Staircase_of_the_BGK_Building_(26620981474).jpg",
+      "author": "Bart Lumber",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "credit": false,
+      "retrievedAt": "2026-10-21T17:34:50.003Z",
+      "note": "modernist staircase"
+    },
+    {
+      "file": "cocina.jpg",
+      "title": "File:This cozy kitchen showcases modern design elements.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:This_cozy_kitchen_showcases_modern_design_elements.jpg",
+      "author": "Shixart1985",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "credit": true,
+      "retrievedAt": "2026-10-21T17:37:15.011Z",
+      "note": "kitchen with wood accents and large windows"
+    },
+    {
+      "file": "cocina-escalera.jpg",
+      "title": "File:Reconstruction original design of the Berlin kitchen by Charlotte Perriand and the Berlin Stair by Jean Prouvé.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Reconstruction_original_design_of_the_Berlin_kitchen_by_Charlotte_Perriand_and_the_Berlin_Stair_by_Jean_Prouv%C3%A9.jpg",
+      "author": "Philippstargard",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": true,
+      "retrievedAt": "2026-10-21T17:40:35.546Z",
+      "note": "reconstructed mid-century kitchen"
+    },
+    {
+      "file": "oficina-reforma.jpg",
+      "title": "File:C4DI interior coworking space 2025.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:C4DI_interior_coworking_space_2025.jpg",
+      "author": "Influence Media",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+      "credit": true,
+      "retrievedAt": "2026-10-21T17:43:41.145Z",
+      "note": "refurbished office"
+    },
+    {
+      "file": "pausa-luz.jpg",
+      "title": "File:Empty apartment room with corner windows.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Empty_apartment_room_with_corner_windows.jpg",
+      "author": "aismallard",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "credit": true,
+      "retrievedAt": "2026-10-21T17:45:03.940Z",
+      "note": "empty room with corner windows"
+    }
+  ]
+}

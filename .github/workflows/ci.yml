@@ -42,6 +42,9 @@ jobs:
       - name: Validate pattern sheets
         run: npm run validate:patterns
 
+      - name: Validate archetype sheets
+        run: npm run validate:archetypes
+
       # The fixture tests launch Chromium, so install it before npm test.
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
@@ -314,8 +317,10 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
+      # Lighthouse takes the median of 3 runs: one slow runner pass must not fail a site
+      # (the thresholds stay the same).
       - name: QA (build, screenshots, overflow, reduced motion, Lighthouse, impeccable)
-        run: npm run qa -- --site "$SITE"
+        run: npm run qa -- --site "$SITE" --runs 3
 
       # qa/<slug>/latest is a symlink; upload-artifact does not follow it, so resolve it.
       - name: Resolve report directory

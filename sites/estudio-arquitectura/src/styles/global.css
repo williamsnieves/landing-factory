@@ -1,0 +1,96 @@
+@import 'tailwindcss';
+@import './tokens.css';
+@import '@fontsource-variable/schibsted-grotesk';
+@import '@fontsource-variable/hanken-grotesk';
+
+@layer base {
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    overflow-x: clip;
+    font-size: var(--text-base);
+    line-height: 1.6;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 3px;
+  }
+}
+
+/* Page grammar: one outer wrap, one button shape, ruled sections ------------ */
+@layer components {
+  .wrap {
+    width: 100%;
+    max-width: 90rem;
+    margin-inline: auto;
+    padding-inline: calc(var(--spacing) * 5);
+  }
+  @media (min-width: 48rem) {
+    .wrap {
+      padding-inline: calc(var(--spacing) * 8);
+    }
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--spacing) * 3);
+    min-height: calc(var(--spacing) * 12);
+    padding: 0;
+    border: 0;
+    border-bottom: 2px solid var(--color-primary);
+    border-radius: 0;
+    background: transparent;
+    color: var(--color-primary);
+    font-size: var(--text-base);
+    font-weight: 500;
+    line-height: 1.3;
+    text-decoration: none;
+    transition:
+      border-color 200ms ease,
+      color 200ms ease;
+  }
+  .btn:hover {
+    border-color: var(--color-ink);
+    color: var(--color-ink);
+  }
+  .btn-outline {
+    font-size: var(--text-sm);
+  }
+  .link {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    transition: color 200ms ease;
+  }
+  .link:hover {
+    color: var(--color-ink);
+  }
+}
+
+/* Motion layer -----------------------------------------------------------
+ * Hidden initial states apply ONLY when the .js-motion class is on <html>.
+ * That class is added by the inline script in <Motion /> when JavaScript runs
+ * and prefers-reduced-motion is not "reduce". Without it, everything is visible.
+ */
+.js-motion [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 2rem, 0);
+}
+
+/* Lenis recommended base styles */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}

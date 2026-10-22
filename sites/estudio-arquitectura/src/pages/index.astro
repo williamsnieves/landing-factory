@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Motion from '../components/motion/Motion.astro';
+import Header from '../components/sections/Header.astro';
+import Hero from '../components/sections/Hero.astro';
+import Estudio from '../components/sections/Estudio.astro';
+import Proyectos from '../components/sections/Proyectos.astro';
+import Metodo from '../components/sections/Metodo.astro';
+import Ambitos from '../components/sections/Ambitos.astro';
+import Pausa from '../components/sections/Pausa.astro';
+import Encargo from '../components/sections/Encargo.astro';
+import Contacto from '../components/sections/Contacto.astro';
+import Footer from '../components/sections/Footer.astro';
+
+const title = 'Estudio Larrea Vidal Arquitectura · Rehabilitación en Madrid';
+const description =
+  'Estudio de arquitectura en Madrid dedicado a la rehabilitación de viviendas y a la reforma de espacios de trabajo. Proyectos, método y una primera conversación.';
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  lang="es"
+  skipLabel="Saltar al contenido"
+>
+  <Motion slot="head" />
+  <Header slot="header" />
+  <Hero />
+  <Estudio />
+  <Proyectos />
+  <Metodo />
+  <Ambitos />
+  <Pausa />
+  <Encargo />
+  <Contacto />
+  <Footer slot="footer" />
+</BaseLayout>

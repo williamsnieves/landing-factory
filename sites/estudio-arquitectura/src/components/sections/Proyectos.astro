@@ -1,0 +1,174 @@
+---
+import Chapter from '../Chapter.astro';
+import Photo from '../Photo.astro';
+import Plan from '../Plan.astro';
+import Cta from '../Cta.astro';
+import { projects } from '../../data/projects';
+---
+
+<section
+  id="proyectos"
+  class="border-line scroll-mt-4 border-t"
+  aria-labelledby="proyectos-title"
+>
+  <div class="wrap grid grid-cols-12 gap-x-4 gap-y-8 pt-24 md:gap-x-6 md:pt-40">
+    <div class="col-span-12 md:col-span-3">
+      <Chapter n="II" label="Proyectos" />
+    </div>
+    <div class="col-span-12 md:col-span-9">
+      <h2
+        id="proyectos-title"
+        class="font-display max-w-[24ch] text-3xl leading-[1.15] font-medium tracking-tight text-balance"
+        data-reveal
+      >
+        Cinco proyectos, cada uno con su fotografía y su planta.
+      </h2>
+      <p class="text-ink-soft mt-6 max-w-[58ch]" data-reveal>
+        Los proyectos, las superficies y los años son ejemplos. Las fotografías
+        son imágenes de archivo con licencia abierta que ilustran el tipo de
+        espacio; no son obra del estudio.
+      </p>
+
+      <ol class="border-line mt-12 border-t" aria-label="Índice de proyectos">
+        {projects.map((p) => (
+          <li class="border-line border-b">
+            <a
+              href={`#${p.id}`}
+              class="index-row hover:text-primary grid grid-cols-[2rem_1fr_auto] items-baseline gap-x-4 gap-y-1 py-4 lg:grid-cols-[2rem_1fr_14rem_8rem_4rem]"
+            >
+              <span class="text-ink-soft tabular-nums">{p.n}</span>
+              <span class="font-display text-lg font-medium">{p.name}</span>
+              <span class="text-ink-soft col-start-2 text-sm lg:col-start-auto">
+                {p.kind}
+              </span>
+              <span class="text-ink-soft hidden text-sm tabular-nums lg:block">
+                {p.area}
+              </span>
+              <span class="text-ink-soft col-start-3 row-start-1 text-right text-sm tabular-nums lg:col-start-auto lg:row-start-auto">
+                {p.year}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+
+  <div class="mt-16 md:mt-20">
+    <p class="wrap text-ink-soft mb-4 text-sm" id="track-hint">
+      Desplace en horizontal para recorrer los cinco proyectos: a la izquierda,
+      la fotografía; a la derecha, la planta.
+    </p>
+    <div
+      class="track"
+      tabindex="0"
+      role="region"
+      aria-label="Proyectos, de 1 a 5. Desplazamiento horizontal con las flechas del teclado"
+      aria-describedby="track-hint"
+    >
+      {projects.map((p, i) => (
+        <article class="panel" id={p.id} aria-labelledby={`${p.id}-name`}>
+          <div class="grid gap-3 md:grid-cols-2 md:gap-4">
+            <figure>
+              <Photo
+                src={p.photo}
+                alt={p.alt}
+                ratio="4 / 3"
+                position={p.position}
+                sizes="(min-width: 1100px) 520px, (min-width: 768px) 40vw, 88vw"
+                widths={[480, 800, 1040]}
+                loading={i === 0 ? 'eager' : 'lazy'}
+              />
+              <figcaption class="text-ink-soft mt-2 text-sm">
+                Proyecto {p.n}. Imagen de archivo.
+              </figcaption>
+            </figure>
+            <figure>
+              <div
+                class="bg-surface border-line border"
+                style="aspect-ratio:4 / 3"
+              >
+                <Plan variant={p.plan} />
+              </div>
+              <figcaption class="text-ink-soft mt-2 text-sm">
+                Proyecto {p.n}. Planta esquemática.
+              </figcaption>
+            </figure>
+          </div>
+          <div class="mt-6 grid gap-x-6 gap-y-4 md:grid-cols-[1fr_1fr]">
+            <div>
+              <h3
+                id={`${p.id}-name`}
+                class="font-display text-xl font-medium tracking-tight"
+              >
+                <span class="text-primary tabular-nums">{p.n}</span>
+                <span class="ml-3">{p.name}</span>
+              </h3>
+              <p class="text-ink-soft mt-3 max-w-[44ch]">{p.description}</p>
+            </div>
+            <dl class="border-line grid grid-cols-3 gap-x-4 self-start border-t pt-3 text-sm">
+              <div>
+                <dt class="text-ink-soft">Tipo</dt>
+                <dd class="mt-1">{p.kind}</dd>
+              </div>
+              <div>
+                <dt class="text-ink-soft">Superficie</dt>
+                <dd class="mt-1 tabular-nums">{p.area}</dd>
+              </div>
+              <div>
+                <dt class="text-ink-soft">Año</dt>
+                <dd class="mt-1 tabular-nums">{p.year}</dd>
+              </div>
+            </dl>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+
+  <div class="wrap grid grid-cols-12 gap-x-4 gap-y-6 pt-16 pb-24 md:gap-x-6 md:pt-24 md:pb-40">
+    <div class="col-span-12 md:col-span-9 md:col-start-4" data-reveal>
+      <p class="font-display max-w-[28ch] text-2xl leading-snug font-medium text-balance">
+        ¿Tiene un piso, un local o una oficina que rehabilitar?
+      </p>
+      <div class="mt-8">
+        <Cta />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .track {
+    --gutter: calc(var(--spacing) * 5);
+    display: flex;
+    gap: calc(var(--spacing) * 6);
+    overflow-x: auto;
+    padding-inline: var(--gutter);
+    padding-bottom: calc(var(--spacing) * 6);
+    scroll-padding-inline: var(--gutter);
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-primary) var(--color-surface);
+  }
+  @media (min-width: 48rem) {
+    .track {
+      --gutter: max(
+        calc(var(--spacing) * 8),
+        calc((100% - 90rem) / 2 + var(--spacing) * 8)
+      );
+    }
+  }
+  .panel {
+    flex: 0 0 min(88vw, 66rem);
+    scroll-snap-align: start;
+  }
+  .track:focus-visible {
+    outline: 3px solid var(--color-primary);
+    outline-offset: -3px;
+  }
+  .index-row {
+    transition: color 200ms ease;
+  }
+</style>

@@ -1,0 +1,31 @@
+---
+interface Props {
+  tone?: 'primary' | 'light';
+}
+const { tone = 'primary' } = Astro.props;
+const stores = [
+  { hint: 'Descargar en', name: 'App Store' },
+  { hint: 'Disponible en', name: 'Google Play' },
+];
+const toneClass =
+  tone === 'light'
+    ? 'bg-paper text-ink hover:bg-primary-soft'
+    : 'bg-primary text-primary-contrast hover:bg-primary-hover';
+---
+
+<ul class="flex flex-wrap gap-3">
+  {stores.map((s) => (
+    <li>
+      <a
+        href="#descarga"
+        class:list={[
+          'rounded-md inline-flex min-h-14 min-w-44 flex-col justify-center px-5 py-2 leading-tight transition-colors duration-150',
+          toneClass,
+        ]}
+      >
+        <span class="text-xs">{s.hint}</span>
+        <span class="font-display text-lg font-bold">{s.name}</span>
+      </a>
+    </li>
+  ))}
+</ul>
