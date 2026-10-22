@@ -39,5 +39,8 @@
     "minLayoutDistance": 0.2,
     "maxHashMatch": 0.5,
     "hashHamming": 10
+  },
+  "brief": {
+    "sampleWords": ["ejemplo", "example", "sample"]
   }
 }

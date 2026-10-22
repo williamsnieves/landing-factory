@@ -219,3 +219,96 @@ test('CLI exit codes: 0 up to date, 1 stale with --check, 2 for bad usage or an 
   assert.equal(help.status, 0);
   assert.match(help.stdout, /--check/);
 });
+
+test('customer files get their own part; credit shows in the footer only when true; a stock-only site is unchanged', () => {
+  const root = freshRoot();
+  const before = syncCredits({ slug: 'demo', root });
+  assert.ok(before.written.length);
+  const stockCredits = read(root, 'CREDITS.md');
+  const stockJson = read(root, 'src/data/credits.json');
+  assert.ok(!stockCredits.includes('Provided by the customer'));
+
+  const manifestPath = join(root, 'sites/demo/assets.json');
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+  manifest.images.push(
+    {
+      file: 'logo.svg',
+      source: 'customer',
+      owner: 'Taller Plantilla',
+      permission: 'Free use on the business website',
+      credit: false,
+      note: 'Own logo.',
+    },
+    {
+      file: 'founder.jpg',
+      source: 'customer',
+      owner: 'Ana Taller',
+      permission: 'Photo by the owner, used with permission',
+      credit: true,
+    },
+  );
+  writeFileSync(manifestPath, JSON.stringify(manifest));
+  syncCredits({ slug: 'demo', root });
+  const credits = read(root, 'CREDITS.md');
+  const section = credits.slice(
+    credits.indexOf('### Provided by the customer'),
+  );
+  assert.match(
+    section,
+    /\| `logo\.svg`\s+\| Taller Plantilla\s+\| Free use on the business website\s+\| no\s+\| Own logo\s+\|/,
+  );
+  assert.match(
+    section,
+    /\| `founder\.jpg`\s+\| Ana Taller\s+\| Photo by the owner, used with permission\s+\| yes/,
+  );
+  // The stock photo table above it is the same as before, and the section sits between the markers.
+  assert.ok(
+    credits.indexOf('### Provided by the customer') <
+      credits.indexOf('<!-- credits:end -->'),
+  );
+  const footer = JSON.parse(read(root, 'src/data/credits.json'));
+  assert.deepEqual(footer.slice(0, 2), JSON.parse(stockJson));
+  assert.deepEqual(footer.slice(2), [
+    {
+      author: 'Ana Taller',
+      license: 'Photo by the owner, used with permission',
+      url: '',
+    },
+  ]);
+  assert.equal(
+    syncCredits({ slug: 'demo', root, check: true }).stale.length,
+    0,
+  );
+  // Only customer files: no stock table, still a valid block.
+  const only = renderCreditsFile(
+    '# Credits\n',
+    manifest.images.filter((e) => e.source === 'customer'),
+  );
+  assert.ok(!only.includes('No photographs are used yet.'));
+  assert.ok(only.includes('### Provided by the customer'));
+});
+
+test('a customer entry needs owner and permission, not the stock fields; stock entries still need theirs', () => {
+  const entry = { file: 'logo.svg', source: 'customer', credit: false };
+  assert.throws(() => validateManifest({ images: [entry] }), /has no "owner"/);
+  assert.throws(
+    () => validateManifest({ images: [{ ...entry, owner: 'A' }] }),
+    /has no "permission"/,
+  );
+  validateManifest({ images: [{ ...entry, owner: 'A', permission: 'p' }] });
+  assert.throws(
+    () =>
+      validateManifest({
+        images: [
+          {
+            file: 'a.jpg',
+            source: 'commons',
+            owner: 'A',
+            permission: 'p',
+            credit: false,
+          },
+        ],
+      }),
+    /has no "title"/,
+  );
+});

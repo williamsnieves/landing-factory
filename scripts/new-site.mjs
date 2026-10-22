@@ -14,7 +14,7 @@ import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
-import { SLUG_PATTERN } from './lib/sites.mjs';
+import { SLUG_PATTERN, isPlanningDoc } from './lib/sites.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -166,8 +166,9 @@ Status: **draft**. Fill every section; the checkpoint waits for approval unless 
 
 ## Brief
 
+- **Source:** the niche line, or \`sites/${slug}/brief.json\` (the customer's requirement; fields listed in its \`assumed\` array, and empty ones, are not customer facts and are listed under Decisions).
 - **Niche:**
-- **Brand (fictional or real):**
+- **Brand (fictional or real):** from the brief when there is one.
 - **Goal of the page:** primary action and secondary action.
 - **Audience:**
 - **Tone:**
@@ -302,11 +303,9 @@ Pages project and production branch: [site.config.json](site.config.json). Asset
 `;
 }
 
-const isMarkdown = (name) => name.toLowerCase().endsWith('.md');
-
 /**
  * Throws unless sites/<slug> can be created. With allowExistingDocs, an existing
- * folder is accepted only when it contains nothing but top-level *.md files.
+ * folder is accepted only when it contains nothing but top-level *.md files and brief.json.
  */
 function assertTargetFree(target, slug, allowExistingDocs) {
   if (!existsSync(target)) return;
@@ -319,11 +318,11 @@ function assertTargetFree(target, slug, allowExistingDocs) {
     throw new Error(`sites/${slug} exists and is not a folder.`);
   }
   const offending = readdirSync(target, { withFileTypes: true }).filter(
-    (entry) => !entry.isFile() || !isMarkdown(entry.name),
+    (entry) => !entry.isFile() || !isPlanningDoc(entry.name),
   );
   if (offending.length) {
     throw new Error(
-      `sites/${slug} already exists with files other than Markdown docs (${offending.map((e) => e.name).join(', ')}); refusing to touch it.`,
+      `sites/${slug} already exists with files other than Markdown docs or brief.json (${offending.map((e) => e.name).join(', ')}); refusing to touch it.`,
     );
   }
 }
@@ -419,7 +418,7 @@ The 3D layer (src/components/three/) is copied with an empty src/scenes/. The st
   --lang <tag>              <html lang> of the placeholder page (default: en)
   --message <text>          placeholder body text (default: "This site is under construction.")
   --allow-existing-docs     accept an existing sites/<slug> that holds only *.md
-                            files (for example a PROPOSAL.md or RUN.md); they are never overwritten
+                            files (for example a PROPOSAL.md or RUN.md) and brief.json; they are never overwritten
   --help                    show this help
 
 Environment: LANDING_FACTORY_ROOT=<dir> creates the site in <dir>/sites/ instead of this repo (tests only).

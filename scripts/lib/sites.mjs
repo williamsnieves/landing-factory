@@ -23,3 +23,7 @@ export function listSites(sitesDir) {
     .map((entry) => entry.name)
     .sort();
 }
+
+/** Top-level files a site folder may hold before scaffolding: Markdown planning docs and the customer brief. */
+export const isPlanningDoc = (name) =>
+  name.toLowerCase().endsWith('.md') || name === 'brief.json';

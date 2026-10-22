@@ -301,3 +301,104 @@ test('the skill is not anchored on a generated site and drives the archetype flo
     );
   assert.ok(!settings.permissions.allow.some((p) => /^Bash\(node \*/.test(p)));
 });
+
+// --- --brief (add-brief-intake) ---------------------------------------------------------------------
+
+const briefFixture = join(ROOT, 'tests/fixtures/brief/brief.json');
+const briefSlug = `zz-nlb-${process.pid}`;
+
+test('--brief makes --niche optional, copies the brief and its assets into the site and passes it in the prompt', () => {
+  const r = run([briefSlug, '--brief', briefFixture, '--dry-run'], {
+    STUB_RESULT: 'dry-run-done',
+  });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  const brief = join(factoryRoot, 'sites', briefSlug, 'brief.json');
+  assert.ok(existsSync(brief));
+  assert.ok(
+    existsSync(join(factoryRoot, 'sites', briefSlug, 'assets/logo.svg')),
+  );
+  assert.deepEqual(
+    JSON.parse(readFileSync(brief, 'utf8')),
+    JSON.parse(readFileSync(briefFixture, 'utf8')),
+  );
+  // The scaffold ran around the brief, and the language comes from the brief (es).
+  assert.ok(existsSync(join(factoryRoot, 'sites', briefSlug, 'package.json')));
+  assert.deepEqual(recorded().slice(0, 2), [
+    '-p',
+    `/new-landing ${briefSlug} --brief ${brief} --dry-run --max-attempts 5 --lang es`,
+  ]);
+});
+
+test('with a brief, --niche and --lang still pass through; the brief language is the default', () => {
+  const english = join(tmp, 'brief-en.json');
+  const data = JSON.parse(readFileSync(briefFixture, 'utf8'));
+  data.language = 'en';
+  data.assets = [];
+  writeFileSync(english, JSON.stringify(data));
+  const slugEn = `${briefSlug}-en`;
+  const r = run([slugEn, '--brief', english, '--niche', 'templates'], {
+    STUB_RESULT: 'checkpoint',
+  });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.match(
+    recorded()[1],
+    new RegExp(
+      `^/new-landing ${slugEn} --niche "templates" --brief .*brief\\.json --max-attempts 5 --lang en$`,
+    ),
+  );
+  assert.match(
+    r.stdout,
+    new RegExp(`--brief .*${slugEn}/brief\\.json --resume --auto`),
+  );
+  assert.match(
+    readFileSync(
+      join(factoryRoot, 'sites', slugEn, 'src/pages/index.astro'),
+      'utf8',
+    ),
+    /const lang = 'en';/,
+  );
+  const forced = run([slugEn, '--brief', english, '--lang', 'es', '--resume'], {
+    STUB_RESULT: 'checkpoint',
+  });
+  assert.equal(forced.status, 0, forced.stderr);
+  assert.match(recorded()[1], /--lang es$/);
+});
+
+test('an existing sites/<slug>/brief.json is used without the flag', () => {
+  const r = run([briefSlug, '--resume'], { STUB_RESULT: 'checkpoint' });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.match(
+    recorded()[1],
+    new RegExp(
+      `^/new-landing ${briefSlug} --brief .*/${briefSlug}/brief\\.json --resume --max-attempts 5 --lang es$`,
+    ),
+  );
+});
+
+test('an invalid brief stops with the validator errors before anything is created or claude is started', () => {
+  rmSync(argsFile, { force: true });
+  const broken = join(tmp, 'brief-broken.json');
+  const data = JSON.parse(readFileSync(briefFixture, 'utf8'));
+  data.offer[1].price = 59;
+  data.contact.email = 'not-an-email';
+  writeFileSync(broken, JSON.stringify(data));
+  const slugBad = `${briefSlug}-bad`;
+  const r = run([slugBad, '--brief', broken]);
+  assert.equal(r.status, 1);
+  assert.match(r.stderr, /offer\[1\]\.price: expected a string/);
+  assert.match(r.stderr, /contact\.email: expected an email/);
+  assert.match(r.stderr, /the brief is invalid; nothing was created/);
+  assert.ok(!existsSync(join(factoryRoot, 'sites', slugBad)));
+  assert.ok(!existsSync(argsFile));
+});
+
+test('no niche and no brief, or a missing brief file, is a usage error', () => {
+  const none = run([`${briefSlug}-none`]);
+  assert.equal(none.status, 2);
+  assert.match(none.stderr, /--niche "<text>" or --brief <file> is required/);
+  const missing = run([`${briefSlug}-none`, '--brief', join(tmp, 'nope.json')]);
+  assert.equal(missing.status, 2);
+  assert.match(missing.stderr, /--brief .*nope\.json does not exist/);
+  const help = run(['--help']);
+  assert.ok(help.stdout.includes('--brief'));
+});
