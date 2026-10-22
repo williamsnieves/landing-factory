@@ -19,7 +19,7 @@
 
 ## 4. Validation and docs
 
-- [ ] 4.1 `new-landing.sh <fixture-slug> --brief tests/fixtures/brief/brief.json --dry-run`: the proposal uses the brief's business, products, prices, URL and email, lists the assumed fields under Decisions, derives `Signals:` from the brief and passes the liked sheet to `pick-archetypes`; the throwaway site is removed afterwards. Verify: read the proposal and RUN.md, record the run time.
+- [x] 4.1 `new-landing.sh <fixture-slug> --brief tests/fixtures/brief/brief.json --dry-run`: the proposal uses the brief's business, products, prices, URL and email, lists the assumed fields under Decisions, derives `Signals:` from the brief and passes the liked sheet to `pick-archetypes`; the throwaway site is removed afterwards. Verify: read the proposal and RUN.md, record the run time. (verified 2026-10-22: `new-landing.sh zz-brief-pilot --brief tests/fixtures/brief/brief.json --dry-run --model sonnet` exit 0 in under 3 minutes; PROPOSAL.md uses the brief's name, both products and prices, primary URL and email, lists `tone` and `contact.hours` as assumed under Decisions, derives `Signals:` from the brief, ran `pick-archetypes --refs sonomabakery-com` from the liked sheet and kept the disliked reference as an avoid note; MASTER.md kept the brand color #1f3a5f; the throwaway site was removed)
 - [x] 4.2 Docs: `CLAUDE.md` (commands, generating a landing, brief), `docs/status.md`, `sites/README.md`. Verify: `npx prettier --check .`, `openspec validate add-brief-intake --strict`. (verified: prettier --check and openspec validate --strict pass; docs/status.md left to the main session)
 
 ## Workflow follow-up

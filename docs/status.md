@@ -22,11 +22,11 @@ Read this first in a new or compacted session. Last updated: 2026-10-22 (add-bri
 | add-3d-scenes (opt-in Three.js scenes, 3D QA budgets, Met images), validated with `sites/samurai` | Merged (PR #13) and archived; production https://samurai-1v4.pages.dev |
 | Product plan (`docs/product-plan.md`): archetypes, intake, report, deploy adapters, agent interface, 3D models | Agreed 2026-10-21 |
 | add-design-archetypes (archetype blends, layout diversity), validated with `sites/{estudio-arquitectura,festival-electronica,app-finanzas}` | Merged (PR #14) and archived 2026-10-22; owner liked the previews, `minLayoutDistance` stays 0.2 |
-| add-brief-intake | In progress on branch `change/add-brief-intake` |
+| add-brief-intake (`brief.json`, `/brief-intake` interview, generation reads the brief, `brief-facts` check) | Implemented and validated on branch `change/add-brief-intake`; PR open |
 
 ## Resume here (2026-10-22)
 
-Branch `change/add-brief-intake`: first commit archives `add-design-archetypes`. Next: propose `add-brief-intake` (validated `brief.json`, agent-led interview that asks only for what is missing, assumed fields marked, proposal and copy read from it), implement, PR. After it merges: the owner's digital-products landing as the first real customer test.
+Branch `change/add-brief-intake`: all tasks done (dry run from a fictional digital-products brief passed, see tasks.md 4.1) and the PR is open. After the owner merges and says so: archive `add-brief-intake` as the first commit of the next branch, then the first real customer test: the owner's digital-products landing, starting with `/brief-intake <slug>` (interview in the owner's language; the page language is asked separately), then `npm run new-landing -- <slug> --brief sites/<slug>/brief.json`.
 
 ## Owner decisions to keep (2026-10-21)
 
@@ -34,6 +34,7 @@ Branch `change/add-brief-intake`: first commit archives `add-design-archetypes`.
 - One landing per repository, introduced gradually: monorepo now, then an export command, then generation straight into a repository, then product storage (`docs/product-plan.md`).
 - 3D models later may come from generators such as Meshy, purchases, open licenses or the customer's own files (for example a Drive link in the brief).
 - First real customer test: the owner's own landing to promote their digital products, after `add-design-archetypes` and `add-brief-intake`.
+- The intake interview follows the user's language (Spanish, English or other); the page language is a separate brief field (2026-10-22).
 
 ## How to generate a landing
 
