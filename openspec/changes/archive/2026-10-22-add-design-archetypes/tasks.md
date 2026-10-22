@@ -19,7 +19,7 @@
 ## 4. Validation (three-niche pilot)
 
 - [x] 4.1 Generate three landings for different niches with one `new-landing.sh --auto` command each; verify each passes site QA and `check-landing` (new diversity rule included) with no touch-ups, and that all six sites are pairwise different by the new measure (verified 2026-10-21: festival-electronica (brutalist-raw+typographic-poster, QA first run, ~24 min), app-finanzas (data-and-proof+swiss-grid-minimal, QA after 2 rounds, ~12 min), estudio-arquitectura (swiss-grid-minimal+horizontal-chapter-story, QA after 1 round, ~45 min; its first run stopped on an allow-list bug, fixed in 0b69332, and was regenerated from scratch; its final check caught a layout too close to another site and the run recomposed it). All three pass check-landing. Pairwise layout distance among all six sites: every pair involving a new site is >= 0.21 (min 0.2); the only pair under the threshold is the pre-existing panaderia/clinica-dental (0.13); screenshot hash matches 0% for every pair)
-- [ ] 4.2 Record niches, blends, signatures and run times; the owner reviews the previews
+- [x] 4.2 Record niches, blends, signatures and run times; the owner reviews the previews (verified 2026-10-22: recorded in 4.1, the PR and `docs/status.md`; the owner reviewed the three previews, liked them and merged PR #14, so `minLayoutDistance` stays at 0.2)
 
 ## Workflow follow-up
 

@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-21 (add-design-archetypes, three-niche pilot in progress).
+Read this first in a new or compacted session. Last updated: 2026-10-22 (add-brief-intake started).
 
 ## Working agreements
 
@@ -20,13 +20,13 @@ Read this first in a new or compacted session. Last updated: 2026-10-21 (add-des
 | Pilot step 3-6: build the bakery landing in `sites/panaderia/` | Merged (PR #11), production https://panaderia-a3o.pages.dev; lessons in `docs/pilot-panaderia-lessons.md` |
 | add-new-landing-skill (`/new-landing`, one command per landing) | Merged (PR #12) and archived; `sites/clinica-dental` in production at https://clinica-dental-9pd.pages.dev |
 | add-3d-scenes (opt-in Three.js scenes, 3D QA budgets, Met images), validated with `sites/samurai` | Merged (PR #13) and archived; production https://samurai-1v4.pages.dev |
-| Product plan (`docs/product-plan.md`): archetypes, intake, report, deploy adapters, agent interface, 3D models | Agreed 2026-10-21; step 1 `add-design-archetypes` in progress on branch `change/add-design-archetypes` (no PR yet): tasks 1 to 3 implemented and pushed; task 4 (three-niche pilot) running, see "Resume here" |
+| Product plan (`docs/product-plan.md`): archetypes, intake, report, deploy adapters, agent interface, 3D models | Agreed 2026-10-21 |
+| add-design-archetypes (archetype blends, layout diversity), validated with `sites/{estudio-arquitectura,festival-electronica,app-finanzas}` | Merged (PR #14) and archived 2026-10-22; owner liked the previews, `minLayoutDistance` stays 0.2 |
+| add-brief-intake | In progress on branch `change/add-brief-intake` |
 
-## Resume here (2026-10-21)
+## Resume here (2026-10-22)
 
-Branch `change/add-design-archetypes`: tasks 1 to 4.1 done; the three pilot sites (`estudio-arquitectura`, `festival-electronica`, `app-finanzas`) are committed and the PR is open. Task 4.2 waits for the owner's review of the three previews. After merge and the owner's go-ahead: archive `add-design-archetypes` as the first commit of `change/add-brief-intake`.
-
-Pilot results: every pair involving a new site has layout distance >= 0.21 (threshold 0.2); three pairs sit close to the line (samurai/estudio 0.21, samurai/app 0.21, estudio/app 0.21), so the threshold may need raising after the owner's visual review.
+Branch `change/add-brief-intake`: first commit archives `add-design-archetypes`. Next: propose `add-brief-intake` (validated `brief.json`, agent-led interview that asks only for what is missing, assumed fields marked, proposal and copy read from it), implement, PR. After it merges: the owner's digital-products landing as the first real customer test.
 
 ## Owner decisions to keep (2026-10-21)
 
