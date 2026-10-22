@@ -524,3 +524,222 @@ test('scenes: more than two distinct scenes fail; a site using <Scene3D /> witho
   assert.equal(noDist.length, 1);
   assert.match(noDist[0].message, /does not exist; build first/);
 });
+
+// --- brief-facts (add-brief-intake) -----------------------------------------------------------------
+
+const BRIEF_FIXTURE = join(ROOT, 'tests/fixtures/brief');
+const briefRoot = (change = (brief) => brief) => {
+  const root = freshRoot();
+  const brief = JSON.parse(
+    readFileSync(join(BRIEF_FIXTURE, 'brief.json'), 'utf8'),
+  );
+  mkdirSync(site(root, 'assets'), { recursive: true });
+  cpSync(join(BRIEF_FIXTURE, 'assets'), site(root, 'assets'), {
+    recursive: true,
+  });
+  writeFileSync(
+    site(root, 'brief.json'),
+    JSON.stringify(change(brief) ?? brief),
+  );
+  return root;
+};
+const goodPage = `<header><a href="https://example.com/tienda/pack-notion-freelance">Comprar el pack</a></header>
+<h1>Taller Plantilla</h1>
+<section><h2>Pack Notion Freelance</h2><p>29 €</p></section>
+<section><h2>Curso Orden en 5 días</h2><p>59,00 €</p></section>
+<footer><p>Escríbenos: <a href="mailto:hola@example.com">hola@example.com</a></p></footer>`;
+const factFailures = async (root) => failuresOf(root, 'brief-facts');
+
+test('brief-facts: a site without brief.json does not run the rule; with one that matches the page it passes', async () => {
+  const plain = await runChecks({ slug: 'good', root: freshRoot() });
+  assert.ok(!plain.checks.some((c) => c.name === 'brief-facts'));
+  const root = briefRoot();
+  withDist(root, goodPage);
+  const result = await runChecks({ slug: 'good', root });
+  assert.deepEqual(
+    result.failures.filter((f) => f.rule === 'brief-facts'),
+    [],
+  );
+  assert.ok(result.checks.some((c) => c.name === 'brief-facts' && c.ok));
+});
+
+test('brief-facts: a missing price or name, URL or email fails naming the field', async () => {
+  const root = briefRoot();
+  withDist(root, goodPage.replace('59,00 €', 'consultar'));
+  const failures = await factFailures(root);
+  assert.equal(failures.length, 1);
+  assert.equal(failures[0].item, 'offer[1].price');
+  assert.match(
+    failures[0].message,
+    /offer\[1\]\.price "59".*not on the built page/,
+  );
+
+  const dropped = briefRoot();
+  withDist(
+    dropped,
+    goodPage
+      .replace('Taller Plantilla', 'Otro nombre')
+      .replace(
+        'href="https://example.com/tienda/pack-notion-freelance"',
+        'href="#"',
+      )
+      .replace(/hola@example\.com/g, 'info@example.com')
+      .replace('Curso Orden en 5 días', 'Curso'),
+  );
+  assert.deepEqual(
+    (await factFailures(dropped)).map((f) => f.item).sort(),
+    [
+      'business.name',
+      'contact.email',
+      'goal.primary.url',
+      'offer[1].name',
+    ].sort(),
+  );
+});
+
+test('brief-facts: a phone must be on the page unless it is assumed or empty; spaces and tel: links are accepted', async () => {
+  const withPhone = (extra = {}) =>
+    briefRoot((brief) => {
+      brief.contact.phone = '+34 600 123 456';
+      return Object.assign(brief, extra);
+    });
+  const missing = withPhone();
+  withDist(missing, goodPage);
+  const failures = await factFailures(missing);
+  assert.deepEqual(
+    failures.map((f) => f.item),
+    ['contact.phone'],
+  );
+
+  const assumed = withPhone({
+    assumed: [{ field: 'contact.phone', reason: 'placeholder number' }],
+  });
+  withDist(assumed, goodPage);
+  assert.deepEqual(await factFailures(assumed), []);
+
+  const spaced = withPhone();
+  withDist(spaced, `${goodPage}<p>Tel. +34600 12 34 56</p>`);
+  assert.deepEqual(await factFailures(spaced), []);
+  const link = withPhone();
+  withDist(link, `${goodPage}<a href="tel:+34600123456">Llámanos</a>`);
+  assert.deepEqual(await factFailures(link), []);
+  // An empty phone in the brief is not required.
+  const empty = briefRoot();
+  withDist(empty, goodPage);
+  assert.deepEqual(await factFailures(empty), []);
+});
+
+test('brief-facts: prices ignore spaces, the currency and a trailing ,00 but not other digits', async () => {
+  const prices = (...texts) => {
+    const root = briefRoot();
+    withDist(
+      root,
+      goodPage.replace('29 €', texts[0]).replace('59,00 €', texts[1]),
+    );
+    return factFailures(root);
+  };
+  assert.deepEqual(await prices('€ 29.00', '59 EUR'), []);
+  assert.deepEqual(await prices('29,00€', '€59'), []);
+  assert.equal((await prices('129 €', '59 €'))[0].item, 'offer[0].price');
+  assert.equal((await prices('29,5 €', '59 €'))[0].item, 'offer[0].price');
+  assert.equal((await prices('29 €', '1.59 €'))[0].item, 'offer[1].price');
+  assert.equal((await prices('29 €', '59,50 €'))[0].item, 'offer[1].price');
+});
+
+test('brief-facts: an element that holds a customer fact and says "ejemplo" fails; placeholders elsewhere do not', async () => {
+  const root = briefRoot();
+  withDist(
+    root,
+    goodPage.replace(
+      '<p>Escríbenos:',
+      '<p>Texto de ejemplo para los otros datos</p><p>Contacto de ejemplo:',
+    ),
+  );
+  const failures = await factFailures(root);
+  assert.deepEqual(
+    failures.map((f) => f.item),
+    ['contact.email'],
+  );
+  assert.match(
+    failures[0].message,
+    /customer fact.*says "ejemplo".*never labeled as sample data/,
+  );
+
+  const priced = briefRoot();
+  withDist(
+    priced,
+    goodPage.replace('<p>29 €</p>', '<p>Precio de ejemplo: 29 €</p>'),
+  );
+  assert.deepEqual(
+    (await factFailures(priced)).map((f) => f.item),
+    ['offer[0].price'],
+  );
+  // The domain example.com inside a real email is not a sample label.
+  const clean = briefRoot();
+  withDist(clean, goodPage);
+  assert.deepEqual(await factFailures(clean), []);
+  // A product name that contains the word is the customer's own.
+  const named = briefRoot((brief) => {
+    brief.offer[0].name = 'Plantilla de ejemplo para clientes';
+  });
+  withDist(
+    named,
+    goodPage.replace(
+      'Pack Notion Freelance',
+      'Plantilla de ejemplo para clientes',
+    ),
+  );
+  assert.deepEqual(await factFailures(named), []);
+});
+
+test('brief-facts: no dist asks for a build; an invalid brief fails with the validator errors', async () => {
+  const noDist = await factFailures(briefRoot());
+  assert.equal(noDist.length, 1);
+  assert.match(
+    noDist[0].message,
+    /dist\/index\.html does not exist; build first/,
+  );
+
+  const invalid = briefRoot((brief) => {
+    brief.contact.email = 'nope';
+  });
+  withDist(invalid, goodPage);
+  const failures = await factFailures(invalid);
+  assert.equal(failures.length, 1);
+  assert.match(
+    failures[0].message,
+    /brief\.json is invalid.*contact\.email: expected an email/s,
+  );
+
+  const broken = briefRoot();
+  writeFileSync(site(broken, 'brief.json'), '{ nope');
+  assert.match((await factFailures(broken))[0].message, /not valid JSON/);
+});
+
+test('images-credited: a customer asset needs an owner and a permission', async () => {
+  const root = freshRoot();
+  mkdirSync(site(root, 'src/assets/images'), { recursive: true });
+  writeFileSync(site(root, 'src/assets/images/logo.svg'), '<svg/>');
+  edit(site(root, 'assets.json'), (text) => {
+    const manifest = JSON.parse(text);
+    manifest.images.push({
+      file: 'logo.svg',
+      source: 'customer',
+      credit: false,
+    });
+    return JSON.stringify(manifest);
+  });
+  const failures = await failuresOf(root, 'uncredited-image');
+  assert.equal(failures.length, 1);
+  assert.match(failures[0].message, /customer asset.*without "owner"/);
+  edit(site(root, 'assets.json'), (text) => {
+    const manifest = JSON.parse(text);
+    manifest.images.at(-1).owner = 'Taller Plantilla';
+    manifest.images.at(-1).permission = 'Free use on the business website';
+    return JSON.stringify(manifest);
+  });
+  assert.deepEqual(await failuresOf(root, 'uncredited-image'), []);
+  // Credits for the customer file are generated by credits.mjs, so the credits rule asks for a sync, not a failure of the file.
+  const credits = await failuresOf(root, 'credits-stale');
+  assert.equal(credits.length, 1);
+});

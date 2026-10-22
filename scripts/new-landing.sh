@@ -7,14 +7,19 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 usage() {
   cat <<'EOF'
-Usage: scripts/new-landing.sh <slug> --niche "<niche>" [options]
+Usage: scripts/new-landing.sh <slug> (--niche "<niche>" | --brief <file>) [options]
 
-Generates sites/<slug>/ from a niche: preflight, `npm run new-site`, `npm install`, then
+Generates sites/<slug>/ from a niche or a customer brief: preflight, `npm run new-site`, `npm install`, then
 `claude -p "/new-landing ..."` (headless Claude Code). Output goes to the terminal and to
 sites/<slug>/.run.log. Without --auto the run stops after the proposal so you can review it.
 
   <slug>                  lowercase letters, digits, single hyphens (also the folder under sites/)
-  --niche "<text>"        what the landing is for, in your words (required)
+  --niche "<text>"        what the landing is for, in your words (required unless there is a brief)
+  --brief <file>          a customer brief (JSON, see scripts/brief.mjs and the /brief-intake skill). It is validated
+                          first (exit 1 with the validator's errors, nothing created), copied to sites/<slug>/brief.json
+                          with the local asset files it names, and read by every phase. An existing
+                          sites/<slug>/brief.json is used the same way without the flag. With a brief --niche is
+                          optional (the skill uses business.description) and --lang defaults to the brief's language.
   --refs a,b              slugs of patterns/<slug>.md sheets to draw from (0-3, optional)
   --sources a,b           image sources: commons (default) and/or met (The Met Open Access, public domain;
                           for historical or cultural niches). Preflight checks their hosts.
@@ -22,19 +27,20 @@ sites/<slug>/.run.log. Without --auto the run stops after the proposal so you ca
   --dry-run               stop after PROPOSAL.md, design-system/<slug>/MASTER.md and tokens.css
   --max-attempts N        QA fix attempts before the run fails (default 5; 0 fails at the first red QA)
   --model <id>            model for claude -p (default: the CLI's default)
-  --lang <tag>            language of the page (default es)
+  --lang <tag>            language of the page (default: the brief's language, else es)
   --title "<text>"        working title for the placeholder page (default: the slug)
   --resume                continue an existing sites/<slug>/ (skips preflight slug check, scaffold and install)
   --help                  show this help
 
 Review flow: run without --auto, read sites/<slug>/PROPOSAL.md, edit it if needed, then continue with
-  scripts/new-landing.sh <slug> --niche "<niche>" --resume --auto
+  scripts/new-landing.sh <slug> --niche "<niche>" --resume --auto   (or --brief sites/<slug>/brief.json)
 
 Exit codes: 0 finished as asked (checkpoint reached, dry run done, or passed), 1 failed (preflight, QA
 attempts exhausted, claude error), 2 bad usage.
 
 Testing: LANDING_FACTORY_ROOT=<dir> creates and reads sites/<slug> in <dir> instead of this repo;
-NEW_LANDING_SKIP=preflight,install,final-check skips those steps (used by tests/new-landing.test.mjs).
+NEW_LANDING_SKIP=preflight,install,final-check skips those steps (used by tests/new-landing.test.mjs); the brief
+commands honor LANDING_FACTORY_ROOT too.
 Run from a terminal or a Claude session, not from GitHub Actions (it needs Claude Code credentials).
 EOF
 }
@@ -54,8 +60,10 @@ RESUME=0
 MAX_ATTEMPTS=5
 MODEL=""
 LANG_TAG="es"
+LANG_SET=0
 TITLE=""
 SOURCES=""
+BRIEF=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -64,7 +72,8 @@ while [ $# -gt 0 ]; do
     --refs) [ $# -ge 2 ] || die_usage "--refs needs a value"; REFS="$2"; shift 2 ;;
     --max-attempts) [ $# -ge 2 ] || die_usage "--max-attempts needs a value"; MAX_ATTEMPTS="$2"; shift 2 ;;
     --model) [ $# -ge 2 ] || die_usage "--model needs a value"; MODEL="$2"; shift 2 ;;
-    --lang) [ $# -ge 2 ] || die_usage "--lang needs a value"; LANG_TAG="$2"; shift 2 ;;
+    --lang) [ $# -ge 2 ] || die_usage "--lang needs a value"; LANG_TAG="$2"; LANG_SET=1; shift 2 ;;
+    --brief) [ $# -ge 2 ] || die_usage "--brief needs a value"; BRIEF="$2"; shift 2 ;;
     --title) [ $# -ge 2 ] || die_usage "--title needs a value"; TITLE="$2"; shift 2 ;;
     --sources) [ $# -ge 2 ] || die_usage "--sources needs a value"; SOURCES="$2"; shift 2 ;;
     --auto) AUTO=1; shift ;;
@@ -79,8 +88,10 @@ done
 
 [ -n "$SLUG" ] || die_usage "a site slug is required"
 [[ "$SLUG" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]] || die_usage "invalid slug \"$SLUG\": use lowercase letters, digits and single hyphens"
-[ -n "${NICHE//[[:space:]]/}" ] || die_usage "--niche \"<text>\" is required"
-case "$NICHE" in *$'\n'*) die_usage "--niche must be a single line" ;; esac
+if [ -n "$BRIEF" ]; then
+  [ -f "$BRIEF" ] || die_usage "--brief $BRIEF does not exist"
+  BRIEF="$(cd "$(dirname "$BRIEF")" && pwd)/$(basename "$BRIEF")"
+fi
 [[ "$MAX_ATTEMPTS" =~ ^[0-9]+$ ]] || die_usage "--max-attempts must be a non-negative integer, got \"$MAX_ATTEMPTS\""
 [[ "$LANG_TAG" =~ ^[a-z]{2,3}(-[A-Za-z0-9]+)*$ ]] || die_usage "--lang must be a language tag such as es or en, got \"$LANG_TAG\""
 [ -z "$SOURCES" ] || [[ "$SOURCES" =~ ^(commons|met)(,(commons|met))*$ ]] || die_usage "--sources takes a comma list of commons, met, got \"$SOURCES\""
@@ -97,10 +108,33 @@ command -v claude > /dev/null 2>&1 || die_usage "the claude CLI is not on PATH (
 cd "$ROOT"
 # LANDING_FACTORY_ROOT (tests only) moves where sites/ lives; new-site and preflight honor it too.
 if [ -n "${LANDING_FACTORY_ROOT:-}" ]; then SITE_DIR="$LANDING_FACTORY_ROOT/sites/$SLUG"; else SITE_DIR="sites/$SLUG"; fi
+# A brief comes from --brief or from an existing sites/<slug>/brief.json; with one, --niche is optional.
+HAS_BRIEF=0
+if [ -n "$BRIEF" ] || [ -f "$SITE_DIR/brief.json" ]; then HAS_BRIEF=1; fi
+if [ -n "${NICHE//[[:space:]]/}" ]; then
+  case "$NICHE" in *$'\n'*) die_usage "--niche must be a single line" ;; esac
+else
+  NICHE=""
+  [ "$HAS_BRIEF" -eq 1 ] || die_usage "--niche \"<text>\" or --brief <file> is required"
+fi
 skipped() { case ",${NEW_LANDING_SKIP:-}," in *",$1,"*) return 0 ;; *) return 1 ;; esac; }
 
 if [ "$RESUME" -eq 1 ]; then
   [ -f "$SITE_DIR/package.json" ] || die_usage "--resume needs an existing $SITE_DIR (no package.json found)"
+fi
+
+# 0. The brief, when there is one, must be valid before anything else runs (nothing is created, claude is not started).
+if [ -n "$BRIEF" ]; then
+  node scripts/brief.mjs validate --file "$BRIEF" || { echo "new-landing: the brief is invalid; nothing was created" >&2; exit 1; }
+  BRIEF_FILE="$BRIEF"
+elif [ "$HAS_BRIEF" -eq 1 ]; then
+  node scripts/brief.mjs validate --site "$SLUG" || { echo "new-landing: $SITE_DIR/brief.json is invalid; nothing was changed" >&2; exit 1; }
+  BRIEF_FILE="$SITE_DIR/brief.json"
+fi
+if [ "$HAS_BRIEF" -eq 1 ] && [ "$LANG_SET" -eq 0 ]; then
+  brief_lang="$(node -e 'try { process.stdout.write(String(JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).language || "")); } catch {}' "$BRIEF_FILE")"
+  [ -z "$brief_lang" ] || LANG_TAG="$brief_lang"
+  [[ "$LANG_TAG" =~ ^[a-z]{2,3}(-[A-Za-z0-9]+)*$ ]] || die_usage "the brief's language \"$LANG_TAG\" is not a language tag"
 fi
 
 # 1. Preflight: hosts, Chromium, free slug. Nothing is created before it passes.
@@ -125,9 +159,16 @@ if [ "$RESUME" -eq 0 ]; then
   fi
 fi
 
+# 2b. Put the brief (and the local asset files it names) into the site: sites/<slug>/brief.json.
+if [ -n "$BRIEF" ]; then
+  node scripts/brief.mjs import --file "$BRIEF" --site "$SLUG" || { echo "new-landing: could not import the brief" >&2; exit 1; }
+fi
+
 # 3. Run the skill. The prompt carries every option; the skill reads them from its arguments.
 quoted_niche="${NICHE//\"/\\\"}"
-PROMPT="/new-landing $SLUG --niche \"$quoted_niche\""
+PROMPT="/new-landing $SLUG"
+[ -z "$NICHE" ] || PROMPT+=" --niche \"$quoted_niche\""
+[ "$HAS_BRIEF" -eq 0 ] || PROMPT+=" --brief $SITE_DIR/brief.json"
 [ -z "$REFS" ] || PROMPT+=" --refs $REFS"
 [ -z "$SOURCES" ] || PROMPT+=" --sources $SOURCES"
 [ "$AUTO" -eq 0 ] || PROMPT+=" --auto"
@@ -180,7 +221,11 @@ case "$RESULT" in
   checkpoint)
     echo "new-landing: proposal ready for review: $SITE_DIR/PROPOSAL.md"
     echo "Edit it if needed, then continue with:"
-    echo "  scripts/new-landing.sh $SLUG --niche \"$NICHE\" --resume --auto"
+    if [ "$HAS_BRIEF" -eq 1 ]; then
+      echo "  scripts/new-landing.sh $SLUG --brief $SITE_DIR/brief.json --resume --auto"
+    else
+      echo "  scripts/new-landing.sh $SLUG --niche \"$NICHE\" --resume --auto"
+    fi
     ;;
   dry-run-done)
     echo "new-landing: dry run done: $SITE_DIR/PROPOSAL.md and design-system/$SLUG/MASTER.md"

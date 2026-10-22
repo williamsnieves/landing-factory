@@ -29,6 +29,9 @@ export const DEFAULT_CONFIG = Object.freeze({
   // feature distance must be at least minLayoutDistance (0 identical .. 1 opposite) and at most maxHashMatch
   // of the viewport slices may match another site's within hashHamming bits (of 64).
   diversity: { minLayoutDistance: 0.2, maxHashMatch: 0.5, hashHamming: 10 },
+  // Words that mark text as sample data; `brief-facts` of check-landing fails when an element holding a
+  // customer fact (name, price, email, ...) also says one of them.
+  brief: { sampleWords: ['ejemplo', 'example', 'sample'] },
 });
 
 const LIGHTHOUSE_CATEGORIES = [
@@ -75,6 +78,7 @@ export function validateConfig(config) {
       'impeccable',
       'threeD',
       'diversity',
+      'brief',
     ],
     'config',
   );
@@ -230,6 +234,18 @@ export function validateConfig(config) {
       dv.hashHamming > 32
     )
       err('diversity.hashHamming', 'must be an integer between 0 and 32');
+  }
+
+  const brief = config.brief;
+  if (!isObject(brief)) {
+    err('brief', 'must be an object');
+  } else {
+    known(brief, ['sampleWords'], 'brief');
+    if (
+      !Array.isArray(brief.sampleWords) ||
+      !brief.sampleWords.every((w) => typeof w === 'string' && w.trim() !== '')
+    )
+      err('brief.sampleWords', 'must be an array of non-empty words');
   }
   return errors;
 }

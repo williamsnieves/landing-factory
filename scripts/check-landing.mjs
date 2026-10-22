@@ -15,6 +15,9 @@
 //                      or shares more than diversity.maxHashMatch of its screenshot hashes (thresholds in qa.config.json)
 //   scenes             a built [data-scene] has no poster <img>, a poster not recorded in assets.json (a museum
 //                      or Commons image, or a self-rendered one with source "self"), or the site has more than 2 scenes
+//   brief-facts        (only when sites/<slug>/brief.json exists) a non-assumed fact of the brief (business name, primary
+//                      call-to-action URL, contact email and phone, each product name and price) is missing from the
+//                      built dist/index.html, or an element holding a customer fact also says "ejemplo"/"example"/"sample"
 //   copy-match         (--refs) 8 words in a row of the built page text also appear in a reference page
 //
 // Warnings (never failures): archetype-target, the built layout signature is outside the ranges of the primary
@@ -29,6 +32,13 @@ import { parseArgs } from 'node:util';
 
 import { reexecWithEnvProxy } from '../.claude/skills/analyze-reference/scripts/proxy.mjs';
 import { syncCredits } from './credits.mjs';
+import {
+  formatErrors,
+  getPath,
+  isAssumed,
+  isFilled,
+  validateBrief,
+} from './lib/brief-schema.mjs';
 import {
   archetypeMetaProblems,
   loadCatalog,
@@ -138,6 +148,19 @@ export function checkUncredited(siteDir, manifest) {
           'uncredited-image',
           file,
           `${file} has no entry in assets.json; add it with scripts/find-images.mjs or remove the file`,
+        ),
+      );
+  for (const entry of manifest.images)
+    if (
+      entry.source === 'customer' &&
+      (!String(entry.owner ?? '').trim() ||
+        !String(entry.permission ?? '').trim())
+    )
+      failures.push(
+        failure(
+          'uncredited-image',
+          entry.file,
+          `${entry.file} is a customer asset in assets.json without ${!String(entry.owner ?? '').trim() ? '"owner"' : '"permission"'}; record who owns it and what the customer allowed`,
         ),
       );
   for (const entry of manifest.images)
@@ -844,6 +867,217 @@ export function checkScenes(siteDir, manifest) {
   return failures;
 }
 
+// --------------------------------------------------------------------------------------------------
+// Rule: the facts of the customer brief are on the built page (design: add-brief-intake, Decision 6)
+
+/** Lowercase, accents removed, whitespace collapsed. */
+const squash = (text) =>
+  String(text)
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+
+/** The number of a price ("29", "29 €", "€ 29,00" -> "29"; "19,50" stays), or '' for a non-numeric price ("gratis"). */
+export function priceCore(price) {
+  return String(price)
+    .replace(/[^\d.,]/g, '')
+    .replace(/^[.,]+|[.,]+$/g, '')
+    .replace(/[.,]00$/, '');
+}
+
+/** A RegExp (flags `gi`) matching a price in page text: the number with an optional ",00"/".00", no neighbouring digits. */
+export function priceRegExp(price) {
+  const core = priceCore(price);
+  if (!core) return new RegExp(escapeRegExp(String(price).trim()), 'gi');
+  const number = core.split(/[.,]/).map(escapeRegExp).join('[.,]');
+  return new RegExp(`(?<![\\d.,])${number}(?:[.,]00)?(?!\\d|[.,]\\d)`, 'gi');
+}
+
+const phoneRegExp = (phone) =>
+  new RegExp(
+    [...String(phone)]
+      .filter((c) => /[\d+]/.test(c))
+      .map((c) => (c === '+' ? '\\+' : c))
+      .join('[\\s().-]*'),
+    'g',
+  );
+
+/** Every non-assumed, non-empty fact of a brief the page must carry: [{ path, kind, value }]. */
+export function briefFacts(brief) {
+  const facts = [];
+  const add = (path, kind) => {
+    const value = getPath(brief, path);
+    if (typeof value !== 'string' || !isFilled(value) || isAssumed(brief, path))
+      return;
+    facts.push({ path, kind, value: value.trim() });
+  };
+  add('business.name', 'text');
+  add('goal.primary.url', 'url');
+  add('contact.email', 'email');
+  add('contact.phone', 'phone');
+  (Array.isArray(brief.offer) ? brief.offer : []).forEach((_, index) => {
+    add(`offer[${index}].name`, 'text');
+    add(`offer[${index}].price`, 'price');
+  });
+  return facts;
+}
+
+const decodeAttribute = (value) => value.replace(/&amp;/gi, '&');
+
+/** href values of an HTML string. */
+export function hrefsOf(html) {
+  return [
+    ...String(html).matchAll(/\bhref\s*=\s*(?:"([^"]*)"|'([^']*)')/gi),
+  ].map((m) => decodeAttribute(m[1] ?? m[2]));
+}
+
+const trimSlash = (url) => url.replace(/\/+$/, '');
+const digitsOnly = (text) => String(text).replace(/[\s().-]/g, '');
+
+/** Does the page carry the fact? `text` is the visible text (lines joined), `hrefs` the link targets. */
+function factPresent(fact, text, hrefs) {
+  switch (fact.kind) {
+    case 'text':
+      return squash(text).includes(squash(fact.value));
+    case 'url':
+      return hrefs.some((href) => trimSlash(href) === trimSlash(fact.value));
+    case 'email': {
+      const email = fact.value.toLowerCase();
+      return (
+        text.toLowerCase().includes(email) ||
+        hrefs.some((href) => href.toLowerCase().startsWith(`mailto:${email}`))
+      );
+    }
+    case 'phone': {
+      const wanted = digitsOnly(fact.value);
+      return (
+        digitsOnly(text).includes(wanted) ||
+        hrefs.some(
+          (href) =>
+            /^tel:/i.test(href) && digitsOnly(href.slice(4)).includes(wanted),
+        )
+      );
+    }
+    case 'price':
+      return priceRegExp(fact.value).test(text);
+    default:
+      return false;
+  }
+}
+
+/** A RegExp that finds the fact inside one line of text (to cut it out before looking for sample words), or null. */
+function factInLine(fact) {
+  switch (fact.kind) {
+    case 'text':
+    case 'email':
+      return new RegExp(escapeRegExp(squash(fact.value)), 'g');
+    case 'phone':
+      return phoneRegExp(fact.value);
+    case 'price':
+      return priceRegExp(squash(fact.value));
+    default:
+      return null;
+  }
+}
+
+const sampleRegExp = (words) =>
+  new RegExp(
+    `(?<![\\p{L}\\p{N}])(${words.map((w) => escapeRegExp(squash(w))).join('|')})(?:e?s)?(?![\\p{L}\\p{N}])`,
+    'u',
+  );
+
+export function checkBriefFacts(
+  siteDir,
+  root = ROOT,
+  sampleWords = ['ejemplo', 'example', 'sample'],
+) {
+  const briefPath = join(siteDir, 'brief.json');
+  if (!existsSync(briefPath)) return [];
+  const slug = basename(siteDir);
+  let brief;
+  try {
+    brief = JSON.parse(readFileSync(briefPath, 'utf8'));
+  } catch (error) {
+    return [
+      failure(
+        'brief-facts',
+        'brief.json',
+        `sites/${slug}/brief.json is not valid JSON: ${error.message}`,
+      ),
+    ];
+  }
+  const patternsDir = join(root, 'patterns');
+  const problems = validateBrief(brief, {
+    baseDir: siteDir,
+    patternsDir: existsSync(patternsDir) ? patternsDir : null,
+  });
+  if (problems.length)
+    return [
+      failure(
+        'brief-facts',
+        'brief.json',
+        `sites/${slug}/brief.json is invalid (run: node scripts/brief.mjs validate --site ${slug}):\n${formatErrors(problems)}`,
+      ),
+    ];
+  const indexPath = join(siteDir, 'dist', 'index.html');
+  if (!existsSync(indexPath))
+    return [
+      failure(
+        'brief-facts',
+        'dist/index.html',
+        `sites/${slug}/dist/index.html does not exist; build first (npm run build -w site-${slug}) so the brief's facts can be checked on the page`,
+      ),
+    ];
+  const html = readFileSync(indexPath, 'utf8');
+  const text = htmlToText(html);
+  const hrefs = hrefsOf(html);
+  const lines = text.split('\n').map(squash);
+  const sample = sampleWords.length ? sampleRegExp(sampleWords) : null;
+  const failures = [];
+  for (const fact of briefFacts(brief)) {
+    if (!factPresent(fact, text, hrefs)) {
+      const looked =
+        fact.kind === 'price'
+          ? ` (looked for ${priceCore(fact.value) || fact.value}, with an optional ",00" or ".00", next to no other digit)`
+          : fact.kind === 'url'
+            ? ' (as the href of a link)'
+            : fact.kind === 'phone'
+              ? ' (digits compared without spaces, or as a tel: link)'
+              : fact.kind === 'email'
+                ? ' (as text or a mailto: link)'
+                : '';
+      failures.push(
+        failure(
+          'brief-facts',
+          fact.path,
+          `${fact.path} "${fact.value}" from brief.json is not on the built page${looked}; show it, or list it in "assumed" if the customer did not give it`,
+        ),
+      );
+      continue;
+    }
+    const finder = sample ? factInLine(fact) : null;
+    if (!finder) continue;
+    for (const line of lines) {
+      if (!new RegExp(finder.source, finder.flags).test(line)) continue;
+      const rest = line.replace(new RegExp(finder.source, finder.flags), ' ');
+      const hit = sample.exec(rest);
+      if (hit) {
+        failures.push(
+          failure(
+            'brief-facts',
+            fact.path,
+            `${fact.path} "${fact.value}" is a customer fact but sits in an element that also says "${hit[1]}": "${line.slice(0, 120)}". Customer data is never labeled as sample data; label only the placeholders`,
+          ),
+        );
+        break;
+      }
+    }
+  }
+  return failures;
+}
+
 /** Fetch reference pages into memory only. Nothing is written to disk. */
 export async function fetchReferences(urls, fetchFn = globalThis.fetch) {
   const references = [];
@@ -908,6 +1142,19 @@ export async function runChecks({
         ),
     ],
     ['scenes', () => checkScenes(siteDir, manifest)],
+    ...(existsSync(join(siteDir, 'brief.json'))
+      ? [
+          [
+            'brief-facts',
+            () =>
+              checkBriefFacts(
+                siteDir,
+                root,
+                loadConfig(join(root, 'qa.config.json')).brief.sampleWords,
+              ),
+          ],
+        ]
+      : []),
   ].map(([name, run]) => ({ name, failures: run() }));
 
   if (refs.length) {
@@ -959,6 +1206,8 @@ Final check of sites/<slug>/ after site QA passes. Fails, naming the item, when:
   diversity         another site has the same primary color, display font and hero type
   layout-diversity  the layout signature (scripts/layout-signature.mjs) is too close to another site's (qa.config.json: diversity)
   scenes            a built [data-scene] has no poster, a poster missing from assets.json, or the site has more than ${MAX_SCENES} scenes
+  brief-facts       (only with sites/<slug>/brief.json) a non-assumed brief fact (business name, primary CTA URL, email, phone,
+                    product names and prices) is missing from dist/index.html, or sits in an element that says "ejemplo"/"example"/"sample"
   copy-match        (--refs) ${SHINGLE_WORDS} words in a row of the built page also occur in a reference
 
   --site <slug>     the site (required)

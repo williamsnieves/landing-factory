@@ -5,9 +5,11 @@
 //
 // Reads sites/<slug>/assets.json (written by scripts/find-images.mjs) and writes
 //   - the photo table of sites/<slug>/CREDITS.md between <!-- credits:start --> and <!-- credits:end -->
-//     (the rest of the file, for example the fonts table, is kept), and
+//     (the rest of the file, for example the fonts table, is kept), followed by a "Provided by the
+//     customer" table when the manifest has entries with source "customer" (files the customer gave,
+//     with owner and permission; no public credit line unless credit: true), and
 //   - sites/<slug>/src/data/credits.json: the entries that need a visible credit (credit: true),
-//     one per source photo, for the footer to import.
+//     one per source photo or customer file, for the footer to import.
 // Idempotent. With --check nothing is written; exit 1 when either file is out of date.
 // Exit codes: 0 ok / up to date, 1 out of date (--check), 2 bad usage or unreadable manifest.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -30,12 +32,24 @@ export const REQUIRED_FIELDS = [
   'credit',
 ];
 
+/** Fields of an entry with source "customer" (a file the customer provided; the owner and permission are theirs). */
+export const CUSTOMER_REQUIRED_FIELDS = [
+  'file',
+  'owner',
+  'permission',
+  'credit',
+];
+
+export const isCustomer = (entry) => entry?.source === 'customer';
+
 /** Throws when a manifest entry lacks a field the credits need. */
 export function validateManifest(manifest, label = 'assets.json') {
   if (!manifest || !Array.isArray(manifest.images))
     throw new Error(`${label}: expected {"images": [...]}`);
   manifest.images.forEach((entry, index) => {
-    for (const field of REQUIRED_FIELDS) {
+    for (const field of isCustomer(entry)
+      ? CUSTOMER_REQUIRED_FIELDS
+      : REQUIRED_FIELDS) {
       if (entry?.[field] === undefined || entry[field] === '')
         throw new Error(
           `${label}: image #${index + 1} (${entry?.file ?? 'no file'}) has no "${field}"`,
@@ -77,15 +91,23 @@ export function groupBySource(entries) {
 const creditedAuthor = (group) =>
   group.creditLine ? `${group.author}. ${group.creditLine}` : group.author;
 
-/** The footer list: one {author, license, url} per credited source photo. */
+/** The footer list: one {author, license, url} per credited source photo, then per customer file with credit: true. */
 export function creditList(entries) {
-  return groupBySource(entries)
+  const stock = groupBySource(entries.filter((entry) => !isCustomer(entry)))
     .filter((group) => group.credit)
     .map((group) => ({
       author: creditedAuthor(group),
       license: group.license,
       url: group.sourcePage,
     }));
+  const customer = entries
+    .filter((entry) => isCustomer(entry) && entry.credit)
+    .map((entry) => ({
+      author: entry.owner,
+      license: entry.permission,
+      url: entry.sourcePage ?? '',
+    }));
+  return [...stock, ...customer];
 }
 
 export function renderCreditsJson(entries) {
@@ -112,6 +134,7 @@ export function markdownTable(headers, rows) {
 
 /** The generated block (without the markers): the photo table, or a note when there are no photos. */
 export function renderPhotoTable(entries) {
+  entries = entries.filter((entry) => !isCustomer(entry));
   if (!entries.length) return 'No photographs are used yet.';
   const rows = groupBySource(entries).map((group) => [
     group.files.map((file) => `\`${file}\``).join(', '),
@@ -134,6 +157,29 @@ export function renderPhotoTable(entries) {
   );
 }
 
+/** The "Provided by the customer" part: files the customer gave, or '' when there are none. */
+export function renderCustomerSection(entries) {
+  const files = entries.filter(isCustomer);
+  if (!files.length) return '';
+  const rows = files.map((entry) => [
+    `\`${entry.file}\``,
+    entry.owner,
+    entry.permission,
+    entry.credit ? 'yes' : 'no',
+    String(entry.note ?? '').replace(/\.$/, ''),
+  ]);
+  return `### Provided by the customer\n\n${markdownTable(
+    [
+      'Asset(s) in `src/assets/images/`',
+      'Owner',
+      'Permission',
+      'Credit shown',
+      'Notes',
+    ],
+    rows,
+  )}`;
+}
+
 const APPENDED_INTRO = `## Photographs
 
 Photographs come from Wikimedia Commons (renditions served by \`upload.wikimedia.org\`, or crops of them) or from The Met's Open Access collection (public domain; the museum's credit line is kept). Authors and licenses were read from the Commons file metadata or the museum's record. The table below is generated from \`assets.json\` by \`node scripts/credits.mjs --site <slug>\`; edit the manifest, not the table. Photos under a license that requires attribution are credited in the page footer.`;
@@ -143,7 +189,16 @@ Photographs come from Wikimedia Commons (renditions served by \`upload.wikimedia
  * section with the markers is appended. Everything else is kept byte for byte.
  */
 export function renderCreditsFile(existing, entries) {
-  const block = `${START_MARKER}\n\n${renderPhotoTable(entries)}\n\n${END_MARKER}`;
+  const stock = entries.filter((entry) => !isCustomer(entry));
+  const customer = renderCustomerSection(entries);
+  // Customer files get their own part; a manifest of only customer files has no stock photo table.
+  const body = [
+    stock.length || !customer ? renderPhotoTable(stock) : '',
+    customer,
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+  const block = `${START_MARKER}\n\n${body}\n\n${END_MARKER}`;
   const start = existing.indexOf(START_MARKER);
   const end = existing.indexOf(END_MARKER);
   if (start !== -1 && end !== -1 && end > start)

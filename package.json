@@ -27,6 +27,7 @@
     "qa": "node scripts/qa.mjs",
     "new-site": "node scripts/new-site.mjs",
     "new-landing": "bash scripts/new-landing.sh",
+    "brief": "node scripts/brief.mjs",
     "preflight": "node scripts/preflight.mjs",
     "find-images": "node scripts/find-images.mjs",
     "credits": "node scripts/credits.mjs",

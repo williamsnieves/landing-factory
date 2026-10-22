@@ -10,6 +10,7 @@ import { parseArgs } from 'node:util';
 
 import { reexecWithEnvProxy } from '../.claude/skills/analyze-reference/scripts/proxy.mjs';
 import { validateSlug } from './new-site.mjs';
+import { isPlanningDoc } from './lib/sites.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -168,7 +169,7 @@ export async function checkChromium(deps) {
   };
 }
 
-/** The slug is valid and sites/<slug> is absent, or holds only top-level *.md planning docs. */
+/** The slug is valid and sites/<slug> is absent, or holds only top-level *.md planning docs and brief.json. */
 export function checkSlug(slug, sitesDir) {
   const invalid = validateSlug(slug);
   if (invalid)
@@ -183,10 +184,7 @@ export function checkSlug(slug, sitesDir) {
     return { name: 'Site slug', ok: true, detail: `sites/${slug} is free` };
   const offending = statSync(target).isDirectory()
     ? readdirSync(target, { withFileTypes: true })
-        .filter(
-          (entry) =>
-            !entry.isFile() || !entry.name.toLowerCase().endsWith('.md'),
-        )
+        .filter((entry) => !entry.isFile() || !isPlanningDoc(entry.name))
         .map((entry) => entry.name)
     : [target];
   if (offending.length)

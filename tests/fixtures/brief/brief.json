@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "language": "es",
+  "business": {
+    "name": "Taller Plantilla",
+    "description": "Plantillas de Notion y un curso corto para que freelances y equipos pequeños organicen su trabajo sin perder horas configurando herramientas.",
+    "city": "Valencia",
+    "country": "España",
+    "kind": "product"
+  },
+  "offer": [
+    {
+      "name": "Pack Notion Freelance",
+      "description": "Plantillas de clientes, proyectos y facturas listas para duplicar.",
+      "price": "29",
+      "currency": "EUR",
+      "url": "https://example.com/tienda/pack-notion-freelance"
+    },
+    {
+      "name": "Curso Orden en 5 días",
+      "description": "Un curso corto en vídeo para montar tu sistema de trabajo en una semana.",
+      "price": "59",
+      "currency": "EUR",
+      "url": "https://example.com/tienda/curso-orden"
+    }
+  ],
+  "audience": {
+    "who": "Freelances y equipos de menos de diez personas.",
+    "needs": "Un sistema claro de trabajo que se pueda empezar a usar el mismo día.",
+    "objections": "Miedo a pagar por algo que luego no se adapta a su forma de trabajar."
+  },
+  "goal": {
+    "primary": {
+      "label": "Comprar el pack",
+      "url": "https://example.com/tienda/pack-notion-freelance"
+    },
+    "secondary": { "label": "Escribirnos", "url": "mailto:hola@example.com" }
+  },
+  "tone": ["cercano", "claro", "sin jerga"],
+  "contact": {
+    "email": "hola@example.com",
+    "phone": "",
+    "address": "",
+    "hours": "Lunes a viernes, de 9:00 a 17:00",
+    "social": [
+      { "network": "Instagram", "url": "https://example.com/tallerplantilla" }
+    ]
+  },
+  "assets": [
+    {
+      "kind": "logo",
+      "path": "assets/logo.svg",
+      "url": "",
+      "owner": "Taller Plantilla",
+      "permission": "Uso libre en la web del negocio",
+      "notes": "Logotipo propio"
+    }
+  ],
+  "brand": {
+    "colors": ["#1f3a5f", "#f4efe6"],
+    "fonts": [],
+    "keep": "El logotipo y el azul oscuro.",
+    "avoid": "Fondos negros y estética de startup."
+  },
+  "references": {
+    "liked": [
+      {
+        "url": "https://example.com/inspiracion/panaderia-calida",
+        "sheet": "sonomabakery-com",
+        "why": "La calidez y el orden de la página."
+      }
+    ],
+    "disliked": [
+      {
+        "url": "https://example.org/tienda-recargada",
+        "why": "Demasiados avisos y botones compitiendo."
+      }
+    ]
+  },
+  "legal": {
+    "regulated": false,
+    "notices": [],
+    "constraints": "Sin promesas de resultados económicos."
+  },
+  "deploy": {
+    "target": "cloudflare-pages",
+    "domain": "tallerplantilla.example.com"
+  },
+  "assumed": [
+    {
+      "field": "tone",
+      "reason": "El cliente pidió que el agente eligiera el tono."
+    },
+    {
+      "field": "contact.hours",
+      "reason": "Horario propuesto por el agente; el cliente debe confirmarlo."
+    }
+  ],
+  "notes": "Cliente ficticio para las pruebas del brief."
+}
