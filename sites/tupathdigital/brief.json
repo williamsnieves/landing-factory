@@ -73,9 +73,9 @@
       "url": "https://www.etsy.com/es/listing/4297967816/guia-financiera-de-30-dias-hoja-de"
     },
     {
-      "name": "Guía de IA Generativa — 450 Prompts",
+      "name": "Guía de IA Generativa + 450 Prompts: Midjourney, DALL-E 3 (Tutorial en PDF, edición en español)",
       "description": "Etsy. Coupon FALL2026: 50% off.",
-      "price": "",
+      "price": "14,50",
       "currency": "USD",
       "url": "https://www.etsy.com/es/listing/4369377710/guia-de-ia-generativa-450-prompts"
     },
@@ -342,6 +342,14 @@
       "owner": "tupathdigital",
       "permission": "Owner's own product image from their store listing",
       "notes": "Product image: 50 Fantasy & Sci-Fi 3D Models, Game Asset Collection Vol. 2 (GLB, FBX, OBJ)"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/products/etsy-4369377710.jpg",
+      "url": "https://www.etsy.com/es/listing/4369377710/guia-de-ia-generativa-450-prompts",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "notes": "Product image: Guía de IA Generativa + 450 Prompts: Midjourney, DALL-E 3 (Tutorial en PDF, edición en español)"
     }
   ],
   "brand": {
@@ -363,6 +371,11 @@
     "target": "",
     "domain": ""
   },
-  "assumed": [],
-  "notes": "Goal: send traffic to the stores (Etsy and Gumroad). Page wanted in English and Spanish (pending: bilingual pages are out of the factory scope today). Coupons are 50% for every product: FALL2026 on Etsy, 92xsh57 on Gumroad (in each offer description until the schema has a coupon field). Prices: Etsy from the owner's CSV export, Gumroad read from the public product pages (USD); the Etsy 450-prompts guide has no verified price or image. Same product in both stores: Generative AI 450 prompts (Etsy 4369377710 / Gumroad heoolh), Meshy 54 3D models (Etsy 4560860968 / Gumroad frbcf), 50 Fantasy Sci-Fi 3D models Vol. 2 (Etsy 4565088403 / Gumroad xfoqn)."
+  "assumed": [
+    {
+      "field": "offer[9].currency",
+      "reason": "The owner gave the price as 14,50 without a currency; USD like the rest of the Etsy CSV. Confirm."
+    }
+  ],
+  "notes": "Goal: send traffic to the stores (Etsy and Gumroad). Page wanted in English and Spanish (pending: bilingual pages are out of the factory scope today). Coupons are 50% for every product: FALL2026 on Etsy, 92xsh57 on Gumroad (in each offer description until the schema has a coupon field). Prices: Etsy from the owner's CSV export, Gumroad read from the public product pages (USD); the Etsy 450-prompts guide was completed by the owner. Same product in both stores: Generative AI 450 prompts (Etsy 4369377710 / Gumroad heoolh), Meshy 54 3D models (Etsy 4560860968 / Gumroad frbcf), 50 Fantasy Sci-Fi 3D models Vol. 2 (Etsy 4565088403 / Gumroad xfoqn)."
 }
