@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "language": "",
+  "business": {
+    "name": "tupathdigital",
+    "description": "Productos digitales orientados a la tecnología, rápidos y directos, con ejemplos de aplicación real y sin perder tiempo; hoy muy centrados en la IA y sus usos: desarrollar, integrarla en productos digitales, crear imágenes, vídeos e influencers, crear juegos, automatizaciones y sistemas multiagente.",
+    "city": "",
+    "country": "",
+    "kind": "product"
+  },
+  "offer": [],
+  "audience": {
+    "who": "",
+    "needs": "",
+    "objections": ""
+  },
+  "goal": {
+    "primary": {
+      "label": "",
+      "url": ""
+    },
+    "secondary": {
+      "label": "",
+      "url": ""
+    }
+  },
+  "tone": [],
+  "contact": {
+    "email": "",
+    "phone": "",
+    "address": "",
+    "hours": "",
+    "social": [
+      {
+        "network": "X",
+        "url": "https://x.com/tupathdigital"
+      },
+      {
+        "network": "Instagram",
+        "url": "https://www.instagram.com/tupathdigital"
+      }
+    ]
+  },
+  "assets": [
+    {
+      "kind": "logo",
+      "path": "assets/logo.webp",
+      "url": "",
+      "owner": "tupathdigital",
+      "permission": "Own brand logo, provided by the owner for the landing",
+      "notes": "Blue circular t/e mark with the wordmark below, on an off-white background"
+    }
+  ],
+  "brand": {
+    "colors": [],
+    "fonts": [],
+    "keep": "",
+    "avoid": ""
+  },
+  "references": {
+    "liked": [],
+    "disliked": []
+  },
+  "legal": {
+    "regulated": false,
+    "notices": [],
+    "constraints": ""
+  },
+  "deploy": {
+    "target": "",
+    "domain": ""
+  },
+  "assumed": [],
+  "notes": "Goal: send traffic to the stores (Etsy and Gumroad). Page wanted in English and Spanish (pending decision: i18n is out of the factory scope today). 20 product links with coupons (50%): Etsy listings use FALL2026, Gumroad products use 92xsh57; product names, prices and images pending (store pages not reachable from this environment yet)."
+}
