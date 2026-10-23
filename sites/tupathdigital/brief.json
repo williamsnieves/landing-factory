@@ -151,8 +151,8 @@
     }
   ],
   "audience": {
-    "who": "",
-    "needs": "",
+    "who": "Una mezcla de todos los públicos del catálogo, pero sobre todo gente que quiere hacer cosas con IA y tener ejemplos listos para usar.",
+    "needs": "Ejemplos de IA listos para usar, rápidos y directos, con aplicación real y sin perder tiempo.",
     "objections": ""
   },
   "goal": {
@@ -165,7 +165,12 @@
       "url": "https://tupathdigital.gumroad.com/"
     }
   },
-  "tone": [],
+  "tone": [
+    "técnico",
+    "energético",
+    "amable",
+    "cercano"
+  ],
   "contact": {
     "email": "",
     "phone": "",
@@ -353,9 +358,11 @@
     }
   ],
   "brand": {
-    "colors": [],
+    "colors": [
+      "#1881d4"
+    ],
     "fonts": [],
-    "keep": "",
+    "keep": "Colors close to the logo's blue (#1881d4, measured from the logo) or that match it; the logo as given. The page should feel like the visitor's place to buy AI content.",
     "avoid": ""
   },
   "references": {
@@ -368,7 +375,7 @@
     "constraints": ""
   },
   "deploy": {
-    "target": "",
+    "target": "undecided",
     "domain": ""
   },
   "assumed": [
@@ -377,5 +384,5 @@
       "reason": "The owner gave the price as 14,50 without a currency; USD like the rest of the Etsy CSV. Confirm."
     }
   ],
-  "notes": "Goal: send traffic to the stores (Etsy and Gumroad). Page in English only for now (owner, 2026-10-23); a Spanish version may come later. Coupons are 50% for every product: FALL2026 on Etsy, 92xsh57 on Gumroad (in each offer description until the schema has a coupon field). Prices: Etsy from the owner's CSV export, Gumroad read from the public product pages (USD); the Etsy 450-prompts guide was completed by the owner. Same product in both stores: Generative AI 450 prompts (Etsy 4369377710 / Gumroad heoolh), Meshy 54 3D models (Etsy 4560860968 / Gumroad frbcf), 50 Fantasy Sci-Fi 3D models Vol. 2 (Etsy 4565088403 / Gumroad xfoqn). Owner decisions (2026-10-23): show each product's price with a visible discount badge (50% off with its coupon code); a product sold in both stores appears once with two buttons, Etsy and Gumroad; product names stay as the listing titles (some are Spanish-language products). No contact email or domain yet."
+  "notes": "Goal: send traffic to the stores (Etsy and Gumroad). Page in English only for now (owner, 2026-10-23); a Spanish version may come later. Coupons are 50% for every product: FALL2026 on Etsy, 92xsh57 on Gumroad (in each offer description until the schema has a coupon field). Prices: Etsy from the owner's CSV export, Gumroad read from the public product pages (USD); the Etsy 450-prompts guide was completed by the owner. Same product in both stores: Generative AI 450 prompts (Etsy 4369377710 / Gumroad heoolh), Meshy 54 3D models (Etsy 4560860968 / Gumroad frbcf), 50 Fantasy Sci-Fi 3D models Vol. 2 (Etsy 4565088403 / Gumroad xfoqn). Owner decisions (2026-10-23): show each product's price with a visible discount badge (50% off with its coupon code); a product sold in both stores appears once with two buttons, Etsy and Gumroad; product names stay as the listing titles (some are Spanish-language products). No contact email or domain yet. Ambition (owner): it should look like a 40,000-dollar website: creative, made to drive traffic and, ideally, conversions. No references yet. Products in both stores are one card with two store buttons; the card shows each store's own listing title and price (for example the second store's title in small type next to its button), so every listing stays findable."
 }
