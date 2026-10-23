@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-22 (add-brief-intake started).
+Read this first in a new or compacted session. Last updated: 2026-10-22 (owner landing: brief interview).
 
 ## Working agreements
 
@@ -22,11 +22,12 @@ Read this first in a new or compacted session. Last updated: 2026-10-22 (add-bri
 | add-3d-scenes (opt-in Three.js scenes, 3D QA budgets, Met images), validated with `sites/samurai` | Merged (PR #13) and archived; production https://samurai-1v4.pages.dev |
 | Product plan (`docs/product-plan.md`): archetypes, intake, report, deploy adapters, agent interface, 3D models | Agreed 2026-10-21 |
 | add-design-archetypes (archetype blends, layout diversity), validated with `sites/{estudio-arquitectura,festival-electronica,app-finanzas}` | Merged (PR #14) and archived 2026-10-22; owner liked the previews, `minLayoutDistance` stays 0.2 |
-| add-brief-intake (`brief.json`, `/brief-intake` interview, generation reads the brief, `brief-facts` check) | Implemented and validated on branch `change/add-brief-intake`; PR open |
+| add-brief-intake (`brief.json`, `/brief-intake` interview, generation reads the brief, `brief-facts` check) | Merged (PR #15) and archived 2026-10-22 |
+| Owner's digital-products landing `sites/tupathdigital` (first real customer test) | Brief by interview, proposal approved, built with `--auto` (QA first run, check-landing incl. brief-facts passed); PR open on `pilot/tupathdigital` |
 
-## Resume here (2026-10-22)
+## Resume here (2026-10-23)
 
-Branch `change/add-brief-intake`: all tasks done (dry run from a fictional digital-products brief passed, see tasks.md 4.1) and the PR is open. After the owner merges and says so: archive `add-brief-intake` as the first commit of the next branch, then the first real customer test: the owner's digital-products landing, starting with `/brief-intake <slug>` (interview in the owner's language; the page language is asked separately), then `npm run new-landing -- <slug> --brief sites/<slug>/brief.json`.
+Branch `pilot/tupathdigital`: the owner's landing is built and the PR is open; the owner reviews the preview. Coupons FALL2026 (Etsy) and 92xsh57 (Gumroad) end on 31 October 2026: remind the owner to update or remove the badges and tickets after that date. After merge: next factory change, which should also fix the planning-folder bug below, then `add-landing-report`.
 
 ## Owner decisions to keep (2026-10-21)
 
@@ -56,6 +57,9 @@ Follow `docs/product-plan.md`:
 Small fixes pending: panaderia process heading covered at 375 px; `new-landing.sh` final check without `--refs`.
 
 ## Known gaps and follow-ups
+
+- `new-landing.sh`/`new-site --allow-existing-docs`/preflight refuse a `sites/<slug>/` that holds `brief.json` plus the `assets/` folder the `/brief-intake` skill tells you to fill (only `*.md` and `brief.json` are accepted). Workaround used for tupathdigital: pass `--brief` from a copy outside `sites/`. Fix: accept the asset paths the brief names.
+- Etsy listing pages answer with a bot challenge (never bypassed); product data came from the owner's Etsy CSV export. Gumroad public product pages are readable (title, image, price in JSON-LD).
 
 - `section-shots.mjs` does not clear its output folder, so stale screenshots from earlier passes mix with new ones (seen on estudio-arquitectura). Clear `qa/<slug>/sections/` at the start of each run.
 

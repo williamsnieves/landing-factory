@@ -1,0 +1,52 @@
+/*
+ * Design tokens: the single source of truth for a site's theme.
+ * Tailwind v4 turns every --color-*, --font-*, --text-*, --spacing and
+ * --radius-* variable below into utilities (bg-primary, font-display, ...).
+ * To retheme a site, edit only this file. `@theme static` emits every variable
+ * (not only the used ones) so 3D scenes can read colors from the page.
+ */
+@theme static {
+  /* Colors: dark theme, `paper` is the page ground and `ink` the light text */
+  --color-primary: #1881d4;
+  --color-primary-contrast: #04101c;
+  --color-accent: #5cb8ff;
+  --color-ink: #eaf2fb;
+  --color-ink-soft: #9db3cc;
+  --color-paper: #060b14;
+  --color-surface: #0a121e;
+  --color-line: #20334b;
+
+  /* Fonts (self-hosted variable fonts, imported in global.css) */
+  --font-display:
+    'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans:
+    'DM Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Roboto, sans-serif;
+
+  /* Type scale */
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.625rem;
+  --text-2xl: 2.25rem;
+  --text-3xl: clamp(2.5rem, 5vw, 3.75rem);
+  --text-4xl: clamp(3rem, 8vw, 6.25rem);
+
+  /* Spacing base unit: p-4 = 1rem, p-24 = 6rem, ... */
+  --spacing: 0.25rem;
+
+  /* Radii */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+  --radius-tile: 1.25rem;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 600ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}

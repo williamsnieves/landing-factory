@@ -1,0 +1,6 @@
+{
+  "cloudflare": {
+    "pagesProject": "tupathdigital",
+    "productionBranch": "main"
+  }
+}

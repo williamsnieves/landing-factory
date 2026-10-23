@@ -1,0 +1,103 @@
+{
+  "site": "tupathdigital",
+  "version": 1,
+  "page": "/",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "features": {
+    "sectionCount": 9,
+    "cols1Share": 0.11,
+    "cols2Share": 0.67,
+    "cols3Share": 0.22,
+    "splitRatio": 0.39,
+    "fullBleedShare": 0,
+    "imageRadius": 14,
+    "buttonRadius": 22,
+    "buttonShape": "pill",
+    "headingScale": 5.9,
+    "headingAlign": "left",
+    "headingCase": 0,
+    "eyebrowShare": 0.5,
+    "wordsPerScreen": 91,
+    "footerType": "minimal",
+    "mediaPerScreen": 3.3,
+    "rotatedShare": 0,
+    "overlapShare": 0.48,
+    "stickyCount": 0
+  },
+  "sections": [
+    {
+      "id": "top",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": null,
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "ai",
+      "cols": 3,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": "3d",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": null,
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "wallpapers",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": "guides",
+      "cols": 3,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": "coupons",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": null,
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    }
+  ],
+  "mobile": {
+    "screens": 22.59,
+    "wordsPerScreen": 40,
+    "sectionCount": 9
+  },
+  "hashes": [
+    "2a1ac28d999a9a44",
+    "3abac19a9eca828a",
+    "92cecec6e6b8aac0",
+    "8e82ccdcb2b2a2a2",
+    "3aa6a651ac8c88e8",
+    "a2a29adabebabae4",
+    "a4e4c4b2a29a9a9a",
+    "9ec6ca8a8898aaa6",
+    "a61e8586aa8855e0",
+    "a6a4a490f02ea2c2"
+  ]
+}

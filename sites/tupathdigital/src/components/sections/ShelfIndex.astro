@@ -1,0 +1,71 @@
+---
+import { shelves } from '../../data/catalog';
+
+const count = (id: string) =>
+  shelves.find((s) => s.id === id)!.items.filter((i) => !('coupon' in i))
+    .length;
+---
+
+<div class="index" id="shelves">
+  <div class="wrap">
+    <nav aria-label="Shelves" class="chips">
+      <span class="lead">Jump to a shelf</span>
+      {shelves.map((s) => (
+        <a href={`#${s.id}`} class="pick">
+          {s.name}
+          <span class="n">{count(s.id)}</span>
+        </a>
+      ))}
+    </nav>
+  </div>
+</div>
+
+<style>
+  .index {
+    padding-bottom: 1.5rem;
+    scroll-margin-top: 5rem;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .lead {
+    flex-basis: 100%;
+    color: var(--color-ink-soft);
+    font-size: var(--text-sm);
+  }
+  .pick {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 2.75rem;
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      border-color var(--duration-base) var(--ease-out),
+      color var(--duration-base) var(--ease-out);
+  }
+  .pick:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+  .n {
+    color: var(--color-ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  @media (min-width: 720px) {
+    .lead {
+      flex-basis: auto;
+      margin-right: 0.5rem;
+    }
+  }
+</style>
