@@ -8,11 +8,11 @@
   },
   "features": {
     "sectionCount": 9,
-    "cols1Share": 0.22,
-    "cols2Share": 0.56,
+    "cols1Share": 0.11,
+    "cols2Share": 0.67,
     "cols3Share": 0.22,
-    "splitRatio": 0.57,
-    "fullBleedShare": 0.11,
+    "splitRatio": 0.39,
+    "fullBleedShare": 0,
     "imageRadius": 14,
     "buttonRadius": 22,
     "buttonShape": "pill",
@@ -22,9 +22,9 @@
     "eyebrowShare": 0.5,
     "wordsPerScreen": 91,
     "footerType": "minimal",
-    "mediaPerScreen": 2.3,
+    "mediaPerScreen": 3.3,
     "rotatedShare": 0,
-    "overlapShare": 0.23,
+    "overlapShare": 0.48,
     "stickyCount": 0
   },
   "sections": [
@@ -78,26 +78,26 @@
     },
     {
       "id": null,
-      "cols": 1,
-      "fullBleed": true,
+      "cols": 2,
+      "fullBleed": false,
       "eyebrow": false
     }
   ],
   "mobile": {
-    "screens": 20.72,
-    "wordsPerScreen": 43,
+    "screens": 22.59,
+    "wordsPerScreen": 40,
     "sectionCount": 9
   },
   "hashes": [
-    "2a17c38d999a9a47",
-    "3abac19a9edab282",
-    "8acecec6e6baa294",
-    "aa82ccdc8cb2b2a2",
-    "3aa6a651acacdc8a",
-    "9282bad8bebebaa4",
-    "e4e4e482b29a9a9a",
-    "1a9e8a8a889898a6",
-    "a61e8586aa8804f0",
-    "a6a4a290d22aa2c2"
+    "2a1ac28d999a9a44",
+    "3abac19a9eca828a",
+    "92cecec6e6b8aac0",
+    "8e82ccdcb2b2a2a2",
+    "3aa6a651ac8c88e8",
+    "a2a29adabebabae4",
+    "a4e4c4b2a29a9a9a",
+    "9ec6ca8a8898aaa6",
+    "a61e8586aa8855e0",
+    "a6a4a490f02ea2c2"
   ]
 }

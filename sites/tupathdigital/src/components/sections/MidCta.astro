@@ -25,16 +25,20 @@ import { COUPON_END, PRIMARY } from '../../data/catalog';
   .mid {
     margin-block: clamp(2rem, 4vw, 3.5rem);
     padding-block: clamp(2.5rem, 6vw, 5rem);
-    background-color: color-mix(
-      in oklab,
-      var(--color-primary) 16%,
-      var(--color-paper)
-    );
-    background-image: radial-gradient(
-      ellipse 60% 120% at 100% 50%,
-      color-mix(in oklab, var(--color-primary) 40%, transparent),
-      transparent 70%
-    );
+    /* Both layers fade out inside the box: no visible band edge. */
+    background-image:
+      radial-gradient(
+        ellipse 60% 50% at 100% 50%,
+        color-mix(in oklab, var(--color-primary) 34%, transparent),
+        transparent 100%
+      ),
+      linear-gradient(
+        to bottom,
+        transparent,
+        color-mix(in oklab, var(--color-primary) 14%, transparent) 30%,
+        color-mix(in oklab, var(--color-primary) 14%, transparent) 70%,
+        transparent
+      );
   }
   .band {
     display: grid;

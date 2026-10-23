@@ -1,5 +1,6 @@
 ---
-import type { Shelf } from '../../data/catalog';
+import { Image } from 'astro:assets';
+import type { Product, Shelf } from '../../data/catalog';
 import ProductTile from './ProductTile.astro';
 import { COUPONS, COUPON_END } from '../../data/catalog';
 
@@ -7,7 +8,9 @@ interface Props {
   shelf: Shelf;
 }
 const { shelf } = Astro.props;
-const products = shelf.items.filter((i) => !('coupon' in i));
+const products = shelf.items.filter((i): i is Product => !('coupon' in i));
+// Decorative preview: up to three covers of this shelf, fanned.
+const previews = products.slice(0, 3);
 const titleId = `${shelf.id}-title`;
 ---
 
@@ -15,16 +18,30 @@ const titleId = `${shelf.id}-title`;
   <div class="wrap">
     <div class="grid">
       <header
-        class="tile head"
+        class:list={['tile head', { wide: shelf.head.cols === 4 }]}
         style={`--c:${shelf.head.cols};--r:${shelf.head.rows}`}
         data-reveal
       >
         <p class="count">
           <span>{products.length}</span> products
         </p>
-        <div>
+        <div class="text">
           <h2 id={titleId}>{shelf.name}</h2>
           <p class="blurb">{shelf.blurb}</p>
+        </div>
+        <div class={`fan n${previews.length}`} aria-hidden="true">
+          {previews.map((p) => (
+            <Image
+              src={p.cover}
+              alt=""
+              width={240}
+              densities={[1, 2]}
+              format="webp"
+              quality={75}
+              loading="lazy"
+              decoding="async"
+            />
+          ))}
         </div>
       </header>
       {shelf.items.map((item, i) =>
@@ -71,9 +88,8 @@ const titleId = `${shelf.id}-title`;
     overflow: hidden;
   }
   .head {
-    justify-content: space-between;
-    gap: 2.5rem;
-    padding: 1.5rem;
+    gap: 1.5rem;
+    padding: 1.75rem 1.5rem 1.5rem;
     background: color-mix(
       in oklab,
       var(--color-primary) 18%,
@@ -118,10 +134,53 @@ const titleId = `${shelf.id}-title`;
     font-size: var(--text-base);
     line-height: 1.5;
   }
+  .text {
+    min-width: 0;
+  }
+  /* Fanned covers fill the middle of the tile (decorative). */
+  .fan {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 11rem;
+  }
+  .fan :global(img) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    height: 88%;
+    width: auto;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    object-position: 50% 0;
+    border-radius: var(--radius-md);
+    border: 1px solid color-mix(in oklab, var(--color-ink) 18%, transparent);
+    box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 0.35);
+    pointer-events: none;
+    translate: -50% -50%;
+  }
+  .fan :global(img:nth-child(1)) {
+    rotate: -9deg;
+    translate: calc(-50% - 5.5rem) -48%;
+  }
+  .fan :global(img:nth-child(2)) {
+    rotate: 0deg;
+    z-index: 1;
+  }
+  .fan :global(img:nth-child(3)) {
+    rotate: 9deg;
+    translate: calc(-50% + 5.5rem) -48%;
+  }
+  .fan.n2 :global(img:nth-child(1)) {
+    translate: calc(-50% - 3rem) -48%;
+  }
+  .fan.n2 :global(img:nth-child(2)) {
+    rotate: 8deg;
+    translate: calc(-50% + 3rem) -50%;
+  }
   .promo {
     justify-content: center;
     gap: 0.9rem;
-    padding: 1.5rem;
+    padding: 1.75rem 1.5rem;
     background: var(--color-primary);
     border-color: var(--color-primary);
     color: var(--color-primary-contrast);
@@ -148,6 +207,17 @@ const titleId = `${shelf.id}-title`;
     .head {
       grid-column: span 2;
     }
+    .head.wide {
+      flex-direction: row;
+      align-items: center;
+    }
+    .head.wide .text {
+      flex: 1 1 50%;
+    }
+    .head.wide .fan {
+      flex: 1 1 50%;
+      align-self: stretch;
+    }
   }
   @media (min-width: 1024px) {
     .grid {
@@ -161,7 +231,16 @@ const titleId = `${shelf.id}-title`;
       grid-row: span var(--r);
     }
     .head {
-      padding: 2rem;
+      padding: 2.25rem 2rem 2rem;
+    }
+    .head.wide {
+      padding-block: 2rem;
+    }
+    .fan {
+      min-height: 14rem;
+    }
+    .head.wide .fan {
+      min-height: 0;
     }
   }
 </style>

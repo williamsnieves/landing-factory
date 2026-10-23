@@ -1,6 +1,4 @@
 ---
-import { getImage } from 'astro:assets';
-import backdrop from '../../assets/images/etsy-4428727624.jpg';
 import {
   COUPON_END,
   PRIMARY,
@@ -8,16 +6,9 @@ import {
   SOCIAL,
   productCount,
 } from '../../data/catalog';
-
-// The AI Tech wallpaper pack cover as a dimmed full-width backdrop.
-const bg = await getImage({ src: backdrop, format: 'webp', width: 1600 });
 ---
 
-<section
-  class="closing section-pad"
-  style={`background-image: linear-gradient(color-mix(in oklab, var(--color-paper) 86%, transparent), color-mix(in oklab, var(--color-paper) 86%, transparent)), url(${bg.src}); background-size: cover; background-position: center`}
-  aria-labelledby="closing-title"
->
+<section class="closing section-pad" aria-labelledby="closing-title">
   <div class="wrap grid">
     <div class="main" data-reveal>
       <h2 id="closing-title">Pick a shelf. Start making.</h2>
@@ -60,8 +51,17 @@ const bg = await getImage({ src: backdrop, format: 'webp', width: 1600 });
 </section>
 
 <style>
+  /* Soft brand-blue glow, faded to nothing inside the section box. */
+  .closing {
+    background-image: radial-gradient(
+      ellipse 70% 55% at 50% 50%,
+      color-mix(in oklab, var(--color-primary) 18%, transparent),
+      transparent 100%
+    );
+  }
   .grid {
     display: grid;
+    align-items: start;
     gap: 1rem;
   }
   .main,
@@ -105,8 +105,7 @@ const bg = await getImage({ src: backdrop, format: 'webp', width: 1600 });
   .social {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    gap: 1.5rem;
+    gap: 1rem;
     background: var(--color-surface);
   }
   h3 {
@@ -121,7 +120,10 @@ const bg = await getImage({ src: backdrop, format: 'webp', width: 1600 });
     padding: 0;
     list-style: none;
     display: grid;
-    gap: 0.5rem;
+    gap: 0;
+  }
+  li + li {
+    border-top: 1px solid var(--color-line);
   }
   li a {
     display: flex;

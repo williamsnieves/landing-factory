@@ -50,11 +50,19 @@ Deviations from the bento-product-showcase sheet:
 - A full-width band lit by the brand blue (same hue) carries the mid-page call to action; the closing section uses a dimmed wallpaper cover (AI Tech pack) as a full-width backdrop to differ from sibling sites (layout-diversity).
 - Buttons are pills (MASTER.md); the data-and-proof trait `stat-strip` is the four-tile figures row (products, stores, 50% off with a code, shelves). "Instant download" is not a fact the owner stated in the brief, so the fourth figure is the number of shelves.
 
+Polish pass A (owner review, 2026-10-23):
+
+- Shelf title tiles: count, title and blurb stay, and the empty middle now holds a fanned preview of 2 to 3 covers of that shelf (decorative, `alt=""`, `aria-hidden`, lazy). The 3D shelf tile is a short horizontal band (text left, covers right), so no tile is a tall empty block and no text touches the bottom border.
+- Product tiles: more inner padding, price and button row wraps, the coupon badge is two lines ("50% off with code X" / "Until date") with the code kept on one line. Facts unchanged.
+- Closing: the wallpaper cover backdrop (its printed text showed through) is replaced by a soft brand-blue radial glow that fades inside the section; the "Follow along" card is top-aligned, compact, with divided rows. The AI Tech cover is now used only in its shelf card.
+- Arrow links: one continuous underline under text and arrow (the arrow is inline text), applied to every `.link-arrow`.
+- Background tints: `glow-left`, `glow-right`, the mid-page band and the closing glow are ellipses or gradients that reach transparent inside their own box, so no hard edge shows at 375 or 1440 px.
+
 Prices are shown as "$x.xx" USD; the Etsy guide listed as "14,50" is shown as "$14.50" (confirmed by the owner as USD). No final (discounted) price is shown.
 
 ## Images
 
-21 customer files (the logo and 20 product covers), 0 stock photos, 1 self-rendered poster (`network-poster.jpg`, source `self`, rendered from `src/scenes/network.ts`). All customer files are recorded in `assets.json` with `source: "customer"`, owner `tupathdigital` and the permission written in the brief; none asks for a public credit. The originals stay in `assets/`; the optimized copies are in `src/assets/images/`. Each cover is used once in its shelf card; the three covers of products sold in both stores that are not used in a card (the Etsy covers of the 450-prompts guide, the Meshy bundle and the 50 Fantasy models Vol. 2) appear once each as drifting cards in the hero; the AI Tech cover is also the dimmed closing backdrop; the logo appears in header and footer.
+21 customer files (the logo and 20 product covers), 0 stock photos, 1 self-rendered poster (`network-poster.jpg`, source `self`, rendered from `src/scenes/network.ts`). All customer files are recorded in `assets.json` with `source: "customer"`, owner `tupathdigital` and the permission written in the brief; none asks for a public credit. The originals stay in `assets/`; the optimized copies are in `src/assets/images/`. Each cover is used once in its shelf card; the three covers of products sold in both stores that are not used in a card (the Etsy covers of the 450-prompts guide, the Meshy bundle and the 50 Fantasy models Vol. 2) appear once each as drifting cards in the hero; the logo appears in header and footer.
 
 To confirm before launch: coupon codes and the "until Oct 31, 2026" text must be updated or removed after that date (owner decision).
 

@@ -37,19 +37,20 @@
     }
   }
 
-  /* A full-width band lit from one edge by the brand blue (same hue only). */
+  /* A full-width band lit from one edge by the brand blue (same hue only).
+     The ellipse always ends inside the section box, so no edge is visible. */
   .glow-right {
     background-image: radial-gradient(
-      ellipse 55% 90% at 100% 40%,
-      color-mix(in oklab, var(--color-primary) 22%, transparent),
-      transparent 70%
+      ellipse 60% 50% at 100% 50%,
+      color-mix(in oklab, var(--color-primary) 20%, transparent),
+      transparent 100%
     );
   }
   .glow-left {
     background-image: radial-gradient(
-      ellipse 55% 90% at 0% 60%,
-      color-mix(in oklab, var(--color-primary) 22%, transparent),
-      transparent 70%
+      ellipse 60% 50% at 0% 50%,
+      color-mix(in oklab, var(--color-primary) 20%, transparent),
+      transparent 100%
     );
   }
 
@@ -103,23 +104,23 @@
     border-color: var(--color-accent);
   }
 
+  /* One continuous underline under text and arrow: the arrow is inline text. */
   .link-arrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    min-height: 2.75rem;
+    display: inline-block;
+    padding-block: 0.7rem;
     color: var(--color-accent);
     font-weight: 500;
+    line-height: 1.4;
     text-decoration: underline;
     text-underline-offset: 0.3em;
     text-decoration-thickness: 1px;
+    transition: color var(--duration-base) var(--ease-out);
   }
   .link-arrow::after {
-    content: '\2192';
-    transition: transform var(--duration-base) var(--ease-out);
+    content: '\00a0\2192';
   }
-  .link-arrow:hover::after {
-    transform: translateX(0.25rem);
+  .link-arrow:hover {
+    text-decoration-thickness: 2px;
   }
 
   .chip {
