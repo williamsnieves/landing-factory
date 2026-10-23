@@ -167,17 +167,6 @@
       "permission": "Owner's own product image from their store listing",
       "credit": false,
       "note": "Product image: Guía de IA Generativa + 450 Prompts: Midjourney, DALL-E 3 (Tutorial en PDF, edición en español)"
-    },
-    {
-      "file": "network-poster.jpg",
-      "title": "Poster of the \"network\" 3D scene",
-      "sourcePage": "site code: src/scenes/network.ts (page /)",
-      "author": "Original",
-      "license": "Original (rendered from site code)",
-      "credit": false,
-      "source": "self",
-      "retrievedAt": "2026-10-23T19:07:16.683Z",
-      "note": "Rendered with scripts/render-poster.mjs from the \"network\" scene."
     }
   ]
 }

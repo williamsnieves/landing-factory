@@ -5,28 +5,19 @@ import type { Product } from '../../data/catalog';
 
 interface Props {
   product: Product;
-  delay?: number;
 }
-const { product, delay = 0 } = Astro.props;
+const { product } = Astro.props;
 const { cover, stores } = product;
 const headline = stores[0];
-const wide = product.cols === 2;
-const sizes = wide
-  ? '(min-width: 1024px) 600px, (min-width: 640px) 50vw, 100vw'
-  : '(min-width: 1024px) 300px, (min-width: 640px) 50vw, 100vw';
+const sizes = '(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw';
 ---
 
-<article
-  class:list={['tile', { contain: product.contain }]}
-  style={`--c:${product.cols};--r:${product.rows};--ar:${cover.width}/${cover.height}`}
-  data-reveal
-  data-reveal-delay={delay}
->
+<article class="tile card">
   <div class="cover">
     <Image
       src={cover}
       alt={product.alt}
-      widths={[360, 600, 900, 1200]}
+      widths={[360, 600, 800]}
       sizes={sizes}
       format="webp"
       quality={80}
@@ -35,13 +26,11 @@ const sizes = wide
   </div>
   <div class="info">
     <h3>{headline.title}</h3>
-    {product.chips.length > 0 && (
-      <ul class="chips" aria-label="Details from the listing">
-        {product.chips.map((c) => (
-          <li class="chip">{c}</li>
-        ))}
-      </ul>
-    )}
+    <ul class="tags" aria-label="Formats and details from the listing">
+      {product.tags.map((t) => (
+        <li class="tag">{t}</li>
+      ))}
+    </ul>
     {stores.map((s, i) => (
       <div class="buy">
         {i > 0 && (
@@ -80,46 +69,48 @@ const sizes = wide
   .tile {
     display: flex;
     flex-direction: column;
-    background: var(--color-surface);
-    border: 1px solid var(--color-line);
-    border-radius: var(--radius-tile);
     overflow: hidden;
-    transition:
-      border-color var(--duration-base) var(--ease-out),
-      translate var(--duration-base) var(--ease-out);
+    transition: border-color var(--duration-base) var(--ease-out);
   }
   @media (hover: hover) {
     .tile:hover {
-      border-color: var(--color-primary);
-      translate: 0 -0.25rem;
+      border-color: color-mix(
+        in oklab,
+        var(--color-primary) 70%,
+        var(--color-line)
+      );
     }
     .tile:hover .cover :global(img) {
       scale: 1.03;
     }
   }
+  /* The whole cover is shown (never cropped) on a soft blue spotlight; the
+     stage grows when a neighbour card is taller, so no card has an empty gap. */
   .cover {
     position: relative;
+    flex: 1 1 auto;
+    aspect-ratio: 1 / 1;
+    border-bottom: 1px solid var(--color-line);
+    background:
+      radial-gradient(
+        closest-side,
+        color-mix(in oklab, var(--color-primary) 22%, transparent),
+        transparent 100%
+      ),
+      var(--color-paper);
     overflow: hidden;
-    margin: 0.5rem 0.5rem 0;
-    border-radius: var(--radius-md);
-    aspect-ratio: var(--ar);
-    background: var(--color-paper);
   }
   .cover :global(img) {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: 50% 0;
-    border-radius: var(--radius-md);
-    transition: scale 0.6s var(--ease-out);
-  }
-  .contain .cover :global(img) {
+    position: absolute;
+    inset: 1rem;
+    width: calc(100% - 2rem);
+    height: calc(100% - 2rem);
     object-fit: contain;
-    object-position: 50% 50%;
+    transition: scale 0.6s var(--ease-out);
   }
   .info {
     display: flex;
+    flex: none;
     flex-direction: column;
     gap: 1rem;
     padding: 1.25rem 1.25rem 1.5rem;
@@ -127,12 +118,12 @@ const sizes = wide
   h3 {
     margin: 0;
     font-family: var(--font-display);
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
     font-weight: 600;
     line-height: 1.35;
     text-wrap: pretty;
   }
-  .chips {
+  .tags {
     display: flex;
     flex-wrap: wrap;
     gap: 0.35rem;
@@ -176,6 +167,7 @@ const sizes = wide
   }
   .price span {
     color: var(--color-ink-soft);
+    font-family: var(--font-mono);
     font-size: var(--text-xs);
   }
   .badge {
@@ -195,6 +187,7 @@ const sizes = wide
     line-height: 1.4;
   }
   .badge .code {
+    font-family: var(--font-mono);
     white-space: nowrap;
   }
   .badge .until {
@@ -203,28 +196,5 @@ const sizes = wide
   .badge b {
     color: var(--color-accent);
     font-weight: 700;
-  }
-
-  @media (min-width: 640px) {
-    .tile {
-      grid-column: span var(--c);
-    }
-  }
-  @media (min-width: 1024px) {
-    .tile {
-      grid-row: span var(--r);
-    }
-    .cover {
-      flex: 1 1 0;
-      min-height: 0;
-      aspect-ratio: auto;
-    }
-    .cover :global(img) {
-      position: absolute;
-      inset: 0;
-    }
-    .info {
-      flex: none;
-    }
   }
 </style>

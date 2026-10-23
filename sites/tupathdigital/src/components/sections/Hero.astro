@@ -1,28 +1,44 @@
 ---
 import { Image } from 'astro:assets';
-import Scene3D from '../three/Scene3D.astro';
-import heroScene from '../../assets/network-poster.jpg';
-import coverGen from '../../assets/images/etsy-4369377710.jpg';
-import coverMeshy from '../../assets/images/etsy-4560860968.jpg';
-import coverFantasy from '../../assets/images/etsy-4565088403.jpg';
+import coverFront from '../../assets/images/etsy-4510744982.jpg';
+import coverPrompts from '../../assets/images/etsy-4369377710.jpg';
+import coverPlanner from '../../assets/images/etsy-1888381994.jpg';
+import coverVehicles from '../../assets/images/etsy-4443144664.jpg';
+import coverCharacters from '../../assets/images/etsy-4448900410.jpg';
 import {
   COUPON_END,
+  COUPONS,
   PRIMARY,
   SECONDARY,
-  productCount,
+  lowestPrice,
 } from '../../data/catalog';
+
+const facts = [
+  'Instant download',
+  'Etsy & Gumroad',
+  `50% off until ${COUPON_END}`,
+];
+
+/* Product covers of the stack, back to front. Only the front one is eager. */
+const covers = [
+  { key: 'characters', src: coverCharacters, speed: 0.05, w: 380 },
+  { key: 'vehicles', src: coverVehicles, speed: -0.05, w: 380 },
+  { key: 'prompts', src: coverPrompts, speed: 0, w: 420 },
+  { key: 'planner', src: coverPlanner, speed: 0, w: 420 },
+];
 ---
 
-<section class="hero glow-right" id="top" aria-labelledby="hero-title">
+<section class="hero" id="top" aria-labelledby="hero-title">
   <div class="wrap hero-grid">
     <div class="copy">
+      <p class="pill-label">Instant digital downloads</p>
       <h1 id="hero-title">
-        AI products, <span class="hl">ready to use.</span>
+        AI products, <em class="hl">ready</em> to use.
       </h1>
       <p class="lede">
-        Prompt guides, 3D game assets, wallpaper packs and practical guides, in
-        two stores. Pick a shelf, copy a code and take 50% off until{' '}
-        {COUPON_END}.
+        Prompt guides, 3D game assets, wallpaper packs and practical guides.
+        Pick a product, use the code for its store and download it straight
+        away.
       </p>
       <div class="actions">
         <a
@@ -34,7 +50,7 @@ import {
           {PRIMARY.label}
         </a>
         <a
-          class="link-arrow"
+          class="btn btn-lg btn-ghost"
           href={SECONDARY.url}
           target="_blank"
           rel="noopener noreferrer"
@@ -42,51 +58,57 @@ import {
           {SECONDARY.label}
         </a>
       </div>
-      <p class="count">
-        <strong>{productCount}</strong> products on four shelves
-      </p>
+      <ul class="facts" aria-label="At a glance">
+        {facts.map((f) => (
+          <li class="tag">{f}</li>
+        ))}
+      </ul>
     </div>
 
-    <div class="visual">
-      <Scene3D
-        scene="network"
-        poster={heroScene}
-        alt="A network of glowing blue points joined by thin lines, winding across a dark background like a path."
-        scrub
-        priority
-        aspect="1/1"
-        sizes="(min-width: 1024px) 560px, 100vw"
-        class="scene"
-      />
-      <div class="float f1" aria-hidden="true">
-        <Image
-          src={coverGen}
-          alt=""
-          widths={[160, 240, 360]}
-          sizes="(min-width: 1024px) 150px, 30vw"
-          format="webp"
-          loading="eager"
-        />
-      </div>
-      <div class="float f2" aria-hidden="true">
-        <Image
-          src={coverMeshy}
-          alt=""
-          widths={[160, 240, 360]}
-          sizes="(min-width: 1024px) 170px, 34vw"
-          format="webp"
-          loading="eager"
-        />
-      </div>
-      <div class="float f3" aria-hidden="true">
-        <Image
-          src={coverFantasy}
-          alt=""
-          widths={[160, 240, 360]}
-          sizes="(min-width: 1024px) 140px, 28vw"
-          format="webp"
-          loading="eager"
-        />
+    <div class="visual" aria-hidden="true">
+      <div class="stack">
+        <div class="bloom"></div>
+        {covers.map((c) => (
+          <div
+            class={`cover c-${c.key}`}
+            data-parallax={c.speed !== 0 ? c.speed : undefined}
+          >
+            <Image
+              src={c.src}
+              alt=""
+              widths={[200, 300, c.w]}
+              sizes="(min-width: 1024px) 230px, 40vw"
+              format="webp"
+              quality={78}
+              loading="lazy"
+            />
+          </div>
+        ))}
+        <div class="cover c-front">
+          <Image
+            src={coverFront}
+            alt=""
+            widths={[240, 360, 520]}
+            sizes="(min-width: 1024px) 270px, 50vw"
+            format="webp"
+            quality={80}
+            loading="eager"
+            fetchpriority="high"
+          />
+        </div>
+        <div class="frag f-coupon" data-parallax="0.9">
+          <span class="tag-mono">Code</span>
+          <strong>{COUPONS.Etsy.code}</strong>
+          <span class="tag-mono dim">50% off</span>
+        </div>
+        <div class="frag f-format" data-parallax="-0.7">
+          <span class="tag-mono">Formats</span>
+          <strong>GLB · FBX · OBJ</strong>
+        </div>
+        <div class="frag f-price" data-parallax="0.6">
+          <span class="tag-mono">From</span>
+          <strong>{lowestPrice}</strong>
+        </div>
       </div>
     </div>
   </div>
@@ -94,114 +116,198 @@ import {
 
 <style>
   .hero {
-    padding-block: clamp(2rem, 5vw, 4rem) clamp(2.5rem, 6vw, 5rem);
+    position: relative;
+    overflow-x: clip;
+    padding-block: clamp(2rem, 5vw, 4.5rem) clamp(3rem, 6vw, 5rem);
   }
   .hero-grid {
     display: grid;
-    gap: 2.5rem;
+    gap: 3rem;
     align-items: center;
   }
-  h1 {
-    margin: 0;
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: var(--text-4xl);
-    line-height: 1;
-    letter-spacing: -0.035em;
-    text-wrap: balance;
+  .copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
   }
-  .hl {
-    color: var(--color-primary);
+  h1 {
+    margin: 1.25rem 0 0;
+    max-width: 12ch;
+    font-family: var(--font-display);
+    font-size: var(--text-4xl);
+    font-weight: 700;
+    line-height: 0.96;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
   }
   .lede {
     margin: 1.5rem 0 0;
-    max-width: 34rem;
+    max-width: 32rem;
     color: var(--color-ink-soft);
     font-size: var(--text-lg);
     line-height: 1.5;
+    text-wrap: pretty;
   }
   .actions {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    gap: 0.75rem 1.75rem;
+    gap: 0.75rem;
     margin-top: 2rem;
   }
-  .count {
-    margin: 1.75rem 0 0;
-    color: var(--color-ink-soft);
-    font-size: var(--text-sm);
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 2rem 0 0;
+    padding: 0;
+    list-style: none;
   }
-  .count strong {
+  .facts .tag {
+    padding: 0.35rem 0.75rem;
     color: var(--color-ink);
-    font-family: var(--font-display);
-    font-size: var(--text-xl);
+    text-transform: none;
+    letter-spacing: 0;
+    background: color-mix(in oklab, var(--color-surface) 80%, transparent);
   }
+
+  /* Cover stack: positioned in percentages of the stack box. */
   .visual {
     position: relative;
+  }
+  .stack {
+    position: relative;
     width: 100%;
-    max-width: 38rem;
+    max-width: 34rem;
     margin-inline: auto;
+    aspect-ratio: 1 / 1.02;
   }
-  .visual :global(.scene) {
-    border-radius: var(--radius-tile);
-    border: 1px solid var(--color-line);
-  }
-  .float {
+  .bloom {
     position: absolute;
-    overflow: hidden;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--color-line);
-    background: var(--color-surface);
-    animation: drift 9s var(--ease-in-out) infinite alternate;
+    inset: -10%;
+    background: radial-gradient(
+      closest-side,
+      color-mix(in oklab, var(--color-primary) 42%, transparent),
+      transparent 100%
+    );
+    pointer-events: none;
   }
-  .float :global(img) {
+  .cover {
+    position: absolute;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid color-mix(in oklab, var(--color-ink) 16%, transparent);
+    background: var(--color-surface);
+    box-shadow: 0 1.5rem 3rem -1rem #000c;
+  }
+  .cover :global(img) {
     display: block;
     width: 100%;
     height: auto;
   }
-  .f1 {
-    width: 26%;
-    left: -2%;
-    bottom: 6%;
-    rotate: -6deg;
+  .c-characters {
+    left: 1%;
+    top: 12%;
+    width: 36%;
+    rotate: -9deg;
+    z-index: 1;
+    filter: brightness(0.7);
   }
-  .f2 {
-    width: 30%;
-    right: -3%;
-    top: 5%;
-    rotate: 5deg;
-    animation-delay: -3s;
+  .c-vehicles {
+    right: 0;
+    top: 4%;
+    width: 36%;
+    rotate: 8deg;
+    z-index: 1;
+    filter: brightness(0.7);
   }
-  .f3 {
-    width: 24%;
+  .c-prompts {
+    left: 8%;
+    top: 40%;
+    width: 38%;
+    rotate: -5deg;
+    z-index: 2;
+  }
+  .c-planner {
     right: 6%;
-    bottom: -4%;
-    rotate: -3deg;
-    animation-delay: -6s;
+    top: 38%;
+    width: 38%;
+    rotate: 5deg;
+    z-index: 2;
   }
-  @keyframes drift {
-    from {
-      translate: 0 -0.35rem;
-    }
-    to {
-      translate: 0 0.5rem;
-    }
+  .c-front {
+    left: 27%;
+    top: 7%;
+    width: 46%;
+    rotate: -1deg;
+    z-index: 3;
+    box-shadow:
+      0 2rem 4rem -1rem #000d,
+      0 0 4rem -1rem color-mix(in oklab, var(--color-primary) 60%, transparent);
   }
-  @media (prefers-reduced-motion: reduce) {
-    .float {
-      animation: none;
-    }
+
+  /* Floating fragments. */
+  .frag {
+    position: absolute;
+    z-index: 4;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.55rem 0.8rem;
+    border: 1px solid color-mix(in oklab, var(--color-accent) 40%, transparent);
+    border-radius: var(--radius-md);
+    background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 1rem 2rem -0.75rem #000b;
+    white-space: nowrap;
+    line-height: 1.2;
   }
+  .frag strong {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  .tag-mono {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  .tag-mono.dim {
+    color: var(--color-ink-soft);
+  }
+  .f-coupon {
+    left: -2%;
+    top: 30%;
+  }
+  .f-format {
+    right: -1%;
+    bottom: 12%;
+  }
+  .f-price {
+    left: 12%;
+    bottom: 2%;
+  }
+
   @media (min-width: 1024px) {
-    .hero {
-      min-height: calc(100svh - 5rem);
-      display: flex;
-      align-items: center;
-    }
     .hero-grid {
       grid-template-columns: 1.05fr 0.95fr;
-      gap: 3rem;
+      gap: 2rem;
+    }
+  }
+  @media (max-width: 479px) {
+    .frag {
+      padding: 0.4rem 0.6rem;
+    }
+    .frag strong {
+      font-size: var(--text-xs);
+    }
+    .f-coupon {
+      left: 0;
+    }
+    .f-format {
+      right: 0;
     }
   }
 </style>

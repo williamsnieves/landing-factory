@@ -1,0 +1,176 @@
+---
+import { COUPON_END, productCount, shelves } from '../../data/catalog';
+import ProductTile from './ProductTile.astro';
+
+/* Filter pills are radio inputs: they work without JavaScript. */
+const filters = [
+  { id: 'all', label: 'All', count: productCount },
+  ...shelves.map((s) => ({
+    id: s.id,
+    label: s.name,
+    count: s.items.length,
+  })),
+];
+---
+
+<section
+  id="catalog"
+  class="catalog section-pad"
+  aria-labelledby="catalog-title"
+>
+  <div class="wrap">
+    <div class="intro" data-reveal>
+      <p class="eyebrow">The catalog</p>
+      <h2 id="catalog-title" class="h2">
+        Pick your <em class="hl">product</em>
+      </h2>
+      <p class="lead">
+        {productCount} products on Etsy and Gumroad, half price with a code
+        until {COUPON_END}. Filter by type, then open the listing in its store.
+      </p>
+    </div>
+
+    <fieldset class="filters">
+      <legend class="sr-only" data-qa-allow-clip>
+        Filter products by type
+      </legend>
+      {filters.map((f) => (
+        <>
+          <input
+            type="radio"
+            name="catalog-filter"
+            id={`filter-${f.id}`}
+            class="sr-only"
+            checked={f.id === 'all'}
+          />
+          <label for={`filter-${f.id}`}>
+            {f.label}
+            <span class="count">{f.count}</span>
+          </label>
+        </>
+      ))}
+    </fieldset>
+
+    <div class="groups">
+      {shelves.map((s) => (
+        <div class="group" data-shelf={s.id} id={`shelf-${s.id}`}>
+          <div class="group-head">
+            <h3 class="eyebrow">
+              {s.name} <span>/ {s.items.length}</span>
+            </h3>
+            <p>{s.blurb}</p>
+          </div>
+          <div class="grid">
+            {s.items.map((p) => (
+              <ProductTile product={p} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .catalog {
+    scroll-margin-top: 4.5rem;
+  }
+  .intro {
+    max-width: 40rem;
+  }
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 2rem 0 0;
+    padding: 0;
+    border: 0;
+    min-inline-size: 0;
+  }
+  label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 2.75rem;
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition:
+      border-color var(--duration-base) var(--ease-out),
+      background-color var(--duration-base) var(--ease-out);
+  }
+  label:hover {
+    border-color: var(--color-accent);
+  }
+  .count {
+    color: var(--color-ink-soft);
+  }
+  input:checked + label {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+    color: var(--color-primary-contrast);
+  }
+  input:checked + label .count {
+    color: var(--color-primary-contrast);
+  }
+  input:focus-visible + label {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+  .groups {
+    display: grid;
+    gap: clamp(2.5rem, 5vw, 4rem);
+    margin-top: 2.5rem;
+  }
+  .group-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .group-head h3 span {
+    color: var(--color-ink-soft);
+  }
+  .group-head p {
+    margin: 0;
+    max-width: 44rem;
+    color: var(--color-ink-soft);
+  }
+  .grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 640px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1024px) {
+    .grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+  }
+</style>
+
+<!-- Filtering with no JavaScript: the checked radio hides the other groups. -->
+<style is:global>
+  .catalog:has(#filter-ai:checked) .group:not([data-shelf='ai']),
+  .catalog:has(#filter-3d:checked) .group:not([data-shelf='3d']),
+  .catalog:has(#filter-wallpapers:checked)
+    .group:not([data-shelf='wallpapers']),
+  .catalog:has(#filter-guides:checked) .group:not([data-shelf='guides']) {
+    display: none;
+  }
+</style>

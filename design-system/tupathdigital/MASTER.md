@@ -19,7 +19,7 @@ Design system for the real brand tupathdigital (English page, `en`): a dark, ele
 
 ## 3. Chosen style
 
-Dark bento product shelf with an electric blue accent. A near-black blue ground, slightly lighter tinted tiles with thin blue-grey borders, glow only on hover and on the hero scene. One brand hue (blue) in two steps; the covers bring magenta, orange and violet. Radii: tiles 20 px, small chips 8 px, buttons pill. Type contrast is large (display up to 100 px against 17 px body). Density medium: 25 to 110 words per screen.
+Dark bento product shelf with an electric blue accent. A near-black blue ground, slightly lighter tinted tiles with thin blue-grey borders, glow only on hover and behind the hero cover stack. One brand hue (blue) in two steps; the covers bring magenta, orange and violet. Radii: tiles 20 px, small chips 8 px, buttons pill. Type contrast is large (display up to 100 px against 17 px body). Density medium: 25 to 110 words per screen.
 
 ## 4. Palette
 
@@ -47,6 +47,7 @@ Contrast pairs used (all measured by `check-landing`, text >= 4.5, non-text >= 3
 
 - Display: Space Grotesk Variable (`@fontsource-variable/space-grotesk`, SIL OFL 1.1), weights 500 to 700, tight leading (1.0 to 1.05), slight negative tracking.
 - Body: DM Sans Variable (`@fontsource-variable/dm-sans`, SIL OFL 1.1), regular and medium, leading 1.55.
+- Mono (Redesign B, 2026-10-23): Geist Mono Variable (`@fontsource-variable/geist-mono`, SIL OFL 1.1) for eyebrows, pill labels, format tags, filter pills, coupon codes and step numbers (`--font-mono` in tokens.css), 12 to 15 px, uppercase with 0.04 to 0.08em tracking for labels.
 - Tabular figures (`font-variant-numeric: tabular-nums`) on the body for prices, stats and counts.
 - Scale (tokens.css): xs 13, sm 15, base 17, lg 20, xl 26, 2xl 36, 3xl clamp 40 to 60, 4xl clamp 48 to 100 px (hero and stat figures).
 - Tile titles small and bold, spec text small and secondary, per the bento sheet.
@@ -61,7 +62,7 @@ Contrast pairs used (all measured by `check-landing`, text >= 4.5, non-text >= 3
 
 - Durations: fast 150 ms (hover), base 250 ms (lift, color), slow 600 ms (reveal).
 - Easings: `--ease-out` cubic-bezier(0.22, 1, 0.36, 1) for reveals and lifts, `--ease-in-out` for glows.
-- Primitives: `data-reveal` staggered fade and lift for tiles, one scrubbed 3D scene in the hero, CSS hover lift and glow on covers (pointer devices), inline copy-code script. No pinned sections, no parallax. Reduced motion: tiles at rest, hero shows its poster.
+- Primitives: `data-reveal` staggered fade and lift for tiles, a hero cover stack with floating fragment chips on light `data-parallax` (Redesign B replaced the 3D scene), CSS hover lift and glow on covers (pointer devices), inline copy-code script. No pinned sections. Reduced motion: tiles at rest, no parallax, the hero stack sits still.
 
 ## 8. Do / don't for the build step
 

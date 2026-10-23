@@ -13,10 +13,6 @@ Photographs come from Wikimedia Commons (renditions served by `upload.wikimedia.
 
 <!-- credits:start -->
 
-| Asset(s) in `src/assets/images/` | Source URL                                | Author   | License                            | Credit shown | Notes                                                            |
-| -------------------------------- | ----------------------------------------- | -------- | ---------------------------------- | ------------ | ---------------------------------------------------------------- |
-| `network-poster.jpg`             | site code: src/scenes/network.ts (page /) | Original | Original (rendered from site code) | no           | Rendered with scripts/render-poster.mjs from the "network" scene |
-
 ### Provided by the customer
 
 | Asset(s) in `src/assets/images/` | Owner         | Permission                                            | Credit shown | Notes                                                                                                                    |

@@ -1,7 +1,7 @@
 /**
  * The catalog of the page. Titles, prices, URLs and coupon codes are read from
  * brief.json (the owner's listings), so they are shown exactly as given. This
- * file only adds the layout: shelf, cover, alt text, spec chips and tile size.
+ * file only adds the layout: shelf, cover, alt text, and mono format tags.
  */
 import type { ImageMetadata } from 'astro';
 import brief from '../../brief.json';
@@ -52,21 +52,15 @@ export interface Product {
   cover: ImageMetadata;
   alt: string;
   stores: Store[];
-  chips: string[];
-  /** Tile size on the desktop grid (columns x rows of the shelf grid). */
-  cols: 1 | 2;
-  rows: 2;
-  /** Keep the whole cover (it sits on a dark ground) instead of filling the frame. */
-  contain?: boolean;
+  /** Mono format tags, each one a word or number taken from the listing titles. */
+  tags: string[];
 }
 
 export interface Shelf {
   id: string;
   name: string;
   blurb: string;
-  /** Size of the shelf's own title tile. */
-  head: { cols: 2 | 4; rows: 1 | 2 };
-  items: (Product | { coupon: true; cols: 1; rows: 2 })[];
+  items: Product[];
 }
 
 const formatPrice = (value: string) =>
@@ -98,43 +92,34 @@ export const shelves: Shelf[] = [
     name: 'AI & prompts',
     blurb:
       'Prompt packs and playbooks for making images, apps and a calmer week with AI.',
-    head: { cols: 2, rows: 2 },
     items: [
       product({
         id: 'gen-ai-450',
         cover: gumHeoolh,
         alt: 'Cover: Practical Guide to Generative AI plus 450 prompts, showing a mountain landscape, an animated girl portrait and a unicorn line drawing on a pink and orange gradient.',
         listings: ['4369377710', 'heoolh'],
-        chips: ['450 prompts', 'Midjourney', 'DALL-E 3', 'Firefly'],
-        cols: 2,
-        rows: 2,
+        tags: ['450 prompts', 'PDF', 'Midjourney', 'DALL-E 3'],
       }),
       product({
         id: 'prompt-collection',
         cover: gumUfvyu,
         alt: 'Cover: Ultimate AI Prompt Bundle, a grid of glowing city and robot scenes with a stack of PDF prompt files.',
         listings: ['ufvyu'],
-        chips: ['Strategy', 'Creativity', 'Business frameworks'],
-        cols: 2,
-        rows: 2,
+        tags: ['Prompt collection', 'Strategy', 'Creativity'],
       }),
       product({
         id: 'lovable',
         cover: etsyLovable,
         alt: 'Cover: The Lovable Playbook, a dark purple poster with an app dashboard on a laptop and the line from prompt to deployment.',
         listings: ['4510744982'],
-        chips: ['No-code', 'SaaS MVPs', 'AI apps'],
-        cols: 1,
-        rows: 2,
+        tags: ['No-code', 'Guide', 'SaaS MVPs'],
       }),
       product({
         id: 'planner',
         cover: etsyPlanner,
         alt: 'Cover: Organize your life with Notion and ChatGPT in 7 days, a laptop showing a weekly planner next to the Notion and ChatGPT logos.',
         listings: ['1888381994'],
-        chips: ['Notion', 'ChatGPT'],
-        cols: 1,
-        rows: 2,
+        tags: ['Notion', 'ChatGPT'],
       }),
     ],
   },
@@ -143,14 +128,13 @@ export const shelves: Shelf[] = [
     name: '3D & game assets',
     blurb:
       'Ready-made models in GLB, FBX and OBJ, and a guide to make your own with AI.',
-    head: { cols: 4, rows: 1 },
     items: [
       product({
         id: 'meshy-54',
         cover: gumFrbcf,
         alt: 'Cover: The Ultimate Bundle, a 94-page guide, 250 prompts and 54 ready-to-use 3D assets, with a dragon, a wizard, a castle and a spaceship.',
         listings: ['4560860968', 'frbcf'],
-        chips: [
+        tags: [
           '54 3D models',
           '250 prompts',
           '94-page guide',
@@ -158,17 +142,13 @@ export const shelves: Shelf[] = [
           'FBX',
           'OBJ',
         ],
-        cols: 2,
-        rows: 2,
       }),
       product({
         id: 'fantasy-50',
         cover: gumXfoqn,
         alt: 'Cover: 50 Premium 3D Assets Volume 2, a game-ready set with a scavenger heroine, an armored beast, a timber house and a stone gate.',
         listings: ['4565088403', 'xfoqn'],
-        chips: ['50 models', 'Vol. 2', 'GLB', 'FBX', 'OBJ'],
-        cols: 2,
-        rows: 2,
+        tags: ['50 3D models', 'GLB', 'FBX', 'OBJ'],
       }),
     ],
   },
@@ -177,124 +157,103 @@ export const shelves: Shelf[] = [
     name: 'Wallpapers',
     blurb:
       'Six packs of AI backgrounds: neon, cyberpunk, sci-fi, landscapes, vehicles and characters.',
-    head: { cols: 2, rows: 2 },
     items: [
       product({
         id: 'ai-tech',
         cover: etsyAiTech,
         alt: 'Cover: AI Tech and Data sci-fi abstract backgrounds, showing a glowing brain, a planet ring, a globe and a cloud in blue.',
         listings: ['4428727624'],
-        chips: ['85 wallpapers'],
-        cols: 2,
-        rows: 2,
+        tags: ['85 wallpapers'],
       }),
       product({
         id: 'cyberpunk',
         cover: etsyCyber,
         alt: 'Cover: Futuristic Cyberpunk abstract backgrounds, a mosaic of neon grids, waves and tunnels.',
         listings: ['4426604786'],
-        chips: ['150 wallpapers'],
-        cols: 2,
-        rows: 2,
+        tags: ['150 wallpapers'],
       }),
       product({
         id: 'vehicles',
         cover: etsyVehicles,
         alt: 'Cover: AI Vehicles and Transportation backgrounds, with a black hypercar, a hover craft, a rover and a bullet train.',
         listings: ['4443144664'],
-        chips: [],
-        cols: 1,
-        rows: 2,
+        tags: ['Backgrounds'],
       }),
       product({
         id: 'characters',
         cover: etsyCharacters,
         alt: 'Cover: AI Characters and Fantasy Beings, a wizard, a robot, a warrior and a dragon in a starry sky.',
         listings: ['4448900410'],
-        chips: [],
-        cols: 1,
-        rows: 2,
+        tags: ['Backgrounds'],
       }),
       product({
         id: 'earth',
         cover: etsyEarth,
         alt: 'Cover: Epic Earth landscape backgrounds, four panels of mountains, rivers, lava and forests through the seasons.',
         listings: ['4442926542'],
-        chips: ['Seasons & weather'],
-        cols: 2,
-        rows: 2,
+        tags: ['Landscape', 'Backgrounds'],
       }),
       product({
         id: 'vaporwave',
         cover: etsyVapor,
         alt: 'Cover: Vaporwave Neon abstract backgrounds, three overlapping neon rings on black.',
         listings: ['4423955365'],
-        chips: ['89 wallpapers'],
-        cols: 2,
-        rows: 2,
-        contain: true,
+        tags: ['89 wallpapers'],
       }),
     ],
   },
   {
     id: 'guides',
-    name: 'Guides for life and work',
+    name: 'Guides',
     blurb:
       'Practical kits and 30-day guides for money, freelancing, parenting and social media.',
-    head: { cols: 2, rows: 2 },
     items: [
       product({
         id: 'social-kit',
         cover: etsyKit,
         alt: 'Cover: Social media marketing kit for local businesses, with Instagram and Facebook icons, a calendar and a phone.',
         listings: ['4316616449'],
-        chips: ['Canva', 'Calendar', 'PDF'],
-        cols: 1,
-        rows: 2,
+        tags: ['Canva', 'Calendario', 'PDF'],
       }),
       product({
         id: 'parents',
         cover: etsyParents,
         alt: 'Cover: Pantallas con Propósito, a parents guide with a mother and child reading a book.',
         listings: ['4338601085'],
-        chips: [],
-        cols: 1,
-        rows: 2,
+        tags: ['Guía'],
       }),
       product({
         id: 'freelancer',
         cover: etsyFreelance,
         alt: 'Cover: How to start as a freelancer in 30 days, an illustration of a person working at a laptop.',
         listings: ['4349241344'],
-        chips: ['30 days'],
-        cols: 1,
-        rows: 2,
+        tags: ['30 días', 'Manual'],
       }),
       product({
         id: 'finance-es',
         cover: etsyFinanceEs,
         alt: 'Cover: Controla tus finanzas en 30 días, an orange cover with a woman holding a coin and a checklist.',
         listings: ['4298208749'],
-        chips: ['30 days', 'Budget template'],
-        cols: 1,
-        rows: 2,
+        tags: ['30 días', 'Plantilla'],
       }),
       product({
         id: 'finance-en',
         cover: etsyFinanceEn,
         alt: 'Cover: Take control of your finances in 30 days, a yellow cover with a piggy bank and a checklist.',
         listings: ['4297967816'],
-        chips: ['30 days', 'Budget spreadsheet'],
-        cols: 1,
-        rows: 2,
+        tags: ['30-day', 'Spreadsheet'],
       }),
-      { coupon: true, cols: 1, rows: 2 },
     ],
   },
 ];
 
 /** Total distinct products on the page. */
-export const productCount = shelves.reduce(
-  (n, s) => n + s.items.filter((i) => !('coupon' in i)).length,
-  0,
-);
+export const productCount = shelves.reduce((n, s) => n + s.items.length, 0);
+
+/** Lowest listed price in the catalog, as shown on a card ("$4.10"). */
+export const lowestPrice = shelves
+  .flatMap((s) => s.items.flatMap((p) => p.stores.map((st) => st.price)))
+  .sort((a, b) => Number(a.slice(1)) - Number(b.slice(1)))[0];
+
+/** Number of stores that sell the products. */
+export const storeCount = 2;
