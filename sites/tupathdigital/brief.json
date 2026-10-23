@@ -8,7 +8,148 @@
     "country": "",
     "kind": "product"
   },
-  "offer": [],
+  "offer": [
+    {
+      "name": "Kit de Marketing en Redes Sociales — Canva + Calendario + PDF",
+      "description": "Etsy. Coupon FALL2026: 50% off.",
+      "price": "4.10",
+      "currency": "USD",
+      "url": "https://www.etsy.com/es/listing/4316616449/kit-de-marketing-en-redes-sociales"
+    },
+    {
+      "name": "Guía para Padres: Tiempo de Pantalla y Rutinas",
+      "description": "Etsy. Coupon FALL2026: 50% off.",
+      "price": "4.56",
+      "currency": "USD",
+      "url": "https://www.etsy.com/es/listing/4338601085/guia-para-padres-tiempo-frente-a-la"
+    },
+    {
+      "name": "Guía de Inicio para Freelancers — Manual de 30 Días",
+      "description": "Etsy. Coupon FALL2026: 50% off.",
+      "price": "4.68",
+      "currency": "USD",
+      "url": "https://www.etsy.com/es/listing/4349241344/guia-de-inicio-para-freelancers-manual"
+    },
+    {
+      "name": "Vaporwave Neon Abstract Backgrounds — 89 Wallpapers",
+      "description": "Etsy. Coupon FALL2026: 50% off.",
+      "price": "9.36",
+      "currency": "USD",
+      "url": "https://www.etsy.com/es/listing/4423955365/paquete-de-fondos-abstractos-de-neon"
+    },
+    {
+      "name": "Futuristic Cyberpunk Abstract Backgrounds — 150 Wallpapers",
+      "description": "Etsy. Coupon FALL2026: 50% off.",
+      "price": "11.70",
+      "currency": "USD",
+      "url": "https://www.etsy.com/es/listing/4426604786/fondos-abstractos-cyberpunk-futuristas"
+    },
+    {
+      "name": "AI Weekly Planner — Notion + ChatGPT",
+      "description": "Etsy. Coupon FALL2026: 50% off.",
+      "price": "7.02",
+      "currency": "USD",
+      "url": "https://www.etsy.com/es/listing/1888381994/planificador-semanal-con-ia-plantilla-de"
+    },
+    {
+      "name": "AI Tech & Data Sci-Fi Abstract Backgrounds — 85 Wallpapers",
+      "description": "Etsy. Coupon FALL2026: 50% off.",
+      "price": "7.02",
+      "currency": "USD",
+      "url": "https://www.etsy.com/es/listing/4428727624/fondos-abstractos-ia-tech-y-sci-fi-85"
+    },
+    {
+      "name": "Guía de Finanzas de 30 Días + Plantilla de Presupuesto (Español)",
+      "description": "Etsy. Coupon FALL2026: 50% off.",
+      "price": "7.02",
+      "currency": "USD",
+      "url": "https://www.etsy.com/es/listing/4298208749/guia-de-finanzas-de-30-dias-plantilla-de"
+    },
+    {
+      "name": "30-Day Finance Guide + Budget Spreadsheet (Inglés)",
+      "description": "Etsy. Coupon FALL2026: 50% off.",
+      "price": "7.02",
+      "currency": "USD",
+      "url": "https://www.etsy.com/es/listing/4297967816/guia-financiera-de-30-dias-hoja-de"
+    },
+    {
+      "name": "Guía de IA Generativa — 450 Prompts",
+      "description": "Etsy. Coupon FALL2026: 50% off.",
+      "price": "",
+      "currency": "USD",
+      "url": "https://www.etsy.com/es/listing/4369377710/guia-de-ia-generativa-450-prompts"
+    },
+    {
+      "name": "Epic Earth Landscape Backgrounds — Seasons & Weather",
+      "description": "Etsy. Coupon FALL2026: 50% off.",
+      "price": "5.85",
+      "currency": "USD",
+      "url": "https://www.etsy.com/es/listing/4442926542/fondos-de-paisajes-naturales-epicos-o"
+    },
+    {
+      "name": "AI Vehicle & Transportation Backgrounds",
+      "description": "Etsy. Coupon FALL2026: 50% off.",
+      "price": "5.85",
+      "currency": "USD",
+      "url": "https://www.etsy.com/es/listing/4443144664/fondos-de-vehiculos-y-transporte-con-ia"
+    },
+    {
+      "name": "Futuristic Characters Sci-Fi Portrait Backgrounds",
+      "description": "Etsy. Coupon FALL2026: 50% off.",
+      "price": "5.85",
+      "currency": "USD",
+      "url": "https://www.etsy.com/es/listing/4448900410/personajes-futuristas-sci-fi-fondos"
+    },
+    {
+      "name": "AI Professional Prompt Collection – Strategy, Creativity & Business Frameworks",
+      "description": "Gumroad. Coupon 92xsh57: 50% off.",
+      "price": "11.19",
+      "currency": "USD",
+      "url": "https://tupathdigital.gumroad.com/l/ufvyu"
+    },
+    {
+      "name": "Generative AI Master Guide +450 Prompts – Midjourney, DALL-E 3, Firefly, Leonardo AI & Google Nano Banana",
+      "description": "Gumroad. Coupon 92xsh57: 50% off.",
+      "price": "13.43",
+      "currency": "USD",
+      "url": "https://tupathdigital.gumroad.com/l/heoolh"
+    },
+    {
+      "name": "Lovable Playbook: Build SaaS MVPs, AI Apps, Landing Pages (No-Code Guide)",
+      "description": "Etsy. Coupon FALL2026: 50% off.",
+      "price": "14.04",
+      "currency": "USD",
+      "url": "https://www.etsy.com/es/listing/4510744982/the-lovable-playbook-o-crea-saas-mvps-y"
+    },
+    {
+      "name": "Meshy AI 3D Creation Guide – 54 3D Models + 250 Premium Prompts",
+      "description": "Gumroad. Coupon 92xsh57: 50% off.",
+      "price": "13.43",
+      "currency": "USD",
+      "url": "https://tupathdigital.gumroad.com/l/frbcf"
+    },
+    {
+      "name": "54 3D Assets Bundle + 94-Page Creation Guide | Fantasy, Sci-Fi, Vehicles (GLB, FBX, OBJ)",
+      "description": "Etsy. Coupon FALL2026: 50% off.",
+      "price": "14.04",
+      "currency": "USD",
+      "url": "https://www.etsy.com/es/listing/4560860968/pack-de-54-modelos-3d-guia-de-creacion"
+    },
+    {
+      "name": "50 Fantasy Sci-Fi 3D Models, Game Assets Vol. 2 (GLB FBX OBJ Digital Download)",
+      "description": "Etsy. Coupon FALL2026: 50% off.",
+      "price": "9.36",
+      "currency": "USD",
+      "url": "https://www.etsy.com/es/listing/4565088403/50-modelos-3d-fantasy-y-sci-fi-coleccion"
+    },
+    {
+      "name": "50 Fantasy & Sci-Fi 3D Models, Game Asset Collection Vol. 2 (GLB, FBX, OBJ)",
+      "description": "Gumroad. Coupon 92xsh57: 50% off.",
+      "price": "8.95",
+      "currency": "USD",
+      "url": "https://tupathdigital.gumroad.com/l/xfoqn"
+    }
+  ],
   "audience": {
     "who": "",
     "needs": "",
@@ -49,6 +190,158 @@
       "owner": "tupathdigital",
       "permission": "Own brand logo, provided by the owner for the landing",
       "notes": "Blue circular t/e mark with the wordmark below, on an off-white background"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/products/etsy-4316616449.jpg",
+      "url": "https://www.etsy.com/es/listing/4316616449/kit-de-marketing-en-redes-sociales",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "notes": "Product image: Kit de Marketing en Redes Sociales — Canva + Calendario + PDF"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/products/etsy-4338601085.jpg",
+      "url": "https://www.etsy.com/es/listing/4338601085/guia-para-padres-tiempo-frente-a-la",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "notes": "Product image: Guía para Padres: Tiempo de Pantalla y Rutinas"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/products/etsy-4349241344.jpg",
+      "url": "https://www.etsy.com/es/listing/4349241344/guia-de-inicio-para-freelancers-manual",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "notes": "Product image: Guía de Inicio para Freelancers — Manual de 30 Días"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/products/etsy-4423955365.jpg",
+      "url": "https://www.etsy.com/es/listing/4423955365/paquete-de-fondos-abstractos-de-neon",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "notes": "Product image: Vaporwave Neon Abstract Backgrounds — 89 Wallpapers"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/products/etsy-4426604786.jpg",
+      "url": "https://www.etsy.com/es/listing/4426604786/fondos-abstractos-cyberpunk-futuristas",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "notes": "Product image: Futuristic Cyberpunk Abstract Backgrounds — 150 Wallpapers"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/products/etsy-1888381994.jpg",
+      "url": "https://www.etsy.com/es/listing/1888381994/planificador-semanal-con-ia-plantilla-de",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "notes": "Product image: AI Weekly Planner — Notion + ChatGPT"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/products/etsy-4428727624.jpg",
+      "url": "https://www.etsy.com/es/listing/4428727624/fondos-abstractos-ia-tech-y-sci-fi-85",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "notes": "Product image: AI Tech & Data Sci-Fi Abstract Backgrounds — 85 Wallpapers"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/products/etsy-4298208749.jpg",
+      "url": "https://www.etsy.com/es/listing/4298208749/guia-de-finanzas-de-30-dias-plantilla-de",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "notes": "Product image: Guía de Finanzas de 30 Días + Plantilla de Presupuesto (Español)"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/products/etsy-4297967816.jpg",
+      "url": "https://www.etsy.com/es/listing/4297967816/guia-financiera-de-30-dias-hoja-de",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "notes": "Product image: 30-Day Finance Guide + Budget Spreadsheet (Inglés)"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/products/etsy-4442926542.jpg",
+      "url": "https://www.etsy.com/es/listing/4442926542/fondos-de-paisajes-naturales-epicos-o",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "notes": "Product image: Epic Earth Landscape Backgrounds — Seasons & Weather"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/products/etsy-4443144664.jpg",
+      "url": "https://www.etsy.com/es/listing/4443144664/fondos-de-vehiculos-y-transporte-con-ia",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "notes": "Product image: AI Vehicle & Transportation Backgrounds"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/products/etsy-4448900410.jpg",
+      "url": "https://www.etsy.com/es/listing/4448900410/personajes-futuristas-sci-fi-fondos",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "notes": "Product image: Futuristic Characters Sci-Fi Portrait Backgrounds"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/products/gumroad-ufvyu.png",
+      "url": "https://tupathdigital.gumroad.com/l/ufvyu",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "notes": "Product image: AI Professional Prompt Collection – Strategy, Creativity & Business Frameworks"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/products/gumroad-heoolh.png",
+      "url": "https://tupathdigital.gumroad.com/l/heoolh",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "notes": "Product image: Generative AI Master Guide +450 Prompts – Midjourney, DALL-E 3, Firefly, Leonardo AI & Google Nano Banana"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/products/etsy-4510744982.jpg",
+      "url": "https://www.etsy.com/es/listing/4510744982/the-lovable-playbook-o-crea-saas-mvps-y",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "notes": "Product image: Lovable Playbook: Build SaaS MVPs, AI Apps, Landing Pages (No-Code Guide)"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/products/gumroad-frbcf.png",
+      "url": "https://tupathdigital.gumroad.com/l/frbcf",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "notes": "Product image: Meshy AI 3D Creation Guide – 54 3D Models + 250 Premium Prompts"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/products/etsy-4560860968.jpg",
+      "url": "https://www.etsy.com/es/listing/4560860968/pack-de-54-modelos-3d-guia-de-creacion",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "notes": "Product image: 54 3D Assets Bundle + 94-Page Creation Guide | Fantasy, Sci-Fi, Vehicles (GLB, FBX, OBJ)"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/products/etsy-4565088403.jpg",
+      "url": "https://www.etsy.com/es/listing/4565088403/50-modelos-3d-fantasy-y-sci-fi-coleccion",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "notes": "Product image: 50 Fantasy Sci-Fi 3D Models, Game Assets Vol. 2 (GLB FBX OBJ Digital Download)"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/products/gumroad-xfoqn.png",
+      "url": "https://tupathdigital.gumroad.com/l/xfoqn",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "notes": "Product image: 50 Fantasy & Sci-Fi 3D Models, Game Asset Collection Vol. 2 (GLB, FBX, OBJ)"
     }
   ],
   "brand": {
@@ -71,5 +364,5 @@
     "domain": ""
   },
   "assumed": [],
-  "notes": "Goal: send traffic to the stores (Etsy and Gumroad). Page wanted in English and Spanish (pending decision: i18n is out of the factory scope today). 20 product links with coupons (50%): Etsy listings use FALL2026, Gumroad products use 92xsh57; product names, prices and images pending (store pages not reachable from this environment yet)."
+  "notes": "Goal: send traffic to the stores (Etsy and Gumroad). Page wanted in English and Spanish (pending: bilingual pages are out of the factory scope today). Coupons are 50% for every product: FALL2026 on Etsy, 92xsh57 on Gumroad (in each offer description until the schema has a coupon field). Prices: Etsy from the owner's CSV export, Gumroad read from the public product pages (USD); the Etsy 450-prompts guide has no verified price or image. Same product in both stores: Generative AI 450 prompts (Etsy 4369377710 / Gumroad heoolh), Meshy 54 3D models (Etsy 4560860968 / Gumroad frbcf), 50 Fantasy Sci-Fi 3D models Vol. 2 (Etsy 4565088403 / Gumroad xfoqn)."
 }
