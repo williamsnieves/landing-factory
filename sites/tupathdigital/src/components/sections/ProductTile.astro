@@ -1,0 +1,216 @@
+---
+import { Image } from 'astro:assets';
+import { COUPON_END, COUPON_END_ISO } from '../../data/catalog';
+import type { Product } from '../../data/catalog';
+
+interface Props {
+  product: Product;
+  delay?: number;
+}
+const { product, delay = 0 } = Astro.props;
+const { cover, stores } = product;
+const headline = stores[0];
+const wide = product.cols === 2;
+const sizes = wide
+  ? '(min-width: 1024px) 600px, (min-width: 640px) 50vw, 100vw'
+  : '(min-width: 1024px) 300px, (min-width: 640px) 50vw, 100vw';
+---
+
+<article
+  class:list={['tile', { contain: product.contain }]}
+  style={`--c:${product.cols};--r:${product.rows};--ar:${cover.width}/${cover.height}`}
+  data-reveal
+  data-reveal-delay={delay}
+>
+  <div class="cover">
+    <Image
+      src={cover}
+      alt={product.alt}
+      widths={[360, 600, 900, 1200]}
+      sizes={sizes}
+      format="webp"
+      quality={80}
+      loading="lazy"
+    />
+  </div>
+  <div class="info">
+    <h3>{headline.title}</h3>
+    {product.chips.length > 0 && (
+      <ul class="chips" aria-label="Details from the listing">
+        {product.chips.map((c) => (
+          <li class="chip">{c}</li>
+        ))}
+      </ul>
+    )}
+    {stores.map((s, i) => (
+      <div class="buy">
+        {i > 0 && (
+          <p class="own-title">
+            <span>{s.name} listing:</span> {s.title}
+          </p>
+        )}
+        <div class="row">
+          <p class="price">
+            <strong>{s.price}</strong> <span>on {s.name}</span>
+          </p>
+          <a
+            class="btn btn-sm"
+            href={s.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`View on ${s.name}: ${s.title}`}
+          >
+            View on {s.name}
+          </a>
+        </div>
+        <p class="badge">
+          <b>50% off</b> with code <b class="code">{s.code}</b>, until{' '}
+          <time datetime={COUPON_END_ISO}>{COUPON_END}</time>
+        </p>
+      </div>
+    ))}
+  </div>
+</article>
+
+<style>
+  .tile {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-tile);
+    overflow: hidden;
+    transition:
+      border-color var(--duration-base) var(--ease-out),
+      translate var(--duration-base) var(--ease-out);
+  }
+  @media (hover: hover) {
+    .tile:hover {
+      border-color: var(--color-primary);
+      translate: 0 -0.25rem;
+    }
+    .tile:hover .cover :global(img) {
+      scale: 1.03;
+    }
+  }
+  .cover {
+    position: relative;
+    overflow: hidden;
+    margin: 0.5rem 0.5rem 0;
+    border-radius: var(--radius-md);
+    aspect-ratio: var(--ar);
+    background: var(--color-paper);
+  }
+  .cover :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 0;
+    border-radius: var(--radius-md);
+    transition: scale 0.6s var(--ease-out);
+  }
+  .contain .cover :global(img) {
+    object-fit: contain;
+    object-position: 50% 50%;
+  }
+  .info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+  h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    line-height: 1.35;
+    text-wrap: pretty;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .buy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .own-title {
+    margin: 0.25rem 0 0;
+    color: var(--color-ink-soft);
+    font-size: var(--text-xs);
+    line-height: 1.4;
+  }
+  .own-title span {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .price {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+  }
+  .price strong {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .price span {
+    color: var(--color-ink-soft);
+    font-size: var(--text-xs);
+  }
+  .badge {
+    margin: 0;
+    padding: 0.4rem 0.65rem;
+    border-radius: var(--radius-sm);
+    background: color-mix(
+      in oklab,
+      var(--color-primary) 16%,
+      var(--color-surface)
+    );
+    color: var(--color-ink);
+    font-size: var(--text-xs);
+    line-height: 1.4;
+  }
+  .badge b {
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+
+  @media (min-width: 640px) {
+    .tile {
+      grid-column: span var(--c);
+    }
+  }
+  @media (min-width: 1024px) {
+    .tile {
+      grid-row: span var(--r);
+    }
+    .cover {
+      flex: 1 1 0;
+      min-height: 0;
+      aspect-ratio: auto;
+    }
+    .cover :global(img) {
+      position: absolute;
+      inset: 0;
+    }
+    .info {
+      flex: none;
+    }
+  }
+</style>

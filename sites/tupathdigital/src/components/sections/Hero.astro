@@ -1,0 +1,207 @@
+---
+import { Image } from 'astro:assets';
+import Scene3D from '../three/Scene3D.astro';
+import heroScene from '../../assets/network-poster.jpg';
+import coverGen from '../../assets/images/etsy-4369377710.jpg';
+import coverMeshy from '../../assets/images/etsy-4560860968.jpg';
+import coverFantasy from '../../assets/images/etsy-4565088403.jpg';
+import {
+  COUPON_END,
+  PRIMARY,
+  SECONDARY,
+  productCount,
+} from '../../data/catalog';
+---
+
+<section class="hero glow-right" id="top" aria-labelledby="hero-title">
+  <div class="wrap hero-grid">
+    <div class="copy">
+      <h1 id="hero-title">
+        AI products, <span class="hl">ready to use.</span>
+      </h1>
+      <p class="lede">
+        Prompt guides, 3D game assets, wallpaper packs and practical guides, in
+        two stores. Pick a shelf, copy a code and take 50% off until{' '}
+        {COUPON_END}.
+      </p>
+      <div class="actions">
+        <a
+          class="btn btn-lg"
+          href={PRIMARY.url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {PRIMARY.label}
+        </a>
+        <a
+          class="link-arrow"
+          href={SECONDARY.url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {SECONDARY.label}
+        </a>
+      </div>
+      <p class="count">
+        <strong>{productCount}</strong> products on four shelves
+      </p>
+    </div>
+
+    <div class="visual">
+      <Scene3D
+        scene="network"
+        poster={heroScene}
+        alt="A network of glowing blue points joined by thin lines, winding across a dark background like a path."
+        scrub
+        priority
+        aspect="1/1"
+        sizes="(min-width: 1024px) 560px, 100vw"
+        class="scene"
+      />
+      <div class="float f1" aria-hidden="true">
+        <Image
+          src={coverGen}
+          alt=""
+          widths={[160, 240, 360]}
+          sizes="(min-width: 1024px) 150px, 30vw"
+          format="webp"
+          loading="eager"
+        />
+      </div>
+      <div class="float f2" aria-hidden="true">
+        <Image
+          src={coverMeshy}
+          alt=""
+          widths={[160, 240, 360]}
+          sizes="(min-width: 1024px) 170px, 34vw"
+          format="webp"
+          loading="eager"
+        />
+      </div>
+      <div class="float f3" aria-hidden="true">
+        <Image
+          src={coverFantasy}
+          alt=""
+          widths={[160, 240, 360]}
+          sizes="(min-width: 1024px) 140px, 28vw"
+          format="webp"
+          loading="eager"
+        />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding-block: clamp(2rem, 5vw, 4rem) clamp(2.5rem, 6vw, 5rem);
+  }
+  .hero-grid {
+    display: grid;
+    gap: 2.5rem;
+    align-items: center;
+  }
+  h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-4xl);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+  .hl {
+    color: var(--color-primary);
+  }
+  .lede {
+    margin: 1.5rem 0 0;
+    max-width: 34rem;
+    color: var(--color-ink-soft);
+    font-size: var(--text-lg);
+    line-height: 1.5;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.75rem;
+    margin-top: 2rem;
+  }
+  .count {
+    margin: 1.75rem 0 0;
+    color: var(--color-ink-soft);
+    font-size: var(--text-sm);
+  }
+  .count strong {
+    color: var(--color-ink);
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+  }
+  .visual {
+    position: relative;
+    width: 100%;
+    max-width: 38rem;
+    margin-inline: auto;
+  }
+  .visual :global(.scene) {
+    border-radius: var(--radius-tile);
+    border: 1px solid var(--color-line);
+  }
+  .float {
+    position: absolute;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-line);
+    background: var(--color-surface);
+    animation: drift 9s var(--ease-in-out) infinite alternate;
+  }
+  .float :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .f1 {
+    width: 26%;
+    left: -2%;
+    bottom: 6%;
+    rotate: -6deg;
+  }
+  .f2 {
+    width: 30%;
+    right: -3%;
+    top: 5%;
+    rotate: 5deg;
+    animation-delay: -3s;
+  }
+  .f3 {
+    width: 24%;
+    right: 6%;
+    bottom: -4%;
+    rotate: -3deg;
+    animation-delay: -6s;
+  }
+  @keyframes drift {
+    from {
+      translate: 0 -0.35rem;
+    }
+    to {
+      translate: 0 0.5rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .float {
+      animation: none;
+    }
+  }
+  @media (min-width: 1024px) {
+    .hero {
+      min-height: calc(100svh - 5rem);
+      display: flex;
+      align-items: center;
+    }
+    .hero-grid {
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 3rem;
+    }
+  }
+</style>

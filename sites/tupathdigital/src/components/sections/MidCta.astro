@@ -1,0 +1,73 @@
+---
+import { COUPON_END, PRIMARY } from '../../data/catalog';
+---
+
+<section class="mid" aria-labelledby="mid-title">
+  <div class="wrap">
+    <div class="band" data-reveal>
+      <h2 id="mid-title">Half price with a code. Pick your store and go.</h2>
+      <div class="side">
+        <p>Both codes end on {COUPON_END}.</p>
+        <a
+          class="btn btn-lg"
+          href={PRIMARY.url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {PRIMARY.label}
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .mid {
+    margin-block: clamp(2rem, 4vw, 3.5rem);
+    padding-block: clamp(2.5rem, 6vw, 5rem);
+    background-color: color-mix(
+      in oklab,
+      var(--color-primary) 16%,
+      var(--color-paper)
+    );
+    background-image: radial-gradient(
+      ellipse 60% 120% at 100% 50%,
+      color-mix(in oklab, var(--color-primary) 40%, transparent),
+      transparent 70%
+    );
+  }
+  .band {
+    display: grid;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  h2 {
+    margin: 0;
+    max-width: 22ch;
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  .side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .side p {
+    margin: 0;
+    color: var(--color-ink-soft);
+  }
+  @media (min-width: 900px) {
+    .band {
+      grid-template-columns: 1fr auto;
+      gap: 3rem;
+    }
+    .side {
+      align-items: flex-end;
+    }
+  }
+</style>

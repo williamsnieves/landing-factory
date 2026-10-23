@@ -165,12 +165,7 @@
       "url": "https://tupathdigital.gumroad.com/"
     }
   },
-  "tone": [
-    "técnico",
-    "energético",
-    "amable",
-    "cercano"
-  ],
+  "tone": ["técnico", "energético", "amable", "cercano"],
   "contact": {
     "email": "",
     "phone": "",
@@ -358,9 +353,7 @@
     }
   ],
   "brand": {
-    "colors": [
-      "#1881d4"
-    ],
+    "colors": ["#1881d4"],
     "fonts": [],
     "keep": "Colors close to the logo's blue (#1881d4, measured from the logo) or that match it; the logo as given. The page should feel like the visitor's place to buy AI content.",
     "avoid": ""

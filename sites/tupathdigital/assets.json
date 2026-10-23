@@ -1,3 +1,183 @@
 {
-  "images": []
+  "images": [
+    {
+      "file": "logo.webp",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Own brand logo, provided by the owner for the landing",
+      "credit": false,
+      "note": "Blue circular t/e mark with the wordmark below, on an off-white background"
+    },
+    {
+      "file": "etsy-4316616449.jpg",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: Kit de Marketing en Redes Sociales — Canva + Calendario + PDF"
+    },
+    {
+      "file": "etsy-4338601085.jpg",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: Guía para Padres: Tiempo de Pantalla y Rutinas"
+    },
+    {
+      "file": "etsy-4349241344.jpg",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: Guía de Inicio para Freelancers — Manual de 30 Días"
+    },
+    {
+      "file": "etsy-4423955365.jpg",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: Vaporwave Neon Abstract Backgrounds — 89 Wallpapers"
+    },
+    {
+      "file": "etsy-4426604786.jpg",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: Futuristic Cyberpunk Abstract Backgrounds — 150 Wallpapers"
+    },
+    {
+      "file": "etsy-1888381994.jpg",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: AI Weekly Planner — Notion + ChatGPT"
+    },
+    {
+      "file": "etsy-4428727624.jpg",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: AI Tech & Data Sci-Fi Abstract Backgrounds — 85 Wallpapers"
+    },
+    {
+      "file": "etsy-4298208749.jpg",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: Guía de Finanzas de 30 Días + Plantilla de Presupuesto (Español)"
+    },
+    {
+      "file": "etsy-4297967816.jpg",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: 30-Day Finance Guide + Budget Spreadsheet (Inglés)"
+    },
+    {
+      "file": "etsy-4442926542.jpg",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: Epic Earth Landscape Backgrounds — Seasons & Weather"
+    },
+    {
+      "file": "etsy-4443144664.jpg",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: AI Vehicle & Transportation Backgrounds"
+    },
+    {
+      "file": "etsy-4448900410.jpg",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: Futuristic Characters Sci-Fi Portrait Backgrounds"
+    },
+    {
+      "file": "gumroad-ufvyu.png",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: AI Professional Prompt Collection – Strategy, Creativity & Business Frameworks"
+    },
+    {
+      "file": "gumroad-heoolh.png",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: Generative AI Master Guide +450 Prompts – Midjourney, DALL-E 3, Firefly, Leonardo AI & Google Nano Banana"
+    },
+    {
+      "file": "etsy-4510744982.jpg",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: Lovable Playbook: Build SaaS MVPs, AI Apps, Landing Pages (No-Code Guide)"
+    },
+    {
+      "file": "gumroad-frbcf.png",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: Meshy AI 3D Creation Guide – 54 3D Models + 250 Premium Prompts"
+    },
+    {
+      "file": "etsy-4560860968.jpg",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: 54 3D Assets Bundle + 94-Page Creation Guide | Fantasy, Sci-Fi, Vehicles (GLB, FBX, OBJ)"
+    },
+    {
+      "file": "etsy-4565088403.jpg",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: 50 Fantasy Sci-Fi 3D Models, Game Assets Vol. 2 (GLB FBX OBJ Digital Download)"
+    },
+    {
+      "file": "gumroad-xfoqn.png",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: 50 Fantasy & Sci-Fi 3D Models, Game Asset Collection Vol. 2 (GLB, FBX, OBJ)"
+    },
+    {
+      "file": "etsy-4369377710.jpg",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: Guía de IA Generativa + 450 Prompts: Midjourney, DALL-E 3 (Tutorial en PDF, edición en español)"
+    },
+    {
+      "file": "network-poster.jpg",
+      "title": "Poster of the \"network\" 3D scene",
+      "sourcePage": "site code: src/scenes/network.ts (page /)",
+      "author": "Original",
+      "license": "Original (rendered from site code)",
+      "credit": false,
+      "source": "self",
+      "retrievedAt": "2026-10-23T19:07:16.683Z",
+      "note": "Rendered with scripts/render-poster.mjs from the \"network\" scene."
+    }
+  ]
 }

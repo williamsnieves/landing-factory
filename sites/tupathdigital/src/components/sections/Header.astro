@@ -1,0 +1,104 @@
+---
+import { Image } from 'astro:assets';
+import brandMark from '../../assets/images/logo.webp';
+import { BUSINESS, PRIMARY } from '../../data/catalog';
+---
+
+<header class="site-header">
+  <div class="wrap">
+    <div class="bar">
+      <a href="#top" class="brand" aria-label={`${BUSINESS}, back to top`}>
+        <Image
+          src={brandMark}
+          alt=""
+          width={44}
+          height={44}
+          densities={[1, 2]}
+          class="brand-img"
+        />
+        <span class="brand-name">{BUSINESS}</span>
+      </a>
+      <nav aria-label="Page" class="nav">
+        <a href="#shelves">Shelves</a>
+        <a href="#coupons">Coupons</a>
+        <a href="#stores">Stores</a>
+      </nav>
+      <a
+        class="btn btn-sm"
+        href={PRIMARY.url}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {PRIMARY.label}
+      </a>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0.75rem;
+    z-index: 40;
+    padding-top: 0.75rem;
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0.5rem 0.5rem 0.5rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-lg);
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    color: var(--color-ink);
+    font-family: var(--font-display);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .brand :global(.brand-img) {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius-sm);
+    display: block;
+  }
+  .brand-name {
+    display: none;
+    font-size: var(--text-base);
+  }
+  .nav {
+    display: none;
+    gap: 0.25rem;
+    margin-left: auto;
+    margin-right: 0.5rem;
+  }
+  .nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding-inline: 0.9rem;
+    border-radius: var(--radius-md);
+    color: var(--color-ink-soft);
+    font-size: var(--text-sm);
+    text-decoration: none;
+  }
+  .nav a:hover {
+    color: var(--color-ink);
+  }
+  @media (min-width: 480px) {
+    .brand-name {
+      display: inline;
+    }
+  }
+  @media (min-width: 720px) {
+    .nav {
+      display: flex;
+    }
+  }
+</style>

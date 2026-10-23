@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 @import './tokens.css';
+@import '@fontsource-variable/space-grotesk';
+@import '@fontsource-variable/dm-sans';
 
 @layer base {
   html {
@@ -7,9 +9,11 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-text-size-adjust: 100%;
+    color-scheme: dark;
   }
   body {
     margin: 0;
+    font-variant-numeric: tabular-nums;
     overflow-x: clip;
     font-size: var(--text-base);
     line-height: 1.6;
@@ -17,6 +21,116 @@
   :focus-visible {
     outline: 3px solid var(--color-primary);
     outline-offset: 3px;
+  }
+}
+
+@layer components {
+  .wrap {
+    width: 100%;
+    max-width: 80rem;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 768px) {
+    .wrap {
+      padding-inline: 2rem;
+    }
+  }
+
+  /* A full-width band lit from one edge by the brand blue (same hue only). */
+  .glow-right {
+    background-image: radial-gradient(
+      ellipse 55% 90% at 100% 40%,
+      color-mix(in oklab, var(--color-primary) 22%, transparent),
+      transparent 70%
+    );
+  }
+  .glow-left {
+    background-image: radial-gradient(
+      ellipse 55% 90% at 0% 60%,
+      color-mix(in oklab, var(--color-primary) 22%, transparent),
+      transparent 70%
+    );
+  }
+
+  .section-pad {
+    padding-block: clamp(3.5rem, 8vw, 7rem);
+  }
+
+  /* One button shape across the page: pill, 48px high (44px small). */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 3rem;
+    padding: 0.65rem 1.5rem;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    background: var(--color-primary);
+    color: var(--color-primary-contrast);
+    border: 1px solid var(--color-primary);
+    cursor: pointer;
+    transition:
+      background-color var(--duration-base) var(--ease-out),
+      transform var(--duration-base) var(--ease-out);
+  }
+  .btn:hover {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+  .btn-sm {
+    min-height: 2.75rem;
+    padding: 0.5rem 1.1rem;
+  }
+  .btn-lg {
+    min-height: 3.75rem;
+    padding: 0.9rem 2.25rem;
+    font-size: var(--text-lg);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--color-ink);
+    border-color: var(--color-line);
+  }
+  .btn-ghost:hover {
+    background: transparent;
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  .link-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    color: var(--color-accent);
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+    text-decoration-thickness: 1px;
+  }
+  .link-arrow::after {
+    content: '\2192';
+    transition: transform var(--duration-base) var(--ease-out);
+  }
+  .link-arrow:hover::after {
+    transform: translateX(0.25rem);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem 0.6rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    color: var(--color-accent);
+    font-size: var(--text-xs);
+    line-height: 1.5;
   }
 }
 
