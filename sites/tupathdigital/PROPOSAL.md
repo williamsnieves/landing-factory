@@ -1,6 +1,6 @@
 # Proposal: tupathdigital
 
-Status: **proposed**. Review the sections below; the checkpoint waits for approval unless the run is automatic.
+Status: **approved** by the owner on 2026-10-23 (answers in Decisions 3 to 5 and the 3D section).
 
 ## Brief
 
@@ -70,7 +70,7 @@ No pinned section. Reduced motion: no scrub, no parallax, no smooth scroll; the 
 
 ## 3D
 
-One scene, built from code (no models), because the audience is AI and 3D-minded and the owner wants a standout hero.
+One scene, built from code (no models), because the audience is AI and 3D-minded and the owner wants a standout hero (confirmed by the owner).
 
 | Scene     | Purpose                                                                                  | Poster                                                                      | Scroll behavior               | Reduced-motion fallback |
 | --------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ----------------------------- | ----------------------- |
@@ -88,9 +88,9 @@ Online shop, cart, payments, backend forms, CMS, multiple languages (a Spanish v
 
 1. Customer facts shown exactly: business name, the 20 listing titles (kept as written, including Spanish ones), prices, store URLs, the primary and secondary action URLs and the X and Instagram links. Nothing is labeled sample.
 2. Duplicated products (Gen AI 450 prompts, Meshy 54 models, 50 Fantasy Sci-Fi models Vol. 2) appear once with two buttons, Etsy and Gumroad, and the card shows each store's own title and price so every listing stays findable (owner decision).
-3. Discount: each product shows its listed price with a visible "50% off" badge and its coupon code (FALL2026 on Etsy, 92xsh57 on Gumroad). We do not compute or show a discounted price: the owner did not say whether the listed price is before the coupon. Assumed: the badge means "50% off the listed price with this code" (confirm at the checkpoint). The code name suggests a seasonal promotion: confirm when it ends and whether the page should drop the badge afterwards.
-4. Assumed (from `assumed`): `offer[9].currency` is USD for the Etsy guide priced "14,50". The page shows "14.50 USD" in the same format as the others (confirm).
-5. Empty fields the page needs and the placeholder used: contact email, phone, address and hours are empty, so the footer has no contact block and the page offers only the store and social links. Domain and deploy target are undecided: the site goes to its own Cloudflare Pages project for now. Audience objections are empty: no objection-handling copy is invented.
+3. Discount: each product shows its listed price with a visible "50% off" badge and its coupon code (FALL2026 on Etsy, 92xsh57 on Gumroad). We do not compute or show a discounted price: the owner did not say whether the listed price is before the coupon. Confirmed by the owner: the listed price is before the coupon, the badge means "50% off the listed price with this code" and the page shows no final price. Both codes end on 31 October 2026: the badge and the coupon tickets say "until Oct 31, 2026"; the owner updates or removes them after that date.
+4. Confirmed by the owner: the Etsy guide priced "14,50" is in USD. The page shows it in the same format as the others.
+5. Empty fields the page needs and the placeholder used: contact email, phone, address and hours are empty, so the footer has no contact block and the page offers only the store and social links (confirmed by the owner). Domain and deploy target are undecided: the site goes to its own Cloudflare Pages project for now. Audience objections are empty: no objection-handling copy is invented.
 6. Customer assets: `assets/logo.webp` (used as given in header and footer) and the 20 product covers (`assets/products/*`), all with owner `tupathdigital` and the permission written in the brief. No stock photos. Gumroad covers are PNG and will be converted to optimized formats by the image pipeline, not edited.
 7. Claims: no invented reviews, ratings, sales figures, download counts or testimonials. The figures strip uses only counts derivable from the brief (17 products, 2 stores) and the coupon. Product descriptions use only what the listing titles and covers state.
 8. Tone: technical and energetic, in friendly second person ("grab", "copy", "ready to use").
