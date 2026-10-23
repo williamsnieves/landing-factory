@@ -359,7 +359,18 @@
     "avoid": ""
   },
   "references": {
-    "liked": [],
+    "liked": [
+      {
+        "url": "https://craftsman-contractor-landing-page-v1.21st.app/",
+        "sheet": "craftsman-contractor-21st-app",
+        "why": "Polished sections, strong hero, trust signals, disciplined card system."
+      },
+      {
+        "url": "https://crypgo-shadcn-ui-landingpage-v1.21st.app/",
+        "sheet": "crypgo-21st-app",
+        "why": "Visually attractive dark product page that makes a digital product feel tangible and builds trust to buy."
+      }
+    ],
     "disliked": []
   },
   "legal": {
@@ -372,5 +383,5 @@
     "domain": ""
   },
   "assumed": [],
-  "notes": "Goal: send traffic to the stores (Etsy and Gumroad). Page in English only for now (owner, 2026-10-23); a Spanish version may come later. Coupons are 50% for every product: FALL2026 on Etsy, 92xsh57 on Gumroad (in each offer description until the schema has a coupon field). Prices: Etsy from the owner's CSV export, Gumroad read from the public product pages (USD); the Etsy 450-prompts guide was completed by the owner. Same product in both stores: Generative AI 450 prompts (Etsy 4369377710 / Gumroad heoolh), Meshy 54 3D models (Etsy 4560860968 / Gumroad frbcf), 50 Fantasy Sci-Fi 3D models Vol. 2 (Etsy 4565088403 / Gumroad xfoqn). Owner decisions (2026-10-23): show each product's price with a visible discount badge (50% off with its coupon code); a product sold in both stores appears once with two buttons, Etsy and Gumroad; product names stay as the listing titles (some are Spanish-language products). No contact email or domain yet. Ambition (owner): it should look like a 40,000-dollar website: creative, made to drive traffic and, ideally, conversions. No references yet. Products in both stores are one card with two store buttons; the card shows each store's own listing title and price (for example the second store's title in small type next to its button), so every listing stays findable. Confirmed by the owner (2026-10-23): listed prices are before the coupon and the page does not compute a final price; both codes (FALL2026, 92xsh57) end on 31 October 2026, so the badge says so; the 14,50 guide is in USD; no contact block in the footer is fine; the hero 3D scene is wanted."
+  "notes": "Goal: send traffic to the stores (Etsy and Gumroad). Page in English only for now (owner, 2026-10-23); a Spanish version may come later. Coupons are 50% for every product: FALL2026 on Etsy, 92xsh57 on Gumroad (in each offer description until the schema has a coupon field). Prices: Etsy from the owner's CSV export, Gumroad read from the public product pages (USD); the Etsy 450-prompts guide was completed by the owner. Same product in both stores: Generative AI 450 prompts (Etsy 4369377710 / Gumroad heoolh), Meshy 54 3D models (Etsy 4560860968 / Gumroad frbcf), 50 Fantasy Sci-Fi 3D models Vol. 2 (Etsy 4565088403 / Gumroad xfoqn). Owner decisions (2026-10-23): show each product's price with a visible discount badge (50% off with its coupon code); a product sold in both stores appears once with two buttons, Etsy and Gumroad; product names stay as the listing titles (some are Spanish-language products). No contact email or domain yet. Ambition (owner): it should look like a 40,000-dollar website: creative, made to drive traffic and, ideally, conversions. No references yet. Products in both stores are one card with two store buttons; the card shows each store's own listing title and price (for example the second store's title in small type next to its button), so every listing stays findable. Confirmed by the owner (2026-10-23): listed prices are before the coupon and the page does not compute a final price; both codes (FALL2026, 92xsh57) end on 31 October 2026, so the badge says so; the 14,50 guide is in USD; no contact block in the footer is fine; the hero 3D scene is wanted. Owner (2026-10-23, pass B): downloads are instant after purchase; some files download directly from the store, others through a Google Drive link included with the purchase. Around 9 sales so far: not shown on the page (no sales counts, ratings or reviews yet). Pass B redesign uses the references patterns/craftsman-contractor-21st-app.md and patterns/crypgo-21st-app.md; no 3D models (owner)."
 }
