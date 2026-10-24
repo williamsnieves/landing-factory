@@ -44,3 +44,14 @@ The brief SHALL hold the markets where the page is offered, the holder who runs 
 #### Scenario: Market named, holder missing
 - **WHEN** the brief names the market `ES` and has no holder tax id
 - **THEN** `brief missing` lists the holder tax id among the recommended fields
+
+### Requirement: AI image consent
+The brief SHALL hold whether the customer allows AI-generated images (`allowed`, `not-allowed` or empty) and the interview SHALL ask for it; an empty value counts as not allowed for generation, and the value MUST NOT be listed as assumed.
+
+#### Scenario: Consent assumed
+- **WHEN** the brief lists the AI-image field in `assumed`
+- **THEN** validation fails saying the customer must decide it
+
+#### Scenario: Older brief
+- **WHEN** a brief written before this field existed is validated
+- **THEN** it is still valid and the field reads as empty

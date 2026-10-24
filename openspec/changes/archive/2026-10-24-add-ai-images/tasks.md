@@ -64,7 +64,7 @@
 
 ## 6. Real generation and full run
 
-- [ ] 6.1 (not run: no OPENAI_API_KEY and api.openai.com not allowed in this environment) Real smoke test. Needs `OPENAI_API_KEY` in the environment and `api.openai.com` allowed:
+- [x] 6.1 (verified 2026-10-24, after merge, in a new session with the key and domain: dry run printed the request and sent nothing; `generate zz-ai-smoke --quality low` with `gpt-image-1.5` saved a 1536x1024 WebP (100 KB, 20 input and 701 output tokens) and a full `assets.json` entry with request id and usage; `credits.mjs` wrote the AI-generated images table; `check-landing` `ai-provenance` failed without `data-ai-disclosure` and passed with it; a "photo of our team" prompt was refused before any request; the key appeared in no file; default model `gpt-image-1.5` confirmed; throwaway site removed, lockfile unchanged) Real smoke test. Needs `OPENAI_API_KEY` in the environment and `api.openai.com` allowed:
   - run `node scripts/ai-images.mjs generate <throwaway-slug> --prompt "abstract ..." --as smoke --quality low` on a throwaway site;
   - check the file, the entry, the credits table, and `check-landing` `ai-provenance` with a disclosure element;
   - confirm or correct the default model;
