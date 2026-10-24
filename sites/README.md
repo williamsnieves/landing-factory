@@ -7,7 +7,7 @@ sites/<slug>/
   package.json        private, name site-<slug>; same dependency ranges as the root
   astro.config.mjs    static output, React and Tailwind v4 (copied from the root)
   tsconfig.json
-  site.config.json    Cloudflare Pages project (cloudflare.pagesProject) and production branch
+  site.config.json    deploy target (cloudflare by default, vercel, vps, shared) and its settings
   CREDITS.md          source URL, author and license of every external asset (photo table generated)
   brief.json          optional: the customer's validated requirement (node scripts/brief.mjs); /new-landing reads it, check-landing verifies its facts
   assets.json         image manifest (written by scripts/find-images.mjs): file, source, author, license, credit
@@ -28,7 +28,7 @@ npm install                          # registers the workspace; commit package-l
 npm run build -w site-cafeteria      # -> sites/cafeteria/dist/index.html
 ```
 
-The scaffold copies the layout, motion layer, 3D layer (`src/components/three/`, with an empty `src/scenes/`), the legal components (`src/components/legal/`, used only when the brief names a market), styles and headers from the root starter and writes a `noindex` placeholder home page, `site.config.json` (`pagesProject` equals the slug; change it if the name is taken on Cloudflare), `CREDITS.md`, `README.md`, the `PROPOSAL.md` and `RUN.md` templates and an empty `assets.json`. It never copies the starter's demo pages, demo scene or sections. It refuses invalid slugs (`^[a-z0-9]+(-[a-z0-9]+)*$`) and existing folders. For a folder that so far holds only planning docs (for example a `PROPOSAL.md`), pass `--allow-existing-docs`: the `*.md` files stay untouched.
+The scaffold copies the layout, motion layer, 3D layer (`src/components/three/`, with an empty `src/scenes/`), the legal components (`src/components/legal/`, used only when the brief names a market), styles and headers from the root starter and writes a `noindex` placeholder home page, `site.config.json` (`target: "cloudflare"`, `pagesProject` equals the slug; change it if the name is taken on Cloudflare), `CREDITS.md`, `README.md`, the `PROPOSAL.md` and `RUN.md` templates and an empty `assets.json`. It never copies the starter's demo pages, demo scene or sections. It refuses invalid slugs (`^[a-z0-9]+(-[a-z0-9]+)*$`) and existing folders. For a folder that so far holds only planning docs (for example a `PROPOSAL.md`), pass `--allow-existing-docs`: the `*.md` files stay untouched.
 
 Run `npm run new-site -- --help` for every option.
 
@@ -50,4 +50,4 @@ A site is independent: its tokens, sections and pages are its own, and a change 
 
 ## CI
 
-Pull requests and pushes to `main` build, check and deploy only the sites that changed (`scripts/changed-sites.mjs`); a change to a shared path (dependencies, motion layer, layouts, styles, QA scripts, workflows) runs every site. Each site is deployed to its own Cloudflare Pages project, with a preview URL per branch and one sticky PR comment per site. A failing QA or landing report never deploys. See the root [README](../README.md#deployment).
+Pull requests and pushes to `main` build, check and deploy only the sites that changed (`scripts/changed-sites.mjs`); a change to a shared path (dependencies, motion layer, layouts, styles, QA scripts, workflows) runs every site. Each site is deployed to the target in its `site.config.json` (`target`: `cloudflare` by default, `vercel`, `vps` or `shared`; guides in [docs/deploy/](../docs/deploy/cloudflare.md)), with a preview URL per branch where the target supports previews and one sticky PR comment per site. A failing QA or landing report never deploys. See the root [README](../README.md#deployment).

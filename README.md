@@ -20,6 +20,7 @@ npm run qa        # build + screenshots, overflow, reduced motion, Lighthouse, i
 npm run report    # security (OWASP Top 10:2025), performance and legal report -> qa/report/latest/report.md
 npm run report -- --site <slug> [--url <deployed-url>]  # the same for one site; --url adds the live checks
 npm run new-site -- <slug>        # scaffold sites/<slug>/ from the starter (then `npm install`)
+npm run deploy -- --site <slug> --dry-run   # the deploy plan for the site's target; real deploys run only from CI
 npm run qa -- --site <slug>       # full QA for one site -> qa/<slug>/latest/report.md
 node scripts/render-poster.mjs --page /3d/ --scene demo --out src/assets/3d-demo-poster.jpg  # render a 3D scene's poster
 npm run new-landing -- <slug> --niche "..."  # generate a whole landing with Claude (see "Generating a landing")
@@ -45,39 +46,44 @@ The report also has a `legal` area: cookies and trackers against the consent rul
 
 ## Deployment
 
-Every push is built and verified by [`.github/workflows/ci.yml`](.github/workflows/ci.yml). The `qa` job runs Prettier, `astro check`, the tests, `npm run qa` and the landing report (`npm run report -- --only static`); only if it passes does the `deploy` job publish `dist/` to Cloudflare Pages with `wrangler pages deploy`. A failing QA or report never deploys. After the deploy the report's live checks run on the deployed URL.
+Every push is built and verified by [`.github/workflows/ci.yml`](.github/workflows/ci.yml). The `qa` job runs Prettier, `astro check`, the tests, `npm run qa` and the landing report (`npm run report -- --only static`); only if it passes does the `deploy` job publish `dist/` to the site's deploy target. A failing QA or report never deploys. After the deploy the report's live checks run on the deployed URL. Deploys happen only from CI: `node scripts/deploy.mjs --site <slug> --dry-run` prints what a deploy would do and changes nothing.
 
-| Event                       | Result                                                                         |
-| --------------------------- | ------------------------------------------------------------------------------ |
-| Pull request / other branch | Preview deployment at `https://<branch-alias>.<project>.pages.dev`             |
-| Push to `main`              | Production deployment (the project's production URL)                           |
-| Pull request                | One comment with the preview URL and the report verdict, updated on every push |
+### Deploy targets
 
-Preview URLs look like `https://<branch-alias>.<project>.pages.dev`. Pages normalizes the branch name into the alias (lowercased, `/` and other characters replaced by `-`, long names truncated), so `change/add-cloudflare-preview-deploy` becomes something like `change-add-cloudflare-preview-deploy.landing-factory.pages.dev`. Each deployment also has its own `https://<hash>.<project>.pages.dev` URL. The PR comment and the job summary list both.
+Each site chooses its target in `site.config.json` (`target`, default `cloudflare`, so existing sites change nothing). Every guide ends with pointing the domain and running `npm run report -- --site <slug> --url https://<domain>`.
+
+| Target       | Where                                              | Previews on a branch                                 | Secrets                                         | Guide                                                          |
+| ------------ | -------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------- | -------------------------------------------------------------- |
+| `cloudflare` | Cloudflare Pages (default)                         | Native, `https://<branch-alias>.<project>.pages.dev` | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | [docs/deploy/cloudflare.md](docs/deploy/cloudflare.md)         |
+| `vercel`     | Vercel (REST API, no CLI)                          | Native                                               | `VERCEL_TOKEN`                                  | [docs/deploy/vercel.md](docs/deploy/vercel.md)                 |
+| `vps`        | Hostinger VPS or DigitalOcean Droplet (rsync, SSH) | Cloudflare Pages (`previews: "cloudflare"`) or none  | `DEPLOY_SSH_KEY`                                | [docs/deploy/vps.md](docs/deploy/vps.md)                       |
+| `shared`     | Hostinger web hosting (rsync over SSH, or FTPS)    | Cloudflare Pages (`previews: "cloudflare"`) or none  | `DEPLOY_SSH_KEY` or `DEPLOY_FTP_PASSWORD`       | [docs/deploy/shared-hosting.md](docs/deploy/shared-hosting.md) |
+
+| Event                       | Result                                                                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Pull request / other branch | Preview on Cloudflare Pages or Vercel; a `vps` or `shared` site gets a Cloudflare preview or a comment saying it has none |
+| Push to `main`              | Production deployment to the site's target                                                                                |
+| Pull request                | One comment with the preview URL and the report verdict, updated on every push                                            |
+
+The workflow reads the target (`node scripts/deploy/config.mjs`), checks the secrets of that target (warning and green job when they are missing, and for forks), then runs the Cloudflare steps (`wrangler pages deploy`) or `node scripts/deploy.mjs` for the other targets, and finally the live report on the URL the deploy returned. The headers of `public/_headers` are translated for each target: `vercel.json`, a Caddy and an Nginx snippet for a VPS, and an `.htaccess` for shared hosting.
+
+Preview URLs on Cloudflare look like `https://<branch-alias>.<project>.pages.dev`. Pages normalizes the branch name into the alias (lowercased, `/` and other characters replaced by `-`, long names truncated), so `change/add-cloudflare-preview-deploy` becomes something like `change-add-cloudflare-preview-deploy.landing-factory.pages.dev`. Each deployment also has its own `https://<hash>.<project>.pages.dev` URL. The PR comment and the job summary list both.
 
 ### Sites
 
-Landings under `sites/<slug>/` use the same pipeline per site. The `sites` job lists the sites that changed in the push or pull request (or all of them when a shared file changed), and a matrix job per site runs `astro check`, `npm run qa -- --site <slug>` and `npm run report -- --site <slug> --only static`, then deploys `sites/<slug>/dist` to the Pages project named in `sites/<slug>/site.config.json` (created on the first deploy), with the same secrets gate. Each site gets its own preview URL and its own PR comment, and the reports are uploaded as `qa-report-<slug>` and `landing-report-<slug>` (the live checks run on the preview URL after the deploy). The Cloudflare token needs no extra permission: one Pages project is created per site.
+Landings under `sites/<slug>/` use the same pipeline per site. The `sites` job lists the sites that changed in the push or pull request (or all of them when a shared file changed), and a matrix job per site runs `astro check`, `npm run qa -- --site <slug>` and `npm run report -- --site <slug> --only static`, then deploys `sites/<slug>/dist` to the target named in `sites/<slug>/site.config.json` (a Cloudflare Pages project is created on the first deploy), with the same secrets gate. Each site gets its own preview URL and its own PR comment, and the reports are uploaded as `qa-report-<slug>` and `landing-report-<slug>` (the live checks run on the preview URL after the deploy).
 
-### One-time setup
+### One-time setup (Cloudflare Pages)
 
-1. Create a free [Cloudflare account](https://dash.cloudflare.com/sign-up). You do not need to create the Pages project by hand: CI creates it (production branch `main`) on the first deploy if it does not exist. To create it yourself instead, run `npx wrangler pages project create landing-factory --production-branch main` with the two variables below exported.
-2. Create an API token at **My Profile > API Tokens > Create Token > Create Custom Token** with a single permission: **Account > Cloudflare Pages > Edit**. Scope it to your account and nothing else.
-3. Find your **Account ID** on the Cloudflare dashboard home (right sidebar of the account overview) or in the URL `dash.cloudflare.com/<account-id>/...`.
-4. In GitHub open **Settings > Secrets and variables > Actions > New repository secret** and add:
-   - `CLOUDFLARE_API_TOKEN`: the token from step 2
-   - `CLOUDFLARE_ACCOUNT_ID`: the ID from step 3
-5. The project name and production branch live in [`site.config.json`](site.config.json) (`cloudflare.pagesProject`, `cloudflare.productionBranch`). Change `pagesProject` for each new site. The name must be unique across Cloudflare Pages and use lowercase letters, digits and `-`.
-
-Never commit the token or the account ID. Credentials are read only from GitHub secrets (or your shell environment locally).
+Create a Cloudflare account, an API token with **Account > Cloudflare Pages > Edit** and add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as repository secrets: the steps are in [docs/deploy/cloudflare.md](docs/deploy/cloudflare.md). CI creates each Pages project (production branch `main`) on the first deploy. Never commit a token or an account ID; credentials are read only from GitHub secrets (or your shell environment locally).
 
 ### Until the secrets exist
 
-The `deploy` job still runs but skips every deploy step: it emits a `::warning::` annotation naming the missing secret(s) and ends green, so QA keeps working on a fresh clone. Pull requests from forks are skipped the same way, because GitHub does not give forks access to secrets. Secret values are never printed.
+The `deploy` job still runs but skips every deploy step: it emits a `::warning::` annotation naming the missing secret(s) of the effective target and ends green, so QA keeps working on a fresh clone. Pull requests from forks are skipped the same way, because GitHub does not give forks access to secrets. Secret values are never printed.
 
 ### Headers
 
-[`public/_headers`](public/_headers) is copied to `dist/_headers` by the build. It serves `/_astro/*` with `Cache-Control: public, max-age=31536000, immutable` and every response with `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Content-Security-Policy: frame-ancestors 'self'` and a minimal `Permissions-Policy`.
+[`public/_headers`](public/_headers) is copied to `dist/_headers` by the build. It serves `/_astro/*` with `Cache-Control: public, max-age=31536000, immutable` and every response with `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Content-Security-Policy: frame-ancestors 'self'`, a minimal `Permissions-Policy`, HSTS and COOP. Cloudflare Pages reads that file itself; the other targets get the same headers from the files `scripts/deploy.mjs` generates (`node scripts/deploy.mjs --site <slug> --print-config` shows them).
 
 ## Generating a landing
 

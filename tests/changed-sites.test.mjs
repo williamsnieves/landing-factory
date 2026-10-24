@@ -83,6 +83,8 @@ test('prefixes do not leak: sites/panaderia-2 is not panaderia, package.json.bak
   assert.equal(isSharedPath('src/stylesheet.css'), false);
   assert.equal(isSharedPath('./package.json'), true);
   assert.ok(SHARED_PATHS.includes('.github/workflows/'));
+  assert.ok(SHARED_PATHS.includes('scripts/deploy/'));
+  assert.ok(SHARED_PATHS.includes('scripts/deploy.mjs'));
 });
 
 test('a deleted site (not in the site list) is never selected', () => {

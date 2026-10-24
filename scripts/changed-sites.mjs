@@ -27,6 +27,8 @@ export const SHARED_PATHS = [
   'scripts/report/',
   'scripts/lib/',
   'scripts/parse-wrangler-output.mjs',
+  'scripts/deploy.mjs',
+  'scripts/deploy/',
   '.github/workflows/',
 ];
 

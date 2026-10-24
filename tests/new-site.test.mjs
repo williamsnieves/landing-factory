@@ -163,10 +163,11 @@ test('the site manifest is private, named site-<slug> and pins the root versions
     assert.equal(site.devDependencies[name], root.devDependencies[name], name);
 });
 
-test('site.config.json names its own Pages project on the main branch', () => {
+test('site.config.json sets the cloudflare target and names its own Pages project on the main branch', () => {
   const sitesDir = freshSites();
   scaffoldSite({ slug: 'cafe-bar', sitesDir });
   assert.deepEqual(readJson(join(sitesDir, 'cafe-bar/site.config.json')), {
+    target: 'cloudflare',
     cloudflare: { pagesProject: 'cafe-bar', productionBranch: 'main' },
   });
 });

@@ -91,7 +91,10 @@ test('deploy job: the live report runs after the URL is captured, before the com
   const body = stepOf('deploy', 'Landing report (live checks)').body;
   assert.match(body, /continue-on-error: true/);
   assert.match(body, /npm run report -- --only live --url "\$DEPLOY_URL"/);
-  assert.match(body, /DEPLOY_URL: \$\{\{ steps\.output\.outputs\.url \}\}/);
+  assert.match(
+    body,
+    /DEPLOY_URL: \$\{\{ steps\.output\.outputs\.url \|\| steps\.target_deploy\.outputs\.url \}\}/,
+  );
   assert.match(
     stepOf('deploy', 'Upload live report').body,
     /name: landing-report-live$/m,
@@ -147,6 +150,209 @@ test('no step prints a secret: the report steps use no secrets', () => {
       (s) => /report/i.test(s.name) && s.body.includes('npm run report'),
     ))
       assert.doesNotMatch(step.body, /secrets\./, `${job}: ${step.name}`);
+});
+
+const DEPLOY_JOBS = ['deploy', 'site-qa-deploy'];
+const CLOUDFLARE_STEPS = {
+  deploy: [
+    'Read Pages project from site.config.json',
+    'Ensure the Pages project exists',
+    'Deploy to Cloudflare Pages',
+    'Capture deployment URLs',
+  ],
+  'site-qa-deploy': [
+    'Read Pages project from the site configuration',
+    'Ensure the Pages project exists',
+    'Deploy to Cloudflare Pages',
+    'Capture deployment URLs',
+  ],
+};
+const NEW_SECRETS = ['VERCEL_TOKEN', 'DEPLOY_SSH_KEY', 'DEPLOY_FTP_PASSWORD'];
+
+for (const job of DEPLOY_JOBS) {
+  test(`${job}: the target is read, then the gate, then every deploy step`, () => {
+    const target = index(job, 'Read deploy target');
+    const gate = index(job, 'Check deploy prerequisites');
+    assert.ok(target < gate);
+    for (const name of [
+      ...CLOUDFLARE_STEPS[job],
+      'Install lftp (FTPS fallback only)',
+      "Deploy to the site's target",
+    ])
+      assert.ok(gate < index(job, name), `${name} follows the gate`);
+    const body = stepOf(job, 'Read deploy target').body;
+    assert.match(body, /id: target$/m);
+    assert.match(
+      body,
+      job === 'deploy'
+        ? /node scripts\/deploy\/config\.mjs --branch "\$BRANCH" --github-output/
+        : /node scripts\/deploy\/config\.mjs --site "\$SITE" --branch "\$BRANCH" --github-output/,
+    );
+    assert.doesNotMatch(body, /secrets\./);
+  });
+
+  test(`${job}: the Cloudflare steps keep their commands and run only when the target dispatches to wrangler`, () => {
+    for (const name of CLOUDFLARE_STEPS[job]) {
+      assert.match(
+        stepOf(job, name).body,
+        /if: steps\.gate\.outputs\.enabled == 'true' && steps\.target\.outputs\.deploy_via == 'wrangler'/,
+        name,
+      );
+    }
+    const deploy = stepOf(job, 'Deploy to Cloudflare Pages').body;
+    assert.match(
+      deploy,
+      job === 'deploy'
+        ? /npx wrangler pages deploy dist \\/
+        : /npx wrangler pages deploy "sites\/\$SITE\/dist" \\/,
+    );
+    assert.match(deploy, /--project-name "\$CF_PAGES_PROJECT" \\/);
+    assert.match(deploy, /--branch "\$BRANCH" \\/);
+    // The Cloudflare secrets stay in the job environment, as before.
+    assert.match(
+      jobs[job].head,
+      /CLOUDFLARE_API_TOKEN: \$\{\{ secrets\.CLOUDFLARE_API_TOKEN \}\}/,
+    );
+    assert.match(
+      jobs[job].head,
+      /CLOUDFLARE_ACCOUNT_ID: \$\{\{ secrets\.CLOUDFLARE_ACCOUNT_ID \}\}/,
+    );
+  });
+
+  test(`${job}: the script deploy runs scripts/deploy.mjs for non-Cloudflare targets and exposes url and alias`, () => {
+    const step = stepOf(job, "Deploy to the site's target").body;
+    assert.match(step, /id: target_deploy$/m);
+    assert.match(
+      step,
+      /if: steps\.gate\.outputs\.enabled == 'true' && steps\.target\.outputs\.deploy_via == 'script'/,
+    );
+    assert.match(
+      step,
+      job === 'deploy'
+        ? /run: node scripts\/deploy\.mjs --branch "\$BRANCH" --github-output/
+        : /run: node scripts\/deploy\.mjs --site "\$SITE" --branch "\$BRANCH" --github-output/,
+    );
+    const lftp = stepOf(job, 'Install lftp (FTPS fallback only)').body;
+    assert.match(lftp, /steps\.target\.outputs\.needs_lftp == 'true'/);
+    assert.match(lftp, /deploy_via == 'script'/);
+    assert.ok(
+      index(job, 'Install lftp (FTPS fallback only)') <
+        index(job, "Deploy to the site's target"),
+    );
+    // The live report and the comment read the URL of whichever deploy ran.
+    const live = stepOf(job, 'Landing report (live checks)').body;
+    assert.match(
+      live,
+      /DEPLOY_URL: \$\{\{ steps\.output\.outputs\.url \|\| steps\.target_deploy\.outputs\.url \}\}/,
+    );
+    const comment = stepOf(job, 'Comment preview URL on the pull request').body;
+    assert.match(
+      comment,
+      /DEPLOY_URL: \$\{\{ steps\.output\.outputs\.url \|\| steps\.target_deploy\.outputs\.url \}\}/,
+    );
+    assert.match(
+      comment,
+      /ALIAS_URL: \$\{\{ steps\.output\.outputs\.alias \|\| steps\.target_deploy\.outputs\.alias \}\}/,
+    );
+    assert.ok(
+      index(job, "Deploy to the site's target") <
+        index(job, 'Landing report (live checks)'),
+    );
+  });
+
+  test(`${job}: the secrets gate checks the secrets of the effective target without reading their values`, () => {
+    const gate = stepOf(job, 'Check deploy prerequisites').body;
+    assert.match(
+      gate,
+      /NEEDED_SECRETS: \$\{\{ steps\.target\.outputs\.secrets \}\}/,
+    );
+    assert.match(
+      gate,
+      /DEPLOY_VIA: \$\{\{ steps\.target\.outputs\.deploy_via \}\}/,
+    );
+    assert.match(gate, /for name in \$NEEDED_SECRETS; do/);
+    assert.match(gate, /::warning title=Deploy skipped/);
+    for (const name of [
+      'CLOUDFLARE_API_TOKEN',
+      'CLOUDFLARE_ACCOUNT_ID',
+      ...NEW_SECRETS,
+    ])
+      assert.match(
+        gate,
+        new RegExp(`HAS_${name}: \\$\\{\\{ secrets\\.${name} != '' \\}\\}`),
+        name,
+      );
+    assert.match(gate, /Pull request from a fork/);
+  });
+
+  test(`${job}: a branch of a target without previews gets a comment when nothing is deployed`, () => {
+    const step = stepOf(job, 'Comment that the target has no preview').body;
+    assert.match(step, /steps\.gate\.outputs\.enabled != 'true'/);
+    assert.match(step, /steps\.target\.outputs\.preview_fallback == 'true'/);
+    assert.match(step, /github\.event_name == 'pull_request'/);
+    assert.match(step, /No preview: the/);
+    assert.doesNotMatch(step, /- Report: static /);
+    assert.ok(
+      index(job, 'Comment preview URL on the pull request') <
+        index(job, 'Comment that the target has no preview'),
+    );
+    assert.ok(
+      index(job, 'Comment that the target has no preview') <
+        index(job, 'Fail when the live report failed'),
+    );
+  });
+}
+
+test('the new deploy secrets appear only in the env of the script deploy step (and as booleans in the gate)', () => {
+  for (const name of NEW_SECRETS) {
+    const lines = text
+      .split('\n')
+      .filter((line) => line.includes(`secrets.${name}`));
+    assert.equal(lines.length, 4, `${name}: gate and deploy step in both jobs`);
+    for (const line of lines)
+      assert.match(
+        line,
+        new RegExp(
+          `^ {10}(HAS_${name}: \\$\\{\\{ secrets\\.${name} != '' \\}\\}|${name}: \\$\\{\\{ secrets\\.${name} \\}\\})$`,
+        ),
+        `${name}: ${line}`,
+      );
+  }
+  for (const job of DEPLOY_JOBS) {
+    assert.doesNotMatch(
+      jobs[job].head,
+      new RegExp(NEW_SECRETS.join('|')),
+      'not in the job env',
+    );
+    for (const step of jobs[job].steps) {
+      const holdsSecret = NEW_SECRETS.some((n) =>
+        step.body.includes(`secrets.${n} }}`),
+      );
+      if (holdsSecret) assert.equal(step.name, "Deploy to the site's target");
+      // No run script interpolates a secret expression.
+      const runBody = step.body.split(/\n {8}run: /)[1] ?? '';
+      assert.doesNotMatch(runBody, /\$\{\{ secrets\./, `${job}: ${step.name}`);
+    }
+  }
+});
+
+test('the other jobs never touch the new deploy secrets', () => {
+  for (const job of ['qa', 'sites'])
+    for (const step of jobs[job].steps)
+      assert.doesNotMatch(
+        step.body,
+        new RegExp(NEW_SECRETS.join('|')),
+        `${job}: ${step.name}`,
+      );
+});
+
+test('no step turns host key checking off or runs a deploy outside the target step', () => {
+  assert.doesNotMatch(text, /StrictHostKeyChecking/);
+  const deployCalls = text
+    .split('\n')
+    .filter((l) => /run: .*scripts\/deploy\.mjs/.test(l));
+  assert.equal(deployCalls.length, 2);
+  for (const line of deployCalls) assert.doesNotMatch(line, /--rollback/);
 });
 
 test('the workflow parses as YAML when a parser is installed', async () => {
