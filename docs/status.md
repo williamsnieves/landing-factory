@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-24 (add-legal-compliance merged; next: add-ai-images with OpenAI).
+Read this first in a new or compacted session. Last updated: 2026-10-24 (add-ai-images in PR #20; next: its real smoke test in a new session).
 
 ## Working agreements
 
@@ -26,11 +26,16 @@ Read this first in a new or compacted session. Last updated: 2026-10-24 (add-leg
 | Owner's digital-products landing `sites/tupathdigital` (first real customer test) | Merged: build from the brief (PR #16, with polish pass A after the owner's review) and redesign B from the owner's references (PR #17). Production: Pages project `tupathdigital` (https://tupathdigital.pages.dev) |
 | add-landing-report (performance and security audit, OWASP Top 10:2025, starter CSP/HSTS/COOP, planning-folder fix) | Merged (PR #18) and archived 2026-10-24; every landing 0 fail in CI (warnings: existing sites have no script CSP, HSTS, COOP or 404 page) |
 | add-legal-compliance (cookies and trackers, consent banner only when needed, legal notice and privacy policy from the brief, price-claim review) | Merged (PR #19) and archived 2026-10-24; every landing 0 fail (warn: market unknown; tupathdigital also warns on its "50% off" claims) |
-| add-ai-images (AI-generated images as a recorded source) | Next, on branch `change/add-ai-images`; provider OpenAI gpt-image (owner, 2026-10-24) |
+| add-ai-images (AI-generated images as a recorded source) | PR #20 open, CI on branch `change/add-ai-images`; provider OpenAI gpt-image (owner, 2026-10-24); real smoke test (task 6.1) pending |
 
 ## Resume here (2026-10-24)
 
-Branch `change/add-ai-images` (from main after PR #19; first commit archives add-legal-compliance). Next: propose `add-ai-images`. Owner chose OpenAI's GPT image models (2026-10-24); importing images the owner made with their own tool stays possible. The cloud session has no `OPENAI_API_KEY` and `api.openai.com` is not in the allowed domains yet: the owner adds both in the environment settings before a real generation can be verified (tests use a local fake server).
+Branch `change/add-ai-images`, PR #20 open (implemented; 467 tests; clean-clone checks pass). Only task 6.1 is open: the real smoke test. The owner added `OPENAI_API_KEY` (environment variable) and `api.openai.com` (allowed domains) on 2026-10-24; they take effect in a new session (in the old one the domain answered 401 without a key). In the new session:
+
+1. Check the key is visible without printing it (`[ -n "$OPENAI_API_KEY" ] && echo set`).
+2. Create a throwaway site (`npm run new-site -- zz-ai-smoke`, no brief, so AI images are allowed), then `node scripts/ai-images.mjs generate zz-ai-smoke --prompt "abstract glass shapes over a soft blue gradient" --as smoke --quality low` (dry run first).
+3. Check the file, the `assets.json` entry, `npm run credits -- --site zz-ai-smoke` (AI table) and `check-landing` `ai-provenance` with a `data-ai-disclosure` element; confirm the default model `gpt-image-1.5` works (if not, change `aiImages.model` in `qa.config.json` and `DEFAULT_CONFIG`).
+4. Remove the throwaway site (and restore `package-lock.json` if `npm install` touched it), check task 6.1 with the result, push to PR #20 and tell the owner.
 
 Reminder scheduled for 2026-11-01: the tupathdigital coupons FALL2026 (Etsy) and 92xsh57 (Gumroad) end on 31 October 2026; offer the owner to update or remove them.
 
