@@ -80,7 +80,17 @@
   "legal": {
     "regulated": false,
     "notices": [],
-    "constraints": "Sin promesas de resultados económicos."
+    "constraints": "Sin promesas de resultados económicos.",
+    "markets": ["ES"],
+    "holder": {
+      "name": "Taller Plantilla S.L.",
+      "taxId": "B00000000",
+      "address": "Calle Ficticia 1, 46001 Valencia, España",
+      "email": "hola@example.com",
+      "register": "Registro Mercantil de Valencia, tomo 0, folio 0"
+    },
+    "privacyContact": "privacidad@example.com",
+    "processing": { "analytics": "none", "forms": false, "embeds": [] }
   },
   "deploy": {
     "target": "cloudflare-pages",

@@ -78,6 +78,14 @@ export function renderMarkdown(report) {
       ),
       '',
     );
+    if (page.privacy) {
+      const pr = page.privacy;
+      const names = pr.cookies.map((c) => `${c.name} (${c.domain})`);
+      out.push(
+        `Privacy record (${pr.viewport}px; names and keys only, never values): cookies: ${names.join(', ') || 'none'}; localStorage keys: ${pr.storage.local.join(', ') || 'none'}; sessionStorage keys: ${pr.storage.session.join(', ') || 'none'}; third-party hosts: ${pr.thirdPartyHosts.join(', ') || 'none'}`,
+        '',
+      );
+    }
     if (page.reducedMotion) {
       const rm = page.reducedMotion;
       out.push(

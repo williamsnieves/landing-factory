@@ -79,6 +79,7 @@ Small fixes pending: panaderia process heading covered at 375 px; `new-landing.s
 ## Known gaps and follow-ups
 
 - Existing sites do not have the starter's hardening yet (script CSP, HSTS, COOP in `public/_headers`): `npm run report` warns on each. Follow-up: one small site change per site to opt in (copy `security.csp` from the root `astro.config.mjs` and the two header lines; tupathdigital first if the owner wants it), then check its QA and the live report.
+- tupathdigital legal follow-up (own site change, after add-legal-compliance merges): the report warns (no market) and flags the "50% off" coupons as price claims. The owner provides the markets (for example `EU`/`ES`) and the holder data (name or company, tax id, address, email, register if a company) and the processing answers; then add them to `sites/tupathdigital/brief.json` (never assumed), run `node scripts/legal.mjs --site tupathdigital --write`, add the legal notice and privacy policy pages with footer links, and review the coupon wording against the EU 30-day lowest-price rule (the coupons FALL2026 and 92xsh57 end on 31 October 2026, so they may simply be removed).
 - Etsy listing pages answer with a bot challenge (never bypassed); product data came from the owner's Etsy CSV export. Gumroad public product pages are readable (title, image, price in JSON-LD).
 
 - `section-shots.mjs` does not clear its output folder, so stale screenshots from earlier passes mix with new ones (seen on estudio-arquitectura). Clear `qa/<slug>/sections/` at the start of each run.

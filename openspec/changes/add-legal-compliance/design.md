@@ -138,6 +138,19 @@ processing: obj({ analytics: str({ enum: ['none','cookieless','cookies'] }),
 - `--skip legal` is allowed.
 - CI needs no workflow change: the static report already runs after QA.
 
+## Implementation notes
+
+Where the build differs from the text above (the smallest sound change that keeps the spec behavior):
+
+- **Components take their data as a prop.** `LegalNotice.astro` and `PrivacyPolicy.astro` receive `data` (the parsed `legal.json`, typed `LegalData` in `texts.ts`) instead of importing the file. A site without `src/data/legal.json` (the starter, or a site with no market) still type-checks, and the page that uses a component does the import. A small `LegalValue.astro` renders a value or the pending marker. The pending marker carries the field name: `<mark data-legal-pending="holder.taxId">`.
+- **`processing.analytics` can be pending.** When a privacy policy is required, an empty `legal.processing.analytics` is listed in `pending` and the policy shows the marker, because the policy cannot state what the page does with personal data without it. Forms and embeds are only mentioned when the brief gives them.
+- **`legal.mjs` with no market writes nothing** (exit 0, "requirements unknown"); an old `legal.json` next to a brief with no market makes `--check` fail. Without `--write` or `--check` it prints the data. The file is serialized so that Prettier leaves it alone, and `--check` keeps the recorded `thirdPartyHosts` when there is no build, so it does not flap. Unsupported page languages fall back to English texts with a warning.
+- **The `legal` config section is top-level in `qa.config.json`** (`essentialCookies`, `trackers`, and `essentialStorageKeys` for storage keys). Storage keys use the same classification as cookie names; an unclassified key warns.
+- **Cookie item precedence.** `legal-cookies` is one item: fail beats warn beats not run beats pass. A clean build with no fresh QA record is `not-run`, not a pass. A tracker host that QA saw requested at first load fails even when the build marks it as gated, or when only a script injected it. Tracker-category hosts are judged by `legal-cookies` only; `legal-third-party` lists every other external host (fonts, CDNs, cookieless analytics, unknown hosts) from the build and from QA's record.
+- **`404.html` does not need the footer links.** Every other built page does, and a legal page needs no link to itself.
+- **The privacy record is taken on the 1440 px load** (the widest viewport if there is no 1440 px one), after QA's scroll through the page and its 1.2 s settle, with cookie fields copied by name so a value cannot reach the report.
+- **Brief schema.** The assumed-identity rule also covers `legal` as a whole. `legal.markets` is in `missing` for everyone (asked first); the holder fields, the privacy contact and the analytics answer only once a market is named. The `/brief-intake` topic order now reads contact, legal identity, assets, brand, references, legal notices, deploy.
+
 ## Risks / Trade-offs
 
 - **[False sense of compliance]** → "not legal advice" appears in the report, the pages and the docs. The rule sets are few and named, and unknown markets never pass.

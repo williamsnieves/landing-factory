@@ -8,6 +8,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readdirSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
@@ -285,6 +286,131 @@ test('init without --lang leaves the page language empty and required (nothing a
   assert.ok(paths(errorsOf(brief)).includes('language'));
 });
 
+// --- Legal fields (add-legal-compliance, task 1.1) ---
+
+test('a valid legal block validates, and the fixture carries one', () => {
+  const brief = fixture();
+  assert.deepEqual(errorsOf(brief), []);
+  assert.deepEqual(brief.legal.markets, ['ES']);
+  brief.legal.markets = ['EU', 'US', 'DE'];
+  brief.legal.processing = {
+    analytics: 'cookieless',
+    forms: true,
+    embeds: ['YouTube'],
+  };
+  assert.deepEqual(errorsOf(brief), []);
+});
+
+test('a bad market code, a bad email and a bad analytics value are named with their path', () => {
+  const brief = fixture();
+  brief.legal.markets = ['ES', 'Spain', 'es'];
+  brief.legal.holder.email = 'not-an-email';
+  brief.legal.privacyContact = 'nobody@';
+  brief.legal.processing.analytics = 'maybe';
+  const errors = errorsOf(brief);
+  assert.deepEqual(paths(errors), [
+    'legal.markets[1]',
+    'legal.markets[2]',
+    'legal.holder.email',
+    'legal.privacyContact',
+    'legal.processing.analytics',
+  ]);
+  assert.match(errors[0].message, /"EU" or a two-letter ISO 3166-1/);
+  const unknown = fixture();
+  unknown.legal.holder.vat = 'x';
+  assert.deepEqual(paths(errorsOf(unknown)), ['legal.holder.vat']);
+});
+
+test('holder identity data cannot be assumed: the tax id, the holder and the privacy contact are errors', () => {
+  for (const field of [
+    'legal.holder.taxId',
+    'legal.holder.name',
+    'legal.holder',
+    'legal.privacyContact',
+    'legal',
+  ]) {
+    const brief = fixture();
+    brief.assumed.push({ field, reason: 'the agent chose it' });
+    const errors = errorsOf(brief);
+    assert.equal(errors.length, 1, field);
+    assert.equal(errors[0].path, `assumed[${brief.assumed.length - 1}].field`);
+    assert.match(errors[0].message, /holder identity data cannot be assumed/);
+  }
+  // Other legal fields can still be assumed (the analytics answer is a choice, not an identity).
+  const ok = fixture();
+  ok.assumed.push({
+    field: 'legal.processing.analytics',
+    reason: 'the customer said no analytics for now',
+  });
+  assert.deepEqual(errorsOf(ok), []);
+});
+
+test('missing lists the holder fields and the privacy contact only when a market is named', () => {
+  const noMarket = emptyBrief({ language: 'es', niche: 'x' });
+  const without = missingFields(noMarket).map((m) => m.path);
+  assert.ok(without.includes('legal.markets'));
+  assert.ok(!without.some((p) => p.startsWith('legal.holder')));
+  assert.ok(!without.includes('legal.privacyContact'));
+
+  const es = emptyBrief({ language: 'es', niche: 'x' });
+  es.legal.markets = ['ES'];
+  const withMarket = missingFields(es).map((m) => m.path);
+  assert.ok(!withMarket.includes('legal.markets'));
+  for (const path of [
+    'legal.holder.name',
+    'legal.holder.taxId',
+    'legal.holder.address',
+    'legal.holder.email',
+    'legal.privacyContact',
+    'legal.processing.analytics',
+  ])
+    assert.ok(withMarket.includes(path), path);
+  // Interview order: after the contact fields, before the assets.
+  assert.ok(
+    withMarket.indexOf('contact.social') <
+      withMarket.indexOf('legal.holder.name'),
+  );
+  assert.ok(
+    withMarket.indexOf('legal.privacyContact') < withMarket.indexOf('assets'),
+  );
+  assert.ok(
+    missingFields(es).every((m) => !m.required || !m.path.startsWith('legal')),
+  );
+
+  const noTax = fixture();
+  noTax.legal.holder.taxId = '';
+  assert.deepEqual(
+    missingFields(noTax).map((m) => m.path),
+    ['contact.phone', 'contact.address', 'legal.holder.taxId', 'brand.fonts'],
+  );
+});
+
+test('every brief on disk still validates, including sites/tupathdigital', () => {
+  const sitesDir = join(ROOT, 'sites');
+  for (const slug of readdirSync(sitesDir)) {
+    const file = join(sitesDir, slug, 'brief.json');
+    if (!existsSync(file)) continue;
+    const brief = JSON.parse(readFileSync(file, 'utf8'));
+    assert.deepEqual(
+      validateBrief(brief, {
+        baseDir: join(sitesDir, slug),
+        patternsDir: join(ROOT, 'patterns'),
+      }),
+      [],
+      slug,
+    );
+  }
+  assert.ok(existsSync(join(sitesDir, 'tupathdigital', 'brief.json')));
+});
+
+test('the summary shows the markets, the holder and the processing', () => {
+  const summary = summarizeBrief(fixture());
+  assert.match(summary, /Markets: ES/);
+  assert.match(summary, /Holder taxId: B00000000/);
+  assert.match(summary, /Privacy contact: privacidad@example\.com/);
+  assert.match(summary, /Analytics: none/);
+});
+
 test('missing reports only what the fixture lacks; summary marks assumed values', () => {
   const brief = fixture();
   assert.deepEqual(
@@ -501,16 +627,34 @@ test('the brief-intake skill names its commands, the topic order, the language r
     'Page language',
   ])
     assert.ok(skill.includes(needle), needle);
+
+  // The legal step: asked after the contact data, one line of why per item, holder identity never assumed.
+  const step = skill.indexOf('legal identity');
+  assert.ok(step > skill.indexOf('contact (email, phone'), 'after contact');
+  assert.ok(step < skill.indexOf('assets (own logo'), 'before assets');
+  for (const needle of [
+    'Where will you sell or promote this',
+    'legal.markets',
+    'legal.holder',
+    'legal.privacyContact',
+    'legal.processing',
+    'Never assume holder identity data',
+    'tax id',
+    'pending legal review',
+    'not legal advice',
+  ])
+    assert.ok(skill.includes(needle), needle);
   const order = [
     'business, offer',
     'audience',
     'goal',
     'tone',
     'contact',
+    'legal identity',
     'assets',
     'brand',
     'references',
-    'legal',
+    'legal notices',
     'deploy',
   ];
   const at = order.map((topic) =>
@@ -568,6 +712,37 @@ test('the new-landing skill reads the brief: validation, assumed fields, referen
   ])
     assert.ok(skill.includes(needle), needle);
   assert.doesNotMatch(skill, /panaderia|clinica-dental|samurai/i);
+});
+
+test('the new-landing skill adds the legal pages when the brief names a market and says "unknown" when it does not', () => {
+  const skill = readFileSync(
+    join(ROOT, '.claude/skills/new-landing/SKILL.md'),
+    'utf8',
+  );
+  for (const needle of [
+    '**Legal pages** (only when `legal.markets` in the brief is non-empty',
+    'node scripts/legal.mjs --site <slug> --write',
+    'node scripts/legal.mjs --site <slug> --check',
+    'src/data/legal.json',
+    '`pending`',
+    '`LegalNotice`',
+    '`PrivacyPolicy`',
+    '`aviso-legal` and `privacidad`',
+    '`legal-notice` and `privacy`',
+    'Link every legal page the market requires from the footer of every page',
+    'visible pending legal review marker',
+    'never fill a pending value yourself',
+    'not legal advice',
+    'legal requirements unknown',
+    '`legal-pages`',
+  ])
+    assert.ok(skill.includes(needle), needle);
+  // The legal step comes before the generic page step, and the final check runs the generator check.
+  assert.ok(skill.indexOf('**Legal pages**') < skill.indexOf('**Page**'));
+  assert.ok(
+    skill.indexOf('legal.mjs --site <slug> --check') >
+      skill.indexOf('### 8. Final check'),
+  );
 });
 
 test('the proposal template points at the brief, and preflight accepts a folder with only a brief and docs', async () => {

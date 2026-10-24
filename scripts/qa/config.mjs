@@ -2,6 +2,7 @@
 // A missing config file means "use the defaults" (spec: Configurable thresholds).
 import { existsSync, readFileSync } from 'node:fs';
 import { REPORT_DEFAULTS, validateReportConfig } from '../report/config.mjs';
+import { LEGAL_DEFAULTS, validateLegalConfig } from '../report/legal-rules.mjs';
 
 export const DEFAULT_CONFIG = Object.freeze({
   viewports: [
@@ -35,6 +36,8 @@ export const DEFAULT_CONFIG = Object.freeze({
   brief: { sampleWords: ['ejemplo', 'example', 'sample'] },
   // Thresholds of the landing report (scripts/landing-report.mjs); defaults and validation live in scripts/report/config.mjs.
   report: REPORT_DEFAULTS,
+  // Cookie allow list and tracker extensions of the legal area of the landing report (scripts/report/legal-rules.mjs).
+  legal: LEGAL_DEFAULTS,
 });
 
 const LIGHTHOUSE_CATEGORIES = [
@@ -83,6 +86,7 @@ export function validateConfig(config) {
       'diversity',
       'brief',
       'report',
+      'legal',
     ],
     'config',
   );
@@ -253,6 +257,7 @@ export function validateConfig(config) {
   }
   // The report section is validated by scripts/report/config.mjs (defaults live there too).
   if ('report' in config) errors.push(...validateReportConfig(config.report));
+  if ('legal' in config) errors.push(...validateLegalConfig(config.legal));
   return errors;
 }
 

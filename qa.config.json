@@ -57,5 +57,10 @@
     "audit": { "ignore": [] },
     "externalLinks": { "max": 50, "gapMs": 250 },
     "live": { "timeoutMs": 10000 }
+  },
+  "legal": {
+    "essentialCookies": ["__cf_bm", "cf_clearance"],
+    "essentialStorageKeys": [],
+    "trackers": []
   }
 }

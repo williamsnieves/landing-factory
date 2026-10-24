@@ -25,6 +25,7 @@ export const COPIED_PATHS = [
   'src/layouts',
   'src/components/motion',
   'src/components/three',
+  'src/components/legal',
   'src/styles',
   'src/env.d.ts',
   'public/_headers',

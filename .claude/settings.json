@@ -29,6 +29,7 @@
       "Bash(node scripts/brief.mjs *)",
       "Bash(node scripts/find-images.mjs *)",
       "Bash(node scripts/credits.mjs *)",
+      "Bash(node scripts/legal.mjs *)",
       "Bash(node scripts/check-landing.mjs *)",
       "Bash(node scripts/landing-report.mjs *)",
       "Bash(node scripts/render-poster.mjs *)",

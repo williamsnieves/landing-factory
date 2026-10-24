@@ -1,6 +1,7 @@
 // Markdown rendering of the report (report.json is the source of truth).
 import { OWASP_CATEGORIES, OWASP_EDITION, OWASP_URL } from './owasp.mjs';
 import { worstStatus } from './items.mjs';
+import { LEGAL_NOTE } from './legal.mjs';
 
 const cell = (value) =>
   String(value ?? '')
@@ -147,6 +148,11 @@ export function renderMarkdown(report) {
       );
     }
     out.push(itemTable(perf), '');
+  }
+
+  const legal = report.items.filter((i) => i.area === 'legal');
+  if (legal.length) {
+    out.push('## Legal', '', itemTable(legal), '', `_${LEGAL_NOTE}_`, '');
   }
   return `${out.join('\n')}\n`;
 }
