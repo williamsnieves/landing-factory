@@ -60,7 +60,8 @@
     "colors": ["#1f3a5f", "#f4efe6"],
     "fonts": [],
     "keep": "El logotipo y el azul oscuro.",
-    "avoid": "Fondos negros y estética de startup."
+    "avoid": "Fondos negros y estética de startup.",
+    "aiImages": "allowed"
   },
   "references": {
     "liked": [

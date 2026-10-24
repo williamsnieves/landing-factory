@@ -77,3 +77,32 @@ test('diversity thresholds default to the calibrated values and are validated', 
   assert.match(errors, /diversity\.hashHamming/);
   assert.match(errors, /diversity\.extra/);
 });
+
+test('aiImages defaults to openai gpt-image-1.5, 1536x1024, high quality and 12 per site, and is validated', () => {
+  assert.deepEqual(DEFAULT_CONFIG.aiImages, {
+    provider: 'openai',
+    model: 'gpt-image-1.5',
+    size: '1536x1024',
+    quality: 'high',
+    maxPerSite: 12,
+  });
+  assert.deepEqual(validateConfig(structuredClone(DEFAULT_CONFIG)), []);
+  assert.equal(loadConfig('/nonexistent').aiImages.maxPerSite, 12);
+  const bad = structuredClone(DEFAULT_CONFIG);
+  bad.aiImages.provider = 'other';
+  bad.aiImages.size = '10x10';
+  bad.aiImages.quality = 'ultra';
+  bad.aiImages.maxPerSite = -1;
+  bad.aiImages.model = 'a b';
+  bad.aiImages.extra = true;
+  const errors = validateConfig(bad).join('\n');
+  for (const key of [
+    'provider',
+    'size',
+    'quality',
+    'maxPerSite',
+    'model',
+    'extra',
+  ])
+    assert.match(errors, new RegExp(`aiImages\\.${key}`), key);
+});

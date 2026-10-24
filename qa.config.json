@@ -62,5 +62,12 @@
     "essentialCookies": ["__cf_bm", "cf_clearance"],
     "essentialStorageKeys": [],
     "trackers": []
+  },
+  "aiImages": {
+    "provider": "openai",
+    "model": "gpt-image-1.5",
+    "size": "1536x1024",
+    "quality": "high",
+    "maxPerSite": 12
   }
 }

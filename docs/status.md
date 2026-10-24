@@ -70,6 +70,8 @@ Follow `docs/product-plan.md`:
 2. `add-brief-intake`; then the owner's digital-products landing as the first real customer test.
 3. `add-landing-report` and `add-legal-compliance` (merged), then `add-ai-images` (owner, 2026-10-24), `add-deploy-adapters`, `add-agent-interface`, `add-3d-models`; one landing per repository introduced gradually (export first).
 
+`add-ai-images`: the real smoke test (task 6.1) waits for `OPENAI_API_KEY` as an environment secret and `api.openai.com` in the allowed domains; the default model `gpt-image-1.5` is confirmed by it.
+
 Small fixes pending: panaderia process heading covered at 375 px; `new-landing.sh` final check without `--refs`.
 
 ## Known gaps and follow-ups

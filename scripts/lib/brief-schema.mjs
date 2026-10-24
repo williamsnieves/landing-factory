@@ -22,6 +22,8 @@ export const ASSET_KINDS = [
   'other',
 ];
 export const ANALYTICS_MODES = ['none', 'cookieless', 'cookies'];
+/** Does the customer allow AI-generated images on the page? Empty means not decided, which counts as not allowed. */
+export const AI_IMAGE_MODES = ['allowed', 'not-allowed'];
 export const DEPLOY_TARGETS = [
   'cloudflare-pages',
   'vercel',
@@ -91,6 +93,8 @@ export const SCHEMA = obj({
     fonts: list(str()),
     keep: str(),
     avoid: str(),
+    // AI-generated illustrations (scripts/ai-images.mjs): only the customer decides, never assumed.
+    aiImages: str({ enum: AI_IMAGE_MODES }),
   }),
   references: obj({
     liked: list(
@@ -224,6 +228,9 @@ function isUrl(value, protocols) {
 
 /** Holder identity (legal.holder.*, legal.privacyContact, or their parent `legal`) is never a value chosen for the customer. */
 const HOLDER_IDENTITY = /^legal(\.(holder|privacyContact)([.[].*)?)?$/;
+
+/** The customer's AI-image consent is their decision: it can never be listed as assumed. */
+const AI_CONSENT = /^brand\.aiImages$/;
 
 /** Each check returns an error text (what was expected) or null. `ctx` carries baseDir and patternsDir. */
 const FORMATS = {
@@ -396,6 +403,11 @@ export function validateBrief(
             path,
             `holder identity data cannot be assumed ("${field}"): ask the customer, or leave it empty and the legal pages show a pending marker`,
           );
+        if (AI_CONSENT.test(field))
+          return fail(
+            path,
+            `AI-image consent cannot be assumed ("${field}"): the customer must decide it, or leave it empty (empty counts as not allowed)`,
+          );
         if (!parsePath(field))
           return fail(
             path,
@@ -426,6 +438,23 @@ export function validateBrief(
 
 export const formatErrors = (errors) =>
   errors.map((e) => `  - ${e.path}: ${e.message}`).join('\n');
+
+// --------------------------------------------------------------------------------------------------
+// AI-image consent
+
+/**
+ * Does the customer allow AI-generated images? No brief (null): yes, demo niches. A brief: only an explicit
+ * `allowed` that is not listed as assumed (directly or through `brand`); empty or `not-allowed` is no.
+ * Returns { allowed, value } where value is the brief's value, "empty", or "(no brief)".
+ */
+export function aiImagesConsent(brief) {
+  if (!brief) return { allowed: true, value: '(no brief)' };
+  const value = String(brief.brand?.aiImages ?? '').trim();
+  return {
+    allowed: value === 'allowed' && !isAssumed(brief, 'brand.aiImages'),
+    value: value || 'empty',
+  };
+}
 
 // --------------------------------------------------------------------------------------------------
 // Missing fields, in interview order
@@ -518,6 +547,11 @@ export const MISSING_FIELDS = [
   ],
   ['brand.colors', false, 'Are there brand colors to keep?'],
   ['brand.fonts', false, 'Are there brand fonts to keep?'],
+  [
+    'brand.aiImages',
+    false,
+    'May the page use AI-generated illustrations (never photos of your people or products)? Empty counts as not allowed.',
+  ],
   ['references.liked', false, 'Which sites do you like, and what about them?'],
   ['references.disliked', false, 'Which sites do you dislike, and why?'],
   [
@@ -608,6 +642,7 @@ export function summarizeBrief(brief) {
   field('Brand fonts', 'brand.fonts');
   field('Keep', 'brand.keep');
   field('Avoid', 'brand.avoid');
+  field('AI images', 'brand.aiImages');
   (brief.references?.liked ?? []).forEach((r) =>
     lines.push(
       `Likes: ${r.url}${r.sheet ? ` (sheet ${r.sheet})` : ''}${r.why ? `, ${r.why}` : ''}`,

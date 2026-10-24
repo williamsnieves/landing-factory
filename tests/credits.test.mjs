@@ -13,6 +13,7 @@ import { join, resolve } from 'node:path';
 import { after, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import {
+  AI_REQUIRED_FIELDS,
   creditList,
   groupBySource,
   main,
@@ -311,4 +312,106 @@ test('a customer entry needs owner and permission, not the stock fields; stock e
       }),
     /has no "title"/,
   );
+});
+
+const aiEntry = (extra = {}) => ({
+  file: 'hero-glass.webp',
+  title: 'Abstract glass shapes',
+  source: 'ai',
+  generator: 'openai',
+  model: 'gpt-image-1.5',
+  prompt: 'An abstract gradient of light and glass shapes',
+  revisedPrompt: '',
+  size: '1536x1024',
+  quality: 'high',
+  createdAt: '2026-10-25T10:00:00.000Z',
+  terms: 'https://openai.com/policies/terms-of-use/',
+  credit: false,
+  note: '',
+  ...extra,
+});
+
+test('an AI entry needs the provenance fields and nothing of the stock ones', () => {
+  validateManifest({ images: [aiEntry()] });
+  for (const field of AI_REQUIRED_FIELDS) {
+    const entry = aiEntry();
+    delete entry[field];
+    assert.throws(
+      () => validateManifest({ images: [entry] }),
+      new RegExp(`has no "${field}"`),
+      field,
+    );
+  }
+  assert.throws(
+    () => validateManifest({ images: [aiEntry({ credit: 'no' })] }),
+    /"credit" must be true or false/,
+  );
+});
+
+test('AI images get their own table with tool, model, date and terms, no footer credit, and stock-only output is unchanged', () => {
+  const root = freshRoot();
+  syncCredits({ slug: 'demo', root });
+  const stockCredits = read(root, 'CREDITS.md');
+  const stockJson = read(root, 'src/data/credits.json');
+  assert.ok(!stockCredits.includes('AI-generated images'));
+
+  const manifestPath = join(root, 'sites/demo/assets.json');
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+  manifest.images.push(
+    aiEntry(),
+    aiEntry({
+      file: 'cover.png',
+      generator: 'Midjourney',
+      model: 'v7',
+      imported: true,
+      createdAt: '2026-10-20T00:00:00.000Z',
+      note: 'Made by the owner.',
+    }),
+  );
+  writeFileSync(manifestPath, JSON.stringify(manifest));
+  syncCredits({ slug: 'demo', root });
+  const credits = read(root, 'CREDITS.md');
+  const section = credits.slice(credits.indexOf('### AI-generated images'));
+  assert.match(
+    section,
+    /\| `hero-glass\.webp`\s+\| openai gpt-image-1\.5\s+\| 2026-10-25\s+\| https:\/\/openai\.com\/policies\/terms-of-use\/\s+\|/,
+  );
+  assert.match(
+    section,
+    /\| `cover\.png`\s+\| Midjourney v7 \(imported\)\s+\| 2026-10-20\s+\|.*\| Made by the owner\s+\|/,
+  );
+  assert.ok(
+    credits.indexOf('### AI-generated images') <
+      credits.indexOf('<!-- credits:end -->'),
+  );
+  // The stock table and the footer list are exactly what they were; AI images add no credit line.
+  assert.equal(read(root, 'src/data/credits.json'), stockJson);
+  assert.ok(
+    credits.startsWith(
+      stockCredits.slice(0, stockCredits.indexOf('<!-- credits:end -->') - 2),
+    ),
+  );
+  assert.equal(
+    syncCredits({ slug: 'demo', root, check: true }).stale.length,
+    0,
+  );
+  // Even credit: true does not put an AI image (no source page) in the footer list.
+  assert.deepEqual(creditList([aiEntry({ credit: true })]), []);
+  // Only AI images: no stock table, still a valid block; and the table passes prettier.
+  const only = renderCreditsFile('# Credits\n', [aiEntry()]);
+  assert.ok(!only.includes('No photographs are used yet.'));
+  assert.ok(only.includes('### AI-generated images'));
+  const prettier = join(ROOT, 'node_modules/prettier/bin/prettier.cjs');
+  const result = spawnSync(
+    process.execPath,
+    [
+      prettier,
+      '--config',
+      join(ROOT, '.prettierrc.json'),
+      '--check',
+      join(root, 'sites/demo/CREDITS.md'),
+    ],
+    { cwd: ROOT, encoding: 'utf8' },
+  );
+  assert.equal(result.status, 0, result.stdout + result.stderr);
 });

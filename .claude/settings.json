@@ -28,6 +28,7 @@
       "Bash(node scripts/preflight.mjs *)",
       "Bash(node scripts/brief.mjs *)",
       "Bash(node scripts/find-images.mjs *)",
+      "Bash(node scripts/ai-images.mjs *)",
       "Bash(node scripts/credits.mjs *)",
       "Bash(node scripts/legal.mjs *)",
       "Bash(node scripts/check-landing.mjs *)",

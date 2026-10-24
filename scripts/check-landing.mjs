@@ -18,6 +18,10 @@
 //   brief-facts        (only when sites/<slug>/brief.json exists) a non-assumed fact of the brief (business name, primary
 //                      call-to-action URL, contact email and phone, each product name and price) is missing from the
 //                      built dist/index.html, or an element holding a customer fact also says "ejemplo"/"example"/"sample"
+//   ai-provenance      (only when assets.json has entries with source "ai") an AI entry lacks a provenance field (generator,
+//                      model, prompt, createdAt, terms, ...) or its image file, the brief does not allow AI images
+//                      (brand.aiImages is not "allowed"), the built dist/index.html has no visible element marked
+//                      data-ai-disclosure with text, or an entry's prompt breaks the AI image prompt policy
 //   copy-match         (--refs) 8 words in a row of the built page text also appear in a reference page
 //
 // Warnings (never failures): archetype-target, the built layout signature is outside the ranges of the primary
@@ -31,8 +35,9 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
 import { reexecWithEnvProxy } from '../.claude/skills/analyze-reference/scripts/proxy.mjs';
-import { syncCredits } from './credits.mjs';
+import { AI_REQUIRED_FIELDS, isAi, syncCredits } from './credits.mjs';
 import {
+  aiImagesConsent,
   formatErrors,
   getPath,
   isAssumed,
@@ -44,6 +49,7 @@ import {
   loadCatalog,
   readArchetypeMeta,
 } from './lib/archetypes.mjs';
+import { checkPrompt, formatViolations } from './lib/ai-prompt-policy.mjs';
 import { compareSignatures, targetWarnings } from './lib/layout-core.mjs';
 import { loadConfig } from './qa/config.mjs';
 import { SLUG_PATTERN, listSites } from './lib/sites.mjs';
@@ -270,7 +276,10 @@ export function countFileUses(siteDir, files) {
 export function checkPhotoUses(siteDir, manifest, max = MAX_USES_PER_PHOTO) {
   const bySource = new Map();
   for (const entry of manifest.images) {
-    const key = entry.sourcePage || entry.title || entry.file;
+    // An AI image has no source page and its title is a description, so every AI file counts on its own.
+    const key = isAi(entry)
+      ? `ai:${entry.file}`
+      : entry.sourcePage || entry.title || entry.file;
     if (!bySource.has(key))
       bySource.set(key, { title: entry.title ?? key, files: [] });
     bySource.get(key).files.push(entry.file);
@@ -1109,6 +1118,135 @@ export async function fetchReferences(urls, fetchFn = globalThis.fetch) {
 }
 
 // --------------------------------------------------------------------------------------------------
+// Rule: AI images have provenance, consent and a visible disclosure
+
+/** The first element carrying data-ai-disclosure: { text, hidden }, or null when the page has none. */
+export function aiDisclosureIn(html) {
+  const open = /<([a-zA-Z][\w:-]*)\b([^>]*\bdata-ai-disclosure\b[^>]*)>/g;
+  let found = null;
+  for (const match of html.matchAll(open)) {
+    const [whole, tag, attributes] = match;
+    const rest = html.slice(match.index + whole.length);
+    const close = new RegExp(`</${tag}\\s*>`, 'i').exec(rest);
+    const text = htmlToText(close ? rest.slice(0, close.index) : rest)
+      .replace(/\s+/g, ' ')
+      .trim();
+    const hidden =
+      /\shidden(?:[\s=>]|$)/i.test(` ${attributes} `) ||
+      /aria-hidden\s*=\s*["']?true/i.test(attributes) ||
+      /style\s*=\s*["'][^"']*(?:display\s*:\s*none|visibility\s*:\s*hidden)/i.test(
+        attributes,
+      );
+    const candidate = { text, hidden };
+    if (text && !hidden) return candidate;
+    found ??= candidate;
+  }
+  return found;
+}
+
+export function checkAiProvenance(siteDir, manifest) {
+  const entries = manifest.images.filter(isAi);
+  if (!entries.length) return [];
+  const slug = basename(siteDir);
+  const failures = [];
+  const files = imageFiles(siteDir);
+
+  for (const entry of entries) {
+    for (const field of AI_REQUIRED_FIELDS)
+      if (
+        entry[field] === undefined ||
+        entry[field] === '' ||
+        entry[field] === null
+      )
+        failures.push(
+          failure(
+            'ai-provenance',
+            entry.file ?? '(no file)',
+            `AI image ${entry.file ?? '(no file)'} in assets.json has no "${field}"; record how it was made (node scripts/ai-images.mjs generate or import)`,
+          ),
+        );
+    if (
+      entry.file &&
+      !files.some((file) => manifestNames(file).includes(entry.file))
+    )
+      failures.push(
+        failure(
+          'ai-provenance',
+          entry.file,
+          `AI image ${entry.file} is listed in assets.json but no such image exists in src/assets/ or public/; restore the file or remove the entry`,
+        ),
+      );
+  }
+
+  // Consent: the brief decides. Without one, AI images are allowed (demo niches).
+  const briefPath = join(siteDir, 'brief.json');
+  let brief = null;
+  if (existsSync(briefPath)) {
+    try {
+      brief = JSON.parse(readFileSync(briefPath, 'utf8'));
+    } catch {
+      brief = null; // brief-facts reports an unreadable brief
+    }
+    const { allowed, value } = brief
+      ? aiImagesConsent(brief)
+      : { allowed: true, value: '' };
+    if (!allowed)
+      failures.push(
+        failure(
+          'ai-provenance',
+          'brief.json',
+          `sites/${slug}/brief.json brand.aiImages is ${value}, not "allowed", but assets.json has ${entries.length} AI image${entries.length === 1 ? '' : 's'} (${entries.map((e) => e.file).join(', ')}); remove them or ask the customer`,
+        ),
+      );
+  }
+
+  // Prompt policy, so an entry edited by hand cannot slip a forbidden subject through.
+  for (const entry of entries) {
+    if (typeof entry.prompt !== 'string' || !entry.prompt.trim()) continue;
+    const violations = checkPrompt(entry.prompt, brief);
+    if (violations.length)
+      failures.push(
+        failure(
+          'ai-provenance',
+          entry.file,
+          `AI image ${entry.file} has a prompt that breaks the prompt policy: ${formatViolations(violations)}`,
+        ),
+      );
+  }
+
+  // Disclosure: the built home page says that some images are AI-generated.
+  const indexPath = join(siteDir, 'dist', 'index.html');
+  if (!existsSync(indexPath))
+    failures.push(
+      failure(
+        'ai-provenance',
+        'dist/index.html',
+        `sites/${slug}/dist/index.html does not exist; build first (npm run build -w site-${slug}) so the AI disclosure can be checked on the page`,
+      ),
+    );
+  else {
+    const disclosure = aiDisclosureIn(readFileSync(indexPath, 'utf8'));
+    if (!disclosure)
+      failures.push(
+        failure(
+          'ai-provenance',
+          'dist/index.html',
+          `the site uses AI images but dist/index.html has no element with data-ai-disclosure; add <p data-ai-disclosure> "Some images on this page were generated with AI." to the footer`,
+        ),
+      );
+    else if (disclosure.hidden || !disclosure.text)
+      failures.push(
+        failure(
+          'ai-provenance',
+          'dist/index.html',
+          `the data-ai-disclosure element on dist/index.html is ${disclosure.hidden ? 'hidden' : 'empty'}; the AI disclosure must be visible text`,
+        ),
+      );
+  }
+  return failures;
+}
+
+// --------------------------------------------------------------------------------------------------
 // Orchestration
 
 export async function runChecks({
@@ -1142,6 +1280,9 @@ export async function runChecks({
         ),
     ],
     ['scenes', () => checkScenes(siteDir, manifest)],
+    ...(manifest.images.some(isAi)
+      ? [['ai-provenance', () => checkAiProvenance(siteDir, manifest)]]
+      : []),
     ...(existsSync(join(siteDir, 'brief.json'))
       ? [
           [
@@ -1208,6 +1349,9 @@ Final check of sites/<slug>/ after site QA passes. Fails, naming the item, when:
   scenes            a built [data-scene] has no poster, a poster missing from assets.json, or the site has more than ${MAX_SCENES} scenes
   brief-facts       (only with sites/<slug>/brief.json) a non-assumed brief fact (business name, primary CTA URL, email, phone,
                     product names and prices) is missing from dist/index.html, or sits in an element that says "ejemplo"/"example"/"sample"
+  ai-provenance     (only when assets.json has AI images) an AI entry without generator, model, prompt, date or terms, or without its
+                    file; a brief that does not allow AI images; no visible data-ai-disclosure element on dist/index.html;
+                    a prompt that breaks the AI image prompt policy
   copy-match        (--refs) ${SHINGLE_WORDS} words in a row of the built page also occur in a reference
 
   --site <slug>     the site (required)
