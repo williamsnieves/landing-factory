@@ -25,6 +25,7 @@ Read this first in a new or compacted session. Last updated: 2026-10-24 (tupathd
 | add-brief-intake (`brief.json`, `/brief-intake` interview, generation reads the brief, `brief-facts` check) | Merged (PR #15) and archived 2026-10-22 |
 | Owner's digital-products landing `sites/tupathdigital` (first real customer test) | Merged: build from the brief (PR #16, with polish pass A after the owner's review) and redesign B from the owner's references (PR #17). Production: Pages project `tupathdigital` (https://tupathdigital.pages.dev) |
 | add-landing-report (performance and security audit, OWASP Top 10) | Next, on branch `change/add-landing-report` (not proposed yet) |
+| add-ai-images (AI-generated images as a recorded source) | Planned after add-landing-report (owner, 2026-10-24) |
 
 ## Resume here (2026-10-24)
 
@@ -45,6 +46,8 @@ Reminder scheduled for 2026-11-01: the tupathdigital coupons FALL2026 (Etsy) and
 - Pass B idea list not yet done: real reviews or ratings once the owner has them; a "prompt → result" showcase if the owner provides real examples.
 
 ## Owner decisions to keep (2026-10-21)
+
+- 2026-10-24: security audit framed by the OWASP Top 10; add `add-ai-images` after the report (today images come only from the customer, Commons/The Met or code-rendered posters; the owner can already hand in AI images made with their own tool as customer files).
 
 - Archetypes are only a base: blends are driven by the requirement and the references; reference-led (`custom`) landings are allowed; deviations are logged, never failed.
 - One landing per repository, introduced gradually: monorepo now, then an export command, then generation straight into a repository, then product storage (`docs/product-plan.md`).
@@ -67,7 +70,7 @@ Follow `docs/product-plan.md`:
 
 1. `add-design-archetypes` (archetype blends steered by the requirement and the references, real diversity measure), validated by the three-niche pilot. Archetypes are a starting grammar, not a template; the hard rules are the quality budgets, licensing and originality, and the layout diversity rule.
 2. `add-brief-intake`; then the owner's digital-products landing as the first real customer test.
-3. `add-landing-report`, `add-deploy-adapters`, `add-agent-interface`, `add-3d-models`; one landing per repository introduced gradually (export first).
+3. `add-landing-report` (OWASP Top 10), then `add-ai-images` (owner, 2026-10-24), `add-deploy-adapters`, `add-agent-interface`, `add-3d-models`; one landing per repository introduced gradually (export first).
 
 Small fixes pending: panaderia process heading covered at 375 px; `new-landing.sh` final check without `--refs`.
 
