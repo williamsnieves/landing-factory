@@ -407,6 +407,22 @@ test('CLI import copies the brief and its local assets into the site, and valida
   assert.equal(cli(['import', '--site', 'x'], env).code, 2);
 });
 
+test("CLI import onto the brief's own location is a no-op and keeps the assets", () => {
+  const root = mkdtempSync(join(tmp, 'root-'));
+  const env = { LANDING_FACTORY_ROOT: root };
+  const site = join(root, 'sites/yaaqui');
+  cpSync(FIXTURE, site, { recursive: true });
+  const before = readFileSync(join(site, 'brief.json'), 'utf8');
+  const done = cli(
+    ['import', '--file', join(site, 'brief.json'), '--site', 'yaaqui'],
+    env,
+  );
+  assert.equal(done.code, 0, done.stderr);
+  assert.match(done.stdout, /already in place/);
+  assert.equal(readFileSync(join(site, 'brief.json'), 'utf8'), before);
+  assert.ok(existsSync(join(site, 'assets/logo.svg')));
+});
+
 test('the script runs as a process: help exits 0, --site reads the repo sites/ folder without LANDING_FACTORY_ROOT', () => {
   const help = spawnSync(process.execPath, ['scripts/brief.mjs', '--help'], {
     cwd: ROOT,
@@ -454,7 +470,7 @@ test('new-site accepts a folder that holds a brief.json next to Markdown docs an
   writeFileSync(join(other, 'notes.json'), '{}');
   assert.throws(
     () => scaffoldSite({ slug: 'otra', sitesDir, allowExistingDocs: true }),
-    /other than Markdown docs or brief\.json/,
+    /other than Markdown docs, brief\.json or its assets folder/,
   );
 });
 

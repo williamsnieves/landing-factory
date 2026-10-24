@@ -23,6 +23,8 @@ export const SHARED_PATHS = [
   'qa.config.json',
   'scripts/qa.mjs',
   'scripts/qa/',
+  'scripts/landing-report.mjs',
+  'scripts/report/',
   'scripts/lib/',
   'scripts/parse-wrangler-output.mjs',
   '.github/workflows/',

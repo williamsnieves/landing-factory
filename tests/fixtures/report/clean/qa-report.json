@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "verdict": "passed",
+  "finishedAt": "2999-01-01T00:00:00.000Z",
+  "pages": [
+    {
+      "path": "/",
+      "lighthouse": {
+        "presets": [
+          {
+            "preset": "mobile",
+            "scores": {
+              "performance": 98,
+              "accessibility": 100,
+              "seo": 100,
+              "best-practices": 100
+            },
+            "detail": {
+              "lcpMs": 1200,
+              "lcpElement": {
+                "selector": "main#main > h1",
+                "snippet": "<h1>",
+                "label": "Fixture landing"
+              },
+              "cls": 0,
+              "tbtMs": 10,
+              "totalByteWeightKb": 20,
+              "requestCount": 5,
+              "images": { "savingsKb": 0, "items": [] },
+              "fonts": { "items": [] },
+              "renderBlocking": [],
+              "thirdParties": []
+            }
+          },
+          {
+            "preset": "desktop",
+            "scores": {
+              "performance": 100,
+              "accessibility": 100,
+              "seo": 100,
+              "best-practices": 100
+            },
+            "detail": {
+              "lcpMs": 400,
+              "lcpElement": {
+                "selector": "main#main > h1",
+                "snippet": "<h1>",
+                "label": "Fixture landing"
+              },
+              "cls": 0,
+              "tbtMs": 0,
+              "totalByteWeightKb": 20,
+              "requestCount": 5,
+              "images": { "savingsKb": 0, "items": [] },
+              "fonts": { "items": [] },
+              "renderBlocking": [],
+              "thirdParties": []
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

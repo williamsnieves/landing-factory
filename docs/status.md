@@ -76,7 +76,7 @@ Small fixes pending: panaderia process heading covered at 375 px; `new-landing.s
 
 ## Known gaps and follow-ups
 
-- `new-landing.sh`/`new-site --allow-existing-docs`/preflight refuse a `sites/<slug>/` that holds `brief.json` plus the `assets/` folder the `/brief-intake` skill tells you to fill (only `*.md` and `brief.json` are accepted). Workaround used for tupathdigital: pass `--brief` from a copy outside `sites/`. Fix: accept the asset paths the brief names.
+- Existing sites do not have the starter's hardening yet (script CSP, HSTS, COOP in `public/_headers`): `npm run report` warns on each. Follow-up: one small site change per site to opt in (copy `security.csp` from the root `astro.config.mjs` and the two header lines; tupathdigital first if the owner wants it), then check its QA and the live report.
 - Etsy listing pages answer with a bot challenge (never bypassed); product data came from the owner's Etsy CSV export. Gumroad public product pages are readable (title, image, price in JSON-LD).
 
 - `section-shots.mjs` does not clear its output folder, so stale screenshots from earlier passes mix with new ones (seen on estudio-arquitectura). Clear `qa/<slug>/sections/` at the start of each run.

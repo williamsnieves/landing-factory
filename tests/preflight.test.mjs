@@ -174,6 +174,21 @@ test('checkSlug: free, planning docs only, and occupied folders', () => {
   assert.equal(checkSlug('Not A Slug', dir).ok, false);
 });
 
+test('checkSlug: brief.json with its assets/ folder is accepted; assets/ alone is not', () => {
+  const dir = sitesDir();
+  mkdirSync(join(dir, 'con-brief/assets'), { recursive: true });
+  writeFileSync(join(dir, 'con-brief/brief.json'), '{}');
+  writeFileSync(join(dir, 'con-brief/assets/logo.webp'), 'x');
+  assert.equal(checkSlug('con-brief', dir).ok, true);
+  mkdirSync(join(dir, 'sin-brief/assets'), { recursive: true });
+  const alone = checkSlug('sin-brief', dir);
+  assert.equal(alone.ok, false);
+  assert.match(alone.detail, /\(assets\)/);
+  mkdirSync(join(dir, 'con-src/src'), { recursive: true });
+  writeFileSync(join(dir, 'con-src/brief.json'), '{}');
+  assert.match(checkSlug('con-src', dir).detail, /\(src\)/);
+});
+
 test('the CLI prints help and exits 2 on bad usage', () => {
   const run = (...args) =>
     spawnSync(process.execPath, ['scripts/preflight.mjs', ...args], {

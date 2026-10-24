@@ -87,7 +87,7 @@
 | A07 Authentication Failures                  | not applicable (no accounts); a password input warns                                                                                |
 | A08 Software or Data Integrity Failures      | SRI on external scripts (fail) and stylesheets (warn); deploys come only from CI after QA and the report (recorded as pass, by design) |
 | A09 Security Logging and Alerting Failures   | not applicable (static host; no application logs to keep)                                                                           |
-| A10 Mishandling of Exceptional Conditions    | `404.html` exists; live: unknown path answers 404                                                                                   |
+| A10 Mishandling of Exceptional Conditions    | `404.html` exists, internal links and assets resolve, outbound link health (opt-in); live: unknown path answers 404                  |
 
 - **Secrets** are a cross-cutting item listed under A04, since hard-coded credentials are a cryptographic-material failure. Their own heading keeps them visible.
 - **Edition:** the edition string lives in one constant, so a future edition is a small change.
@@ -98,7 +98,9 @@
 - **CSP sources:** the effective CSP of a page is the header CSP plus any `<meta http-equiv="Content-Security-Policy">`. A script CSP "restricts scripts" when `script-src` (or `default-src`) exists and contains neither `'unsafe-inline'` (unless a hash or nonce is also present, which makes browsers ignore it) nor `*`.
 - **Starter adopts Astro's `security.csp`.**
   - Scripts get hashes.
-  - Styles: `styleDirective` keeps `'unsafe-inline'` because sites use `style=` attributes for custom properties. Style injection is far less dangerous than script injection, and the trade-off is written in the starter's config comment.
+  - Styles: sites use `style=` attributes for custom properties, which cannot be hashed. The starter allows `'unsafe-inline'` only for style attributes (`styleDirective.resources`: `'self'` and `{ resource: "'unsafe-inline'", kind: 'attribute' }`, which Astro writes as `style-src-attr`). `<style>` and `<link>` elements stay restricted to `'self'` and hashes. Style injection is far less dangerous than script injection, and the trade-off is written in the starter's config comment.
+  - `directives` adds `base-uri 'self'` and `object-src 'none'`.
+  - A policy in a `<meta>` tag only applies to what the parser reads after it, and Astro writes the tag after the `<head>` children it already emitted, so the motion layer's `is:inline define:vars` script (and the module script tag) sit before it. The report therefore reports an inline script before the meta tag as "outside the policy" (authored code, not an injection point) and counts as uncovered only a script after it whose hash is missing. A response header that restricts scripts covers the whole document and has no "before".
   - The meta tag cannot carry `frame-ancestors`, so the header keeps `frame-ancestors 'self'`.
   - **Verification:**
     - QA on the starter (including the `/3d/` scene and the islands page) must pass;
@@ -151,6 +153,7 @@
   4. **Hashed asset:** the first `/_astro/` asset found in the HTML must have `immutable` with a max-age of at least one year.
   5. **Private paths:** `/.git/HEAD` (body starts `ref:`), `/.env` (lines `KEY=`), `/brief.json` (JSON with `business`), `/package.json` (JSON with `dependencies`), `/assets.json`. Each is a fail only when the body matches.
   6. **Unknown path:** `/__landing-report-<random>` must answer 404. A 200 warns: the host serves the home page for unknown paths, which happens on Cloudflare Pages without `404.html`.
+- **Details found in implementation:** a failure to resolve plain `http://` while HTTPS worked (a proxy-only network) is `not-run`, not a warning about the site; a closed port or a timeout still warns. `--allow-http` accepts a plain-HTTP `--url` for local servers (TLS, redirect and HSTS items become `na`). Loopback and private hosts are never requested by `--external-links` unless `--allow-http` is given. A connection cancelled before any answer (`UND_ERR_ABORTED`, as a proxy or firewall does) is `unverified`. `.env.example`, `.env.sample` and `.env.template` do not fail the secret scan.
 - **External links (`--external-links`):**
   - Outbound `http(s)` links are deduplicated, with at most 50 per run, run sequentially with a 250 ms gap.
   - Each link gets a `HEAD`, falling back to a `GET` without reading the body.
@@ -182,6 +185,8 @@
     - any raster image over `report.maxImageKb`;
     - JPEG or PNG images over 100 KB, a legacy-format warning;
     - font files: count and total.
+- **Lighthouse 13 audit ids (found in implementation):** Lighthouse 13 replaced the legacy `modern-image-formats`, `uses-responsive-images`, `offscreen-images`, `uses-optimized-images`, `font-display`, `render-blocking-resources` and `third-party-summary` audits and `largest-contentful-paint-element` with insight audits (`image-delivery-insight`, `font-display-insight`, `render-blocking-insight`, `third-parties-insight`, `lcp-breakdown-insight`). `perfDetail` reads both generations of ids and stores same-origin URLs as paths. Stored fields: `lcpMs`, `lcpElement`, `cls`, `tbtMs`, `totalByteWeightKb`, `requestCount`, `images`, `fonts`, `renderBlocking`, `thirdParties`.
+- **Items:** the Lighthouse-derived data is grouped into five items (`lh-scores`, `lh-vitals`, `lh-loading`, `lh-assets`, `lh-third-party`) so a QA report that is missing or older than the build gives five `not-run` items, not a dozen. Page weight counts text gzipped, binaries raw, one candidate (the largest) per `srcset`, and the images and fonts referenced by the page's stylesheets; it is an upper bound because lazy images count. Fonts are counted per face (family, weight, style), not per unicode-range subset file, because fontsource splits one face into several subset files and the browser downloads only the ones a page uses.
 - **Thresholds:** in `qa.config.json` `report`, with defaults in `scripts/report/config.mjs`:
   - `maxPageKb: 1600`;
   - `maxImageKb: 400`;
@@ -189,7 +194,10 @@
   - `cls: 0.1`;
   - `tbtMs: 200`;
   - `maxFontFiles: 6`;
-  - `maxThirdPartyOrigins: 3`.
+  - `maxThirdPartyOrigins: 3`;
+  - also `legacyImageKb: 100`, `imageSavingsKb: 20` (Lighthouse image savings that warn), `renderBlockingMs: 500`, `externalLinks: { max: 50, gapMs: 250 }`, `live: { timeoutMs: 10000 }` and `audit.ignore`.
+
+  QA's config validator accepts a `report` object and leaves its contents to `scripts/report/config.mjs`.
 
   These are warnings. Lighthouse scores below the QA thresholds fail, as in QA, so the report never passes a site that QA would fail.
 
@@ -201,12 +209,15 @@
 - **`site-qa-deploy`:**
   - after QA: `npm run report -- --site "$SITE" --only static`;
   - after the deploy: `--only live --url`.
-  - The artifact is `landing-report-<slug>`, holding both runs in their own timestamped folders.
+  - The artifact is `landing-report-<slug>`, holding both runs in their own timestamped folders. In the root workflow the static and the live runs are in different jobs, so the artifacts are `landing-report` (qa job) and `landing-report-live` (deploy job).
+  - `node scripts/landing-report.mjs --summary <report-dir>` prints the verdict line of the newest static and live run; the workflow passes it to the sticky comment (the root `qa` job exposes its line as a job output).
+  - The live step uses `continue-on-error` so the artifact and the comment are written first; a final step fails the job when the live report failed.
 - **Deploy gate:** the existing "only if everything passed" condition covers the static report, because it is a step before the deploy.
 - **Live failure:** the job fails. The preview already exists, which is fine: the PR shows red and the comment says why.
-- **Sticky comment:** gains one line, `Report: passed — 0 fail, 3 warn, 2 n/a, 0 not run`, with the artifact link.
+- **Sticky comment:** gains one line, `Report: static passed: 0 fail, 3 warn, 2 n/a, 0 not run; live passed: ...`, with the artifact link.
 - **Network:** the static report runs `npm audit`, which needs the registry. CI has it.
 - **Local default:** the report runs all static checks, and live checks only with `--url`.
+- **Shared paths:** `scripts/landing-report.mjs` and `scripts/report/` join the shared paths of `scripts/changed-sites.mjs`, since a change to the report affects every site's job.
 
 ### 10. Planning-folder fix
 

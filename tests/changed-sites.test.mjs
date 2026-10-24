@@ -46,6 +46,8 @@ test('a shared path changed: every site', () => {
     'src/styles/tokens.css',
     'scripts/qa.mjs',
     'scripts/qa/lighthouse.mjs',
+    'scripts/landing-report.mjs',
+    'scripts/report/live.mjs',
     '.github/workflows/ci.yml',
   ])
     assert.deepEqual(
