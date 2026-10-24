@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-24 (add-ai-images in PR #20; next: its real smoke test in a new session).
+Read this first in a new or compacted session. Last updated: 2026-10-24 (add-ai-images merged and verified against the real API).
 
 ## Working agreements
 
@@ -26,16 +26,13 @@ Read this first in a new or compacted session. Last updated: 2026-10-24 (add-ai-
 | Owner's digital-products landing `sites/tupathdigital` (first real customer test) | Merged: build from the brief (PR #16, with polish pass A after the owner's review) and redesign B from the owner's references (PR #17). Production: Pages project `tupathdigital` (https://tupathdigital.pages.dev) |
 | add-landing-report (performance and security audit, OWASP Top 10:2025, starter CSP/HSTS/COOP, planning-folder fix) | Merged (PR #18) and archived 2026-10-24; every landing 0 fail in CI (warnings: existing sites have no script CSP, HSTS, COOP or 404 page) |
 | add-legal-compliance (cookies and trackers, consent banner only when needed, legal notice and privacy policy from the brief, price-claim review) | Merged (PR #19) and archived 2026-10-24; every landing 0 fail (warn: market unknown; tupathdigital also warns on its "50% off" claims) |
-| add-ai-images (AI-generated images as a recorded source) | PR #20 open, CI on branch `change/add-ai-images`; provider OpenAI gpt-image (owner, 2026-10-24); real smoke test (task 6.1) pending |
+| add-ai-images (AI-generated images as a recorded source) | Merged (PR #20) and archived 2026-10-24; real OpenAI generation verified with `gpt-image-1.5` (low quality, 1536x1024) |
 
 ## Resume here (2026-10-24)
 
-Branch `change/add-ai-images`, PR #20 open (implemented; 467 tests; clean-clone checks pass). Only task 6.1 is open: the real smoke test. The owner added `OPENAI_API_KEY` (environment variable) and `api.openai.com` (allowed domains) on 2026-10-24; they take effect in a new session (in the old one the domain answered 401 without a key). In the new session:
+Branch `change/ai-images-smoke-test` (from main after PR #20): archives add-ai-images and records the real smoke test (task 6.1, passed: `gpt-image-1.5` works as the default). `OPENAI_API_KEY` (environment variable) and `api.openai.com` (allowed domain) are set in the cloud environment from 2026-10-24.
 
-1. Check the key is visible without printing it (`[ -n "$OPENAI_API_KEY" ] && echo set`).
-2. Create a throwaway site (`npm run new-site -- zz-ai-smoke`, no brief, so AI images are allowed), then `node scripts/ai-images.mjs generate zz-ai-smoke --prompt "abstract glass shapes over a soft blue gradient" --as smoke --quality low` (dry run first).
-3. Check the file, the `assets.json` entry, `npm run credits -- --site zz-ai-smoke` (AI table) and `check-landing` `ai-provenance` with a `data-ai-disclosure` element; confirm the default model `gpt-image-1.5` works (if not, change `aiImages.model` in `qa.config.json` and `DEFAULT_CONFIG`).
-4. Remove the throwaway site (and restore `package-lock.json` if `npm install` touched it), check task 6.1 with the result, push to PR #20 and tell the owner.
+Next, after this PR merges (owner decides): the tupathdigital legal follow-up (needs the owner's markets and holder data) or `add-deploy-adapters`.
 
 Reminder scheduled for 2026-11-01: the tupathdigital coupons FALL2026 (Etsy) and 92xsh57 (Gumroad) end on 31 October 2026; offer the owner to update or remove them.
 

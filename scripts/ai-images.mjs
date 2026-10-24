@@ -234,7 +234,8 @@ async function generate({ args, values, io, deps, root }) {
     return 0;
   }
 
-  const apiKey = env[KEY_VARIABLE];
+  // The env this command was given is the only source of the key: never fall back to process.env.
+  const apiKey = env[KEY_VARIABLE] ?? '';
   const result = await generateImage({
     prompt,
     model,
