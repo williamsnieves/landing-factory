@@ -9,12 +9,15 @@ const tickets = [
 
 <section
   id="coupons"
-  class="coupons section-pad glow-left"
+  class="coupons section-pad"
   aria-labelledby="coupons-title"
 >
   <div class="wrap">
     <div class="intro" data-reveal>
-      <h2 id="coupons-title">Two stores, two codes</h2>
+      <p class="eyebrow">Coupons</p>
+      <h2 id="coupons-title" class="h2">
+        Two stores, two <em class="hl">codes</em>
+      </h2>
       <p>
         Each code takes 50% off the listed price in its own store, until{' '}
         {COUPON_END}. Copy it, open the store and use it on any product.
@@ -69,16 +72,7 @@ const tickets = [
     max-width: 40rem;
     margin-bottom: 2rem;
   }
-  h2 {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: var(--text-3xl);
-    font-weight: 700;
-    line-height: 1;
-    letter-spacing: -0.03em;
-    text-wrap: balance;
-  }
-  .intro p {
+  .intro p:not(.eyebrow) {
     margin: 1rem 0 0;
     color: var(--color-ink-soft);
     font-size: var(--text-lg);
@@ -131,18 +125,20 @@ const tickets = [
   .store {
     margin: 0;
     color: var(--color-accent);
-    font-family: var(--font-display);
-    font-size: var(--text-lg);
-    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
   .code {
     margin: 0.5rem 0 0;
   }
   .code code {
-    font-family: var(--font-display);
-    font-size: var(--text-3xl);
-    font-weight: 700;
-    letter-spacing: 0.02em;
+    font-family: var(--font-mono);
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    letter-spacing: 0;
     word-break: break-all;
     user-select: all;
   }

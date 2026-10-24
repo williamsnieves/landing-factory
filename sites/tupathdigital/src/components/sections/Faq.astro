@@ -1,0 +1,130 @@
+---
+import { COUPON_END } from '../../data/catalog';
+
+const items = [
+  {
+    q: 'How do I get my files?',
+    a: 'Download them straight from the store after you buy, or through the Google Drive link included with your purchase.',
+  },
+  {
+    q: 'Where do I enter the code?',
+    a: 'At checkout, on Etsy or on Gumroad. Each store has its own code, shown in the coupon section of this page.',
+  },
+  {
+    q: 'Which store should I choose?',
+    a: 'Use the store that lists the product you want. Three products are listed in both stores (the 450-prompts guide, the Meshy 3D creation bundle and the 50 Fantasy & Sci-Fi 3D models, Vol. 2), and either store works for those.',
+  },
+  {
+    q: 'Which file formats do I get?',
+    a: 'The formats are named in each listing title: for example PDF, Canva, Notion and ChatGPT for the guides and planners, or GLB, FBX and OBJ for the 3D models. Open the listing for the full details.',
+  },
+  {
+    q: 'When do the codes end?',
+    a: `Both codes end on ${COUPON_END}.`,
+  },
+];
+---
+
+<section id="faq" class="faq section-pad" aria-labelledby="faq-title">
+  <div class="wrap grid">
+    <div class="intro" data-reveal>
+      <p class="eyebrow">FAQ</p>
+      <h2 id="faq-title" class="h2">
+        Before you <em class="hl">buy</em>
+      </h2>
+      <p class="lead">The short answers about downloads, codes and stores.</p>
+    </div>
+    <div class="list" data-reveal data-reveal-delay="0.1">
+      {items.map((it, i) => (
+        <details class="item" open={i === 0}>
+          <summary>
+            <span>{it.q}</span>
+          </summary>
+          <p>{it.a}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq {
+    scroll-margin-top: 4.5rem;
+  }
+  .grid {
+    display: grid;
+    gap: 2rem;
+    align-items: start;
+  }
+  .list {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .item {
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-tile);
+    transition: border-color var(--duration-base) var(--ease-out);
+  }
+  .item[open] {
+    border-color: color-mix(
+      in oklab,
+      var(--color-primary) 60%,
+      var(--color-line)
+    );
+  }
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 3.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-tile);
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary::after {
+    content: '+';
+    flex: none;
+    width: 1.75rem;
+    height: 1.75rem;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--color-line);
+    border-radius: 50%;
+    color: var(--color-accent);
+    font-family: var(--font-mono);
+    line-height: 1;
+  }
+  .item[open] summary::after {
+    content: '\2212';
+  }
+  summary:hover span {
+    color: var(--color-accent);
+  }
+  .item p {
+    margin: 0;
+    padding: 0 1.25rem 1.25rem;
+    max-width: 44rem;
+    color: var(--color-ink-soft);
+    text-wrap: pretty;
+  }
+  @media (min-width: 900px) {
+    .grid {
+      grid-template-columns: 0.8fr 1.2fr;
+      gap: 4rem;
+    }
+    .intro {
+      position: sticky;
+      top: 6rem;
+    }
+  }
+</style>

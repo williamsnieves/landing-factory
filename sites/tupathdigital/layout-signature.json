@@ -7,29 +7,35 @@
     "height": 900
   },
   "features": {
-    "sectionCount": 9,
-    "cols1Share": 0.11,
-    "cols2Share": 0.67,
-    "cols3Share": 0.22,
-    "splitRatio": 0.39,
+    "sectionCount": 8,
+    "cols1Share": 0.63,
+    "cols2Share": 0.13,
+    "cols3Share": 0.25,
+    "splitRatio": 0.46,
     "fullBleedShare": 0,
-    "imageRadius": 14,
+    "imageRadius": 0,
     "buttonRadius": 22,
     "buttonShape": "pill",
     "headingScale": 5.9,
     "headingAlign": "left",
-    "headingCase": 0,
-    "eyebrowShare": 0.5,
-    "wordsPerScreen": 91,
+    "headingCase": 0.13,
+    "eyebrowShare": 1,
+    "wordsPerScreen": 94,
     "footerType": "minimal",
-    "mediaPerScreen": 3.3,
-    "rotatedShare": 0,
-    "overlapShare": 0.48,
-    "stickyCount": 0
+    "mediaPerScreen": 2,
+    "rotatedShare": 0.09,
+    "overlapShare": 0.23,
+    "stickyCount": 1
   },
   "sections": [
     {
       "id": "top",
+      "cols": 3,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": null,
       "cols": 2,
       "fullBleed": false,
       "eyebrow": false
@@ -41,63 +47,53 @@
       "eyebrow": false
     },
     {
-      "id": "ai",
+      "id": "catalog",
       "cols": 3,
       "fullBleed": false,
       "eyebrow": true
     },
     {
-      "id": "3d",
-      "cols": 2,
-      "fullBleed": false,
-      "eyebrow": true
-    },
-    {
-      "id": null,
-      "cols": 2,
-      "fullBleed": false,
-      "eyebrow": false
-    },
-    {
-      "id": "wallpapers",
-      "cols": 2,
-      "fullBleed": false,
-      "eyebrow": true
-    },
-    {
-      "id": "guides",
-      "cols": 3,
+      "id": "how",
+      "cols": 1,
       "fullBleed": false,
       "eyebrow": true
     },
     {
       "id": "coupons",
-      "cols": 2,
+      "cols": 1,
       "fullBleed": false,
-      "eyebrow": false
+      "eyebrow": true
+    },
+    {
+      "id": "faq",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": true
     },
     {
       "id": null,
-      "cols": 2,
+      "cols": 1,
       "fullBleed": false,
-      "eyebrow": false
+      "eyebrow": true
     }
   ],
   "mobile": {
-    "screens": 22.59,
-    "wordsPerScreen": 40,
-    "sectionCount": 9
+    "screens": 22.29,
+    "wordsPerScreen": 46,
+    "sectionCount": 8
   },
   "hashes": [
-    "2a1ac28d999a9a44",
-    "3abac19a9eca828a",
-    "92cecec6e6b8aac0",
-    "8e82ccdcb2b2a2a2",
-    "3aa6a651ac8c88e8",
-    "a2a29adabebabae4",
-    "a4e4c4b2a29a9a9a",
-    "9ec6ca8a8898aaa6",
-    "a61e8586aa8855e0",
-    "a6a4a490f02ea2c2"
+    "3a8e8eea9a8e6cb3",
+    "9a9a89808231c6c6",
+    "d292c684d2d29490",
+    "9a924888a0d0d2b2",
+    "9292d2d2d2a186d6",
+    "9696b6da94929292",
+    "1adaa49696969696",
+    "aeb4929292b2da92",
+    "2a82e2b4b45b8484",
+    "ba8a31929030120c",
+    "1668f8f0e0982282",
+    "6a68f8e0f02aa2c2"
   ]
 }

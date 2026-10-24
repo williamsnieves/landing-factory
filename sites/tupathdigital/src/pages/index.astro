@@ -4,36 +4,32 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Motion from '../components/motion/Motion.astro';
 import Header from '../components/sections/Header.astro';
 import Hero from '../components/sections/Hero.astro';
+import StoreStrip from '../components/sections/StoreStrip.astro';
 import Figures from '../components/sections/Figures.astro';
-import ShelfIndex from '../components/sections/ShelfIndex.astro';
-import Shelf from '../components/sections/Shelf.astro';
-import MidCta from '../components/sections/MidCta.astro';
+import Catalog from '../components/sections/Catalog.astro';
+import HowItWorks from '../components/sections/HowItWorks.astro';
 import Coupons from '../components/sections/Coupons.astro';
+import Faq from '../components/sections/Faq.astro';
 import Closing from '../components/sections/Closing.astro';
 import Footer from '../components/sections/Footer.astro';
-import poster from '../assets/network-poster.jpg';
-import { shelves } from '../data/catalog';
+import share from '../assets/images/gumroad-heoolh.png';
 
 const title = 'tupathdigital: AI prompts, 3D assets and wallpapers';
 const description =
   'Ready-to-use AI products: prompt guides, 3D game assets, wallpapers and practical guides on Etsy and Gumroad. 50% off with a code until Oct 31, 2026.';
-const og = await getImage({ src: poster, format: 'jpg', width: 1200 });
-
-const byId = (id: string) => shelves.find((s) => s.id === id)!;
+const og = await getImage({ src: share, format: 'jpg', width: 1000 });
 ---
 
 <BaseLayout title={title} description={description} lang="en" ogImage={og.src}>
   <Motion slot="head" />
   <Header slot="header" />
   <Hero />
+  <StoreStrip />
   <Figures />
-  <ShelfIndex />
-  <Shelf shelf={byId('ai')} />
-  <Shelf shelf={byId('3d')} />
-  <MidCta />
-  <Shelf shelf={byId('wallpapers')} />
-  <Shelf shelf={byId('guides')} />
+  <Catalog />
+  <HowItWorks />
   <Coupons />
+  <Faq />
   <Closing />
   <Footer slot="footer" />
 </BaseLayout>

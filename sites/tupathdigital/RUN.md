@@ -58,11 +58,28 @@ Polish pass A (owner review, 2026-10-23):
 - Arrow links: one continuous underline under text and arrow (the arrow is inline text), applied to every `.link-arrow`.
 - Background tints: `glow-left`, `glow-right`, the mid-page band and the closing glow are ellipses or gradients that reach transparent inside their own box, so no hard edge shows at 375 or 1440 px.
 
+Redesign B (2026-10-23, owner request: premium, trust to buy; spec in `PROPOSAL.md` "Redesign B"):
+
+- Sections now: header (Products, How it works, Coupons, FAQ), split hero, "Available on" store strip, four figure tiles, one filterable catalog, how it works, coupons, FAQ, closing, footer. Removed: the `network` 3D scene, its poster (`network-poster.jpg`, dropped from `assets.json`, credits regenerated), `Shelf`, `ShelfIndex`, `MidCta`, the bento title tiles and the shelf promo tile.
+- Hero: a stack of five real covers (eager and `fetchpriority="high"` on the front one, the other four lazy, `sizes` set) at slight angles on a blue bloom, plus three floating fragments (coupon code, GLB/FBX/OBJ formats, lowest listed price) with `data-parallax` from the motion layer; no entrance animation on the images so LCP is not delayed. Without JS or under reduced motion the stack and chips sit still at their CSS positions. The OG image is now the 450-prompts Gumroad cover instead of the poster.
+- Catalog: one section, filter pills as radio inputs and labels (`:has()` hides the other groups, no JavaScript needed; keyboard arrows move between pills, visible focus ring); shelf groups stay visible under "All". Cards are uniform (one radius, hairline border), the cover is shown whole on a blue spotlight, mono tags come only from words in the listing titles (so Spanish words such as "Guía", "Plantilla", "30 días" stay as written). Both-store cards keep both titles, prices, badges and buttons.
+- Mono family added: Geist Mono Variable (`@fontsource-variable/geist-mono`, OFL 1.1); not used by another site with the same display font.
+- No sales counts, ratings, reviews, testimonials or partner logos. FAQ answers only state facts from the brief and the listing titles; no refund, license or support promises.
+
+Deviations from the archetype sheets in Redesign B (bento-product-showcase primary, data-and-proof secondary), each justified by the owner request and the two reference sheets:
+
+- The bento mosaic with spans and shelf title tiles is replaced by a uniform 3-column card grid with filter pills (reference `craftsman-contractor-21st-app`: disciplined card system, filter pills). The bento sheet's 2x2 lead tile and coloured count tiles are gone; the `layout-signature` columns will read as 3 uniform columns.
+- A centered closing card on a soft glow (reference `crypgo-21st-app`) instead of a left-weighted closing plus follow-along card; socials stay in the footer.
+- The hero loses its code-built scene in favour of a cover stack with floating fragments (owner: no 3D models); this is a collage-like hero, so `hero: split` stays in `landing-meta`.
+- Mono eyebrows and pill labels are used above headings (the design-taste skill prefers none; the reference sheets and the owner request both ask for the mono label system). One accent word per heading.
+- `check-landing` warns (not fails) about `archetype-target`: `cols3Share` 0.25, `imageRadius` 0 (covers are shown whole inside the card, the card itself has the 20 px radius) and `eyebrowShare` 1 (every section has a mono eyebrow, by the reference sheets); all follow from the points above.
+- Interactive pills and the FAQ rely on CSS only; no new JavaScript beyond the existing copy-code script.
+
 Prices are shown as "$x.xx" USD; the Etsy guide listed as "14,50" is shown as "$14.50" (confirmed by the owner as USD). No final (discounted) price is shown.
 
 ## Images
 
-21 customer files (the logo and 20 product covers), 0 stock photos, 1 self-rendered poster (`network-poster.jpg`, source `self`, rendered from `src/scenes/network.ts`). All customer files are recorded in `assets.json` with `source: "customer"`, owner `tupathdigital` and the permission written in the brief; none asks for a public credit. The originals stay in `assets/`; the optimized copies are in `src/assets/images/`. Each cover is used once in its shelf card; the three covers of products sold in both stores that are not used in a card (the Etsy covers of the 450-prompts guide, the Meshy bundle and the 50 Fantasy models Vol. 2) appear once each as drifting cards in the hero; the logo appears in header and footer.
+21 customer files (the logo and 20 product covers), 0 stock photos, 0 posters (the hero scene and its poster were removed in Redesign B). All customer files are recorded in `assets.json` with `source: "customer"`, owner `tupathdigital` and the permission written in the brief; none asks for a public credit. The originals stay in `assets/`; the optimized copies are in `src/assets/images/`. Each cover is used once in its shelf card; the three covers of products sold in both stores that are not used in a card (the Etsy covers of the 450-prompts guide, the Meshy bundle and the 50 Fantasy models Vol. 2) appear once each as drifting cards in the hero; the logo appears in header and footer.
 
 To confirm before launch: coupon codes and the "until Oct 31, 2026" text must be updated or removed after that date (owner decision).
 

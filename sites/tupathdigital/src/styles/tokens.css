@@ -23,6 +23,10 @@
     'DM Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
     Roboto, sans-serif;
 
+  --font-mono:
+    'Geist Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, Consolas,
+    monospace;
+
   /* Type scale */
   --text-xs: 0.8125rem;
   --text-sm: 0.9375rem;

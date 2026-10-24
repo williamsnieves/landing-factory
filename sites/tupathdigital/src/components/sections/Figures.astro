@@ -1,5 +1,5 @@
 ---
-import { COUPON_END, productCount, shelves } from '../../data/catalog';
+import { COUPON_END, productCount, storeCount } from '../../data/catalog';
 
 const figures = [
   {
@@ -7,12 +7,16 @@ const figures = [
     label: 'Products',
     note: 'Guides, packs and bundles',
   },
-  { value: '2', label: 'Stores', note: 'Etsy and Gumroad' },
-  { value: '50%', label: 'Off with a code', note: `Until ${COUPON_END}` },
+  { value: String(storeCount), label: 'Stores', note: 'Etsy and Gumroad' },
   {
-    value: String(shelves.length),
-    label: 'Shelves',
-    note: 'AI, 3D, wallpapers, guides',
+    value: '50%',
+    label: 'Off with a code',
+    note: `Until ${COUPON_END}`,
+  },
+  {
+    value: 'Instant',
+    label: 'Download',
+    note: 'Right after purchase',
   },
 ];
 ---
@@ -21,7 +25,7 @@ const figures = [
   <div class="wrap">
     <dl class="row">
       {figures.map((f, i) => (
-        <div class="fig" data-reveal data-reveal-delay={i * 0.08}>
+        <div class="fig card" data-reveal data-reveal-delay={i * 0.08}>
           <dt class="label">{f.label}</dt>
           <dd class="value">{f.value}</dd>
           <dd class="note">{f.note}</dd>
@@ -33,7 +37,7 @@ const figures = [
 
 <style>
   .figures {
-    padding-block: 0 clamp(3rem, 6vw, 5rem);
+    padding-block: clamp(2.5rem, 5vw, 4rem) 0;
   }
   .row {
     display: grid;
@@ -45,40 +49,43 @@ const figures = [
     display: flex;
     flex-direction: column;
     padding: 1.25rem;
-    background: var(--color-surface);
-    border: 1px solid var(--color-line);
-    border-radius: var(--radius-tile);
   }
   .value {
     order: 1;
     margin: 0;
-    color: var(--color-primary);
+    color: var(--color-ink);
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: var(--text-3xl);
+    font-size: var(--text-2xl);
     line-height: 1;
     letter-spacing: -0.03em;
   }
   .label {
     order: 2;
     margin-top: 0.75rem;
-    font-family: var(--font-display);
-    font-size: var(--text-lg);
-    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent);
   }
   .note {
     order: 3;
-    margin: 0.25rem 0 0;
+    margin: 0.35rem 0 0;
     color: var(--color-ink-soft);
     font-size: var(--text-sm);
   }
   @media (min-width: 900px) {
     .row {
-      grid-template-columns: 1.3fr 0.8fr 1.1fr 1fr;
+      grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
     }
     .fig {
       padding: 1.75rem;
+    }
+    .value {
+      font-size: var(--text-3xl);
     }
   }
 </style>

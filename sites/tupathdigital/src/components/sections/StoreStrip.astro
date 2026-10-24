@@ -1,0 +1,70 @@
+---
+import { PRIMARY, SECONDARY } from '../../data/catalog';
+
+const stores = [
+  { name: 'Etsy', url: PRIMARY.url },
+  { name: 'Gumroad', url: SECONDARY.url },
+];
+---
+
+<section class="strip" aria-label="Where to buy">
+  <div class="wrap row">
+    <p class="eyebrow">Available on</p>
+    <ul>
+      {stores.map((s) => (
+        <li>
+          <a href={s.url} target="_blank" rel="noopener noreferrer">
+            {s.name}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .strip {
+    border-block: 1px solid var(--color-line);
+    background: color-mix(in oklab, var(--color-surface) 60%, transparent);
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem 2rem;
+    padding-block: 0.75rem;
+  }
+  .eyebrow {
+    color: var(--color-ink-soft);
+  }
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    color: var(--color-ink);
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+    transition: color var(--duration-base) var(--ease-out);
+  }
+  a::after {
+    content: '\2197';
+    color: var(--color-accent);
+    font-size: var(--text-base);
+  }
+  a:hover {
+    color: var(--color-accent);
+  }
+</style>
