@@ -14,7 +14,7 @@ import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
-import { SLUG_PATTERN, isPlanningDoc } from './lib/sites.mjs';
+import { SLUG_PATTERN, hasBriefFile, isPlanningEntry } from './lib/sites.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -305,7 +305,8 @@ Pages project and production branch: [site.config.json](site.config.json). Asset
 
 /**
  * Throws unless sites/<slug> can be created. With allowExistingDocs, an existing
- * folder is accepted only when it contains nothing but top-level *.md files and brief.json.
+ * folder is accepted only when it contains nothing but top-level *.md files, brief.json
+ * and, next to a brief, an assets/ folder.
  */
 function assertTargetFree(target, slug, allowExistingDocs) {
   if (!existsSync(target)) return;
@@ -317,12 +318,14 @@ function assertTargetFree(target, slug, allowExistingDocs) {
   if (!statSync(target).isDirectory()) {
     throw new Error(`sites/${slug} exists and is not a folder.`);
   }
-  const offending = readdirSync(target, { withFileTypes: true }).filter(
-    (entry) => !entry.isFile() || !isPlanningDoc(entry.name),
+  const entries = readdirSync(target, { withFileTypes: true });
+  const hasBrief = hasBriefFile(entries);
+  const offending = entries.filter(
+    (entry) => !isPlanningEntry(entry, { hasBrief }),
   );
   if (offending.length) {
     throw new Error(
-      `sites/${slug} already exists with files other than Markdown docs or brief.json (${offending.map((e) => e.name).join(', ')}); refusing to touch it.`,
+      `sites/${slug} already exists with files other than Markdown docs, brief.json or its assets folder (${offending.map((e) => e.name).join(', ')}); refusing to touch it.`,
     );
   }
 }

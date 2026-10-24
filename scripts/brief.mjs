@@ -15,6 +15,7 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
+  realpathSync,
   writeFileSync,
 } from 'node:fs';
 import { dirname, join, normalize, resolve } from 'node:path';
@@ -201,12 +202,19 @@ function commandImport(values, io) {
     );
     return 1;
   }
-  mkdirSync(dest.baseDir, { recursive: true });
-  const copied = [];
-  if (resolve(source.path) !== resolve(dest.path)) {
-    writeFileSync(dest.path, readFileSync(source.path));
-    copied.push('brief.json');
+  const real = (path) =>
+    existsSync(path) ? realpathSync(path) : resolve(path);
+  if (real(source.path) === real(dest.path)) {
+    // The brief already sits at its own location: nothing to copy, its assets
+    // are already inside the site.
+    io.log(
+      `brief: ${dest.path} is valid and already in place (nothing copied)`,
+    );
+    return 0;
   }
+  mkdirSync(dest.baseDir, { recursive: true });
+  writeFileSync(dest.path, readFileSync(source.path));
+  const copied = ['brief.json'];
   if (source.baseDir !== dest.baseDir)
     for (const rel of localAssets(brief)) {
       const clean = normalize(rel);

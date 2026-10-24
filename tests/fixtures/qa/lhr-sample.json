@@ -1,0 +1,434 @@
+{
+  "lighthouseVersion": "13.5.0",
+  "finalDisplayedUrl": "http://127.0.0.1:33669/",
+  "audits": {
+    "largest-contentful-paint": {
+      "id": "largest-contentful-paint",
+      "title": "Largest Contentful Paint",
+      "score": 0.9,
+      "scoreDisplayMode": "numeric",
+      "numericValue": 2485.5999999999995,
+      "numericUnit": "millisecond",
+      "displayValue": "2.5 s",
+      "scoringOptions": {
+        "p10": 2500,
+        "median": 4000
+      }
+    },
+    "total-blocking-time": {
+      "id": "total-blocking-time",
+      "title": "Total Blocking Time",
+      "score": 0.99,
+      "scoreDisplayMode": "numeric",
+      "numericValue": 73.99999999999977,
+      "numericUnit": "millisecond",
+      "displayValue": "70 ms",
+      "scoringOptions": {
+        "p10": 200,
+        "median": 600
+      }
+    },
+    "cumulative-layout-shift": {
+      "id": "cumulative-layout-shift",
+      "title": "Cumulative Layout Shift",
+      "score": 1,
+      "scoreDisplayMode": "numeric",
+      "numericValue": 0,
+      "numericUnit": "unitless",
+      "displayValue": "0",
+      "scoringOptions": {
+        "p10": 0.1,
+        "median": 0.25
+      },
+      "details": {
+        "type": "debugdata",
+        "items": [
+          {
+            "cumulativeLayoutShiftMainFrame": 0,
+            "newEngineResult": {
+              "cumulativeLayoutShift": 0,
+              "cumulativeLayoutShiftMainFrame": 0
+            },
+            "newEngineResultDiffered": false
+          }
+        ]
+      }
+    },
+    "total-byte-weight": {
+      "id": "total-byte-weight",
+      "title": "Avoids enormous network payloads",
+      "score": 1,
+      "scoreDisplayMode": "metricSavings",
+      "numericValue": 172422,
+      "numericUnit": "byte",
+      "displayValue": "Total size was 168 KiB",
+      "details": {
+        "type": "table",
+        "headings": [
+          {
+            "key": "url",
+            "valueType": "url",
+            "label": "URL"
+          },
+          {
+            "key": "totalBytes",
+            "valueType": "bytes",
+            "label": "Transfer Size"
+          }
+        ],
+        "items": [
+          {
+            "url": "http://127.0.0.1:33669/_astro/gsap.DLHyXJrb.js",
+            "totalBytes": 70163
+          },
+          {
+            "url": "http://127.0.0.1:33669/_astro/ScrollTrigger.BoM0pWIV.js",
+            "totalBytes": 42932
+          },
+          {
+            "url": "http://127.0.0.1:33669/_astro/BaseLayout.CyUZBW-g.css",
+            "totalBytes": 30026
+          },
+          {
+            "url": "http://127.0.0.1:33669/_astro/lenis.CZma2zI-.js",
+            "totalBytes": 18836
+          },
+          {
+            "url": "http://127.0.0.1:33669/",
+            "totalBytes": 5061
+          },
+          {
+            "url": "http://127.0.0.1:33669/_astro/motion.BiDr7Ohe.js",
+            "totalBytes": 2321
+          },
+          {
+            "url": "http://127.0.0.1:33669/_astro/preload-helper.DHhhL8Zf.js",
+            "totalBytes": 1854
+          },
+          {
+            "url": "http://127.0.0.1:33669/_astro/Motion.astro_astro_type_script_index_0_lang.CQo-1TOK.js",
+            "totalBytes": 897
+          },
+          {
+            "url": "http://127.0.0.1:33669/favicon.svg",
+            "totalBytes": 332
+          }
+        ],
+        "sortedBy": ["totalBytes"]
+      },
+      "guidanceLevel": 1
+    },
+    "network-requests": {
+      "id": "network-requests",
+      "title": "Network Requests",
+      "score": 1,
+      "scoreDisplayMode": "informative",
+      "details": {
+        "type": "table",
+        "headings": [
+          {
+            "key": "url",
+            "valueType": "url",
+            "label": "URL"
+          },
+          {
+            "key": "protocol",
+            "valueType": "text",
+            "label": "Protocol"
+          },
+          {
+            "key": "networkRequestTime",
+            "valueType": "ms",
+            "granularity": 1,
+            "label": "Network Request Time"
+          },
+          {
+            "key": "networkEndTime",
+            "valueType": "ms",
+            "granularity": 1,
+            "label": "Network End Time"
+          },
+          {
+            "key": "transferSize",
+            "valueType": "bytes",
+            "displayUnit": "kb",
+            "granularity": 1,
+            "label": "Transfer Size"
+          },
+          {
+            "key": "resourceSize",
+            "valueType": "bytes",
+            "displayUnit": "kb",
+            "granularity": 1,
+            "label": "Resource Size"
+          },
+          {
+            "key": "statusCode",
+            "valueType": "text",
+            "label": "Status Code"
+          },
+          {
+            "key": "mimeType",
+            "valueType": "text",
+            "label": "MIME Type"
+          },
+          {
+            "key": "resourceType",
+            "valueType": "text",
+            "label": "Resource Type"
+          }
+        ],
+        "items": [
+          {
+            "url": "http://127.0.0.1:33669/",
+            "transferSize": 5061
+          },
+          {
+            "url": "http://127.0.0.1:33669/_astro/Motion.astro_astro_type_script_index_0_lang.CQo-1TOK.js",
+            "transferSize": 897
+          },
+          {
+            "url": "http://127.0.0.1:33669/_astro/BaseLayout.CyUZBW-g.css",
+            "transferSize": 30026
+          }
+        ],
+        "debugData": {
+          "type": "debugdata",
+          "networkStartTimeTs": 160428506,
+          "initiators": [
+            {
+              "type": "parser",
+              "url": "http://127.0.0.1:33669/",
+              "lineNumber": 7,
+              "columnNumber": 106
+            },
+            {
+              "type": "parser",
+              "url": "http://127.0.0.1:33669/",
+              "lineNumber": 7,
+              "columnNumber": 177
+            },
+            {
+              "type": "script",
+              "url": "http://127.0.0.1:33669/_astro/Motion.astro_astro_type_script_index_0_lang.CQo-1TOK.js",
+              "lineNumber": 1,
+              "columnNumber": 18
+            }
+          ]
+        }
+      }
+    },
+    "lcp-breakdown-insight": {
+      "id": "lcp-breakdown-insight",
+      "title": "LCP breakdown",
+      "score": 1,
+      "scoreDisplayMode": "informative",
+      "metricSavings": {
+        "LCP": 0
+      },
+      "details": {
+        "type": "list",
+        "items": [
+          {
+            "type": "table",
+            "headings": [
+              {
+                "key": "label",
+                "valueType": "text",
+                "label": "Subpart"
+              },
+              {
+                "key": "duration",
+                "valueType": "ms",
+                "label": "Duration"
+              }
+            ],
+            "items": [
+              {
+                "subpart": "timeToFirstByte",
+                "label": "Time to first byte",
+                "duration": 19.906999999970196
+              },
+              {
+                "subpart": "elementRenderDelay",
+                "label": "Element render delay",
+                "duration": 441.3470000000298
+              }
+            ]
+          },
+          {
+            "type": "node",
+            "lhId": "page-0-H1",
+            "path": "1,HTML,1,BODY,1,MAIN,0,SECTION,0,DIV,1,H1",
+            "selector": "main#main > section.relative > div.mx-auto > h1.font-display",
+            "boundingRect": {
+              "top": 189,
+              "bottom": 326,
+              "left": 24,
+              "right": 388,
+              "width": 364,
+              "height": 137
+            },
+            "snippet": "<h1 data-reveal=\"\" data-reveal-delay=\"0.1\" class=\"font-display text-4xl max-w-4xl leading-[0.95] tracking-tight text-balance\" style=\"opacity: 1;\">",
+            "nodeLabel": "Motion that respects the people watching it."
+          }
+        ]
+      },
+      "guidanceLevel": 3
+    },
+    "image-delivery-insight": {
+      "id": "image-delivery-insight",
+      "title": "Improve image delivery",
+      "score": 1,
+      "scoreDisplayMode": "metricSavings",
+      "metricSavings": {
+        "FCP": 0,
+        "LCP": 0
+      },
+      "details": {
+        "type": "table",
+        "headings": [
+          {
+            "key": "node",
+            "valueType": "node",
+            "label": ""
+          },
+          {
+            "key": "url",
+            "valueType": "url",
+            "label": "URL",
+            "subItemsHeading": {
+              "key": "reason",
+              "valueType": "text"
+            }
+          },
+          {
+            "key": "totalBytes",
+            "valueType": "bytes",
+            "label": "Resource Size"
+          },
+          {
+            "key": "wastedBytes",
+            "valueType": "bytes",
+            "label": "Est Savings",
+            "subItemsHeading": {
+              "key": "wastedBytes",
+              "valueType": "bytes"
+            }
+          }
+        ],
+        "items": [],
+        "debugData": {
+          "type": "debugdata",
+          "wastedBytes": 0
+        }
+      },
+      "guidanceLevel": 3
+    },
+    "font-display-insight": {
+      "id": "font-display-insight",
+      "title": "Font display",
+      "score": 1,
+      "scoreDisplayMode": "metricSavings",
+      "metricSavings": {
+        "INP": 0
+      },
+      "details": {
+        "type": "table",
+        "headings": [
+          {
+            "key": "url",
+            "valueType": "url",
+            "label": "URL"
+          },
+          {
+            "key": "wastedMs",
+            "valueType": "ms",
+            "label": "Est Savings"
+          }
+        ],
+        "items": [],
+        "skipSumming": ["wastedMs"]
+      },
+      "guidanceLevel": 3
+    },
+    "render-blocking-insight": {
+      "id": "render-blocking-insight",
+      "title": "Render-blocking requests",
+      "score": 0.5,
+      "scoreDisplayMode": "metricSavings",
+      "metricSavings": {
+        "FCP": 0,
+        "LCP": 0
+      },
+      "details": {
+        "type": "table",
+        "headings": [
+          {
+            "key": "url",
+            "valueType": "url",
+            "label": "URL"
+          },
+          {
+            "key": "totalBytes",
+            "valueType": "bytes",
+            "label": "Transfer Size"
+          },
+          {
+            "key": "wastedMs",
+            "valueType": "timespanMs",
+            "label": "Duration"
+          }
+        ],
+        "items": [
+          {
+            "url": "http://127.0.0.1:33669/_astro/BaseLayout.CyUZBW-g.css",
+            "totalBytes": 30026,
+            "wastedMs": 302
+          }
+        ]
+      },
+      "guidanceLevel": 3
+    },
+    "third-parties-insight": {
+      "id": "third-parties-insight",
+      "title": "3rd parties",
+      "score": 1,
+      "scoreDisplayMode": "numeric",
+      "details": {
+        "type": "table",
+        "headings": [
+          {
+            "key": "entity",
+            "valueType": "text",
+            "label": "3rd party",
+            "subItemsHeading": {
+              "key": "url",
+              "valueType": "url"
+            }
+          },
+          {
+            "key": "transferSize",
+            "granularity": 1,
+            "valueType": "bytes",
+            "label": "Transfer size",
+            "subItemsHeading": {
+              "key": "transferSize"
+            }
+          },
+          {
+            "key": "mainThreadTime",
+            "granularity": 1,
+            "valueType": "ms",
+            "label": "Main thread time",
+            "subItemsHeading": {
+              "key": "mainThreadTime"
+            }
+          }
+        ],
+        "items": []
+      },
+      "guidanceLevel": 3
+    }
+  }
+}

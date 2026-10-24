@@ -17,6 +17,8 @@ npm test          # unit and fixture tests (QA script, reference-analysis script
 npm run validate:patterns  # check patterns/*.md (structure, no site content)
 npm run validate:archetypes  # check design-archetypes/*.md (fields, vocabularies, ranges)
 npm run qa        # build + screenshots, overflow, reduced motion, Lighthouse, impeccable -> qa/latest/report.md
+npm run report    # security (OWASP Top 10:2025) and performance report -> qa/report/latest/report.md
+npm run report -- --site <slug> [--url <deployed-url>]  # the same for one site; --url adds the live checks
 npm run new-site -- <slug>        # scaffold sites/<slug>/ from the starter (then `npm install`)
 npm run qa -- --site <slug>       # full QA for one site -> qa/<slug>/latest/report.md
 node scripts/render-poster.mjs --page /3d/ --scene demo --out src/assets/3d-demo-poster.jpg  # render a 3D scene's poster
@@ -29,21 +31,29 @@ Each landing lives in its own workspace under `sites/<slug>/` with its own build
 
 Agent rules and conventions: [CLAUDE.md](CLAUDE.md). Motion primitives: [src/components/motion/README.md](src/components/motion/README.md). 3D scenes (opt-in Three.js, poster first, QA budgets): [src/components/three/README.md](src/components/three/README.md), demo at `/3d/`.
 
+## Landing report
+
+`npm run report -- --site <slug>` audits a built landing for security, framed by the [OWASP Top 10:2025](https://owasp.org/Top10/2025/), and for performance, and writes `qa/<slug>/report/<timestamp>/report.md` (and `report.json`). Each item is `pass`, `warn`, `fail`, `na` or `not-run`, with the evidence and how to fix it; only a `fail` makes the command exit 1.
+
+- Static checks (read `dist/` and the source): security headers and the Content-Security-Policy, private files in the build, secrets (always masked in the output), `npm audit` of the production dependencies, Subresource Integrity and third-party origins, mixed content, broken links, forms, and weight, images and fonts. Lighthouse detail (LCP element, CLS, TBT, requests) comes from the last `npm run qa` of the same build.
+- `--url https://<site>.pages.dev` adds live checks on the deployed site (TLS, HTTP to HTTPS, response headers and HSTS, caching, private paths such as `/.git/HEAD` and `/.env` judged by their content, unknown paths answering 404). `--external-links` checks the outbound links; stores that block bots are listed as unverified, never failed.
+- Thresholds for the performance warnings live in `qa.config.json` under `report`. The starter ships a script CSP, HSTS and COOP; existing sites get warnings until they opt in.
+
 ## Deployment
 
-Every push is built and verified by [`.github/workflows/ci.yml`](.github/workflows/ci.yml). The `qa` job runs Prettier, `astro check`, the tests and `npm run qa`; only if it passes does the `deploy` job publish `dist/` to Cloudflare Pages with `wrangler pages deploy`. A failing QA never deploys.
+Every push is built and verified by [`.github/workflows/ci.yml`](.github/workflows/ci.yml). The `qa` job runs Prettier, `astro check`, the tests, `npm run qa` and the landing report (`npm run report -- --only static`); only if it passes does the `deploy` job publish `dist/` to Cloudflare Pages with `wrangler pages deploy`. A failing QA or report never deploys. After the deploy the report's live checks run on the deployed URL.
 
-| Event                       | Result                                                             |
-| --------------------------- | ------------------------------------------------------------------ |
-| Pull request / other branch | Preview deployment at `https://<branch-alias>.<project>.pages.dev` |
-| Push to `main`              | Production deployment (the project's production URL)               |
-| Pull request                | One comment with the preview URL, updated on every push            |
+| Event                       | Result                                                                         |
+| --------------------------- | ------------------------------------------------------------------------------ |
+| Pull request / other branch | Preview deployment at `https://<branch-alias>.<project>.pages.dev`             |
+| Push to `main`              | Production deployment (the project's production URL)                           |
+| Pull request                | One comment with the preview URL and the report verdict, updated on every push |
 
 Preview URLs look like `https://<branch-alias>.<project>.pages.dev`. Pages normalizes the branch name into the alias (lowercased, `/` and other characters replaced by `-`, long names truncated), so `change/add-cloudflare-preview-deploy` becomes something like `change-add-cloudflare-preview-deploy.landing-factory.pages.dev`. Each deployment also has its own `https://<hash>.<project>.pages.dev` URL. The PR comment and the job summary list both.
 
 ### Sites
 
-Landings under `sites/<slug>/` use the same pipeline per site. The `sites` job lists the sites that changed in the push or pull request (or all of them when a shared file changed), and a matrix job per site runs `astro check` and `npm run qa -- --site <slug>`, then deploys `sites/<slug>/dist` to the Pages project named in `sites/<slug>/site.config.json` (created on the first deploy), with the same secrets gate. Each site gets its own preview URL and its own PR comment, and the QA report is uploaded as `qa-report-<slug>`. The Cloudflare token needs no extra permission: one Pages project is created per site.
+Landings under `sites/<slug>/` use the same pipeline per site. The `sites` job lists the sites that changed in the push or pull request (or all of them when a shared file changed), and a matrix job per site runs `astro check`, `npm run qa -- --site <slug>` and `npm run report -- --site <slug> --only static`, then deploys `sites/<slug>/dist` to the Pages project named in `sites/<slug>/site.config.json` (created on the first deploy), with the same secrets gate. Each site gets its own preview URL and its own PR comment, and the reports are uploaded as `qa-report-<slug>` and `landing-report-<slug>` (the live checks run on the preview URL after the deploy). The Cloudflare token needs no extra permission: one Pages project is created per site.
 
 ### One-time setup
 

@@ -24,6 +24,20 @@ export function listSites(sitesDir) {
     .sort();
 }
 
-/** Top-level files a site folder may hold before scaffolding: Markdown planning docs and the customer brief. */
-export const isPlanningDoc = (name) =>
-  name.toLowerCase().endsWith('.md') || name === 'brief.json';
+/**
+ * Entries a site folder may hold before scaffolding: top-level Markdown planning
+ * docs, the customer brief and, next to a brief, its `assets/` folder (the brief
+ * interview tells the user to put the customer's files there).
+ * `entry` is a Dirent (or `{ name, isFile(), isDirectory() }`).
+ */
+export function isPlanningEntry(entry, { hasBrief = false } = {}) {
+  if (entry.isFile())
+    return (
+      entry.name.toLowerCase().endsWith('.md') || entry.name === 'brief.json'
+    );
+  return Boolean(hasBrief) && entry.isDirectory() && entry.name === 'assets';
+}
+
+/** True when the folder entries (Dirents) include a top-level brief.json file. */
+export const hasBriefFile = (entries) =>
+  entries.some((entry) => entry.isFile() && entry.name === 'brief.json');

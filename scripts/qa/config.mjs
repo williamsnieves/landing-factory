@@ -1,6 +1,7 @@
 // QA configuration: roadmap defaults, loading and a small built-in validator.
 // A missing config file means "use the defaults" (spec: Configurable thresholds).
 import { existsSync, readFileSync } from 'node:fs';
+import { REPORT_DEFAULTS, validateReportConfig } from '../report/config.mjs';
 
 export const DEFAULT_CONFIG = Object.freeze({
   viewports: [
@@ -32,6 +33,8 @@ export const DEFAULT_CONFIG = Object.freeze({
   // Words that mark text as sample data; `brief-facts` of check-landing fails when an element holding a
   // customer fact (name, price, email, ...) also says one of them.
   brief: { sampleWords: ['ejemplo', 'example', 'sample'] },
+  // Thresholds of the landing report (scripts/landing-report.mjs); defaults and validation live in scripts/report/config.mjs.
+  report: REPORT_DEFAULTS,
 });
 
 const LIGHTHOUSE_CATEGORIES = [
@@ -79,6 +82,7 @@ export function validateConfig(config) {
       'threeD',
       'diversity',
       'brief',
+      'report',
     ],
     'config',
   );
@@ -247,6 +251,8 @@ export function validateConfig(config) {
     )
       err('brief.sampleWords', 'must be an array of non-empty words');
   }
+  // The report section is validated by scripts/report/config.mjs (defaults live there too).
+  if ('report' in config) errors.push(...validateReportConfig(config.report));
   return errors;
 }
 

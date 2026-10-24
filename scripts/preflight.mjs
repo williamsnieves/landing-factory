@@ -10,7 +10,7 @@ import { parseArgs } from 'node:util';
 
 import { reexecWithEnvProxy } from '../.claude/skills/analyze-reference/scripts/proxy.mjs';
 import { validateSlug } from './new-site.mjs';
-import { isPlanningDoc } from './lib/sites.mjs';
+import { hasBriefFile, isPlanningEntry } from './lib/sites.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -169,7 +169,7 @@ export async function checkChromium(deps) {
   };
 }
 
-/** The slug is valid and sites/<slug> is absent, or holds only top-level *.md planning docs and brief.json. */
+/** The slug is valid and sites/<slug> is absent, or holds only top-level *.md planning docs, brief.json and (next to a brief) assets/. */
 export function checkSlug(slug, sitesDir) {
   const invalid = validateSlug(slug);
   if (invalid)
@@ -182,11 +182,14 @@ export function checkSlug(slug, sitesDir) {
   const target = join(sitesDir, slug);
   if (!existsSync(target))
     return { name: 'Site slug', ok: true, detail: `sites/${slug} is free` };
-  const offending = statSync(target).isDirectory()
-    ? readdirSync(target, { withFileTypes: true })
-        .filter((entry) => !entry.isFile() || !isPlanningDoc(entry.name))
-        .map((entry) => entry.name)
-    : [target];
+  let offending = [target];
+  if (statSync(target).isDirectory()) {
+    const entries = readdirSync(target, { withFileTypes: true });
+    const hasBrief = hasBriefFile(entries);
+    offending = entries
+      .filter((entry) => !isPlanningEntry(entry, { hasBrief }))
+      .map((entry) => entry.name);
+  }
   if (offending.length)
     return {
       name: 'Site slug',
@@ -197,7 +200,7 @@ export function checkSlug(slug, sitesDir) {
   return {
     name: 'Site slug',
     ok: true,
-    detail: `sites/${slug} holds only planning docs, they are kept`,
+    detail: `sites/${slug} holds only planning docs (and the brief's assets), they are kept`,
   };
 }
 
@@ -250,7 +253,7 @@ Checks before generating a landing, naming every failure in one message:
     (through HTTPS_PROXY when it is set)
   - a Chromium for QA exists (QA_CHROME_PATH, CHROME_PATH, Playwright's browser,
     or /opt/pw-browsers/chromium-*/chrome-linux/chrome)
-  - with --slug: the slug is valid and sites/<slug> is absent (or holds only *.md planning docs)
+  - with --slug: the slug is valid and sites/<slug> is absent (or holds only *.md planning docs, brief.json and its assets/)
 
   --slug <slug>       also check the slug
   --sources <list>    image sources to check, comma separated (default commons; met adds

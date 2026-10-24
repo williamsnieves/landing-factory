@@ -30,6 +30,7 @@
       "Bash(node scripts/find-images.mjs *)",
       "Bash(node scripts/credits.mjs *)",
       "Bash(node scripts/check-landing.mjs *)",
+      "Bash(node scripts/landing-report.mjs *)",
       "Bash(node scripts/render-poster.mjs *)",
       "Bash(node scripts/pick-archetypes.mjs *)",
       "Bash(node scripts/layout-signature.mjs *)",

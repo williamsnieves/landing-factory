@@ -17,6 +17,8 @@ jobs:
   qa:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      report_static: ${{ steps.report_summary.outputs.static }}
     env:
       OPENSPEC_TELEMETRY: '0'
     steps:
@@ -55,7 +57,12 @@ jobs:
       - name: QA (build, screenshots, overflow, reduced motion, Lighthouse, impeccable)
         run: npm run qa
 
-      # Only reached when every step above passed, so a failing QA never publishes dist/.
+      # Security (OWASP Top 10) and performance report of the build QA just checked. A failing item stops the
+      # job here, so a failing report never publishes dist/ (like a failing QA).
+      - name: Landing report (static checks)
+        run: npm run report -- --only static
+
+      # Only reached when every step above passed, so a failing QA or report never publishes dist/.
       - name: Upload built site
         uses: actions/upload-artifact@v4
         with:
@@ -79,6 +86,26 @@ jobs:
         with:
           name: qa-report
           path: ${{ steps.report.outputs.dir }}
+          if-no-files-found: warn
+          retention-days: 14
+
+      # The verdict line goes to the pull request comment of the deploy job.
+      - name: Summarize landing report
+        if: always()
+        id: report_summary
+        run: |
+          line=$(node scripts/landing-report.mjs --summary qa/report | sed -n 's/^static: //p')
+          echo "static=$line" >> "$GITHUB_OUTPUT"
+
+      # qa/report/latest is a symlink and is left out; every run folder is uploaded.
+      - name: Upload landing report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: landing-report
+          path: |
+            qa/report/
+            !qa/report/latest
           if-no-files-found: warn
           retention-days: 14
 
@@ -207,6 +234,34 @@ jobs:
             [ -z "$alias" ] || echo "- Branch alias URL: $alias"
           } >> "$GITHUB_STEP_SUMMARY"
 
+      # Live checks on the deployed URL: TLS, HTTP to HTTPS, headers, caching, private paths, unknown path.
+      # A failure is held until the comment and the artifact are written, then fails the job below.
+      - name: Landing report (live checks)
+        id: live_report
+        if: steps.gate.outputs.enabled == 'true'
+        continue-on-error: true
+        env:
+          DEPLOY_URL: ${{ steps.output.outputs.url }}
+        run: npm run report -- --only live --url "$DEPLOY_URL"
+
+      - name: Summarize live report
+        if: steps.gate.outputs.enabled == 'true'
+        id: live_summary
+        run: |
+          line=$(node scripts/landing-report.mjs --summary qa/report | sed -n 's/^live: //p')
+          echo "live=$line" >> "$GITHUB_OUTPUT"
+
+      - name: Upload live report
+        if: steps.gate.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: landing-report-live
+          path: |
+            qa/report/
+            !qa/report/latest
+          if-no-files-found: warn
+          retention-days: 14
+
       # One comment per PR, found by its hidden marker and updated on every push.
       - name: Comment preview URL on the pull request
         if: steps.gate.outputs.enabled == 'true' && github.event_name == 'pull_request'
@@ -215,16 +270,22 @@ jobs:
           DEPLOY_URL: ${{ steps.output.outputs.url }}
           ALIAS_URL: ${{ steps.output.outputs.alias }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REPORT_STATIC: ${{ needs.qa.outputs.report_static }}
+          REPORT_LIVE: ${{ steps.live_summary.outputs.live }}
         with:
           script: |
             const marker = '<!-- landing-factory-preview -->';
-            const { DEPLOY_URL, ALIAS_URL, COMMIT_SHA, RUN_URL } = process.env;
+            const { DEPLOY_URL, ALIAS_URL, COMMIT_SHA, RUN_URL, REPORT_STATIC, REPORT_LIVE } = process.env;
             const lines = [marker, '### Preview deployment', '', `- Preview: ${DEPLOY_URL}`];
             if (ALIAS_URL) lines.push(`- Branch alias: ${ALIAS_URL}`);
             lines.push(
               `- Commit: \`${COMMIT_SHA.slice(0, 7)}\``,
               `- [QA report artifact (\`qa-report\`) on this run](${RUN_URL})`,
             );
+            if (REPORT_STATIC || REPORT_LIVE)
+              lines.push(
+                `- Report: static ${REPORT_STATIC || 'not available'}; live ${REPORT_LIVE || 'not available'} ([artifacts \`landing-report\`, \`landing-report-live\`](${RUN_URL}))`,
+              );
             const body = lines.join('\n');
             const { owner, repo } = context.repo;
             const issue_number = context.issue.number;
@@ -240,6 +301,13 @@ jobs:
             } else {
               await github.rest.issues.createComment({ owner, repo, issue_number, body });
             }
+
+      # The preview exists; a failing live report still turns the job red.
+      - name: Fail when the live report failed
+        if: steps.live_report.outcome == 'failure'
+        run: |
+          echo "::error title=Landing report::The live checks on the deployed URL failed. See the landing-report-live artifact."
+          exit 1
 
   # Which sites under sites/ must be built and deployed: the ones whose folder changed,
   # or all of them when a shared path changed (see scripts/changed-sites.mjs).
@@ -321,6 +389,11 @@ jobs:
       # (the thresholds stay the same).
       - name: QA (build, screenshots, overflow, reduced motion, Lighthouse, impeccable)
         run: npm run qa -- --site "$SITE" --runs 3
+
+      # Security (OWASP Top 10) and performance report of the build QA just checked. A failing item stops the
+      # job here, before any deploy step.
+      - name: Landing report (static checks)
+        run: npm run report -- --site "$SITE" --only static
 
       # qa/<slug>/latest is a symlink; upload-artifact does not follow it, so resolve it.
       - name: Resolve report directory
@@ -426,6 +499,36 @@ jobs:
             [ -z "$alias" ] || echo "- Branch alias URL: $alias"
           } >> "$GITHUB_STEP_SUMMARY"
 
+      # Live checks on the deployed URL: TLS, HTTP to HTTPS, headers, caching, private paths, unknown path.
+      # A failure is held until the comment and the artifact are written, then fails the job below.
+      - name: Landing report (live checks)
+        id: live_report
+        if: steps.gate.outputs.enabled == 'true'
+        continue-on-error: true
+        env:
+          DEPLOY_URL: ${{ steps.output.outputs.url }}
+        run: npm run report -- --site "$SITE" --only live --url "$DEPLOY_URL"
+
+      - name: Summarize landing report
+        if: always()
+        id: report_summary
+        run: |
+          dir="qa/$SITE/report"
+          echo "static=$(node scripts/landing-report.mjs --summary "$dir" | sed -n 's/^static: //p')" >> "$GITHUB_OUTPUT"
+          echo "live=$(node scripts/landing-report.mjs --summary "$dir" | sed -n 's/^live: //p')" >> "$GITHUB_OUTPUT"
+
+      # Both runs (static and live) sit in their own timestamped folders; the latest symlink is left out.
+      - name: Upload landing report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: landing-report-${{ matrix.site }}
+          path: |
+            qa/${{ matrix.site }}/report/
+            !qa/${{ matrix.site }}/report/latest
+          if-no-files-found: warn
+          retention-days: 14
+
       # One comment per site and PR, found by its hidden marker and updated on every push.
       - name: Comment preview URL on the pull request
         if: steps.gate.outputs.enabled == 'true' && github.event_name == 'pull_request'
@@ -434,17 +537,23 @@ jobs:
           DEPLOY_URL: ${{ steps.output.outputs.url }}
           ALIAS_URL: ${{ steps.output.outputs.alias }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REPORT_STATIC: ${{ steps.report_summary.outputs.static }}
+          REPORT_LIVE: ${{ steps.report_summary.outputs.live }}
         with:
           script: |
             const site = process.env.SITE;
             const marker = `<!-- landing-factory-preview:${site} -->`;
-            const { DEPLOY_URL, ALIAS_URL, COMMIT_SHA, RUN_URL } = process.env;
+            const { DEPLOY_URL, ALIAS_URL, COMMIT_SHA, RUN_URL, REPORT_STATIC, REPORT_LIVE } = process.env;
             const lines = [marker, `### Preview deployment: ${site}`, '', `- Preview: ${DEPLOY_URL}`];
             if (ALIAS_URL) lines.push(`- Branch alias: ${ALIAS_URL}`);
             lines.push(
               `- Commit: \`${COMMIT_SHA.slice(0, 7)}\``,
               `- [QA report artifact (\`qa-report-${site}\`) on this run](${RUN_URL})`,
             );
+            if (REPORT_STATIC || REPORT_LIVE)
+              lines.push(
+                `- Report: static ${REPORT_STATIC || 'not available'}; live ${REPORT_LIVE || 'not available'} ([artifact \`landing-report-${site}\`](${RUN_URL}))`,
+              );
             const body = lines.join('\n');
             const { owner, repo } = context.repo;
             const issue_number = context.issue.number;
@@ -460,3 +569,10 @@ jobs:
             } else {
               await github.rest.issues.createComment({ owner, repo, issue_number, body });
             }
+
+      # The preview exists; a failing live report still turns the job red.
+      - name: Fail when the live report failed
+        if: steps.live_report.outcome == 'failure'
+        run: |
+          echo "::error title=Landing report ($SITE)::The live checks on the deployed URL failed. See the landing-report-$SITE artifact."
+          exit 1

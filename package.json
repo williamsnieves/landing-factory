@@ -25,6 +25,7 @@
     "pick-archetypes": "node scripts/pick-archetypes.mjs",
     "layout-signature": "node scripts/layout-signature.mjs",
     "qa": "node scripts/qa.mjs",
+    "report": "node scripts/landing-report.mjs",
     "new-site": "node scripts/new-site.mjs",
     "new-landing": "bash scripts/new-landing.sh",
     "brief": "node scripts/brief.mjs",

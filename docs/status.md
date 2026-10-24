@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-22 (owner landing: brief interview).
+Read this first in a new or compacted session. Last updated: 2026-10-24 (tupathdigital redesign merged; next: add-landing-report with OWASP Top 10).
 
 ## Working agreements
 
@@ -23,13 +23,31 @@ Read this first in a new or compacted session. Last updated: 2026-10-22 (owner l
 | Product plan (`docs/product-plan.md`): archetypes, intake, report, deploy adapters, agent interface, 3D models | Agreed 2026-10-21 |
 | add-design-archetypes (archetype blends, layout diversity), validated with `sites/{estudio-arquitectura,festival-electronica,app-finanzas}` | Merged (PR #14) and archived 2026-10-22; owner liked the previews, `minLayoutDistance` stays 0.2 |
 | add-brief-intake (`brief.json`, `/brief-intake` interview, generation reads the brief, `brief-facts` check) | Merged (PR #15) and archived 2026-10-22 |
-| Owner's digital-products landing `sites/tupathdigital` (first real customer test) | Brief by interview, proposal approved, built with `--auto` (QA first run, check-landing incl. brief-facts passed); PR open on `pilot/tupathdigital` |
+| Owner's digital-products landing `sites/tupathdigital` (first real customer test) | Merged: build from the brief (PR #16, with polish pass A after the owner's review) and redesign B from the owner's references (PR #17). Production: Pages project `tupathdigital` (https://tupathdigital.pages.dev) |
+| add-landing-report (performance and security audit, OWASP Top 10) | Next, on branch `change/add-landing-report` (not proposed yet) |
+| add-ai-images (AI-generated images as a recorded source) | Planned after add-landing-report (owner, 2026-10-24) |
 
-## Resume here (2026-10-23)
+## Resume here (2026-10-24)
 
-Branch `pilot/tupathdigital`: the owner's landing is built and the PR is open; the owner reviews the preview. Coupons FALL2026 (Etsy) and 92xsh57 (Gumroad) end on 31 October 2026: remind the owner to update or remove the badges and tickets after that date. After merge: next factory change, which should also fix the planning-folder bug below, then `add-landing-report`.
+Branch `change/add-landing-report` (from main after PR #17; nothing committed on it but this status update). Next: propose `add-landing-report` with the owner's direction (2026-10-24): a security and performance audit so every landing is optimal and safe before publishing, using the OWASP Top 10 as the security frame. Draft scope agreed in chat (refine in the proposal):
+
+- Security, mapped to the OWASP Top 10 categories that apply to a static site: security misconfiguration (headers: CSP, HSTS, X-Content-Type-Options, frame-ancestors, Referrer-Policy, Permissions-Policy; no directory listing; no exposed `.git`, `.env`, source maps or build files), cryptographic failures (TLS on the deployed URL, HTTPS-only links and mixed content), injection/XSS surface (inline scripts and `innerHTML`, a CSP that blocks inline script where possible), vulnerable and outdated components (`npm audit`, pinned versions), software and data integrity (third-party scripts and Subresource Integrity, external links with `rel="noopener noreferrer"`), broken access control (nothing private shipped in `dist/`), plus secret scanning of the site and repo. Categories that need a server (authentication, logging, SSRF) are reported as not applicable for static landings, with why.
+- Performance: today's Lighthouse budgets plus Core Web Vitals detail (LCP element, CLS, INP/TBT), page weight and request count, image formats and sizes, font loading, third-party requests inventory, cache headers; real-user Web Vitals after deployment as a later step.
+- One readable report per landing (pass, warn or fail per area, with the fix), run locally and in CI; it also checks the deployed preview URL when given.
+- Also fix the planning-folder bug (see Known gaps: `new-landing` refuses `sites/<slug>/` holding `brief.json` plus its `assets/`).
+
+Reminder scheduled for 2026-11-01: the tupathdigital coupons FALL2026 (Etsy) and 92xsh57 (Gumroad) end on 31 October 2026; offer the owner to update or remove them.
+
+## tupathdigital (owner's landing) facts
+
+- Brief: `sites/tupathdigital/brief.json` (English page; 20 listings, 3 sold in both stores, so 17 cards; prices in USD; coupons 50% until 31 Oct 2026; downloads instant, some via a Google Drive link; about 9 sales, not shown; no contact email or domain yet; deploy target undecided). Product data: Gumroad public pages, Etsy from the owner's CSV export (Etsy listing pages answer with a bot challenge; never bypassed).
+- References: `patterns/craftsman-contractor-21st-app.md`, `patterns/crypgo-21st-app.md`. No 3D models (owner).
+- Coupons: codes and end date live in `sites/tupathdigital/src/data/catalog.ts` (`COUPONS`, `COUPON_END`, `COUPON_END_ISO`); the "50%" figure and the page meta description in `src/pages/index.astro` repeat them. Changing a coupon = edit those, update the brief notes, run site QA and `check-landing`, open a PR. A `coupon` field in the brief schema would make this data-driven (candidate for a later change).
+- Pass B idea list not yet done: real reviews or ratings once the owner has them; a "prompt → result" showcase if the owner provides real examples.
 
 ## Owner decisions to keep (2026-10-21)
+
+- 2026-10-24: security audit framed by the OWASP Top 10; add `add-ai-images` after the report (today images come only from the customer, Commons/The Met or code-rendered posters; the owner can already hand in AI images made with their own tool as customer files).
 
 - Archetypes are only a base: blends are driven by the requirement and the references; reference-led (`custom`) landings are allowed; deviations are logged, never failed.
 - One landing per repository, introduced gradually: monorepo now, then an export command, then generation straight into a repository, then product storage (`docs/product-plan.md`).
@@ -52,13 +70,13 @@ Follow `docs/product-plan.md`:
 
 1. `add-design-archetypes` (archetype blends steered by the requirement and the references, real diversity measure), validated by the three-niche pilot. Archetypes are a starting grammar, not a template; the hard rules are the quality budgets, licensing and originality, and the layout diversity rule.
 2. `add-brief-intake`; then the owner's digital-products landing as the first real customer test.
-3. `add-landing-report`, `add-deploy-adapters`, `add-agent-interface`, `add-3d-models`; one landing per repository introduced gradually (export first).
+3. `add-landing-report` (OWASP Top 10), then `add-ai-images` (owner, 2026-10-24), `add-deploy-adapters`, `add-agent-interface`, `add-3d-models`; one landing per repository introduced gradually (export first).
 
 Small fixes pending: panaderia process heading covered at 375 px; `new-landing.sh` final check without `--refs`.
 
 ## Known gaps and follow-ups
 
-- `new-landing.sh`/`new-site --allow-existing-docs`/preflight refuse a `sites/<slug>/` that holds `brief.json` plus the `assets/` folder the `/brief-intake` skill tells you to fill (only `*.md` and `brief.json` are accepted). Workaround used for tupathdigital: pass `--brief` from a copy outside `sites/`. Fix: accept the asset paths the brief names.
+- Existing sites do not have the starter's hardening yet (script CSP, HSTS, COOP in `public/_headers`): `npm run report` warns on each. Follow-up: one small site change per site to opt in (copy `security.csp` from the root `astro.config.mjs` and the two header lines; tupathdigital first if the owner wants it), then check its QA and the live report.
 - Etsy listing pages answer with a bot challenge (never bypassed); product data came from the owner's Etsy CSV export. Gumroad public product pages are readable (title, image, price in JSON-LD).
 
 - `section-shots.mjs` does not clear its output folder, so stale screenshots from earlier passes mix with new ones (seen on estudio-arquitectura). Clear `qa/<slug>/sections/` at the start of each run.

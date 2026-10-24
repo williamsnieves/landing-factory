@@ -13,6 +13,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { after, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { build } from '../scripts/qa/server.mjs';
 import {
   RUN_PHASES,
   SHARED_DEPENDENCIES,
@@ -274,6 +275,86 @@ test('--allow-existing-docs still refuses folders with anything but top-level Ma
   );
   assert.ok(!existsSync(join(withCode, 'package.json')));
   assert.ok(!existsSync(join(withDir, 'package.json')));
+});
+
+test('--allow-existing-docs keeps a brief.json and its assets/ folder untouched', () => {
+  const sitesDir = freshSites();
+  const site = join(sitesDir, 'tienda');
+  mkdirSync(join(site, 'assets'), { recursive: true });
+  writeFileSync(join(site, 'brief.json'), '{"keep":"me"}');
+  writeFileSync(join(site, 'assets/logo.webp'), 'binary-ish');
+  const { created, kept } = scaffoldSite({
+    slug: 'tienda',
+    sitesDir,
+    allowExistingDocs: true,
+  });
+  assert.deepEqual(kept, ['assets/logo.webp', 'brief.json']);
+  assert.ok(created.includes('package.json'));
+  assert.equal(readFileSync(join(site, 'brief.json'), 'utf8'), '{"keep":"me"}');
+  assert.equal(
+    readFileSync(join(site, 'assets/logo.webp'), 'utf8'),
+    'binary-ish',
+  );
+});
+
+test('--allow-existing-docs refuses assets/ without a brief, naming it, and changes nothing', () => {
+  const sitesDir = freshSites();
+  const site = join(sitesDir, 'sinbrief');
+  mkdirSync(join(site, 'assets'), { recursive: true });
+  writeFileSync(join(site, 'assets/logo.webp'), 'x');
+  assert.throws(
+    () => scaffoldSite({ slug: 'sinbrief', sitesDir, allowExistingDocs: true }),
+    /\(assets\)/,
+  );
+  assert.ok(!existsSync(join(site, 'package.json')));
+  // A brief does not make other folders acceptable.
+  const other = join(sitesDir, 'otro');
+  mkdirSync(join(other, 'src'), { recursive: true });
+  writeFileSync(join(other, 'brief.json'), '{}');
+  assert.throws(
+    () => scaffoldSite({ slug: 'otro', sitesDir, allowExistingDocs: true }),
+    /\(src\)/,
+  );
+  // `assets` as a file is not the assets folder.
+  const asFile = join(sitesDir, 'archivo');
+  mkdirSync(asFile);
+  writeFileSync(join(asFile, 'brief.json'), '{}');
+  writeFileSync(join(asFile, 'assets'), 'x');
+  assert.throws(
+    () => scaffoldSite({ slug: 'archivo', sitesDir, allowExistingDocs: true }),
+    /\(assets\)/,
+  );
+});
+
+test('a scaffolded site carries the hardened starter: script CSP config, HSTS and COOP, and it builds with a CSP meta tag', async () => {
+  // Scaffolded under .cache/ (ignored by git) so node resolves astro from the repo's node_modules; removed afterwards.
+  const sitesDir = join(ROOT, '.cache', `new-site-test-${process.pid}`);
+  mkdirSync(sitesDir, { recursive: true });
+  try {
+    scaffoldSite({ slug: 'hardened', sitesDir });
+    const site = join(sitesDir, 'hardened');
+    assert.match(
+      readFileSync(join(site, 'astro.config.mjs'), 'utf8'),
+      /security:\s*{\s*(\/\/[^\n]*\n\s*)*csp:/,
+    );
+    const headers = readFileSync(join(site, 'public/_headers'), 'utf8');
+    assert.match(headers, /^\s*Strict-Transport-Security: max-age=31536000$/m);
+    assert.match(headers, /^\s*Cross-Origin-Opener-Policy: same-origin$/m);
+    assert.match(headers, /frame-ancestors 'self'/);
+    await build(site);
+    const html = readFileSync(join(site, 'dist/index.html'), 'utf8');
+    const meta =
+      /<meta http-equiv="content-security-policy" content="([^"]+)"/.exec(html);
+    assert.ok(meta, 'the built home page has a CSP meta tag');
+    assert.match(meta[1], /script-src 'self' 'sha256-/);
+    assert.ok(!/script-src[^;]*'unsafe-inline'/.test(meta[1]));
+    assert.match(
+      readFileSync(join(site, 'dist/_headers'), 'utf8'),
+      /Strict-Transport-Security/,
+    );
+  } finally {
+    rmSync(sitesDir, { recursive: true, force: true });
+  }
 });
 
 test('the CLI exits non-zero for a bad slug and prints help with --help', () => {

@@ -42,5 +42,20 @@
   },
   "brief": {
     "sampleWords": ["ejemplo", "example", "sample"]
+  },
+  "report": {
+    "maxPageKb": 1600,
+    "maxImageKb": 400,
+    "legacyImageKb": 100,
+    "lcpMs": 2500,
+    "cls": 0.1,
+    "tbtMs": 200,
+    "maxFontFiles": 6,
+    "maxThirdPartyOrigins": 3,
+    "imageSavingsKb": 20,
+    "renderBlockingMs": 500,
+    "audit": { "ignore": [] },
+    "externalLinks": { "max": 50, "gapMs": 250 },
+    "live": { "timeoutMs": 10000 }
   }
 }

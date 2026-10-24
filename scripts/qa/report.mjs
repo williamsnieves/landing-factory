@@ -130,6 +130,14 @@ export function renderMarkdown(report) {
         ),
         '',
       );
+      for (const p of lh.presets) {
+        const d = p.detail;
+        if (d?.lcpMs != null)
+          out.push(
+            `- ${p.preset} LCP ${d.lcpMs} ms${d.lcpElement ? ` on \`${d.lcpElement.selector}\`` : ''}`,
+          );
+      }
+      if (lh.presets.some((p) => p.detail?.lcpMs != null)) out.push('');
       for (const f of lh.failedCategories) {
         out.push(
           `Highest-impact audits for ${f.category} (${f.preset}, ${f.score} < ${f.threshold}):`,

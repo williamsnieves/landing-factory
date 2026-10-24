@@ -375,6 +375,26 @@ test('an existing sites/<slug>/brief.json is used without the flag', () => {
   );
 });
 
+test('a folder prepared by the brief interview (brief.json and assets/) runs end to end and keeps the asset', () => {
+  const prepared = `${briefSlug}-prep`;
+  const dir = join(factoryRoot, 'sites', prepared);
+  mkdirSync(join(dir, 'assets'), { recursive: true });
+  writeFileSync(join(dir, 'brief.json'), readFileSync(briefFixture));
+  writeFileSync(join(dir, 'assets/logo.svg'), '<svg>mine</svg>');
+  const r = run([prepared, '--dry-run'], { STUB_RESULT: 'dry-run-done' });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.equal(
+    readFileSync(join(dir, 'assets/logo.svg'), 'utf8'),
+    '<svg>mine</svg>',
+  );
+  assert.ok(existsSync(join(dir, 'package.json')));
+  assert.deepEqual(
+    JSON.parse(readFileSync(join(dir, 'brief.json'), 'utf8')),
+    JSON.parse(readFileSync(briefFixture, 'utf8')),
+  );
+  assert.match(recorded()[1], new RegExp(`--brief ${dir}/brief\\.json`));
+});
+
 test('an invalid brief stops with the validator errors before anything is created or claude is started', () => {
   rmSync(argsFile, { force: true });
   const broken = join(tmp, 'brief-broken.json');
