@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-24 (add-ai-images merged and verified against the real API).
+Read this first in a new or compacted session. Last updated: 2026-10-24 (add-ai-images done; next: add-deploy-adapters).
 
 ## Working agreements
 
@@ -30,9 +30,7 @@ Read this first in a new or compacted session. Last updated: 2026-10-24 (add-ai-
 
 ## Resume here (2026-10-24)
 
-Branch `change/ai-images-smoke-test` (from main after PR #20): archives add-ai-images and records the real smoke test (task 6.1, passed: `gpt-image-1.5` works as the default). `OPENAI_API_KEY` (environment variable) and `api.openai.com` (allowed domain) are set in the cloud environment from 2026-10-24.
-
-Next, after this PR merges (owner decides): the tupathdigital legal follow-up (needs the owner's markets and holder data) or `add-deploy-adapters`.
+Branch `change/add-deploy-adapters` (from main after PR #21, which archived add-ai-images with its real smoke test). Next: propose `add-deploy-adapters`. Owner (2026-10-24): targets Vercel, VPS (Hostinger VPS, DigitalOcean Droplet) and shared hosting (Hostinger web hosting); no accounts yet for a real deploy, so adapters are tested against fakes and local rsync, and real deploys come when the owner has accounts. Cloud sessions lack rsync/ssh by default (`apt-get install -y rsync openssh-client` works); `api.vercel.com` is not in the allowed domains.
 
 Reminder scheduled for 2026-11-01: the tupathdigital coupons FALL2026 (Etsy) and 92xsh57 (Gumroad) end on 31 October 2026; offer the owner to update or remove them.
 
@@ -45,6 +43,7 @@ Reminder scheduled for 2026-11-01: the tupathdigital coupons FALL2026 (Etsy) and
 
 ## Owner decisions to keep (2026-10-21)
 
+- 2026-10-24: deploy adapters for Vercel, VPS (Hostinger VPS, DigitalOcean Droplet) and shared hosting (Hostinger web hosting); Netlify and DigitalOcean App Platform later.
 - 2026-10-24: AI images from OpenAI GPT image models (owner's choice over Gemini/Imagen, FLUX or import-only).
 - 2026-10-24: legal compliance (cookies, GDPR, legal notice, price claims) as its own change `add-legal-compliance`, before `add-ai-images`.
 - 2026-10-24: security audit framed by the OWASP Top 10; add `add-ai-images` after the report (today images come only from the customer, Commons/The Met or code-rendered posters; the owner can already hand in AI images made with their own tool as customer files).
