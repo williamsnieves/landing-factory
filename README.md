@@ -17,7 +17,7 @@ npm test          # unit and fixture tests (QA script, reference-analysis script
 npm run validate:patterns  # check patterns/*.md (structure, no site content)
 npm run validate:archetypes  # check design-archetypes/*.md (fields, vocabularies, ranges)
 npm run qa        # build + screenshots, overflow, reduced motion, Lighthouse, impeccable -> qa/latest/report.md
-npm run report    # security (OWASP Top 10:2025) and performance report -> qa/report/latest/report.md
+npm run report    # security (OWASP Top 10:2025), performance and legal report -> qa/report/latest/report.md
 npm run report -- --site <slug> [--url <deployed-url>]  # the same for one site; --url adds the live checks
 npm run new-site -- <slug>        # scaffold sites/<slug>/ from the starter (then `npm install`)
 npm run qa -- --site <slug>       # full QA for one site -> qa/<slug>/latest/report.md
@@ -38,6 +38,10 @@ Agent rules and conventions: [CLAUDE.md](CLAUDE.md). Motion primitives: [src/com
 - Static checks (read `dist/` and the source): security headers and the Content-Security-Policy, private files in the build, secrets (always masked in the output), `npm audit` of the production dependencies, Subresource Integrity and third-party origins, mixed content, broken links, forms, and weight, images and fonts. Lighthouse detail (LCP element, CLS, TBT, requests) comes from the last `npm run qa` of the same build.
 - `--url https://<site>.pages.dev` adds live checks on the deployed site (TLS, HTTP to HTTPS, response headers and HSTS, caching, private paths such as `/.git/HEAD` and `/.env` judged by their content, unknown paths answering 404). `--external-links` checks the outbound links; stores that block bots are listed as unverified, never failed.
 - Thresholds for the performance warnings live in `qa.config.json` under `report`. The starter ships a script CSP, HSTS and COOP; existing sites get warnings until they opt in.
+
+## Legal checks
+
+The report also has a `legal` area: cookies and trackers against the consent rule, third-party hosts that receive the visitor's IP address, the legal notice and privacy policy the brief's market requires (EU, Spain), and discount claims to review. A landing that sets no cookie and loads nothing from a tracker needs no consent banner. `node scripts/legal.mjs --site <slug> --write` builds `src/data/legal.json` from the brief, and the starter's `src/components/legal/` components render the pages; a value the brief lacks shows a visible "pending legal review" marker and the report fails on it. These checks and templates support compliance and are not legal advice; a lawyer must review the result before production. Guide: [docs/legal.md](docs/legal.md).
 
 ## Deployment
 
@@ -90,7 +94,7 @@ scripts/new-landing.sh clinica-dental --niche "..." --auto [--max-attempts 5] [-
 scripts/new-landing.sh clinica-dental --niche "..." --dry-run
 ```
 
-The run leaves `sites/<slug>/RUN.md` (inputs, phase times, QA attempts, decisions, what to confirm before launch) and a git-ignored `.run.log`. Afterwards review the diff, commit and open a PR; CI builds, checks and deploys the preview. Helper scripts, each with `--help`: `npm run preflight` (hosts, Chromium, free slug), `npm run find-images` (licensed Commons photos, and with `--source met` public-domain Met objects, into `assets.json`), `node scripts/render-poster.mjs` (poster image of a 3D scene), `npm run credits -- --site <slug>` (CREDITS.md and footer credits), `npm run check-landing -- --site <slug>` (credits, photo reuse, tokens, diversity, layout diversity, copy originality), `node scripts/pick-archetypes.mjs --site <slug>` (archetype blends from the brief signals and reference sheets) and `node scripts/layout-signature.mjs --site <slug> --write` (measure the built layout). Each landing starts from a blend of the composition archetypes in [design-archetypes/](design-archetypes/README.md), chosen from its requirement and its references: a starting grammar, not a template. See [scripts/README.md](scripts/README.md).
+The run leaves `sites/<slug>/RUN.md` (inputs, phase times, QA attempts, decisions, what to confirm before launch) and a git-ignored `.run.log`. Afterwards review the diff, commit and open a PR; CI builds, checks and deploys the preview. Helper scripts, each with `--help`: `npm run preflight` (hosts, Chromium, free slug), `npm run find-images` (licensed Commons photos, and with `--source met` public-domain Met objects, into `assets.json`), `node scripts/render-poster.mjs` (poster image of a 3D scene), `npm run credits -- --site <slug>` (CREDITS.md and footer credits), `npm run legal -- --site <slug> --write` (legal data for the legal pages, from the brief), `npm run check-landing -- --site <slug>` (credits, photo reuse, tokens, diversity, layout diversity, copy originality), `node scripts/pick-archetypes.mjs --site <slug>` (archetype blends from the brief signals and reference sheets) and `node scripts/layout-signature.mjs --site <slug> --write` (measure the built layout). Each landing starts from a blend of the composition archetypes in [design-archetypes/](design-archetypes/README.md), chosen from its requirement and its references: a starting grammar, not a template. See [scripts/README.md](scripts/README.md).
 
 ## Analyzing reference sites
 

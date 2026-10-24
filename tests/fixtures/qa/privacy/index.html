@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fixture privacy</title>
+    <meta name="description" content="QA fixture page: Fixture privacy." />
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        color: #111;
+        background: #fff;
+      }
+    </style>
+    <script>
+      document.cookie = '_ga=GA1.COOKIEVALUE-8f3a91; path=/';
+      localStorage.setItem('fx_pref', 'STORAGEVALUE-77c2e0');
+      sessionStorage.setItem('fx_tab', 'SESSIONVALUE-12ab');
+    </script>
+  </head>
+  <body>
+    <main id="main">
+      <h1>Fixture privacy</h1>
+      <p>
+        This page sets a cookie and two storage keys and requests an image from
+        a second host.
+      </p>
+      <img src="http://localhost:9/pixel.gif" alt="" width="1" height="1" />
+    </main>
+  </body>
+</html>

@@ -39,23 +39,27 @@ test('a clean fixture site passes with exit 0 and writes report.json, report.md 
   assert.equal(code, 0, out + err);
   assert.equal(report.verdict, 'passed');
   assert.equal(report.counts.fail, 0);
+  // The fixture has no brief, so the only warning is the unknown legal market.
   assert.deepEqual(
     report.items
       .filter((i) => i.status === 'fail' || i.status === 'warn')
-      .map((i) => i.id),
-    [],
+      .map((i) => `${i.status} ${i.id}`),
+    ['warn legal-pages'],
   );
   assert.ok(existsSync(join(outDir, 'report.md')));
   const latest = join(site.root, 'qa/fixture/report/latest');
   assert.ok(lstatSync(latest).isSymbolicLink());
-  assert.match(out, /Report PASSED: passed: 0 fail, 0 warn/);
+  assert.match(out, /Report PASSED: passed: 0 fail, 1 warn/);
 });
 
 test('every item has an area, a status, a title, evidence and a fix', async () => {
   const site = fresh();
   const { report } = await runReport(site, ['--only', 'static']);
   for (const item of report.items) {
-    assert.ok(['security', 'performance'].includes(item.area), item.id);
+    assert.ok(
+      ['security', 'performance', 'legal'].includes(item.area),
+      item.id,
+    );
     assert.ok(
       ['pass', 'warn', 'fail', 'na', 'not-run'].includes(item.status),
       item.id,

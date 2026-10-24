@@ -10,6 +10,7 @@ import { parseArgs } from 'node:util';
 import { chromium } from 'playwright';
 import { measureLayout, measureReducedMotion } from './qa/browser-checks.mjs';
 import { loadConfig } from './qa/config.mjs';
+import { collectPrivacy, recordRequestHosts } from './qa/privacy.mjs';
 import { runImpeccable } from './qa/impeccable.mjs';
 import {
   PRESETS,
@@ -164,10 +165,14 @@ async function main() {
       viewports: {},
       reducedMotion: null,
       scenes: null,
+      privacy: null,
       lighthouse: null,
       pageErrors: [],
     }));
 
+    const privacyWidth = config.viewports.some((v) => v.width === 1440)
+      ? 1440
+      : Math.max(...config.viewports.map((v) => v.width));
     if (
       !skip.has('layout') ||
       !skip.has('reduced-motion') ||
@@ -185,6 +190,11 @@ async function main() {
             const context = await browser.newContext({ viewport: vp });
             try {
               const page = await context.newPage();
+              // The privacy record is taken on the 1440 px load (else the widest viewport).
+              const recorder =
+                vp.width === privacyWidth
+                  ? recordRequestHosts(page, report.url)
+                  : null;
               page.on('pageerror', (e) =>
                 report.pageErrors.push(String(e.message)),
               );
@@ -219,6 +229,14 @@ async function main() {
                 window.scrollTo(0, 0);
               });
               await page.waitForTimeout(1200);
+              if (recorder)
+                report.privacy = await collectPrivacy({
+                  context,
+                  page,
+                  pageUrl: report.url,
+                  recorder,
+                  viewport: vp.width,
+                });
               const m = await page.evaluate(measureLayout);
               const screenshot = `screens/${p.slug}-${vp.width}.png`;
               await page.screenshot({

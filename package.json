@@ -32,6 +32,7 @@
     "preflight": "node scripts/preflight.mjs",
     "find-images": "node scripts/find-images.mjs",
     "credits": "node scripts/credits.mjs",
+    "legal": "node scripts/legal.mjs",
     "section-shots": "node scripts/section-shots.mjs",
     "check-landing": "node scripts/check-landing.mjs",
     "test": "node --test \"tests/**/*.test.mjs\""

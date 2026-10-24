@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-24 (tupathdigital redesign merged; next: add-landing-report with OWASP Top 10).
+Read this first in a new or compacted session. Last updated: 2026-10-24 (add-landing-report merged; next: add-legal-compliance).
 
 ## Working agreements
 
@@ -24,17 +24,18 @@ Read this first in a new or compacted session. Last updated: 2026-10-24 (tupathd
 | add-design-archetypes (archetype blends, layout diversity), validated with `sites/{estudio-arquitectura,festival-electronica,app-finanzas}` | Merged (PR #14) and archived 2026-10-22; owner liked the previews, `minLayoutDistance` stays 0.2 |
 | add-brief-intake (`brief.json`, `/brief-intake` interview, generation reads the brief, `brief-facts` check) | Merged (PR #15) and archived 2026-10-22 |
 | Owner's digital-products landing `sites/tupathdigital` (first real customer test) | Merged: build from the brief (PR #16, with polish pass A after the owner's review) and redesign B from the owner's references (PR #17). Production: Pages project `tupathdigital` (https://tupathdigital.pages.dev) |
-| add-landing-report (performance and security audit, OWASP Top 10) | Next, on branch `change/add-landing-report` (not proposed yet) |
-| add-ai-images (AI-generated images as a recorded source) | Planned after add-landing-report (owner, 2026-10-24) |
+| add-landing-report (performance and security audit, OWASP Top 10:2025, starter CSP/HSTS/COOP, planning-folder fix) | Merged (PR #18) and archived 2026-10-24; every landing 0 fail in CI (warnings: existing sites have no script CSP, HSTS, COOP or 404 page) |
+| add-legal-compliance (cookies and trackers, consent banner only when needed, legal notice and privacy policy from the brief, price-claim review) | Next, on branch `change/add-legal-compliance` (owner, 2026-10-24) |
+| add-ai-images (AI-generated images as a recorded source) | Planned after add-legal-compliance (owner, 2026-10-24) |
 
 ## Resume here (2026-10-24)
 
-Branch `change/add-landing-report` (from main after PR #17; nothing committed on it but this status update). Next: propose `add-landing-report` with the owner's direction (2026-10-24): a security and performance audit so every landing is optimal and safe before publishing, using the OWASP Top 10 as the security frame. Draft scope agreed in chat (refine in the proposal):
+Branch `change/add-legal-compliance` (from main after PR #18; first commit archives add-landing-report). Next: propose `add-legal-compliance` (owner, 2026-10-24: "does the landing meet the rules to be in production: cookies, GDPR, etc."). Draft scope agreed in chat (refine in the proposal):
 
-- Security, mapped to the OWASP Top 10 categories that apply to a static site: security misconfiguration (headers: CSP, HSTS, X-Content-Type-Options, frame-ancestors, Referrer-Policy, Permissions-Policy; no directory listing; no exposed `.git`, `.env`, source maps or build files), cryptographic failures (TLS on the deployed URL, HTTPS-only links and mixed content), injection/XSS surface (inline scripts and `innerHTML`, a CSP that blocks inline script where possible), vulnerable and outdated components (`npm audit`, pinned versions), software and data integrity (third-party scripts and Subresource Integrity, external links with `rel="noopener noreferrer"`), broken access control (nothing private shipped in `dist/`), plus secret scanning of the site and repo. Categories that need a server (authentication, logging, SSRF) are reported as not applicable for static landings, with why.
-- Performance: today's Lighthouse budgets plus Core Web Vitals detail (LCP element, CLS, INP/TBT), page weight and request count, image formats and sizes, font loading, third-party requests inventory, cache headers; real-user Web Vitals after deployment as a later step.
-- One readable report per landing (pass, warn or fail per area, with the fix), run locally and in CI; it also checks the deployed preview URL when given.
-- Also fix the planning-folder bug (see Known gaps: `new-landing` refuses `sites/<slug>/` holding `brief.json` plus its `assets/`).
+- Cookies and trackers: detect cookies, browser storage and known trackers on a real page load; a consent banner only when non-essential cookies exist (prefer cookieless analytics, so no banner is needed). Today tupathdigital loads nothing from third parties.
+- Legal pages from the brief: legal notice (Spain, LSSI-CE: holder name, tax id, address, email) and privacy policy (GDPR: at least the host's IP logs), per the customer's market; customer data is never invented, missing data marks the page "pending legal review".
+- Price claims: discount percentages and struck-through prices flagged for review (EU Omnibus rule on the prior 30-day lowest price; relevant to the tupathdigital coupons).
+- A new "legal" area in the landing report (fail: non-essential cookies without consent, required legal page missing; warn: price claims). The brief gains market and legal identity fields; the interview asks for them. Not legal advice; a lawyer's review comes before selling the factory.
 
 Reminder scheduled for 2026-11-01: the tupathdigital coupons FALL2026 (Etsy) and 92xsh57 (Gumroad) end on 31 October 2026; offer the owner to update or remove them.
 
@@ -47,6 +48,7 @@ Reminder scheduled for 2026-11-01: the tupathdigital coupons FALL2026 (Etsy) and
 
 ## Owner decisions to keep (2026-10-21)
 
+- 2026-10-24: legal compliance (cookies, GDPR, legal notice, price claims) as its own change `add-legal-compliance`, before `add-ai-images`.
 - 2026-10-24: security audit framed by the OWASP Top 10; add `add-ai-images` after the report (today images come only from the customer, Commons/The Met or code-rendered posters; the owner can already hand in AI images made with their own tool as customer files).
 
 - Archetypes are only a base: blends are driven by the requirement and the references; reference-led (`custom`) landings are allowed; deviations are logged, never failed.
@@ -70,13 +72,14 @@ Follow `docs/product-plan.md`:
 
 1. `add-design-archetypes` (archetype blends steered by the requirement and the references, real diversity measure), validated by the three-niche pilot. Archetypes are a starting grammar, not a template; the hard rules are the quality budgets, licensing and originality, and the layout diversity rule.
 2. `add-brief-intake`; then the owner's digital-products landing as the first real customer test.
-3. `add-landing-report` (OWASP Top 10), then `add-ai-images` (owner, 2026-10-24), `add-deploy-adapters`, `add-agent-interface`, `add-3d-models`; one landing per repository introduced gradually (export first).
+3. `add-landing-report` (merged), then `add-legal-compliance`, `add-ai-images` (owner, 2026-10-24), `add-deploy-adapters`, `add-agent-interface`, `add-3d-models`; one landing per repository introduced gradually (export first).
 
 Small fixes pending: panaderia process heading covered at 375 px; `new-landing.sh` final check without `--refs`.
 
 ## Known gaps and follow-ups
 
 - Existing sites do not have the starter's hardening yet (script CSP, HSTS, COOP in `public/_headers`): `npm run report` warns on each. Follow-up: one small site change per site to opt in (copy `security.csp` from the root `astro.config.mjs` and the two header lines; tupathdigital first if the owner wants it), then check its QA and the live report.
+- tupathdigital legal follow-up (own site change, after add-legal-compliance merges): the report warns (no market) and flags the "50% off" coupons as price claims. The owner provides the markets (for example `EU`/`ES`) and the holder data (name or company, tax id, address, email, register if a company) and the processing answers; then add them to `sites/tupathdigital/brief.json` (never assumed), run `node scripts/legal.mjs --site tupathdigital --write`, add the legal notice and privacy policy pages with footer links, and review the coupon wording against the EU 30-day lowest-price rule (the coupons FALL2026 and 92xsh57 end on 31 October 2026, so they may simply be removed).
 - Etsy listing pages answer with a bot challenge (never bypassed); product data came from the owner's Etsy CSV export. Gumroad public product pages are readable (title, image, price in JSON-LD).
 
 - `section-shots.mjs` does not clear its output folder, so stale screenshots from earlier passes mix with new ones (seen on estudio-arquitectura). Clear `qa/<slug>/sections/` at the start of each run.

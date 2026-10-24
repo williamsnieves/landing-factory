@@ -21,6 +21,7 @@ export const ASSET_KINDS = [
   'model',
   'other',
 ];
+export const ANALYTICS_MODES = ['none', 'cookieless', 'cookies'];
 export const DEPLOY_TARGETS = [
   'cloudflare-pages',
   'vercel',
@@ -107,6 +108,21 @@ export const SCHEMA = obj({
     regulated: { type: 'boolean' },
     notices: list(str()),
     constraints: str(),
+    // Where the page is offered ('EU' or ISO 3166-1 alpha-2), who runs it and what it does with personal data.
+    markets: list(str({ format: 'market' })),
+    holder: obj({
+      name: str(),
+      taxId: str(),
+      address: str(),
+      email: str({ format: 'email' }),
+      register: str(),
+    }),
+    privacyContact: str({ format: 'email' }),
+    processing: obj({
+      analytics: str({ enum: ANALYTICS_MODES }),
+      forms: { type: 'boolean' },
+      embeds: list(str()),
+    }),
   }),
   deploy: obj({
     target: str({ enum: DEPLOY_TARGETS }),
@@ -192,6 +208,7 @@ export function isAssumed(brief, path) {
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DOMAIN = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/i;
 const SHEET = /^[a-z0-9_]+(-[a-z0-9]+)*$/;
+const MARKET = /^(EU|[A-Z]{2})$/;
 
 function isUrl(value, protocols) {
   let url;
@@ -204,6 +221,9 @@ function isUrl(value, protocols) {
   if (url.protocol.startsWith('http')) return url.hostname.includes('.');
   return url.pathname !== '';
 }
+
+/** Holder identity (legal.holder.*, legal.privacyContact, or their parent `legal`) is never a value chosen for the customer. */
+const HOLDER_IDENTITY = /^legal(\.(holder|privacyContact)([.[].*)?)?$/;
 
 /** Each check returns an error text (what was expected) or null. `ctx` carries baseDir and patternsDir. */
 const FORMATS = {
@@ -229,6 +249,10 @@ const FORMATS = {
       ? null
       : 'expected a phone number with 7 to 15 digits, for example "+34 600 123 456"';
   },
+  market: (v) =>
+    MARKET.test(v)
+      ? null
+      : 'expected "EU" or a two-letter ISO 3166-1 country code in capitals, such as "ES" or "US"',
   color: (v) =>
     /^#[0-9a-fA-F]{6}$/.test(v) ? null : 'expected a color as #rrggbb',
   domain: (v) =>
@@ -367,6 +391,11 @@ export function validateBrief(
         const field = entry?.field;
         if (typeof field !== 'string' || field.trim() === '') return; // reported above
         const path = `assumed[${index}].field`;
+        if (HOLDER_IDENTITY.test(field))
+          return fail(
+            path,
+            `holder identity data cannot be assumed ("${field}"): ask the customer, or leave it empty and the legal pages show a pending marker`,
+          );
         if (!parsePath(field))
           return fail(
             path,
@@ -442,6 +471,47 @@ export const MISSING_FIELDS = [
   ['contact.hours', false, 'What are the opening hours or response times?'],
   ['contact.social', false, 'Which social profiles should be linked?'],
   [
+    'legal.markets',
+    false,
+    'In which countries will you sell or promote this (for example ES, EU, US)? It decides which legal pages the page needs.',
+  ],
+  [
+    'legal.holder.name',
+    false,
+    'Who runs the page: the legal name of the person or company? Legal pages must show it.',
+    'markets',
+  ],
+  [
+    'legal.holder.taxId',
+    false,
+    'What is the tax id (NIF, CIF, VAT number) of the holder? Never guessed.',
+    'markets',
+  ],
+  [
+    'legal.holder.address',
+    false,
+    'What is the holder address for the legal notice?',
+    'markets',
+  ],
+  [
+    'legal.holder.email',
+    false,
+    'Which email can visitors use to contact the holder?',
+    'markets',
+  ],
+  [
+    'legal.privacyContact',
+    false,
+    'Which email handles privacy requests (access, deletion)?',
+    'markets',
+  ],
+  [
+    'legal.processing.analytics',
+    false,
+    'Does the page use analytics: none, cookieless or cookies? Do forms or embeds (video, maps) collect data?',
+    'markets',
+  ],
+  [
     'assets',
     false,
     'Which logo, photos, videos or documents of your own can be used, and who owns them?',
@@ -457,13 +527,24 @@ export const MISSING_FIELDS = [
   ],
   ['deploy.target', false, 'Where will the page be hosted?'],
   ['deploy.domain', false, 'Which domain should it use?'],
-].map(([path, required, hint]) => ({ path, required, hint }));
+].map(([path, required, hint, when]) => ({
+  path,
+  required,
+  hint,
+  ...(when ? { when } : {}),
+}));
+
+/** Does the brief name at least one market? (Holder fields are only asked for then.) */
+export const hasMarkets = (brief) =>
+  Array.isArray(brief?.legal?.markets) && brief.legal.markets.some(isFilled);
 
 /** Fields still empty: required first, then recommended in interview order. */
 export function missingFields(brief) {
   const empty = MISSING_FIELDS.filter(
-    ({ path }) => !isFilled(getPath(brief, path)),
-  );
+    ({ path, when }) =>
+      (when !== 'markets' || hasMarkets(brief)) &&
+      !isFilled(getPath(brief, path)),
+  ).map(({ when, ...field }) => field);
   return [
     ...empty.filter((f) => f.required),
     ...empty.filter((f) => !f.required),
@@ -536,6 +617,13 @@ export function summarizeBrief(brief) {
     lines.push(`Dislikes: ${r.url}${r.why ? `, ${r.why}` : ''}`),
   );
   if (brief.legal?.regulated) lines.push('Legal: regulated niche');
+  field('Markets', 'legal.markets');
+  for (const key of ['name', 'taxId', 'address', 'email', 'register'])
+    field(`Holder ${key}`, `legal.holder.${key}`);
+  field('Privacy contact', 'legal.privacyContact');
+  field('Analytics', 'legal.processing.analytics');
+  field('Embeds', 'legal.processing.embeds');
+  if (brief.legal?.processing?.forms) lines.push('Forms collect data: yes');
   field('Legal notices', 'legal.notices');
   field('Legal constraints', 'legal.constraints');
   field('Deploy target', 'deploy.target');

@@ -126,6 +126,57 @@ test('an invalid config is a run error (exit 2), not a pass', () => {
   assert.match(r.stderr, /Invalid QA config/);
 });
 
+// --- Privacy record (add-legal-compliance, design Decision 1) --------------------------
+
+test('the privacy record holds cookie names, storage keys and third-party hosts, never their values, and the verdict is unchanged', () => {
+  const r = runQa('privacy', FAST);
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(r.report.verdict, 'passed');
+  const record = r.report.pages[0].privacy;
+  assert.equal(record.viewport, 1440);
+  assert.deepEqual(record.cookies, [
+    {
+      name: '_ga',
+      domain: '127.0.0.1',
+      path: '/',
+      session: true,
+      thirdParty: false,
+    },
+  ]);
+  assert.deepEqual(record.storage, {
+    local: ['fx_pref'],
+    session: ['fx_tab'],
+  });
+  assert.deepEqual(record.thirdPartyHosts, ['localhost']);
+  // The values the page stored never reach the report, in any form.
+  for (const file of ['report.json', 'report.md']) {
+    const text = readFileSync(join(r.latest, file), 'utf8');
+    for (const value of ['COOKIEVALUE', 'STORAGEVALUE', 'SESSIONVALUE'])
+      assert.ok(!text.includes(value), `${file} leaks ${value}`);
+  }
+  assert.match(
+    readFileSync(join(r.latest, 'report.md'), 'utf8'),
+    /Privacy record \(1440px; names and keys only, never values\): cookies: _ga \(127\.0\.0\.1\)/,
+  );
+});
+
+test('a page that stores nothing has an empty privacy record', () => {
+  const r = runQa('ok', FAST);
+  assert.equal(r.status, 0, r.stderr);
+  assert.deepEqual(r.report.pages[0].privacy, {
+    viewport: 1440,
+    cookies: [],
+    storage: { local: [], session: [] },
+    thirdPartyHosts: [],
+  });
+});
+
+test('skipping the layout check skips the privacy record', () => {
+  const r = runQa('ok', ['--skip', 'lighthouse,impeccable,layout']);
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(r.report.pages[0].privacy, null);
+});
+
 // --- 3D scene checks (design.md Decision 5) -----------------------------------------
 
 const SCENES = ['--skip', 'lighthouse,impeccable,layout'];

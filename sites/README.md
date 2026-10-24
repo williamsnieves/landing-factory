@@ -15,7 +15,7 @@ sites/<slug>/
   RUN.md              run log of /new-landing: phases, QA attempts, decisions, result
   README.md
   qa.config.json      optional: QA thresholds for this site (falls back to the root file)
-  src/                layouts/, components/motion/, components/three/, scenes/, styles/ (tokens.css), pages/
+  src/                layouts/, components/motion/, components/three/, components/legal/, scenes/, styles/ (tokens.css), pages/
   public/             _headers, favicon.svg, site assets
   src/data/credits.json  generated list of credited photos for the footer
 ```
@@ -28,7 +28,7 @@ npm install                          # registers the workspace; commit package-l
 npm run build -w site-cafeteria      # -> sites/cafeteria/dist/index.html
 ```
 
-The scaffold copies the layout, motion layer, 3D layer (`src/components/three/`, with an empty `src/scenes/`), styles and headers from the root starter and writes a `noindex` placeholder home page, `site.config.json` (`pagesProject` equals the slug; change it if the name is taken on Cloudflare), `CREDITS.md`, `README.md`, the `PROPOSAL.md` and `RUN.md` templates and an empty `assets.json`. It never copies the starter's demo pages, demo scene or sections. It refuses invalid slugs (`^[a-z0-9]+(-[a-z0-9]+)*$`) and existing folders. For a folder that so far holds only planning docs (for example a `PROPOSAL.md`), pass `--allow-existing-docs`: the `*.md` files stay untouched.
+The scaffold copies the layout, motion layer, 3D layer (`src/components/three/`, with an empty `src/scenes/`), the legal components (`src/components/legal/`, used only when the brief names a market), styles and headers from the root starter and writes a `noindex` placeholder home page, `site.config.json` (`pagesProject` equals the slug; change it if the name is taken on Cloudflare), `CREDITS.md`, `README.md`, the `PROPOSAL.md` and `RUN.md` templates and an empty `assets.json`. It never copies the starter's demo pages, demo scene or sections. It refuses invalid slugs (`^[a-z0-9]+(-[a-z0-9]+)*$`) and existing folders. For a folder that so far holds only planning docs (for example a `PROPOSAL.md`), pass `--allow-existing-docs`: the `*.md` files stay untouched.
 
 Run `npm run new-site -- --help` for every option.
 

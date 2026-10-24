@@ -30,7 +30,7 @@ Field names, notes about the process and everything you write into the repo besi
 1. **Start or resume.** If `sites/<slug>/brief.json` exists, read it and continue from it. Otherwise run `node scripts/brief.mjs init --site <slug> [--lang <tag>] [--niche "<one line>"]` (it creates `sites/<slug>/` holding only `brief.json`; `new-site --allow-existing-docs` accepts that folder later). Never use `--force` without the customer's say-so.
 2. **Read what exists.** Take whatever the customer gives (pasted text, a file, an old brief, public links) and fill the fields it states, using the customer's wording. Local files (logo, photos) are asset entries with a `path` relative to `sites/<slug>/`; put the files there. A link goes in an asset's `url`.
 3. **Find the gaps.** Run `node scripts/brief.mjs missing --site <slug>`. It lists empty required fields first, then recommended ones in this topic order, each with a question hint:
-   business, offer (name, price, currency, link per product), audience, goal (primary and secondary action with real URLs), tone, contact (email, phone, address, hours, social), assets (own logo, photos, videos, documents, with owner and permission), brand (colors and fonts to keep, what to avoid), references (liked with why, disliked with why), legal (regulated niche, notices, constraints), deploy (target and domain).
+   business, offer (name, price, currency, link per product), audience, goal (primary and secondary action with real URLs), tone, contact (email, phone, address, hours, social), legal identity (markets, holder, privacy contact, data processing; see "The legal step"), assets (own logo, photos, videos, documents, with owner and permission), brand (colors and fonts to keep, what to avoid), references (liked with why, disliked with why), legal notices (regulated niche, notices, constraints), deploy (target and domain).
 4. **Ask the next 2 to 4 questions** from the first topics that still have gaps, in the user's language, with a short reason when it helps ("so the page can show your real prices"). Offer to skip: "if you don't know, leave it and we will mark it as a placeholder".
 5. **Write and validate after every answer.** Update `brief.json`, then run `node scripts/brief.mjs validate --site <slug>`. Fix the errors it names (each gives the field path and what is expected) before asking more. Required fields that are still empty are expected until you have asked for them.
 6. **Mark choices as assumed.** When the customer says "you choose" for something (the tone, the headline angle, a placeholder price), write the value and add `{ "field": "<dotted.path>", "reason": "<why, who confirms>" }` to `assumed`. Dotted paths look like `tone`, `contact.hours`, `offer[0].price`. Anything the customer skips stays empty.
@@ -43,6 +43,18 @@ Field names, notes about the process and everything you write into the repo besi
    (or `--refs` to add pattern sheets, `--auto` to skip the proposal checkpoint). Do not start the landing yourself, and never commit, push or deploy.
 
 A filled `brief.json` written by hand (a form the customer completed) is accepted the same way: validate it, run `missing`, ask only about the gaps.
+
+## The legal step
+
+Asked right after the contact data, because it decides which legal pages the landing needs. Give one line of why with each question, in the user's language.
+
+1. **Markets.** "Where will you sell or promote this (countries)?" Why: the countries decide which legal pages the page needs (a privacy policy for the EU, a legal notice as well for Spain). Write `legal.markets` as `EU` or ISO 3166-1 codes in capitals (`ES`, `DE`, `US`). If the customer names no country, leave it empty: the landing is then generated with its legal requirements marked unknown.
+2. **Holder** (only when a market is named). "Who runs the page: the legal name of the person or company, the tax id (NIF, CIF, VAT number), the address and an email?" Why: the legal notice and the privacy policy must show who is responsible. Also ask for the register entry when the holder is a company (`legal.holder.register`) and for the email that handles privacy requests (`legal.privacyContact`; it may be the holder's email).
+3. **Data processing.** "Will the page use analytics, forms or embeds such as video or maps?" Why: analytics and embeds may set cookies, which needs a consent mechanism; no cookies means no banner. Write `legal.processing.analytics` (`none`, `cookieless` or `cookies`), `forms` (true or false) and the embed names in `embeds`.
+
+Never assume holder identity data. `legal.holder.*` and `legal.privacyContact` are what the customer says, nothing else: never write them from a guess, from the business contact data or from another customer, and never list them in `assumed` (validation fails with "holder identity data cannot be assumed"). When the customer does not know the tax id yet, leave it empty: the legal pages then show a visible pending legal review marker and the landing report fails until the value is given. The processing answers may be assumed when the customer says "you choose".
+
+Tell the customer once that the generated pages and the checks support compliance and are not legal advice, and that a lawyer should review them before the page goes live in production.
 
 ## Field notes
 

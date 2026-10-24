@@ -22,6 +22,7 @@ import { auditItem, lockfileItem } from './report/audit.mjs';
 import { staticHeaderItems } from './report/checks-headers.mjs';
 import { resolveReportConfig } from './report/config.mjs';
 import { distItems, loadDist } from './report/dist-scan.mjs';
+import { LEGAL_NOTE, legalItems } from './report/legal.mjs';
 import { countStatuses, summaryLine, verdictOf } from './report/items.mjs';
 import { checkLinks, linkItem, outboundLinks } from './report/links.mjs';
 import { runLiveChecks } from './report/live.mjs';
@@ -50,16 +51,44 @@ export const GROUPS = [
   'secrets',
   'audit',
   'perf',
+  'legal',
   'live',
   'external-links',
 ];
-const STATIC_GROUPS = ['headers', 'dist', 'source', 'secrets', 'audit', 'perf'];
+const STATIC_GROUPS = [
+  'headers',
+  'dist',
+  'source',
+  'secrets',
+  'audit',
+  'perf',
+  'legal',
+];
 
 class RunError extends Error {}
 
+/** The landing's brief.json, or { brief: null, problem } when there is none (or it cannot be read). */
+function readBrief(projectDir, site) {
+  if (!site) return { brief: null, problem: 'the starter has no brief.json' };
+  const file = join(projectDir, 'brief.json');
+  if (!existsSync(file))
+    return { brief: null, problem: `no sites/${site}/brief.json` };
+  try {
+    const brief = JSON.parse(readFileSync(file, 'utf8'));
+    return brief && typeof brief === 'object' && !Array.isArray(brief)
+      ? { brief, problem: null }
+      : { brief: null, problem: `sites/${site}/brief.json is not an object` };
+  } catch (error) {
+    return {
+      brief: null,
+      problem: `cannot read sites/${site}/brief.json: ${error.message}`,
+    };
+  }
+}
+
 const HELP = `Usage: npm run report -- [options]
 
-Security (OWASP Top 10:${OWASP_EDITION}) and performance report of one landing. Writes report.json and
+Security (OWASP Top 10:${OWASP_EDITION}), performance and legal report of one landing. Writes report.json and
 report.md to qa/<slug>/report/<timestamp>/ (qa/report/<timestamp>/ for the starter) and a "latest" link.
 
   --site <slug>       report on sites/<slug> (default: the starter at the repo root)
@@ -187,7 +216,7 @@ export async function runReport(values, deps = {}) {
 
   const distDir = join(paths.projectDir, 'dist');
   const needsDist = [...groups].some((g) =>
-    ['headers', 'dist', 'perf', 'secrets'].includes(g),
+    ['headers', 'dist', 'perf', 'secrets', 'legal'].includes(g),
   );
   if (needsDist && !existsSync(join(distDir, 'index.html'))) {
     deps.log?.(
@@ -215,7 +244,7 @@ export async function runReport(values, deps = {}) {
   const model =
     distExists &&
     [...groups].some((g) =>
-      ['headers', 'dist', 'perf', 'external-links'].includes(g),
+      ['headers', 'dist', 'perf', 'legal', 'external-links'].includes(g),
     )
       ? loadDist(distDir)
       : null;
@@ -253,15 +282,20 @@ export async function runReport(values, deps = {}) {
       lockfileItem(existsSync(join(root, 'package-lock.json'))),
     );
   }
-  if (groups.has('perf')) {
-    const qa = loadQaReport({
-      qaFile: values.qa ? resolve(values.qa) : undefined,
-      qaRoot: paths.outRoot,
-      distDir,
-    });
+  // The QA report (Lighthouse detail and the privacy record) is only used when it ran after this build.
+  const qa =
+    groups.has('perf') || groups.has('legal')
+      ? loadQaReport({
+          qaFile: values.qa ? resolve(values.qa) : undefined,
+          qaRoot: paths.outRoot,
+          distDir,
+        })
+      : null;
+  if (qa)
     extra.qa = qa.problem
       ? { problem: qa.problem }
       : { path: relative(root, qa.path) };
+  if (groups.has('perf')) {
     const lh = lighthouseItems({
       qa: qa.report,
       problem: qa.problem,
@@ -271,6 +305,22 @@ export async function runReport(values, deps = {}) {
     items.push(...lh.items);
     extra.performance.pages = lh.pages;
     if (model) items.push(...distPerfItems(model, reportConfig));
+  }
+
+  if (groups.has('legal') && model) {
+    const { brief, problem } = readBrief(paths.projectDir, values.site);
+    items.push(
+      ...legalItems({
+        model,
+        brief,
+        briefProblem: problem,
+        qa,
+        config: config.legal,
+        siteCommand: values.site
+          ? `node scripts/legal.mjs --site ${values.site} --write`
+          : 'node scripts/legal.mjs --site <slug> --write',
+      }),
+    );
   }
 
   let liveHtml = null;
@@ -329,7 +379,9 @@ export async function runReport(values, deps = {}) {
     pages: model ? model.pages.map((p) => p.path) : [],
     qa: extra.qa,
     performance: extra.performance,
+    ...(groups.has('legal') ? { legalNote: LEGAL_NOTE } : {}),
     config: reportConfig,
+    legalConfig: config.legal,
     items,
   };
 
