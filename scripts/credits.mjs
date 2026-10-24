@@ -7,7 +7,8 @@
 //   - the photo table of sites/<slug>/CREDITS.md between <!-- credits:start --> and <!-- credits:end -->
 //     (the rest of the file, for example the fonts table, is kept), followed by a "Provided by the
 //     customer" table when the manifest has entries with source "customer" (files the customer gave,
-//     with owner and permission; no public credit line unless credit: true), and
+//     with owner and permission; no public credit line unless credit: true) and an "AI-generated images" table
+//     for entries with source "ai" (tool, model, date and terms link; the prompt stays in assets.json), and
 //   - sites/<slug>/src/data/credits.json: the entries that need a visible credit (credit: true),
 //     one per source photo or customer file, for the footer to import.
 // Idempotent. With --check nothing is written; exit 1 when either file is out of date.
@@ -42,6 +43,23 @@ export const CUSTOMER_REQUIRED_FIELDS = [
 
 export const isCustomer = (entry) => entry?.source === 'customer';
 
+/** Fields of an entry with source "ai" (an AI-generated or imported image; scripts/ai-images.mjs writes them). */
+export const AI_REQUIRED_FIELDS = [
+  'file',
+  'title',
+  'generator',
+  'model',
+  'prompt',
+  'createdAt',
+  'terms',
+  'credit',
+];
+
+export const isAi = (entry) => entry?.source === 'ai';
+
+/** Entries that are neither the customer's nor AI-generated: the stock photos with a source page. */
+const isStock = (entry) => !isCustomer(entry) && !isAi(entry);
+
 /** Throws when a manifest entry lacks a field the credits need. */
 export function validateManifest(manifest, label = 'assets.json') {
   if (!manifest || !Array.isArray(manifest.images))
@@ -49,7 +67,9 @@ export function validateManifest(manifest, label = 'assets.json') {
   manifest.images.forEach((entry, index) => {
     for (const field of isCustomer(entry)
       ? CUSTOMER_REQUIRED_FIELDS
-      : REQUIRED_FIELDS) {
+      : isAi(entry)
+        ? AI_REQUIRED_FIELDS
+        : REQUIRED_FIELDS) {
       if (entry?.[field] === undefined || entry[field] === '')
         throw new Error(
           `${label}: image #${index + 1} (${entry?.file ?? 'no file'}) has no "${field}"`,
@@ -93,7 +113,7 @@ const creditedAuthor = (group) =>
 
 /** The footer list: one {author, license, url} per credited source photo, then per customer file with credit: true. */
 export function creditList(entries) {
-  const stock = groupBySource(entries.filter((entry) => !isCustomer(entry)))
+  const stock = groupBySource(entries.filter(isStock))
     .filter((group) => group.credit)
     .map((group) => ({
       author: creditedAuthor(group),
@@ -134,7 +154,7 @@ export function markdownTable(headers, rows) {
 
 /** The generated block (without the markers): the photo table, or a note when there are no photos. */
 export function renderPhotoTable(entries) {
-  entries = entries.filter((entry) => !isCustomer(entry));
+  entries = entries.filter(isStock);
   if (!entries.length) return 'No photographs are used yet.';
   const rows = groupBySource(entries).map((group) => [
     group.files.map((file) => `\`${file}\``).join(', '),
@@ -180,6 +200,29 @@ export function renderCustomerSection(entries) {
   )}`;
 }
 
+/** The "AI-generated images" part: one row per AI entry, or '' when there are none. */
+export function renderAiSection(entries) {
+  const files = entries.filter(isAi);
+  if (!files.length) return '';
+  const rows = files.map((entry) => [
+    `\`${entry.file}\``,
+    `${entry.generator} ${entry.model}${entry.imported ? ' (imported)' : ''}`,
+    String(entry.createdAt).slice(0, 10),
+    entry.terms,
+    String(entry.note ?? '').replace(/\.$/, ''),
+  ]);
+  return `### AI-generated images\n\nGenerated, not photographed: the page says so in its footer. The prompt, size and request of each image are in \`assets.json\`.\n\n${markdownTable(
+    [
+      'Asset(s) in `src/assets/images/`',
+      'Tool and model',
+      'Date',
+      'Terms',
+      'Notes',
+    ],
+    rows,
+  )}`;
+}
+
 const APPENDED_INTRO = `## Photographs
 
 Photographs come from Wikimedia Commons (renditions served by \`upload.wikimedia.org\`, or crops of them) or from The Met's Open Access collection (public domain; the museum's credit line is kept). Authors and licenses were read from the Commons file metadata or the museum's record. The table below is generated from \`assets.json\` by \`node scripts/credits.mjs --site <slug>\`; edit the manifest, not the table. Photos under a license that requires attribution are credited in the page footer.`;
@@ -189,12 +232,14 @@ Photographs come from Wikimedia Commons (renditions served by \`upload.wikimedia
  * section with the markers is appended. Everything else is kept byte for byte.
  */
 export function renderCreditsFile(existing, entries) {
-  const stock = entries.filter((entry) => !isCustomer(entry));
+  const stock = entries.filter(isStock);
   const customer = renderCustomerSection(entries);
-  // Customer files get their own part; a manifest of only customer files has no stock photo table.
+  const ai = renderAiSection(entries);
+  // Customer files and AI images get their own parts; a manifest of only those has no stock photo table.
   const body = [
-    stock.length || !customer ? renderPhotoTable(stock) : '',
+    stock.length || (!customer && !ai) ? renderPhotoTable(stock) : '',
     customer,
+    ai,
   ]
     .filter(Boolean)
     .join('\n\n');

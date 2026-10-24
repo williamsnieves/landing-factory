@@ -40,6 +40,10 @@ A landing that sets no cookie, writes no `localStorage` or `sessionStorage` key 
 | `ES` (LSSI-CE)                            | Privacy policy, legal notice  | Name, tax id, address, email; register entry only warns             |
 | Any other market                          | None known                    | The report warns "no rule set": the requirements are unknown        |
 
+## AI-generated images
+
+A page that uses AI-generated images says so: a visible disclosure in the footer ("Some images on this page were generated with AI."; Spanish: "Algunas imágenes de esta página se generaron con IA.") marked `data-ai-disclosure`, and the final check (`ai-provenance`) fails without it. This is broader than the deep-fake transparency duties of the EU AI Act that apply from August 2026, which the factory does not try to judge. AI images are for illustration only: the prompt policy keeps them from depicting the business's people, products, logo or results, and the customer must allow them (`brand.aiImages`). The files keep OpenAI's C2PA metadata in the repository; the variants Astro serves may drop it. This is not legal advice.
+
 ## What this does not cover
 
 Terms of sale, accessibility statements, markets without a rule set, the wording of cookie consent, and whether a price claim is lawful. The report names what it cannot judge; a person decides.

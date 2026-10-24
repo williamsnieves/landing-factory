@@ -4,6 +4,9 @@ import { existsSync, readFileSync } from 'node:fs';
 import { REPORT_DEFAULTS, validateReportConfig } from '../report/config.mjs';
 import { LEGAL_DEFAULTS, validateLegalConfig } from '../report/legal-rules.mjs';
 
+export const AI_IMAGE_SIZES = ['1024x1024', '1024x1536', '1536x1024'];
+export const AI_IMAGE_QUALITIES = ['low', 'medium', 'high'];
+
 export const DEFAULT_CONFIG = Object.freeze({
   viewports: [
     { width: 375, height: 812 },
@@ -38,6 +41,14 @@ export const DEFAULT_CONFIG = Object.freeze({
   report: REPORT_DEFAULTS,
   // Cookie allow list and tracker extensions of the legal area of the landing report (scripts/report/legal-rules.mjs).
   legal: LEGAL_DEFAULTS,
+  // AI-generated images (scripts/ai-images.mjs): provider, defaults of a generation and the cap per site.
+  aiImages: {
+    provider: 'openai',
+    model: 'gpt-image-1.5',
+    size: '1536x1024',
+    quality: 'high',
+    maxPerSite: 12,
+  },
 });
 
 const LIGHTHOUSE_CATEGORIES = [
@@ -87,6 +98,7 @@ export function validateConfig(config) {
       'brief',
       'report',
       'legal',
+      'aiImages',
     ],
     'config',
   );
@@ -254,6 +266,31 @@ export function validateConfig(config) {
       !brief.sampleWords.every((w) => typeof w === 'string' && w.trim() !== '')
     )
       err('brief.sampleWords', 'must be an array of non-empty words');
+  }
+  if ('aiImages' in config) {
+    const ai = config.aiImages;
+    if (!isObject(ai)) {
+      err('aiImages', 'must be an object');
+    } else {
+      known(
+        ai,
+        ['provider', 'model', 'size', 'quality', 'maxPerSite'],
+        'aiImages',
+      );
+      if (ai.provider !== 'openai')
+        err('aiImages.provider', 'must be "openai" (the only provider)');
+      if (typeof ai.model !== 'string' || !/^[A-Za-z0-9._-]+$/.test(ai.model))
+        err('aiImages.model', 'must be a model id such as "gpt-image-1.5"');
+      if (!AI_IMAGE_SIZES.includes(ai.size))
+        err('aiImages.size', `must be one of ${AI_IMAGE_SIZES.join(', ')}`);
+      if (!AI_IMAGE_QUALITIES.includes(ai.quality))
+        err(
+          'aiImages.quality',
+          `must be one of ${AI_IMAGE_QUALITIES.join(', ')}`,
+        );
+      if (!Number.isInteger(ai.maxPerSite) || ai.maxPerSite < 0)
+        err('aiImages.maxPerSite', 'must be an integer >= 0');
+    }
   }
   // The report section is validated by scripts/report/config.mjs (defaults live there too).
   if ('report' in config) errors.push(...validateReportConfig(config.report));

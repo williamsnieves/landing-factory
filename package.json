@@ -31,6 +31,7 @@
     "brief": "node scripts/brief.mjs",
     "preflight": "node scripts/preflight.mjs",
     "find-images": "node scripts/find-images.mjs",
+    "ai-images": "node scripts/ai-images.mjs",
     "credits": "node scripts/credits.mjs",
     "legal": "node scripts/legal.mjs",
     "section-shots": "node scripts/section-shots.mjs",

@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-24 (add-landing-report merged; next: add-legal-compliance).
+Read this first in a new or compacted session. Last updated: 2026-10-24 (add-ai-images in PR #20; next: its real smoke test in a new session).
 
 ## Working agreements
 
@@ -25,17 +25,17 @@ Read this first in a new or compacted session. Last updated: 2026-10-24 (add-lan
 | add-brief-intake (`brief.json`, `/brief-intake` interview, generation reads the brief, `brief-facts` check) | Merged (PR #15) and archived 2026-10-22 |
 | Owner's digital-products landing `sites/tupathdigital` (first real customer test) | Merged: build from the brief (PR #16, with polish pass A after the owner's review) and redesign B from the owner's references (PR #17). Production: Pages project `tupathdigital` (https://tupathdigital.pages.dev) |
 | add-landing-report (performance and security audit, OWASP Top 10:2025, starter CSP/HSTS/COOP, planning-folder fix) | Merged (PR #18) and archived 2026-10-24; every landing 0 fail in CI (warnings: existing sites have no script CSP, HSTS, COOP or 404 page) |
-| add-legal-compliance (cookies and trackers, consent banner only when needed, legal notice and privacy policy from the brief, price-claim review) | Next, on branch `change/add-legal-compliance` (owner, 2026-10-24) |
-| add-ai-images (AI-generated images as a recorded source) | Planned after add-legal-compliance (owner, 2026-10-24) |
+| add-legal-compliance (cookies and trackers, consent banner only when needed, legal notice and privacy policy from the brief, price-claim review) | Merged (PR #19) and archived 2026-10-24; every landing 0 fail (warn: market unknown; tupathdigital also warns on its "50% off" claims) |
+| add-ai-images (AI-generated images as a recorded source) | PR #20 open, CI on branch `change/add-ai-images`; provider OpenAI gpt-image (owner, 2026-10-24); real smoke test (task 6.1) pending |
 
 ## Resume here (2026-10-24)
 
-Branch `change/add-legal-compliance` (from main after PR #18; first commit archives add-landing-report). Next: propose `add-legal-compliance` (owner, 2026-10-24: "does the landing meet the rules to be in production: cookies, GDPR, etc."). Draft scope agreed in chat (refine in the proposal):
+Branch `change/add-ai-images`, PR #20 open (implemented; 467 tests; clean-clone checks pass). Only task 6.1 is open: the real smoke test. The owner added `OPENAI_API_KEY` (environment variable) and `api.openai.com` (allowed domains) on 2026-10-24; they take effect in a new session (in the old one the domain answered 401 without a key). In the new session:
 
-- Cookies and trackers: detect cookies, browser storage and known trackers on a real page load; a consent banner only when non-essential cookies exist (prefer cookieless analytics, so no banner is needed). Today tupathdigital loads nothing from third parties.
-- Legal pages from the brief: legal notice (Spain, LSSI-CE: holder name, tax id, address, email) and privacy policy (GDPR: at least the host's IP logs), per the customer's market; customer data is never invented, missing data marks the page "pending legal review".
-- Price claims: discount percentages and struck-through prices flagged for review (EU Omnibus rule on the prior 30-day lowest price; relevant to the tupathdigital coupons).
-- A new "legal" area in the landing report (fail: non-essential cookies without consent, required legal page missing; warn: price claims). The brief gains market and legal identity fields; the interview asks for them. Not legal advice; a lawyer's review comes before selling the factory.
+1. Check the key is visible without printing it (`[ -n "$OPENAI_API_KEY" ] && echo set`).
+2. Create a throwaway site (`npm run new-site -- zz-ai-smoke`, no brief, so AI images are allowed), then `node scripts/ai-images.mjs generate zz-ai-smoke --prompt "abstract glass shapes over a soft blue gradient" --as smoke --quality low` (dry run first).
+3. Check the file, the `assets.json` entry, `npm run credits -- --site zz-ai-smoke` (AI table) and `check-landing` `ai-provenance` with a `data-ai-disclosure` element; confirm the default model `gpt-image-1.5` works (if not, change `aiImages.model` in `qa.config.json` and `DEFAULT_CONFIG`).
+4. Remove the throwaway site (and restore `package-lock.json` if `npm install` touched it), check task 6.1 with the result, push to PR #20 and tell the owner.
 
 Reminder scheduled for 2026-11-01: the tupathdigital coupons FALL2026 (Etsy) and 92xsh57 (Gumroad) end on 31 October 2026; offer the owner to update or remove them.
 
@@ -48,6 +48,7 @@ Reminder scheduled for 2026-11-01: the tupathdigital coupons FALL2026 (Etsy) and
 
 ## Owner decisions to keep (2026-10-21)
 
+- 2026-10-24: AI images from OpenAI GPT image models (owner's choice over Gemini/Imagen, FLUX or import-only).
 - 2026-10-24: legal compliance (cookies, GDPR, legal notice, price claims) as its own change `add-legal-compliance`, before `add-ai-images`.
 - 2026-10-24: security audit framed by the OWASP Top 10; add `add-ai-images` after the report (today images come only from the customer, Commons/The Met or code-rendered posters; the owner can already hand in AI images made with their own tool as customer files).
 
@@ -72,7 +73,9 @@ Follow `docs/product-plan.md`:
 
 1. `add-design-archetypes` (archetype blends steered by the requirement and the references, real diversity measure), validated by the three-niche pilot. Archetypes are a starting grammar, not a template; the hard rules are the quality budgets, licensing and originality, and the layout diversity rule.
 2. `add-brief-intake`; then the owner's digital-products landing as the first real customer test.
-3. `add-landing-report` (merged), then `add-legal-compliance`, `add-ai-images` (owner, 2026-10-24), `add-deploy-adapters`, `add-agent-interface`, `add-3d-models`; one landing per repository introduced gradually (export first).
+3. `add-landing-report` and `add-legal-compliance` (merged), then `add-ai-images` (owner, 2026-10-24), `add-deploy-adapters`, `add-agent-interface`, `add-3d-models`; one landing per repository introduced gradually (export first).
+
+`add-ai-images`: the real smoke test (task 6.1) waits for `OPENAI_API_KEY` as an environment secret and `api.openai.com` in the allowed domains; the default model `gpt-image-1.5` is confirmed by it.
 
 Small fixes pending: panaderia process heading covered at 375 px; `new-landing.sh` final check without `--refs`.
 

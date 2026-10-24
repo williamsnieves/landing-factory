@@ -757,3 +757,72 @@ test('the proposal template points at the brief, and preflight accepts a folder 
   writeFileSync(join(sitesDir, 'tienda/other.json'), '{}');
   assert.equal(checkSlug('tienda', sitesDir).ok, false);
 });
+
+test('brand.aiImages accepts allowed, not-allowed and empty, rejects other values and an older brief stays valid', () => {
+  for (const value of ['allowed', 'not-allowed', '']) {
+    const brief = fixture();
+    brief.brand.aiImages = value;
+    assert.deepEqual(errorsOf(brief), [], value || '(empty)');
+  }
+  const bad = fixture();
+  bad.brand.aiImages = 'maybe';
+  const errors = errorsOf(bad);
+  assert.deepEqual(paths(errors), ['brand.aiImages']);
+  assert.match(errors[0].message, /expected one of allowed, not-allowed/);
+  // A brief written before the field existed is valid and reads as empty.
+  const older = fixture();
+  delete older.brand.aiImages;
+  assert.deepEqual(errorsOf(older), []);
+  assert.equal(getPath(older, 'brand.aiImages'), undefined);
+  assert.equal(emptyBrief().brand.aiImages, '');
+});
+
+test('AI-image consent cannot be assumed, directly', () => {
+  const brief = fixture();
+  brief.assumed.push({
+    field: 'brand.aiImages',
+    reason: 'the agent chose it',
+  });
+  const errors = errorsOf(brief);
+  assert.equal(errors.length, 1);
+  assert.equal(errors[0].path, `assumed[${brief.assumed.length - 1}].field`);
+  assert.match(errors[0].message, /AI-image consent cannot be assumed/);
+  // An empty value listed as assumed gets the same answer (the customer decides), not the "empty" one.
+  const empty = fixture();
+  empty.brand.aiImages = '';
+  empty.assumed.push({ field: 'brand.aiImages', reason: 'x' });
+  assert.match(errorsOf(empty)[0].message, /cannot be assumed/);
+});
+
+test('missing lists brand.aiImages after the brand fields and before the references', () => {
+  const brief = emptyBrief({ language: 'es', niche: 'x' });
+  const recommended = missingFields(brief).map((m) => m.path);
+  const at = recommended.indexOf('brand.aiImages');
+  assert.ok(at > recommended.indexOf('brand.fonts'));
+  assert.ok(at < recommended.indexOf('references.liked'));
+  const answered = fixture();
+  assert.ok(
+    !missingFields(answered).some((m) => m.path === 'brand.aiImages'),
+    'answered',
+  );
+  answered.brand.aiImages = '';
+  assert.ok(missingFields(answered).some((m) => m.path === 'brand.aiImages'));
+  assert.match(summarizeBrief(fixture()), /AI images: allowed/);
+});
+
+test('the brief-intake skill asks the AI-image question and never assumes the answer', () => {
+  const skill = readFileSync(
+    join(ROOT, '.claude/skills/brief-intake/SKILL.md'),
+    'utf8',
+  );
+  for (const needle of [
+    'May the page use AI-generated illustrations (never photos of your people or products)?',
+    'brand.aiImages',
+    '`allowed` or `not-allowed`',
+    'Never assume it',
+    'never list it in `assumed`',
+    'AI-image consent cannot be assumed',
+    'an empty value counts as not allowed',
+  ])
+    assert.ok(skill.includes(needle), needle);
+});
