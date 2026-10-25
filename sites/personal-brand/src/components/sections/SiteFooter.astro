@@ -1,0 +1,136 @@
+---
+// Columns footer: who, this page, elsewhere (LinkedIn, GitHub), language. The AI disclosure line is visible text
+// whenever the page shows an AI image. No email, phone or blog: the owner wants none of them on the page for now.
+import logo from '../../assets/images/logo.svg';
+import LanguageSwitcher from '../i18n/LanguageSwitcher.astro';
+import { locales, t } from '../../i18n/ui';
+
+interface Props {
+  locale: string;
+  homeHref: string;
+  tagline: string;
+  /** True on pages that show an AI image (the home page); false on the 404 page. */
+  disclosure?: boolean;
+  switcher?: boolean;
+}
+const {
+  locale,
+  homeHref,
+  tagline,
+  disclosure = true,
+  switcher = true,
+} = Astro.props;
+const dict = t(locale);
+const links = [
+  { href: `${homeHref}#about`, label: dict.navAbout },
+  { href: `${homeHref}#ai`, label: dict.navAi },
+  { href: `${homeHref}#path`, label: dict.navPath },
+  { href: `${homeHref}#skills`, label: dict.navSkills },
+  { href: `${homeHref}#beyond`, label: dict.navBeyond },
+];
+const social = [
+  { href: 'https://www.linkedin.com/in/willians-nieves', label: dict.linkedin },
+  { href: 'https://github.com/williamsnieves', label: dict.github },
+];
+---
+
+<footer class="bg-surface border-line border-t">
+  <div class="wrap grid grid-cols-2 gap-x-6 gap-y-10 py-12 md:grid-cols-12 md:py-16">
+    <div class="col-span-2 md:col-span-5">
+      <a
+        href={homeHref}
+        class="inline-flex items-center gap-3"
+        aria-label="Willians Nieves"
+      >
+        <img
+          src={logo.src}
+          width="40"
+          height="40"
+          alt={dict.logoAlt}
+          class="block size-10"
+          loading="lazy"
+        />
+        <span class="font-display text-xl font-bold">Willians Nieves</span>
+      </a>
+      <p class="text-ink-soft mt-4 max-w-[34ch] text-base">{tagline}</p>
+      {disclosure && (
+        <p class="text-ink-soft mt-6 max-w-[34ch] text-sm" data-ai-disclosure>
+          {dict.aiDisclosure}
+        </p>
+      )}
+      <p class="label text-ink-soft mt-6">
+        &copy; 2026 Willians Nieves. {dict.rights}
+      </p>
+    </div>
+
+    <nav aria-label={dict.footerPage} class="md:col-span-2 md:col-start-7">
+      <h2 class="label text-ink">{dict.footerPage}</h2>
+      <ul class="mt-3 grid list-none gap-0 p-0">
+        {links.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              class="text-ink-soft foot-link block py-2 text-sm"
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="md:col-span-2">
+      <h2 class="label text-ink">{dict.footerElsewhere}</h2>
+      <ul class="mt-3 grid list-none gap-0 p-0">
+        {social.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              rel="me noopener"
+              class="text-link block py-2 text-sm"
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    {switcher && (
+      <div class="md:col-span-2">
+        <h2 class="label text-ink">{dict.language}</h2>
+        <LanguageSwitcher
+          locales={locales}
+          label={dict.language}
+          class="foot-lang mt-3 text-sm"
+        />
+      </div>
+    )}
+  </div>
+</footer>
+
+<style>
+  .foot-link {
+    transition: color var(--duration-instant) var(--ease-snap);
+  }
+  .foot-link:hover {
+    color: var(--color-primary);
+  }
+  footer :global(.foot-lang a) {
+    display: inline-block;
+    padding: 0.5rem 0;
+    color: var(--color-ink-soft);
+    text-decoration: none;
+    font-weight: 400;
+  }
+  footer :global(.foot-lang a:hover) {
+    color: var(--color-primary);
+  }
+  footer :global(.foot-lang a[aria-current]) {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-decoration-color: var(--color-primary);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.3em;
+  }
+</style>

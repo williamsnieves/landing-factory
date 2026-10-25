@@ -3,7 +3,7 @@
 // AI images are for illustration: abstract art, textures, generic objects and scenes. They never pose as
 // real photos of the business, its people or its products. The policy is a best-effort lexical filter in
 // English and Spanish: it checks a prompt against the brief and a short list of words, case-insensitively,
-// ignoring accents, on word boundaries. It has no override: a prompt that is refused by mistake is reworded,
+// ignoring accents, on word boundaries. Short exclusion clauses ("no people, no logos") are not requests and are skipped. It has no override: a prompt that is refused by mistake is reworded,
 // and a real exception is a person editing assets.json by hand (check-landing still verifies the entry).
 
 /** Lowercase, accents removed, anything but letters and digits collapsed to single spaces. */
@@ -91,6 +91,45 @@ const FAMOUS = [
   /\blikeness of\b/,
 ];
 
+/** Words that open an exclusion clause ("no logos", "without people", "sin texto"). */
+const NEGATIONS = new Set([
+  'no',
+  'not',
+  'without',
+  'never',
+  'avoid',
+  'exclude',
+  'sin',
+  'ni',
+  'nunca',
+  'evita',
+  'evitar',
+  'excluye',
+]);
+/** An exclusion clause is short; a longer clause that merely starts with "no" is still checked. */
+export const MAX_EXCLUSION_WORDS = 6;
+
+/**
+ * The normalized prompt without its exclusion clauses. Clauses are split on punctuation; a clause of at most
+ * MAX_EXCLUSION_WORDS words that starts with a negation (`No people, no text, no logos.`) asks for the opposite of
+ * its words, so the word rules skip it. Everything else, including "no text and our logo on a mug", is checked.
+ */
+export function withoutExclusions(text) {
+  return String(text ?? '')
+    .split(/[.,;:!?()\n]+/)
+    .map((clause) => normalize(clause))
+    .filter(Boolean)
+    .filter((clause) => {
+      const words = clause.split(' ').filter(Boolean);
+      return !(
+        words.length > 0 &&
+        words.length <= MAX_EXCLUSION_WORDS &&
+        NEGATIONS.has(words[0])
+      );
+    })
+    .join(' ');
+}
+
 const find = (patterns, text) => {
   for (const pattern of patterns) {
     const match = pattern.exec(text);
@@ -132,6 +171,8 @@ export function checkPrompt(prompt, brief = null, { subject } = {}) {
   const exempt = subject === 'owner' ? OWNER_EXEMPT_RULES : [];
   const text = String(prompt ?? '');
   const normal = ` ${normalize(text)} `;
+  // The word rules read the prompt without its exclusion clauses; the brand rule reads all of it.
+  const asked = ` ${withoutExclusions(text)} `;
   const violations = [];
 
   for (const { normal: name, raw } of brandNames(brief)) {
@@ -144,7 +185,7 @@ export function checkPrompt(prompt, brief = null, { subject } = {}) {
   }
   for (const rule of RULES) {
     if (exempt.includes(rule.id)) continue;
-    const match = find(rule.patterns, normal);
+    const match = find(rule.patterns, asked);
     if (match)
       violations.push({
         rule: rule.id,
@@ -153,7 +194,7 @@ export function checkPrompt(prompt, brief = null, { subject } = {}) {
       });
   }
   const person = NAMED_PERSON.exec(text);
-  const famous = find(FAMOUS, normal);
+  const famous = find(FAMOUS, asked);
   if ((person || famous) && !exempt.includes('real-person'))
     violations.push({
       rule: 'real-person',

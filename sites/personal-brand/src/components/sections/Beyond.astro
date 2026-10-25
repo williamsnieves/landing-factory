@@ -1,0 +1,152 @@
+---
+// Beyond the code: the human half. Three short cards on a wine field and one playful moment, a row of guitar
+// strings (SVG) that vibrates on hover or keyboard focus. Under reduced motion the strings only change color.
+import SectionHead from './SectionHead.astro';
+import beyondBackdrop from '../../assets/images/bg-beyond.webp';
+import Backdrop from './Backdrop.astro';
+import type { Content } from '../../content/types';
+
+interface Props {
+  content: Content['beyond'];
+}
+const { content } = Astro.props;
+const strings = [14, 30, 46, 62, 78, 94];
+---
+
+<section
+  id="beyond"
+  class="bg-field-4 section-pad relative isolate"
+  aria-labelledby="beyond-heading"
+>
+  <Backdrop src={beyondBackdrop} strength={0.85} />
+  <div class="wrap">
+    <SectionHead
+      label={content.label}
+      heading={content.heading}
+      intro={content.intro}
+      headingId="beyond-heading"
+    />
+    <ul class="mt-12 grid list-none gap-4 p-0 md:grid-cols-3 lg:mt-16">
+      {content.cards.map((card, i) => (
+        <li
+          data-reveal
+          data-reveal-delay={i * 0.1}
+          class="bg-paper border-ink/30 flex min-w-0 flex-col border p-5 md:p-6"
+        >
+          <h3 class="font-display text-2xl leading-none md:text-xl lg:text-2xl [overflow-wrap:anywhere] font-extrabold">
+            {card.title}
+          </h3>
+          <p class="text-ink mt-4 text-base leading-relaxed">{card.body}</p>
+          {i === 1 && (
+            <div class="mt-auto pt-6">
+              <button
+                type="button"
+                class="strings block w-full"
+                aria-label={content.stringsLabel}
+              >
+                <svg
+                  viewBox="0 0 320 108"
+                  class="block h-auto w-full"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <rect x="0" y="4" width="6" height="100" class="fret" />
+                  <rect x="314" y="4" width="6" height="100" class="fret" />
+                  {strings.map((y, n) => (
+                    <g class={`str s${n + 1}`}>
+                      <line
+                        x1="6"
+                        x2="314"
+                        y1={y}
+                        y2={y}
+                        stroke-width={1 + n * 0.5}
+                      />
+                    </g>
+                  ))}
+                </svg>
+                <span class="label text-ink-soft mt-2 block text-left">
+                  {content.stringsHint}
+                </span>
+              </button>
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .strings {
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    color: inherit;
+  }
+  .fret {
+    fill: var(--color-ink-soft);
+  }
+  .str line {
+    stroke: var(--color-ink-soft);
+    transition: stroke var(--duration-instant) var(--ease-snap);
+  }
+  .strings:hover .str line,
+  .strings:focus-visible .str line {
+    stroke: var(--color-accent);
+  }
+  .str {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .strings:hover .str,
+    .strings:focus-visible .str,
+    .strings:active .str {
+      animation: pluck 0.9s var(--ease-out) both;
+    }
+    .strings:hover .s2,
+    .strings:focus-visible .s2 {
+      animation-delay: 0.04s;
+    }
+    .strings:hover .s3,
+    .strings:focus-visible .s3 {
+      animation-delay: 0.08s;
+    }
+    .strings:hover .s4,
+    .strings:focus-visible .s4 {
+      animation-delay: 0.12s;
+    }
+    .strings:hover .s5,
+    .strings:focus-visible .s5 {
+      animation-delay: 0.16s;
+    }
+    .strings:hover .s6,
+    .strings:focus-visible .s6 {
+      animation-delay: 0.2s;
+    }
+    @keyframes pluck {
+      0% {
+        transform: translateY(0);
+      }
+      12% {
+        transform: translateY(-5px);
+      }
+      26% {
+        transform: translateY(4px);
+      }
+      40% {
+        transform: translateY(-3px);
+      }
+      54% {
+        transform: translateY(2px);
+      }
+      70% {
+        transform: translateY(-1px);
+      }
+      100% {
+        transform: translateY(0);
+      }
+    }
+  }
+</style>

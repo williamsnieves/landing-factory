@@ -1,0 +1,93 @@
+---
+// Status ticker strip above the header. A CSS marquee under normal motion (pauses on hover);
+// a static wrapped line under prefers-reduced-motion, and the duplicate track is hidden from everyone.
+interface Props {
+  items: string[];
+}
+const { items } = Astro.props;
+---
+
+<div class="ticker bg-surface border-line border-b" data-qa-allow-clip>
+  <div class="ticker-inner">
+    <ul class="track label text-ink">
+      {items.map((item) => (
+        <li>{item}</li>
+      ))}
+    </ul>
+    <ul class="track label text-ink" aria-hidden="true">
+      {items.map((item) => (
+        <li>{item}</li>
+      ))}
+    </ul>
+  </div>
+</div>
+
+<style>
+  .ticker {
+    overflow: hidden;
+    height: 2.25rem;
+  }
+  .ticker-inner {
+    display: flex;
+    width: max-content;
+    height: 100%;
+    align-items: center;
+  }
+  .track {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    white-space: nowrap;
+  }
+  .track li {
+    display: flex;
+    align-items: center;
+  }
+  .track li::after {
+    content: '';
+    display: inline-block;
+    width: 0.4rem;
+    height: 0.4rem;
+    margin-inline: 1.25rem;
+    background: var(--color-accent);
+  }
+  .ticker:hover .ticker-inner {
+    animation-play-state: paused;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .ticker-inner {
+      animation: ticker-run 48s linear infinite;
+    }
+  }
+  @keyframes ticker-run {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ticker {
+      height: auto;
+      padding-block: 0.5rem;
+    }
+    .ticker-inner {
+      width: auto;
+      flex-wrap: wrap;
+      padding-inline: 1rem;
+    }
+    .track {
+      flex-wrap: wrap;
+      row-gap: 0.25rem;
+      white-space: normal;
+    }
+    .track[aria-hidden='true'] {
+      display: none;
+    }
+    .track li:last-child::after {
+      display: none;
+    }
+  }
+</style>

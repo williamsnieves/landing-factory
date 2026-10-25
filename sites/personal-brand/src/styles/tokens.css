@@ -1,0 +1,77 @@
+/*
+ * Design tokens: the single source of truth for a site's theme.
+ * Tailwind v4 turns every --color-*, --font-*, --text-*, --spacing and
+ * --radius-* variable below into utilities (bg-primary, font-display, ...).
+ * To retheme a site, edit only this file. `@theme static` emits every variable
+ * (not only the used ones) so 3D scenes can read colors from the page.
+ *
+ * Dark theme: `paper` is the dark page, `ink` is the light text. Source of the
+ * values and the measured contrasts: design-system/personal-brand/MASTER.md.
+ */
+@theme static {
+  /* Colors: base */
+  --color-primary: #ff6f3c;
+  --color-primary-hover: #ff8a5e;
+  --color-primary-contrast: #0a0d16;
+  --color-accent: #ffc46b;
+  --color-ink: #eef1f8;
+  --color-ink-soft: #b9c2d6;
+  --color-paper: #0a0d16;
+  --color-surface: #121827;
+  --color-line: #2b3552;
+
+  /* Colors: the two halves and their bridge */
+  --color-cool: #2fb8ff;
+  --color-bridge: #a37bff;
+
+  /* Colors: flat section fields, dark enough for ink and ink-soft text */
+  --color-field-1: #8a2f12;
+  --color-field-2: #0d3f8f;
+  --color-field-3: #4a2a9c;
+  --color-field-4: #7b1d4e;
+  --color-field-5: #0c5560;
+  --color-field-6: #1a2340;
+
+  /* Fonts (self-hosted variable fonts, imported in global.css) */
+  --font-display:
+    'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans:
+    'Instrument Sans Variable', ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', Roboto, sans-serif;
+  --font-mono:
+    'Geist Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, Consolas,
+    monospace;
+
+  /* Display weights: one headline mixes the light and the heavy cut */
+  --font-weight-display-light: 200;
+  --font-weight-display-heavy: 800;
+
+  /* Type scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.625rem;
+  --text-2xl: 2.25rem;
+  --text-3xl: clamp(2.5rem, 6vw, 4.5rem);
+  --text-4xl: clamp(3.25rem, 13vw, 11rem);
+
+  /* Spacing base unit: p-4 = 1rem, p-24 = 6rem, ... */
+  --spacing: 0.25rem;
+
+  /* Radii: hairline and brutal, no pills */
+  --radius-sm: 0;
+  --radius-md: 2px;
+  --radius-lg: 4px;
+  --radius-pill: 0;
+
+  /* Motion: durations and easings (instant cuts for state, short eases for reveals) */
+  --duration-instant: 90ms;
+  --duration-fast: 180ms;
+  --duration-base: 320ms;
+  --duration-slow: 700ms;
+  --duration-stage: 1200ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-snap: cubic-bezier(0.7, 0, 0.2, 1);
+}

@@ -1,0 +1,142 @@
+@import 'tailwindcss';
+@import './tokens.css';
+@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource-variable/instrument-sans';
+@import '@fontsource-variable/geist-mono';
+
+@layer base {
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    color-scheme: dark;
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    overflow-x: clip;
+    font-size: var(--text-base);
+    line-height: 1.6;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 3px;
+  }
+}
+
+/* Motion layer -----------------------------------------------------------
+ * Hidden initial states apply ONLY when the .js-motion class is on <html>.
+ * That class is added by the inline script in <Motion /> when JavaScript runs
+ * and prefers-reduced-motion is not "reduce". Without it, everything is visible.
+ */
+.js-motion [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 2rem, 0);
+}
+
+/* Site vocabulary ---------------------------------------------------------
+ * A few named pieces shared by every section: the page wrapper, mono labels, chips, quiet
+ * text links and the faint column lines of the grid. Colors and sizes come from tokens only.
+ */
+@layer components {
+  section[id] {
+    scroll-margin-top: 3.5rem;
+  }
+  .wrap {
+    width: 100%;
+    max-width: 90rem;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 768px) {
+    .wrap {
+      padding-inline: 2rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .wrap {
+      padding-inline: 3rem;
+    }
+  }
+  .section-pad {
+    padding-block: 3.5rem;
+  }
+  @media (min-width: 768px) {
+    .section-pad {
+      padding-block: 6rem;
+    }
+  }
+  @media (min-width: 1280px) {
+    .section-pad {
+      padding-block: 8rem;
+    }
+  }
+  .label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.4;
+  }
+  .chip {
+    display: inline-block;
+    border: 1px solid color-mix(in oklab, currentColor 45%, transparent);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    padding: 0.25rem 0.5rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+    border-radius: var(--radius-md);
+  }
+  .text-link {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-decoration-color: var(--color-primary);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.3em;
+    transition: color var(--duration-instant) var(--ease-snap);
+  }
+  .text-link:hover {
+    color: var(--color-primary);
+  }
+  .grid-lines {
+    position: relative;
+    isolation: isolate;
+  }
+  .grid-lines::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      to right,
+      color-mix(in oklab, var(--color-line) 60%, transparent) 0 1px,
+      transparent 1px calc(100% / 6)
+    );
+    background-position: 0 0;
+  }
+  @media (min-width: 1024px) {
+    .grid-lines::before {
+      background-image: repeating-linear-gradient(
+        to right,
+        color-mix(in oklab, var(--color-line) 60%, transparent) 0 1px,
+        transparent 1px calc(100% / 12)
+      );
+    }
+  }
+}
+
+/* Lenis recommended base styles */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}

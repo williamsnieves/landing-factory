@@ -1,0 +1,41 @@
+---
+// Section opener: the mono index sits beside the heading (never above it), the intro hangs under the heading.
+interface Props {
+  label: string;
+  heading: string;
+  intro?: string;
+  headingId?: string;
+  class?: string;
+}
+const { label, heading, intro, headingId, class: className } = Astro.props;
+const [num, ...rest] = label.split(' ');
+const word = rest.join(' ');
+---
+
+<header
+  class:list={[
+    'grid grid-cols-[auto_1fr] items-baseline gap-x-4 gap-y-5 md:gap-x-8',
+    className,
+  ]}
+>
+  <p class="label text-ink whitespace-nowrap" aria-hidden="true">
+    <span>{num}</span>
+    {word && <span class="hidden md:inline"> / {word}</span>}
+  </p>
+  <h2
+    id={headingId}
+    data-reveal
+    class="font-display text-3xl leading-[0.95] tracking-[-0.02em] text-balance"
+    style="font-weight: var(--font-weight-display-heavy)"
+  >
+    {heading}
+  </h2>
+  {intro && (
+    <p
+      data-reveal
+      class="text-ink-soft col-start-2 max-w-[46ch] text-lg leading-relaxed"
+    >
+      {intro}
+    </p>
+  )}
+</header>

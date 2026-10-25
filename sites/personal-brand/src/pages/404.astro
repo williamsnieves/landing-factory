@@ -1,0 +1,81 @@
+---
+// Not-found page: the build emits dist/404.html, which static hosts serve with status 404. English only (static
+// hosts serve one 404.html), in the design of the site: same header and footer, links home and to LinkedIn.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteHeader from '../components/sections/SiteHeader.astro';
+import SiteFooter from '../components/sections/SiteFooter.astro';
+import { ui } from '../i18n/ui';
+
+const dict = ui.en;
+const title = 'Page not found | Willians Nieves';
+const description = 'This page does not exist.';
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  lang="en"
+  skipLabel={dict.skipToContent}
+  noindex
+>
+  <SiteHeader slot="header" locale="en" homeHref="/" switcher={false} />
+
+  <section class="grid-lines relative overflow-x-clip">
+    <div class="glow" aria-hidden="true"></div>
+    <div class="wrap section-pad grid min-h-[70svh] content-center">
+      <p class="font-display flex text-4xl leading-[0.85] tracking-[-0.04em]">
+        <span class="light">4</span>
+        <span class="heavy text-primary">0</span>
+        <span class="light">4</span>
+      </p>
+      <h1 class="font-display mt-8 max-w-[18ch] text-3xl leading-[0.95] font-extrabold tracking-[-0.02em] text-balance">
+        This page wandered off.
+      </h1>
+      <p class="text-ink-soft mt-6 max-w-[46ch] text-lg leading-relaxed">
+        Even a senior engineer ships a broken link now and then. The page you
+        were after does not exist, or moved.
+      </p>
+      <p class="label mt-8 flex flex-wrap items-center gap-x-6 gap-y-1">
+        <a class="text-link py-2" href="/">
+          Back to the home page
+        </a>
+        <a
+          class="text-link py-2"
+          href="https://www.linkedin.com/in/willians-nieves"
+          rel="me noopener"
+        >
+          Find me on LinkedIn
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <SiteFooter
+    slot="footer"
+    locale="en"
+    homeHref="/"
+    tagline="Front end and AI engineering, from Madrid."
+    disclosure={false}
+    switcher={false}
+  />
+</BaseLayout>
+
+<style>
+  .glow {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(
+      44rem 30rem at 85% 70%,
+      color-mix(in oklab, var(--color-field-2) 80%, transparent),
+      transparent 70%
+    );
+  }
+  .light {
+    font-weight: var(--font-weight-display-light);
+  }
+  .heavy {
+    font-weight: var(--font-weight-display-heavy);
+  }
+</style>

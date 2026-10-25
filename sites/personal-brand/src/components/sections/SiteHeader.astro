@@ -1,0 +1,151 @@
+---
+// Sticky header: the {W} logo, five anchors (always to the home page of the locale), LinkedIn and GitHub as quiet
+// text links and the language switcher. Below 768 px it is a short row (logo, language, menu): the menu is a
+// <details>, so it needs no JavaScript.
+import logo from '../../assets/images/logo.svg';
+import LanguageSwitcher from '../i18n/LanguageSwitcher.astro';
+import { locales, t } from '../../i18n/ui';
+
+interface Props {
+  locale: string;
+  homeHref: string;
+  /** The 404 page has no translation to switch to. */
+  switcher?: boolean;
+}
+const { locale, homeHref, switcher = true } = Astro.props;
+const dict = t(locale);
+const links = [
+  { href: `${homeHref}#about`, label: dict.navAbout },
+  { href: `${homeHref}#ai`, label: dict.navAi },
+  { href: `${homeHref}#path`, label: dict.navPath },
+  { href: `${homeHref}#skills`, label: dict.navSkills },
+  { href: `${homeHref}#beyond`, label: dict.navBeyond },
+];
+const social = [
+  { href: 'https://www.linkedin.com/in/willians-nieves', label: dict.linkedin },
+  { href: 'https://github.com/williamsnieves', label: dict.github },
+];
+---
+
+<header class="bg-paper border-line sticky top-0 z-40 border-b">
+  <div class="wrap flex h-14 items-center gap-4 lg:gap-8">
+    <a
+      href={homeHref}
+      class="hdr-link flex items-center gap-3"
+      aria-label="Willians Nieves"
+    >
+      <img
+        src={logo.src}
+        width="36"
+        height="36"
+        alt={dict.logoAlt}
+        class="block size-9"
+      />
+      <span class="label text-ink hidden lg:inline">Willians Nieves</span>
+    </a>
+
+    <nav aria-label={dict.navLabel} class="ml-auto hidden md:block">
+      <ul class="flex items-center gap-1 lg:gap-3">
+        {links.map((link) => (
+          <li>
+            <a href={link.href} class="hdr-link label block px-2 py-3">
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <ul class="hidden items-center gap-4 lg:flex">
+      {social.map((link) => (
+        <li>
+          <a
+            href={link.href}
+            rel="me noopener"
+            class="text-link label block py-3"
+          >
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    {switcher && (
+      <LanguageSwitcher
+        locales={locales}
+        label={dict.language}
+        class="lang label ml-auto md:ml-0"
+      />
+    )}
+
+    <details class:list={['menu md:hidden', !switcher && 'ml-auto']}>
+      <summary class="label text-ink border-line cursor-pointer border px-3 py-2">
+        {dict.menu}
+      </summary>
+      <div class="bg-surface border-line absolute inset-x-0 top-full border-b px-4 py-4">
+        <ul class="grid gap-1">
+          {links.map((link) => (
+            <li>
+              <a href={link.href} class="hdr-link label block py-3">
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+        <ul class="border-line mt-3 flex gap-6 border-t pt-3">
+          {social.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                rel="me noopener"
+                class="text-link label block py-3"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </details>
+  </div>
+</header>
+
+<style>
+  .hdr-link {
+    color: var(--color-ink-soft);
+    transition: color var(--duration-instant) var(--ease-snap);
+  }
+  .hdr-link:hover,
+  .hdr-link:focus-visible {
+    color: var(--color-primary);
+  }
+  header :global(.lang a) {
+    display: inline-block;
+    padding: 0.75rem 0.25rem;
+    color: var(--color-ink-soft);
+    text-decoration: none;
+    font-weight: 400;
+  }
+  header :global(.lang ul) {
+    gap: 0.5rem;
+  }
+  header :global(.lang a[aria-current]) {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.3em;
+  }
+  header :global(.lang a:hover) {
+    color: var(--color-ink);
+  }
+  .menu summary {
+    list-style: none;
+  }
+  .menu summary::-webkit-details-marker {
+    display: none;
+  }
+  .menu[open] summary {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+</style>

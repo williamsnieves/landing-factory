@@ -7,6 +7,7 @@ import {
   checkPrompt,
   formatViolations,
   normalize,
+  withoutExclusions,
 } from '../scripts/lib/ai-prompt-policy.mjs';
 
 const brief = JSON.parse(
@@ -148,4 +149,32 @@ test('subject owner skips only the people and real-person rules', () => {
   assert.deepEqual(rules('The owner, antes y después', { subject: 'owner' }), [
     'results',
   ]);
+});
+
+test('short exclusion clauses are not requests; longer or positive clauses are still checked', () => {
+  const rules = (prompt) =>
+    checkPrompt(prompt, null)
+      .map((v) => v.rule)
+      .sort();
+  // A typical negative-prompt tail passes.
+  assert.deepEqual(
+    rules(
+      'Abstract dark background, soft glows. No people, no faces, no text, no logos, no symbols.',
+    ),
+    [],
+  );
+  assert.deepEqual(rules('Textura suave. Sin logotipos, sin personas.'), []);
+  assert.deepEqual(rules('Calm waves without logos or reviews'), [
+    'identity',
+    'people',
+  ]);
+  // The words still count outside a short exclusion clause.
+  assert.deepEqual(rules('A mug with our logo. No people.'), ['identity']);
+  assert.deepEqual(rules('No text at all but our logo on a big mug please'), [
+    'identity',
+  ]);
+  assert.deepEqual(rules('No people, a famous actor in the middle'), [
+    'real-person',
+  ]);
+  assert.equal(withoutExclusions('Glow. No people, no logos.'), 'glow');
 });

@@ -1,0 +1,60 @@
+---
+// These templates support compliance and are not legal advice. See texts.ts.
+// Legal notice, rendered from src/data/legal.json (node scripts/legal.mjs --site <slug> --write).
+import LegalValue from './LegalValue.astro';
+import { textsFor, type LegalData } from './texts';
+
+interface Props {
+  data: LegalData;
+  /** Multi-locale sites: the locale to write the page in (default: Astro.currentLocale, else the data's language). */
+  locale?: string;
+  /** Link to the privacy policy page, when the site has one. */
+  privacyHref?: string;
+}
+const { data, privacyHref, locale = Astro.currentLocale } = Astro.props;
+const t = textsFor(data, locale);
+const n = t.notice;
+const fields = ['name', 'taxId', 'address', 'email', 'register'] as const;
+// A row shows when it has a value or when the market requires it (then it renders the pending marker).
+const rows = fields.filter(
+  (field) => data.holder[field] || data.pending.includes(`holder.${field}`),
+);
+---
+
+<article data-legal-page="notice" class="mx-auto max-w-3xl px-6 py-16 md:py-24">
+  <h1 class="font-display text-3xl">{n.title}</h1>
+
+  <h2 class="font-display mt-12 text-xl">{n.holderHeading}</h2>
+  <p class="text-ink-soft mt-3">{n.holderIntro}</p>
+  <dl class="mt-4 grid gap-x-8 gap-y-2 sm:grid-cols-[14rem_1fr]">
+    {rows.map((field) => (
+      <>
+        <dt class="text-ink-soft">{n.labels[field]}</dt>
+        <dd>
+          <LegalValue
+            value={data.holder[field]}
+            field={`holder.${field}`}
+            pending={t.pending}
+          />
+        </dd>
+      </>
+    ))}
+  </dl>
+
+  <h2 class="font-display mt-12 text-xl">{n.purposeHeading}</h2>
+  <p class="text-ink-soft mt-3">{n.purpose(data.business.name)}</p>
+
+  <h2 class="font-display mt-12 text-xl">{n.ipHeading}</h2>
+  <p class="text-ink-soft mt-3">{n.ip}</p>
+
+  <h2 class="font-display mt-12 text-xl">{n.linksHeading}</h2>
+  <p class="text-ink-soft mt-3">{n.links}</p>
+
+  {privacyHref && (
+    <p class="mt-12">
+      <a href={privacyHref} class="underline underline-offset-4">
+        {n.privacyLink}
+      </a>
+    </p>
+  )}
+</article>
