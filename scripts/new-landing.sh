@@ -38,6 +38,9 @@ Review flow: run without --auto, read sites/<slug>/PROPOSAL.md, edit it if neede
 Exit codes: 0 finished as asked (checkpoint reached, dry run done, or passed), 1 failed (preflight, QA
 attempts exhausted, claude error), 2 bad usage.
 
+Usage: claude runs with --output-format stream-json; the readable log is kept, the run's tokens and cost go to
+sites/<slug>/.run-usage.json and to a "Usage:" line at the end of RUN.md (or "not reported").
+
 Testing: LANDING_FACTORY_ROOT=<dir> creates and reads sites/<slug> in <dir> instead of this repo;
 NEW_LANDING_SKIP=preflight,install,final-check skips those steps (used by tests/new-landing.test.mjs); the brief
 commands honor LANDING_FACTORY_ROOT too.
@@ -178,6 +181,8 @@ PROMPT+=" --max-attempts $MAX_ATTEMPTS --lang $LANG_TAG"
 
 CLAUDE_ARGS=(-p "$PROMPT" --permission-mode acceptEdits)
 [ -z "$MODEL" ] || CLAUDE_ARGS+=(--model "$MODEL")
+# Structured output: scripts/lib/claude-stream.mjs turns it back into the readable log and records the usage.
+CLAUDE_ARGS+=(--output-format stream-json --verbose)
 
 # Headless runs ignore a project's settings.json allow list until the folder is trusted
 # interactively, so pass the same reviewed list explicitly (plus the skill and subagent tools).
@@ -197,13 +202,25 @@ mkdir -p "$SITE_DIR"
   echo "claude ${CLAUDE_ARGS[*]}"
 } >> "$LOG"
 
+USAGE_FILE="$SITE_DIR/.run-usage.json"
+rm -f "$USAGE_FILE"
 echo "new-landing: running claude for $SLUG (log: $LOG)"
 set +e
 # Never cut off subagents or commands the run still waits on (claude -p stops background
-# work 10 minutes after the last turn by default).
-CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS=0 claude "${CLAUDE_ARGS[@]}" 2>&1 | tee -a "$LOG"
+# work 10 minutes after the last turn by default). The filter never fails; PIPESTATUS[0] is claude's own status.
+CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS=0 claude "${CLAUDE_ARGS[@]}" 2>&1 \
+  | node "$ROOT/scripts/lib/claude-stream.mjs" --usage "$USAGE_FILE" | tee -a "$LOG"
 claude_status="${PIPESTATUS[0]}"
 set -e
+
+# Record the run's tokens and cost (or "not reported") at the end of RUN.md, under Totals.
+if [ -f "$SITE_DIR/RUN.md" ]; then
+  usage_line="$(node "$ROOT/scripts/lib/claude-stream.mjs" usage-line "$USAGE_FILE")"
+  grep -q '^## Totals' "$SITE_DIR/RUN.md" || printf '\n## Totals\n' >> "$SITE_DIR/RUN.md"
+  [ -z "$(tail -c1 "$SITE_DIR/RUN.md")" ] || printf '\n' >> "$SITE_DIR/RUN.md"
+  printf '\n%s\n' "$usage_line" >> "$SITE_DIR/RUN.md"
+  echo "new-landing: $usage_line"
+fi
 if [ "$claude_status" -ne 0 ]; then
   echo "new-landing: claude exited with status $claude_status; see $LOG" >&2
   exit 1

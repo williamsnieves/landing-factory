@@ -37,7 +37,7 @@ writeFileSync(
   join(stubDir, 'claude'),
   `#!/usr/bin/env bash
 printf '%s\\n' "$@" > "${argsFile}"
-echo "stub claude ran"
+if [ -n "\${STUB_STREAM:-}" ]; then cat "$STUB_STREAM"; else echo "stub claude ran"; fi
 target="$LANDING_FACTORY_ROOT/sites/$(echo "$2" | sed -n 's#^/new-landing \\([a-z0-9-]*\\) .*#\\1#p')/RUN.md"
 if [ -n "\${STUB_RESULT:-}" ] && [ -f "$target" ]; then
   sed -i "s/^Result: .*/Result: $STUB_RESULT/" "$target"
@@ -161,13 +161,16 @@ test('--dry-run scaffolds the site with its templates, then runs claude with the
     /const lang = 'es';/,
   );
   const args = recorded();
-  assert.deepEqual(args.slice(0, 6), [
+  assert.deepEqual(args.slice(0, 9), [
     '-p',
     `/new-landing ${slug} --niche "a \\"quoted\\" niche" --refs sonomabakery-com --dry-run --max-attempts 3 --lang es`,
     '--permission-mode',
     'acceptEdits',
     '--model',
     'sonnet-test',
+    '--output-format',
+    'stream-json',
+    '--verbose',
   ]);
   // The rest passes the reviewed allow list of .claude/settings.json (headless runs
   // ignore it in an untrusted folder), plus the skill and subagent tools.
@@ -176,7 +179,7 @@ test('--dry-run scaffolds the site with its templates, then runs claude with the
   );
   const expected = [...settings.permissions.allow, 'Skill', 'Agent'];
   assert.deepEqual(
-    args.slice(6),
+    args.slice(9),
     expected.flatMap((tool) => ['--allowedTools', tool]),
   );
   // Output is logged next to the site.
@@ -421,4 +424,113 @@ test('no niche and no brief, or a missing brief file, is a usage error', () => {
   assert.match(missing.stderr, /--brief .*nope\.json does not exist/);
   const help = run(['--help']);
   assert.ok(help.stdout.includes('--brief'));
+});
+
+// --- usage from the stream-json output (add-agent-interface) -----------------------------------------------
+
+const streamFixture = join(ROOT, 'tests/fixtures/claude-stream/run.jsonl');
+
+test('claude runs with stream-json; the log stays readable and the usage is recorded in .run-usage.json and RUN.md', () => {
+  const r = run([slug, '--niche', 'x', '--resume'], {
+    STUB_STREAM: streamFixture,
+    STUB_RESULT: 'checkpoint',
+  });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  const log = readFileSync(join(siteDir, '.run.log'), 'utf8');
+  for (const line of [
+    'Reading the brief and choosing an archetype blend.',
+    '[tool] Bash: node scripts/pick-archetypes.mjs --site demo',
+    '[tool] Write: sites/demo/PROPOSAL.md',
+    'Proposal written. Review it before the build.',
+  ])
+    assert.ok(log.includes(line), line);
+  // The result text repeats the last message: it is printed once. Raw events and file bodies stay out.
+  assert.equal(
+    log.split('Proposal written. Review it before the build.').length,
+    2,
+  );
+  assert.ok(!log.includes('"type":"assistant"'));
+  assert.ok(!log.includes('long body that must not be logged'));
+  const usage = JSON.parse(
+    readFileSync(join(siteDir, '.run-usage.json'), 'utf8'),
+  );
+  assert.equal(usage.reported, true);
+  assert.equal(usage.inputTokens, 1234);
+  assert.equal(usage.outputTokens, 567);
+  assert.equal(usage.cacheCreationTokens, 8900);
+  assert.equal(usage.cacheReadTokens, 45000);
+  assert.equal(usage.totalCostUsd, 0.42);
+  assert.equal(usage.numTurns, 12);
+  const runMd = readFileSync(join(siteDir, 'RUN.md'), 'utf8');
+  assert.match(
+    runMd,
+    /\nUsage: input 1,234 tokens, output 567, cache write 8,900, cache read 45,000, cost \$0\.4200 USD, 12 turns \(reported by Claude Code\)\.\n$/,
+  );
+  assert.ok(runMd.indexOf('## Totals') < runMd.indexOf('Usage: input'));
+});
+
+test('an unparseable stream falls back to raw lines and "not reported"', () => {
+  const garbage = join(tmp, 'garbage.txt');
+  writeFileSync(
+    garbage,
+    'plain text, not json\n{"type": broken\nsecond line\n',
+  );
+  const r = run([slug, '--niche', 'x', '--resume'], {
+    STUB_STREAM: garbage,
+    STUB_RESULT: 'checkpoint',
+  });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  const log = readFileSync(join(siteDir, '.run.log'), 'utf8');
+  for (const line of ['plain text, not json', '{"type": broken', 'second line'])
+    assert.ok(log.includes(line), line);
+  const usage = JSON.parse(
+    readFileSync(join(siteDir, '.run-usage.json'), 'utf8'),
+  );
+  assert.equal(usage.reported, false);
+  assert.match(
+    readFileSync(join(siteDir, 'RUN.md'), 'utf8'),
+    /\nUsage: not reported[^\n]*\n$/,
+  );
+});
+
+test('a failing claude still fails the run when its output goes through the filter', () => {
+  const r = run([slug, '--niche', 'x', '--resume'], {
+    STUB_STREAM: streamFixture,
+    STUB_RESULT: 'passed',
+    STUB_EXIT: '4',
+  });
+  assert.equal(r.status, 1);
+  assert.match(r.stderr, /claude exited with status 4/);
+});
+
+test('claude-stream.mjs formats events and summarizes usage', async () => {
+  const { describeEvent, usageFromResult, usageLine } =
+    await import('../scripts/lib/claude-stream.mjs');
+  assert.deepEqual(
+    describeEvent({
+      type: 'assistant',
+      message: {
+        content: [
+          { type: 'text', text: 'hello' },
+          { type: 'tool_use', name: 'Skill', input: { skill: 'impeccable' } },
+          { type: 'tool_use', name: 'Agent', input: {} },
+        ],
+      },
+    }),
+    ['hello', '[tool] Skill: impeccable', '[tool] Agent'],
+  );
+  assert.deepEqual(describeEvent({ type: 'user' }), []);
+  assert.match(
+    describeEvent({
+      type: 'result',
+      is_error: true,
+      subtype: 'error_max_turns',
+    })[0],
+    /\[claude\] error: error_max_turns/,
+  );
+  assert.deepEqual(usageFromResult({ type: 'result' }), { reported: false });
+  assert.equal(
+    usageLine({ reported: false }).startsWith('Usage: not reported'),
+    true,
+  );
 });

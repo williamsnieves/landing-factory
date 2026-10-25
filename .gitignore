@@ -4,6 +4,7 @@ dist/
 .cache/
 /qa/
 sites/*/.run.log
+sites/*/.run-usage.json
 .env
 .env.*
 .DS_Store

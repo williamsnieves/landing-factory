@@ -1,0 +1,7 @@
+{"type":"system","subtype":"init","session_id":"fixture-session","model":"claude-fixture","tools":["Bash","Read"]}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Reading the brief and choosing an archetype blend."}]}}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"t1","name":"Bash","input":{"command":"node scripts/pick-archetypes.mjs --site demo"}}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t1","content":"ranked blends"}]}}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"t2","name":"Write","input":{"file_path":"sites/demo/PROPOSAL.md","content":"long body that must not be logged"}}]}}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Proposal written. Review it before the build."}]}}
+{"type":"result","subtype":"success","is_error":false,"duration_ms":93000,"num_turns":12,"result":"Proposal written. Review it before the build.","total_cost_usd":0.42,"usage":{"input_tokens":1234,"output_tokens":567,"cache_creation_input_tokens":8900,"cache_read_input_tokens":45000}}

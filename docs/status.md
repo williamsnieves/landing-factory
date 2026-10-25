@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-25 (add-agent-interface proposed on its branch; next: implement it when the owner says so).
+Read this first in a new or compacted session. Last updated: 2026-10-25 (add-agent-interface implemented on its branch; PR pending).
 
 ## Working agreements
 
@@ -28,13 +28,13 @@ Read this first in a new or compacted session. Last updated: 2026-10-25 (add-age
 | add-legal-compliance (cookies and trackers, consent banner only when needed, legal notice and privacy policy from the brief, price-claim review) | Merged (PR #19) and archived 2026-10-24; every landing 0 fail (warn: market unknown; tupathdigital also warns on its "50% off" claims) |
 | add-ai-images (AI-generated images as a recorded source) | Merged (PR #20); archived with the real OpenAI smoke test in PR #21 (`gpt-image-1.5`, low quality, 1536x1024; also fixed the CLI falling back to `process.env` for the key) |
 | add-deploy-adapters (Vercel, VPS, shared hosting from CI; headers on every target) | Merged (PR #22) and archived 2026-10-25; every existing site still deploys to Cloudflare; real deploys per target pending accounts |
-| add-agent-interface (local MCP server: brief, propose, generate jobs, status, QA, report; no publishing) | Proposed on branch `change/add-agent-interface` (commit ebbfab5, pushed; no PR yet); implementation not started |
+| add-agent-interface (local MCP server: brief, propose, generate jobs, status, QA, report; no publishing) | Implemented on branch `change/add-agent-interface` (working tree, to be reviewed and committed); PR pending. Verified end to end over stdio against the real repository (7 sites listed, `get_landing tupathdigital`, `run_report` job reached `passed`, `propose_landing` with the `NEW_LANDING_SKIP` stub reached `checkpoint`); `claude mcp list` connects to the server (a project-scope entry needs interactive approval). First real `generate_landing` through the server not run yet (30 to 70 minutes, costs tokens) |
 
 ## Resume here (2026-10-25)
 
-Branch `change/add-agent-interface` (from main after PR #22). Commits on it: archive of add-deploy-adapters and this status (3609c7b), then the proposal (ebbfab5), both pushed; no PR yet. The OpenSpec change `openspec/changes/add-agent-interface/` (proposal, design, specs `agent-interface` and `landing-generation`, tasks 1.1 to 6.2) validates with `--strict`. **Next: when the owner says to implement, delegate the tasks to a Sonnet subagent, review the diff, run the full checks in a clean clone, commit, push, open the PR and watch CI.**
+Branch `change/add-agent-interface` (from main after PR #22). The change is implemented in the working tree (server `scripts/mcp/`, `scripts/lib/claude-stream.mjs`, `new-landing.sh` usage recording, `.mcp.json`, settings, docs `docs/agent-interface.md`, tests `tests/mcp-*.test.mjs`); tasks 1.1 to 6.1 are checked. **Next: review the diff, run the full pre-push checks in a clean clone (task 6.2), commit, push, open the PR and watch CI.** Then, when the owner wants it, a first real `generate_landing` through the server.
 
-Owner choices for add-agent-interface (2026-10-25): a **local MCP server over stdio** next to the repo (no public HTTP service yet), offering **every action except publishing** (publishing stays PR plus CI). Key design points to keep when implementing:
+Owner choices for add-agent-interface (2026-10-25): a **local MCP server over stdio** next to the repo (no public HTTP service yet), offering **every action except publishing** (publishing stays PR plus CI). Design points (implemented as listed; deviations: `exit.json` written by the wrapper next to `job.json`, a `commands.mjs` module for the fixed command table, job tools for the read side `get_job`/`list_jobs`/`tail_job_log` are allowed in settings, only starting or cancelling a job asks):
 
 - `scripts/mcp/server.mjs` with modules `protocol`, `tools`, `jobs`, `landings`, `paths`, `redact`; hand-written JSON-RPC 2.0 over newline-delimited stdio, no SDK dependency; `initialize` echoes a supported version (`2025-11-25`, `2025-06-18`, `2025-03-26`, `2024-11-05`) else the newest; `tools/list`, `tools/call`, `ping`; stdout only protocol messages, logs to stderr; tool failures as `isError: true` results.
 - Tools: `list_landings`, `get_landing`, `get_qa`, `get_report`, `brief_init` (never `--force`), `brief_validate`, `brief_missing`, `brief_summary`, `brief_update` (deep-merge, arrays replaced, write only if valid, never assume `legal.holder`, `legal.privacyContact`, `brand.aiImages`), jobs `propose_landing`, `generate_landing`, `run_qa`, `run_report`, and `get_job`, `list_jobs`, `tail_job_log` (masked), `cancel_job`.
