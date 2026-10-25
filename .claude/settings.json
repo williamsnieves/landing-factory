@@ -41,7 +41,19 @@
       "Bash(node .claude/skills/design-taste-frontend/scripts/*)",
       "Bash(date *)",
       "Bash(node scripts/section-shots.mjs *)",
-      "Bash(node scripts/deploy.mjs --site * --dry-run)"
+      "Bash(node scripts/deploy.mjs --site * --dry-run)",
+      "mcp__landing-factory__list_landings",
+      "mcp__landing-factory__get_landing",
+      "mcp__landing-factory__get_qa",
+      "mcp__landing-factory__get_report",
+      "mcp__landing-factory__brief_init",
+      "mcp__landing-factory__brief_validate",
+      "mcp__landing-factory__brief_missing",
+      "mcp__landing-factory__brief_summary",
+      "mcp__landing-factory__brief_update",
+      "mcp__landing-factory__get_job",
+      "mcp__landing-factory__list_jobs",
+      "mcp__landing-factory__tail_job_log"
     ]
   },
   "hooks": {

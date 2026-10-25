@@ -102,6 +102,10 @@ scripts/new-landing.sh clinica-dental --niche "..." --dry-run
 
 The run leaves `sites/<slug>/RUN.md` (inputs, phase times, QA attempts, decisions, what to confirm before launch) and a git-ignored `.run.log`. Afterwards review the diff, commit and open a PR; CI builds, checks and deploys the preview. Helper scripts, each with `--help`: `npm run preflight` (hosts, Chromium, free slug), `npm run find-images` (licensed Commons photos, and with `--source met` public-domain Met objects, into `assets.json`), `node scripts/render-poster.mjs` (poster image of a 3D scene), `npm run ai-images -- generate <slug> --prompt "..." --as <name>` (an AI illustration through the OpenAI Images API, with provenance in `assets.json`; needs `OPENAI_API_KEY`, only when the customer allows AI images, capped per site), `npm run credits -- --site <slug>` (CREDITS.md and footer credits), `npm run legal -- --site <slug> --write` (legal data for the legal pages, from the brief), `npm run check-landing -- --site <slug>` (credits, photo reuse, tokens, diversity, layout diversity, copy originality), `node scripts/pick-archetypes.mjs --site <slug>` (archetype blends from the brief signals and reference sheets) and `node scripts/layout-signature.mjs --site <slug> --write` (measure the built layout). Each landing starts from a blend of the composition archetypes in [design-archetypes/](design-archetypes/README.md), chosen from its requirement and its references: a starting grammar, not a template. See [scripts/README.md](scripts/README.md).
 
+## Agent interface
+
+A local MCP server (`npm run mcp`, registered in `.mcp.json` as `landing-factory`) lets Claude Code, Claude Desktop, Cursor or any MCP client list landings, write and validate briefs, start proposal, generation, QA and report jobs, follow them and read their results, with time and token cost per run. It never publishes: deploys stay a pull request plus CI. Guide: [docs/agent-interface.md](docs/agent-interface.md).
+
 ## Analyzing reference sites
 
 References are for learning patterns, never for copying. In Claude Code run:

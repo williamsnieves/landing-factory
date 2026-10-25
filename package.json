@@ -29,6 +29,7 @@
     "new-site": "node scripts/new-site.mjs",
     "new-landing": "bash scripts/new-landing.sh",
     "brief": "node scripts/brief.mjs",
+    "mcp": "node scripts/mcp/server.mjs",
     "preflight": "node scripts/preflight.mjs",
     "find-images": "node scripts/find-images.mjs",
     "ai-images": "node scripts/ai-images.mjs",

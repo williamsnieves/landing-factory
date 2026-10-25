@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-24 (add-ai-images done; next: add-deploy-adapters).
+Read this first in a new or compacted session. Last updated: 2026-10-25 (add-agent-interface implemented on its branch; PR pending).
 
 ## Working agreements
 
@@ -26,11 +26,23 @@ Read this first in a new or compacted session. Last updated: 2026-10-24 (add-ai-
 | Owner's digital-products landing `sites/tupathdigital` (first real customer test) | Merged: build from the brief (PR #16, with polish pass A after the owner's review) and redesign B from the owner's references (PR #17). Production: Pages project `tupathdigital` (https://tupathdigital.pages.dev) |
 | add-landing-report (performance and security audit, OWASP Top 10:2025, starter CSP/HSTS/COOP, planning-folder fix) | Merged (PR #18) and archived 2026-10-24; every landing 0 fail in CI (warnings: existing sites have no script CSP, HSTS, COOP or 404 page) |
 | add-legal-compliance (cookies and trackers, consent banner only when needed, legal notice and privacy policy from the brief, price-claim review) | Merged (PR #19) and archived 2026-10-24; every landing 0 fail (warn: market unknown; tupathdigital also warns on its "50% off" claims) |
-| add-ai-images (AI-generated images as a recorded source) | Merged (PR #20) and archived 2026-10-24; real OpenAI generation verified with `gpt-image-1.5` (low quality, 1536x1024) |
+| add-ai-images (AI-generated images as a recorded source) | Merged (PR #20); archived with the real OpenAI smoke test in PR #21 (`gpt-image-1.5`, low quality, 1536x1024; also fixed the CLI falling back to `process.env` for the key) |
+| add-deploy-adapters (Vercel, VPS, shared hosting from CI; headers on every target) | Merged (PR #22) and archived 2026-10-25; every existing site still deploys to Cloudflare; real deploys per target pending accounts |
+| add-agent-interface (local MCP server: brief, propose, generate jobs, status, QA, report; no publishing) | Implemented on branch `change/add-agent-interface` (working tree, to be reviewed and committed); PR pending. Verified end to end over stdio against the real repository (7 sites listed, `get_landing tupathdigital`, `run_report` job reached `passed`, `propose_landing` with the `NEW_LANDING_SKIP` stub reached `checkpoint`); `claude mcp list` connects to the server (a project-scope entry needs interactive approval). First real `generate_landing` through the server not run yet (30 to 70 minutes, costs tokens) |
 
-## Resume here (2026-10-24)
+## Resume here (2026-10-25)
 
-Branch `change/add-deploy-adapters` (from main after PR #21, which archived add-ai-images with its real smoke test). Next: propose `add-deploy-adapters`. Owner (2026-10-24): targets Vercel, VPS (Hostinger VPS, DigitalOcean Droplet) and shared hosting (Hostinger web hosting); no accounts yet for a real deploy, so adapters are tested against fakes and local rsync, and real deploys come when the owner has accounts. Cloud sessions lack rsync/ssh by default (`apt-get install -y rsync openssh-client` works); `api.vercel.com` is not in the allowed domains.
+Branch `change/add-agent-interface` (from main after PR #22). The change is implemented in the working tree (server `scripts/mcp/`, `scripts/lib/claude-stream.mjs`, `new-landing.sh` usage recording, `.mcp.json`, settings, docs `docs/agent-interface.md`, tests `tests/mcp-*.test.mjs`); tasks 1.1 to 6.1 are checked. **Next: review the diff, run the full pre-push checks in a clean clone (task 6.2), commit, push, open the PR and watch CI.** Then, when the owner wants it, a first real `generate_landing` through the server.
+
+Owner choices for add-agent-interface (2026-10-25): a **local MCP server over stdio** next to the repo (no public HTTP service yet), offering **every action except publishing** (publishing stays PR plus CI). Design points (implemented as listed; deviations: `exit.json` written by the wrapper next to `job.json`, a `commands.mjs` module for the fixed command table, job tools for the read side `get_job`/`list_jobs`/`tail_job_log` are allowed in settings, only starting or cancelling a job asks):
+
+- `scripts/mcp/server.mjs` with modules `protocol`, `tools`, `jobs`, `landings`, `paths`, `redact`; hand-written JSON-RPC 2.0 over newline-delimited stdio, no SDK dependency; `initialize` echoes a supported version (`2025-11-25`, `2025-06-18`, `2025-03-26`, `2024-11-05`) else the newest; `tools/list`, `tools/call`, `ping`; stdout only protocol messages, logs to stderr; tool failures as `isError: true` results.
+- Tools: `list_landings`, `get_landing`, `get_qa`, `get_report`, `brief_init` (never `--force`), `brief_validate`, `brief_missing`, `brief_summary`, `brief_update` (deep-merge, arrays replaced, write only if valid, never assume `legal.holder`, `legal.privacyContact`, `brand.aiImages`), jobs `propose_landing`, `generate_landing`, `run_qa`, `run_report`, and `get_job`, `list_jobs`, `tail_job_log` (masked), `cancel_job`.
+- Jobs in `.cache/jobs/<id>/` (`job.json`, `log.txt`), detached process group plus a wrapper `scripts/mcp/run-job.mjs` that records the exit code, so jobs survive a server restart; states running, passed, failed, cancelled, lost; one generation per slug; fixed command table (no `deploy`, `wrangler`, `git`, `gh`, `push`); argument validation (slug rule, existing pattern sheets, model id pattern, https-only report URL).
+- Cost per run: `new-landing.sh` uses `claude -p --output-format stream-json --verbose` through `scripts/lib/claude-stream.mjs` (readable log kept, final `result` event's usage and `total_cost_usd` to `sites/<slug>/.run-usage.json`, a Usage line in `RUN.md` Totals, "not reported" on failure).
+- Registration: `landing-factory` in `.mcp.json`; `.claude/settings.json` allows read and brief tools (`mcp__landing-factory__...`), not job tools; `mcp` npm script; guide `docs/agent-interface.md`; `docs/product-plan.md` step 7 split into local now, remote later.
+
+After add-agent-interface, open items the owner can pick: the tupathdigital legal follow-up (needs markets and holder data), the first real deploy per target (needs accounts), the site hardening opt-in (CSP, HSTS, COOP, 404 page), and `add-3d-models`.
 
 Reminder scheduled for 2026-11-01: the tupathdigital coupons FALL2026 (Etsy) and 92xsh57 (Gumroad) end on 31 October 2026; offer the owner to update or remove them.
 
@@ -43,6 +55,7 @@ Reminder scheduled for 2026-11-01: the tupathdigital coupons FALL2026 (Etsy) and
 
 ## Owner decisions to keep (2026-10-21)
 
+- 2026-10-25: agent interface first as a local MCP server over stdio, every action except publishing; remote HTTP service, PRs from the interface, containers per job and billing later.
 - 2026-10-24: deploy adapters for Vercel, VPS (Hostinger VPS, DigitalOcean Droplet) and shared hosting (Hostinger web hosting); Netlify and DigitalOcean App Platform later.
 - 2026-10-24: AI images from OpenAI GPT image models (owner's choice over Gemini/Imagen, FLUX or import-only).
 - 2026-10-24: legal compliance (cookies, GDPR, legal notice, price claims) as its own change `add-legal-compliance`, before `add-ai-images`.
@@ -69,9 +82,7 @@ Follow `docs/product-plan.md`:
 
 1. `add-design-archetypes` (archetype blends steered by the requirement and the references, real diversity measure), validated by the three-niche pilot. Archetypes are a starting grammar, not a template; the hard rules are the quality budgets, licensing and originality, and the layout diversity rule.
 2. `add-brief-intake`; then the owner's digital-products landing as the first real customer test.
-3. `add-landing-report` and `add-legal-compliance` (merged), then `add-ai-images` (owner, 2026-10-24), `add-deploy-adapters`, `add-agent-interface`, `add-3d-models`; one landing per repository introduced gradually (export first).
-
-`add-ai-images`: the real smoke test (task 6.1) waits for `OPENAI_API_KEY` as an environment secret and `api.openai.com` in the allowed domains; the default model `gpt-image-1.5` is confirmed by it.
+3. `add-landing-report`, `add-legal-compliance`, `add-ai-images` and `add-deploy-adapters` (all merged), then `add-agent-interface` (proposed), `add-3d-models`; one landing per repository introduced gradually (export first).
 
 Small fixes pending: panaderia process heading covered at 375 px; `new-landing.sh` final check without `--refs`.
 
@@ -107,4 +118,5 @@ Small fixes pending: panaderia process heading covered at 375 px; `new-landing.s
 - Cloudflare Pages projects (names got a suffix because the base names were taken): starter `landing-factory-71t` (https://landing-factory-71t.pages.dev), bakery `panaderia-a3o` (https://panaderia-a3o.pages.dev), dental clinic `clinica-dental-9pd` (https://clinica-dental-9pd.pages.dev), samurai `samurai-1v4` (https://samurai-1v4.pages.dev). A new project's TLS certificate takes a few minutes after its first deploy (browsers show ERR_SSL_VERSION_OR_CIPHER_MISMATCH meanwhile). CI creates a new site's project on its first deploy. Preview aliases: `https://<branch-alias>.<project>.pages.dev`.
 - GitHub secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are repository secrets (not environment secrets).
 - Cloud session network: allowed domains include the three bakery sites, their CDNs (`cdn.sanity.io`, `cdnjs.cloudflare.com`, `unpkg.com`, `use.typekit.net`, `cdn.shopify.com`) and `*.pages.dev`, plus `crazy.studio`, `experience2026.funtech.inc`, `collectionapi.metmuseum.org`, `images.metmuseum.org`, `api.artic.edu`, `www.artic.edu`, Commons and Unsplash hosts. The Art Institute of Chicago image host answers with a bot challenge (never bypassed; source dropped). The Met search API moved to `/public/collection/v1.1/search` on 2026-10-01. New reference sites need their domains added by the user.
+- Cloud environment (2026-10-24): `OPENAI_API_KEY` is set as an environment variable (visible in sessions started after it was added) and `api.openai.com` is an allowed domain; `api.vercel.com` is not allowed. Sessions lack `rsync` and `ssh` by default: `apt-get install -y rsync openssh-client` works (deploy tests need rsync). The `claude` CLI is at `/opt/node22/bin/claude`.
 - Chromium for Playwright: `/opt/pw-browsers/chromium-1194/chrome-linux/chrome` (matches the pinned `playwright@1.56.1`).
