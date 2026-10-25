@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-24 (add-ai-images done; next: add-deploy-adapters).
+Read this first in a new or compacted session. Last updated: 2026-10-25 (add-deploy-adapters merged; next: add-agent-interface).
 
 ## Working agreements
 
@@ -27,10 +27,12 @@ Read this first in a new or compacted session. Last updated: 2026-10-24 (add-ai-
 | add-landing-report (performance and security audit, OWASP Top 10:2025, starter CSP/HSTS/COOP, planning-folder fix) | Merged (PR #18) and archived 2026-10-24; every landing 0 fail in CI (warnings: existing sites have no script CSP, HSTS, COOP or 404 page) |
 | add-legal-compliance (cookies and trackers, consent banner only when needed, legal notice and privacy policy from the brief, price-claim review) | Merged (PR #19) and archived 2026-10-24; every landing 0 fail (warn: market unknown; tupathdigital also warns on its "50% off" claims) |
 | add-ai-images (AI-generated images as a recorded source) | Merged (PR #20) and archived 2026-10-24; real OpenAI generation verified with `gpt-image-1.5` (low quality, 1536x1024) |
+| add-deploy-adapters (Vercel, VPS, shared hosting from CI; headers on every target) | Merged (PR #22) and archived 2026-10-25; every existing site still deploys to Cloudflare; real deploys per target pending accounts |
+| add-agent-interface (local MCP server: brief, propose, generate jobs, status, QA, report; no publishing) | Next, on branch `change/add-agent-interface` (owner, 2026-10-25) |
 
-## Resume here (2026-10-24)
+## Resume here (2026-10-25)
 
-Branch `change/add-deploy-adapters` (from main after PR #21, which archived add-ai-images with its real smoke test). Next: propose `add-deploy-adapters`. Owner (2026-10-24): targets Vercel, VPS (Hostinger VPS, DigitalOcean Droplet) and shared hosting (Hostinger web hosting); no accounts yet for a real deploy, so adapters are tested against fakes and local rsync, and real deploys come when the owner has accounts. Cloud sessions lack rsync/ssh by default (`apt-get install -y rsync openssh-client` works); `api.vercel.com` is not in the allowed domains.
+Branch `change/add-agent-interface` (from main after PR #22; first commit archives add-deploy-adapters). Next: propose `add-agent-interface`. Owner (2026-10-25): a local MCP server over stdio next to the repo (no public service yet), with every action except publishing (brief, propose, generate as a background job, status, QA, report); publishing stays PR plus CI.
 
 Reminder scheduled for 2026-11-01: the tupathdigital coupons FALL2026 (Etsy) and 92xsh57 (Gumroad) end on 31 October 2026; offer the owner to update or remove them.
 
