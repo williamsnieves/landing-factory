@@ -1,6 +1,6 @@
 # {{TITLE}}
 
-A static landing built with Astro, exported from landing-factory on {{DATE}} (factory commit `{{COMMIT}}`). This repository is self-contained: it builds, checks, tests and deploys without the factory.
+A static landing built with Astro, exported from landing-factory on {{DATE}} (factory commit `{{COMMIT}}`). This repository is self-contained: it builds, checks and deploys without the factory.
 
 ## Setup
 
@@ -40,9 +40,6 @@ See `docs/deploy.md` for the full guide of the target.
 
 ## What is in this repository
 
-- `src/`, `public/`, `astro.config.mjs`: the site.
-- `assets.json` and `CREDITS.md`: the image manifest and the credits of every external image.
-  {{BRIEF}}- `scripts/`: the factory scripts QA, the report and the deploy need, copied as they were at export time.
-- `docs/factory/`: the planning documents the factory wrote while building the site (proposal, run log, design system).
+{{CONTENTS}}
 
 To pick up later factory fixes, export the site again into a fresh folder and compare its `scripts/` with this repository's.

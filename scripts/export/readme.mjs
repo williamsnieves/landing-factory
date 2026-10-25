@@ -60,9 +60,18 @@ export function renderReadme({
   const domainText = `${DOMAIN_STEP[config.target]}${
     domain ? ` The site expects \`${domain}\`.` : ''
   }`;
-  const brief = withBrief
-    ? '- `brief.json`: the customer brief the site was built from (business, contact and legal data). The report’s legal checks read it. Remove it before making the repository public; the report then warns that the legal requirements are unknown.\n'
-    : '';
+  // The list is built here: a placeholder inside a Markdown list would be folded into the previous item by Prettier.
+  const contents = [
+    '- `src/`, `public/`, `astro.config.mjs`: the site.',
+    '- `assets.json` and `CREDITS.md`: the image manifest and the credits of every external image.',
+    ...(withBrief
+      ? [
+          '- `brief.json`: the customer brief the site was built from (business, contact and legal data). The report’s legal checks read it. Remove it before making the repository public; the report then warns that the legal requirements are unknown.',
+        ]
+      : []),
+    '- `scripts/`: the factory scripts QA, the report and the deploy need, copied as they were at export time.',
+    '- `docs/factory/`: the planning documents the factory wrote while building the site (proposal, run log, design system).',
+  ].join('\n');
   const values = {
     TITLE: title,
     DATE: date,
@@ -72,7 +81,7 @@ export function renderReadme({
     BRANCH: targetSection(config).productionBranch,
     SECRETS: secrets,
     DOMAIN: domainText,
-    BRIEF: brief,
+    CONTENTS: contents,
   };
   return readTemplate('README.md').replace(
     /\{\{([A-Z]+)\}\}/g,
