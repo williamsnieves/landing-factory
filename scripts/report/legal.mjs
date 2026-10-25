@@ -1,6 +1,7 @@
 // The `legal` area of the landing report: cookies and trackers, third-party hosts, the legal pages a market
 // requires and price claims. These checks support compliance and are NOT legal advice.
 // Design: openspec/changes/add-legal-compliance/design.md.
+import { briefLocales } from '../lib/brief-schema.mjs';
 import { classifyUrl, resolveLocal } from './dist-scan.mjs';
 import { cap, makeItem } from './items.mjs';
 import {
@@ -347,8 +348,33 @@ export function thirdPartyItem({ loads, qa, config, siteHost }) {
 
 // --- Legal pages ---------------------------------------------------------------------------------------------
 
-/** Built pages by legal kind: { notice: [page], privacy: [page] }, found by `data-legal-page` or by path. */
-export function findLegalPages(model) {
+/**
+ * The locale of a built page path on a multi-locale site: a non-default locale owns `/<locale>/...`, everything else
+ * belongs to the default locale (Astro serves it unprefixed). `i18n` is { defaultLocale, locales } or null.
+ */
+export function localeOfPath(path, i18n) {
+  if (!i18n) return null;
+  for (const locale of i18n.locales)
+    if (
+      locale !== i18n.defaultLocale &&
+      (path === `/${locale}` || path.startsWith(`/${locale}/`))
+    )
+      return locale;
+  return i18n.defaultLocale;
+}
+
+/** The path without its locale prefix (`/es/privacidad/` -> `/privacidad/`), unchanged on a single-language site. */
+function withoutLocale(path, i18n) {
+  const locale = localeOfPath(path, i18n);
+  if (!i18n || locale === i18n.defaultLocale) return path;
+  return path.slice(locale.length + 1) || '/';
+}
+
+/**
+ * Built pages by legal kind: { notice: [page], privacy: [page] }, found by `data-legal-page` or by path (a locale
+ * prefix is ignored, so `/es/privacidad/` is the Spanish privacy policy of a multi-locale site).
+ */
+export function findLegalPages(model, i18n = null) {
   const found = { notice: [], privacy: [] };
   for (const page of model.pages) {
     const kinds = new Set();
@@ -356,7 +382,8 @@ export function findLegalPages(model) {
       const kind = tag.attrs['data-legal-page'];
       if (kind === 'notice' || kind === 'privacy') kinds.add(kind);
     }
-    const byPath = LEGAL_PATHS[page.path.replace(/\/+$/, '')];
+    const byPath =
+      LEGAL_PATHS[withoutLocale(page.path, i18n).replace(/\/+$/, '')];
     if (byPath) kinds.add(byPath);
     for (const kind of kinds) found[kind].push(page);
   }
@@ -415,12 +442,26 @@ export function pagesItem({ model, brief, briefProblem, siteCommand }) {
       'legal.holder.register is empty: required when the holder is a company',
     );
 
-  const found = findLegalPages(model);
-  for (const kind of rules.pages)
-    if (!found[kind].length)
-      problems.push(
-        `no ${PAGE_LABEL[kind]} page in the build (a page with data-legal-page="${kind}" or at ${kind === 'notice' ? '/legal-notice/ or /aviso-legal/' : '/privacy/ or /privacidad/'})`,
-      );
+  // A multi-locale brief needs every required page in every locale, each linked from its own locale's pages.
+  const { defaultLocale, locales, multilingual } = briefLocales(brief);
+  const i18n = multilingual ? { defaultLocale, locales } : null;
+  const found = findLegalPages(model, i18n);
+  const where = (kind) =>
+    `a page with data-legal-page="${kind}" or at ${kind === 'notice' ? '/legal-notice/ or /aviso-legal/' : '/privacy/ or /privacidad/'}`;
+  for (const kind of rules.pages) {
+    if (!i18n) {
+      if (!found[kind].length)
+        problems.push(
+          `no ${PAGE_LABEL[kind]} page in the build (${where(kind)})`,
+        );
+      continue;
+    }
+    for (const locale of locales)
+      if (!found[kind].some((p) => localeOfPath(p.path, i18n) === locale))
+        problems.push(
+          `no ${PAGE_LABEL[kind]} page for locale ${locale} in the build (${where(kind)}${locale === defaultLocale ? '' : `, under /${locale}/`})`,
+        );
+  }
 
   for (const page of model.pages)
     for (const tag of page.scan.tags)
@@ -453,10 +494,15 @@ export function pagesItem({ model, brief, briefProblem, siteCommand }) {
   const linked = new Set();
   const pagesToCheck = model.pages.filter((p) => p.file !== '404.html');
   for (const kind of rules.pages) {
-    const targets = new Set(found[kind].map((p) => p.file));
-    if (!targets.size) continue;
+    if (!found[kind].length) continue;
     for (const page of pagesToCheck) {
-      if (targets.has(page.file)) continue;
+      // On a multi-locale site a page must link to the legal page of its own locale.
+      const locale = localeOfPath(page.path, i18n);
+      const own = found[kind].filter(
+        (p) => localeOfPath(p.path, i18n) === locale,
+      );
+      const targets = new Set(own.map((p) => p.file));
+      if (!targets.size || targets.has(page.file)) continue;
       const hasLink = page.refs.some((ref) => {
         if (ref.kind !== 'link') return false;
         const target = classifyUrl(model, ref.url, page.path);
@@ -468,7 +514,7 @@ export function pagesItem({ model, brief, briefProblem, siteCommand }) {
       if (hasLink) linked.add(`${kind} ${page.path}`);
       else
         problems.push(
-          `${page.path} has no link to the ${PAGE_LABEL[kind]} (${found[kind][0].path})`,
+          `${page.path} has no link to the ${PAGE_LABEL[kind]} (${own[0].path})`,
         );
     }
   }
@@ -496,7 +542,7 @@ export function pagesItem({ model, brief, briefProblem, siteCommand }) {
     id: 'legal-pages',
     area: 'legal',
     status: 'pass',
-    title: `Legal pages for ${rules.covered.join(', ')}: ${present} present, linked from ${pagesToCheck.length} page(s), holder data shown`,
+    title: `Legal pages for ${rules.covered.join(', ')}: ${present} present${i18n ? ` in ${locales.join(', ')}` : ''}, linked from ${pagesToCheck.length} page(s), holder data shown`,
     evidence: [],
   });
 }

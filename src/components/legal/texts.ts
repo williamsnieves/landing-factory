@@ -25,6 +25,13 @@ export interface LegalData {
   hosting: { target: string; name: string };
   thirdPartyHosts: string[];
   pending: string[];
+  /** Multi-locale sites only: the default locale and where each locale's legal pages live. */
+  defaultLocale?: string;
+  locales?: {
+    locale: string;
+    language: string;
+    paths: Partial<Record<'privacy' | 'notice', string>>;
+  }[];
 }
 
 export interface Texts {
@@ -200,8 +207,20 @@ const ES: Texts = {
 export const TEXTS: Record<LegalLanguage, Texts> = { en: EN, es: ES };
 
 /** The texts for the data's language; a language without a template falls back to English. */
-export const textsFor = (data: LegalData): Texts =>
-  TEXTS[data.language as LegalLanguage] ?? EN;
+/**
+ * The texts for a locale (a tag such as `es` or `pt-br`; its base language picks the texts, English when there are none).
+ * Without a locale, the page language of the data. A multi-locale site renders each locale's page with its own locale.
+ */
+export const textsFor = (data: LegalData, locale?: string): Texts =>
+  TEXTS[(locale ?? data.language).split('-')[0] as LegalLanguage] ?? EN;
+
+/** Path of a locale's legal page (`/es/privacidad/`), or `undefined` when the data has no such page for that locale. */
+export const legalPath = (
+  data: LegalData,
+  kind: 'privacy' | 'notice',
+  locale: string,
+): string | undefined =>
+  data.locales?.find((entry) => entry.locale === locale)?.paths[kind];
 
 /** The email for privacy requests: the privacy contact, else the holder's email, else empty. */
 export const privacyEmail = (data: LegalData): string =>

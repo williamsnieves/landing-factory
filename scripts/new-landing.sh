@@ -27,7 +27,10 @@ sites/<slug>/.run.log. Without --auto the run stops after the proposal so you ca
   --dry-run               stop after PROPOSAL.md, design-system/<slug>/MASTER.md and tokens.css
   --max-attempts N        QA fix attempts before the run fails (default 5; 0 fails at the first red QA)
   --model <id>            model for claude -p (default: the CLI's default)
-  --lang <tag>            language of the page (default: the brief's language, else es)
+  --lang <tag>            language of the page (default: the brief's language, else es); with --langs, the default locale
+  --langs <a,b>           a multi-locale landing (Astro i18n routing): two or more lowercase language tags, for example
+                          en,es. The default locale is --lang, else the first. A brief with `languages` of two or more
+                          does this on its own; the copy is then written in every locale.
   --title "<text>"        working title for the placeholder page (default: the slug)
   --resume                continue an existing sites/<slug>/ (skips preflight slug check, scaffold and install)
   --help                  show this help
@@ -64,6 +67,7 @@ MAX_ATTEMPTS=5
 MODEL=""
 LANG_TAG="es"
 LANG_SET=0
+LANGS_TAGS=""
 TITLE=""
 SOURCES=""
 BRIEF=""
@@ -76,6 +80,7 @@ while [ $# -gt 0 ]; do
     --max-attempts) [ $# -ge 2 ] || die_usage "--max-attempts needs a value"; MAX_ATTEMPTS="$2"; shift 2 ;;
     --model) [ $# -ge 2 ] || die_usage "--model needs a value"; MODEL="$2"; shift 2 ;;
     --lang) [ $# -ge 2 ] || die_usage "--lang needs a value"; LANG_TAG="$2"; LANG_SET=1; shift 2 ;;
+    --langs) [ $# -ge 2 ] || die_usage "--langs needs a value"; LANGS_TAGS="$2"; shift 2 ;;
     --brief) [ $# -ge 2 ] || die_usage "--brief needs a value"; BRIEF="$2"; shift 2 ;;
     --title) [ $# -ge 2 ] || die_usage "--title needs a value"; TITLE="$2"; shift 2 ;;
     --sources) [ $# -ge 2 ] || die_usage "--sources needs a value"; SOURCES="$2"; shift 2 ;;
@@ -97,6 +102,7 @@ if [ -n "$BRIEF" ]; then
 fi
 [[ "$MAX_ATTEMPTS" =~ ^[0-9]+$ ]] || die_usage "--max-attempts must be a non-negative integer, got \"$MAX_ATTEMPTS\""
 [[ "$LANG_TAG" =~ ^[a-z]{2,3}(-[A-Za-z0-9]+)*$ ]] || die_usage "--lang must be a language tag such as es or en, got \"$LANG_TAG\""
+[ -z "$LANGS_TAGS" ] || [[ "$LANGS_TAGS" =~ ^[a-z]{2,3}(-[a-z0-9]+)*(,[a-z]{2,3}(-[a-z0-9]+)*)+$ ]] || die_usage "--langs takes two or more comma-separated lowercase language tags such as en,es, got \"$LANGS_TAGS\""
 [ -z "$SOURCES" ] || [[ "$SOURCES" =~ ^(commons|met)(,(commons|met))*$ ]] || die_usage "--sources takes a comma list of commons, met, got \"$SOURCES\""
 if [ -n "$REFS" ]; then
   IFS=',' read -r -a REF_LIST <<< "$REFS"
@@ -140,6 +146,11 @@ if [ "$HAS_BRIEF" -eq 1 ] && [ "$LANG_SET" -eq 0 ]; then
   [[ "$LANG_TAG" =~ ^[a-z]{2,3}(-[A-Za-z0-9]+)*$ ]] || die_usage "the brief's language \"$LANG_TAG\" is not a language tag"
 fi
 
+# A brief with two or more languages makes a multi-locale landing (unless --langs was given).
+if [ "$HAS_BRIEF" -eq 1 ] && [ -z "$LANGS_TAGS" ]; then
+  LANGS_TAGS="$(node -e 'try { const b = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")); const l = [...new Set((b.languages || []).map(String))]; if (l.length > 1) process.stdout.write(l.join(",")); } catch {}' "$BRIEF_FILE")"
+fi
+
 # 1. Preflight: hosts, Chromium, free slug. Nothing is created before it passes.
 if skipped preflight; then
   echo "new-landing: preflight skipped (NEW_LANDING_SKIP)"
@@ -152,6 +163,7 @@ fi
 # 2. Scaffold the site and register the workspace.
 if [ "$RESUME" -eq 0 ]; then
   scaffold=(npm run new-site -- "$SLUG" --lang "$LANG_TAG")
+  [ -z "$LANGS_TAGS" ] || scaffold+=(--langs "$LANGS_TAGS")
   [ -z "$TITLE" ] || scaffold+=(--title "$TITLE")
   [ ! -d "$SITE_DIR" ] || scaffold+=(--allow-existing-docs)
   "${scaffold[@]}"
@@ -178,6 +190,7 @@ PROMPT="/new-landing $SLUG"
 [ "$DRY_RUN" -eq 0 ] || PROMPT+=" --dry-run"
 [ "$RESUME" -eq 0 ] || PROMPT+=" --resume"
 PROMPT+=" --max-attempts $MAX_ATTEMPTS --lang $LANG_TAG"
+[ -z "$LANGS_TAGS" ] || PROMPT+=" --langs $LANGS_TAGS"
 
 CLAUDE_ARGS=(-p "$PROMPT" --permission-mode acceptEdits)
 [ -z "$MODEL" ] || CLAUDE_ARGS+=(--model "$MODEL")

@@ -15,7 +15,7 @@ sites/<slug>/
   RUN.md              run log of /new-landing: phases, QA attempts, decisions, result
   README.md
   qa.config.json      optional: QA thresholds for this site (falls back to the root file)
-  src/                layouts/, components/motion/, components/three/, components/legal/, scenes/, styles/ (tokens.css), pages/
+  src/                layouts/, components/motion/, components/three/, components/legal/, scenes/, styles/ (tokens.css), pages/ (multi-locale sites also i18n/ and components/i18n/)
   public/             _headers, favicon.svg, site assets
   src/data/credits.json  generated list of credited photos for the footer
 ```
@@ -31,6 +31,10 @@ npm run build -w site-cafeteria      # -> sites/cafeteria/dist/index.html
 The scaffold copies the layout, motion layer, 3D layer (`src/components/three/`, with an empty `src/scenes/`), the legal components (`src/components/legal/`, used only when the brief names a market), styles and headers from the root starter and writes a `noindex` placeholder home page, a default `noindex` 404 page (`src/pages/404.astro`, restyled by the `/new-landing` build), `site.config.json` (`target: "cloudflare"`, `pagesProject` equals the slug; change it if the name is taken on Cloudflare), `CREDITS.md`, `README.md`, the `PROPOSAL.md` and `RUN.md` templates and an empty `assets.json`. It never copies the starter's demo pages, demo scene or sections. It refuses invalid slugs (`^[a-z0-9]+(-[a-z0-9]+)*$`) and existing folders. For a folder that so far holds only planning docs (for example a `PROPOSAL.md`), pass `--allow-existing-docs`: the `*.md` files stay untouched.
 
 Run `npm run new-site -- --help` for every option.
+
+### Multi-locale sites
+
+`npm run new-site -- <slug> --langs en,es [--lang <default>]` creates a site with two or more languages on Astro's built-in i18n routing (static output). The default locale (`--lang`, else the first) is served at the root and the others under `/<locale>/`: `astro.config.mjs` gets the `i18n` block (`locales`, `defaultLocale`, `prefixDefaultLocale: false`, the `security.csp` block kept), `src/pages/<locale>/index.astro` exists for each other locale (folder names equal the locales, lowercase tags such as `pt-br`), `src/i18n/ui.ts` holds the typed UI dictionary (`t(locale)`) and `src/components/i18n/LanguageSwitcher.astro` is the switcher (real links, no JavaScript, no redirect by browser language). `BaseLayout` sets `<html lang>` from the current locale and emits `hreflang` alternates plus `x-default` on indexable pages (set `site` in `astro.config.mjs` for absolute URLs). One 404 page, in the default language. The factory's `check-landing` has an `i18n` rule for such sites, QA checks every locale page, and `layout-signature.json` describes the default locale's home page. A site without `--langs` is unchanged.
 
 ## Generate a whole site
 

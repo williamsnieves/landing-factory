@@ -24,6 +24,11 @@
 //                      data-ai-disclosure with text, an entry's prompt breaks the AI image prompt policy, an entry has a
 //                      subject other than "owner", or a subject "owner" portrait lacks the owner's consent (brand.aiImages and
 //                      brand.ownerPortrait both "allowed" in a brief)
+//   i18n               (only when astro.config.mjs has an `i18n` block) a locale without its home page, a wrong <html lang>,
+//                      hreflang alternates that are missing, not reciprocal or without x-default, a missing or broken
+//                      language switcher, config/dictionary/brief locales that disagree, or a page that shows the UI
+//                      strings of another locale (src/i18n/ui.ts). With i18n, ai-provenance checks the disclosure on every
+//                      locale's home page and brief-facts checks the business name on each of them
 //   copy-match         (--refs) 8 words in a row of the built page text also appear in a reference page
 //
 // Warnings (never failures): archetype-target, the built layout signature is outside the ranges of the primary
@@ -40,6 +45,7 @@ import { reexecWithEnvProxy } from '../.claude/skills/analyze-reference/scripts/
 import { AI_REQUIRED_FIELDS, isAi, syncCredits } from './credits.mjs';
 import {
   aiImagesConsent,
+  briefLocales,
   ownerPortraitConsent,
   formatErrors,
   getPath,
@@ -53,6 +59,16 @@ import {
   readArchetypeMeta,
 } from './lib/archetypes.mjs';
 import { checkPrompt, formatViolations } from './lib/ai-prompt-policy.mjs';
+import {
+  alternatesOf,
+  canonicalOf,
+  htmlLang,
+  localeIndexFile,
+  localeOfFile,
+  readI18nConfig,
+  readUiDictionary,
+  switcherOf,
+} from './lib/i18n-site.mjs';
 import { compareSignatures, targetWarnings } from './lib/layout-core.mjs';
 import { loadConfig } from './qa/config.mjs';
 import { SLUG_PATTERN, listSites } from './lib/sites.mjs';
@@ -1033,13 +1049,19 @@ export function checkBriefFacts(
         `sites/${slug}/brief.json is invalid (run: node scripts/brief.mjs validate --site ${slug}):\n${formatErrors(problems)}`,
       ),
     ];
-  const indexPath = join(siteDir, 'dist', 'index.html');
+  // A multi-locale site is checked on its default locale's home page (and the name on every locale's, below).
+  const i18n = readI18nConfig(siteDir);
+  const usableI18n = i18n && !i18n.problems.length ? i18n : null;
+  const defaultIndex = usableI18n
+    ? localeIndexFile(usableI18n, usableI18n.defaultLocale)
+    : 'index.html';
+  const indexPath = join(siteDir, 'dist', defaultIndex);
   if (!existsSync(indexPath))
     return [
       failure(
         'brief-facts',
-        'dist/index.html',
-        `sites/${slug}/dist/index.html does not exist; build first (npm run build -w site-${slug}) so the brief's facts can be checked on the page`,
+        `dist/${defaultIndex}`,
+        `sites/${slug}/dist/${defaultIndex} does not exist; build first (npm run build -w site-${slug}) so the brief's facts can be checked on the page`,
       ),
     ];
   const html = readFileSync(indexPath, 'utf8');
@@ -1087,6 +1109,30 @@ export function checkBriefFacts(
       }
     }
   }
+  // The business name is the one fact every locale's home page carries.
+  const name = getPath(brief, 'business.name');
+  if (
+    usableI18n &&
+    typeof name === 'string' &&
+    isFilled(name) &&
+    !isAssumed(brief, 'business.name')
+  )
+    for (const locale of usableI18n.locales) {
+      const file = localeIndexFile(usableI18n, locale);
+      if (file === defaultIndex || !existsSync(join(siteDir, 'dist', file)))
+        continue; // a missing locale page is reported by the i18n rule
+      const localeText = htmlToText(
+        readFileSync(join(siteDir, 'dist', file), 'utf8'),
+      );
+      if (!squash(localeText).includes(squash(name)))
+        failures.push(
+          failure(
+            'brief-facts',
+            'business.name',
+            `business.name "${name.trim()}" from brief.json is not on the ${locale} home page (dist/${file}); every locale shows the business name`,
+          ),
+        );
+    }
   return failures;
 }
 
@@ -1118,6 +1164,272 @@ export async function fetchReferences(urls, fetchFn = globalThis.fetch) {
     references.push({ url, text: htmlToText(await response.text()) });
   }
   return references;
+}
+
+// --------------------------------------------------------------------------------------------------
+// Rule: a multi-locale site is consistent (design: add-bilingual-landing, Decision 6)
+
+const sameSet = (a, b) =>
+  a.length === b.length &&
+  [...a].sort().join('\n') === [...b].sort().join('\n');
+
+/** The built file a root-relative or absolute URL of the site points to, or null when it does not exist. */
+function builtFileOf(distDir, href) {
+  let path;
+  try {
+    path = decodeURIComponent(new URL(href, 'https://dist.invalid').pathname);
+  } catch {
+    return null;
+  }
+  const rel = path.replace(/^\/+/, '');
+  const candidates = path.endsWith('/')
+    ? [`${rel}index.html`]
+    : [rel, `${rel}.html`, `${rel}/index.html`];
+  return candidates.find((c) => c && existsSync(join(distDir, c))) ?? null;
+}
+
+/** html files of dist/ relative to it, 404.html excluded. */
+const distPages = (distDir) =>
+  walk(
+    distDir,
+    (path) => path.endsWith('.html') && basename(path) !== '404.html',
+  )
+    .sort()
+    .map((path) => posix(relative(distDir, path)));
+
+export function checkI18n(siteDir) {
+  const config = readI18nConfig(siteDir);
+  if (!config) return [];
+  const slug = basename(siteDir);
+  const failures = [];
+  const fail = (item, message) => failures.push(failure('i18n', item, message));
+
+  for (const problem of config.problems)
+    fail('astro.config.mjs', `sites/${slug}/astro.config.mjs: ${problem}`);
+  if (config.problems.length) return failures;
+  if (config.locales.length < 2)
+    fail(
+      'astro.config.mjs',
+      `sites/${slug}/astro.config.mjs has an i18n block with ${config.locales.length} locale; list two or more, or remove the block for a single-language site`,
+    );
+
+  // The dictionary and the brief name the same locales as the config.
+  const ui = readUiDictionary(siteDir);
+  if (!ui)
+    fail(
+      'src/i18n/ui.ts',
+      `sites/${slug}/src/i18n/ui.ts does not exist; it holds the UI strings of each locale (node scripts/new-site.mjs --langs writes it)`,
+    );
+  else {
+    if (!sameSet(ui.locales, config.locales))
+      fail(
+        'src/i18n/ui.ts',
+        `src/i18n/ui.ts locales (${ui.locales.join(', ') || 'none'}) differ from i18n.locales in astro.config.mjs (${config.locales.join(', ')}); keep them equal`,
+      );
+    for (const locale of config.locales)
+      if (!ui.strings[locale] || !Object.keys(ui.strings[locale]).length)
+        fail(
+          'src/i18n/ui.ts',
+          `src/i18n/ui.ts has no strings for the locale ${locale}`,
+        );
+  }
+  const briefPath = join(siteDir, 'brief.json');
+  if (existsSync(briefPath)) {
+    let brief = null;
+    try {
+      brief = JSON.parse(readFileSync(briefPath, 'utf8'));
+    } catch {
+      brief = null; // brief-facts reports an unreadable brief
+    }
+    if (brief) {
+      const wanted = briefLocales(brief);
+      if (
+        wanted.defaultLocale &&
+        (wanted.defaultLocale !== config.defaultLocale ||
+          !sameSet(wanted.locales, config.locales))
+      )
+        fail(
+          'brief.json',
+          `brief.json languages (${wanted.locales.join(', ')}; default ${wanted.defaultLocale}) differ from astro.config.mjs i18n (${config.locales.join(', ')}; default ${config.defaultLocale}); change one of them`,
+        );
+    }
+  }
+
+  // The built pages.
+  const distDir = join(siteDir, 'dist');
+  if (!existsSync(distDir)) {
+    fail(
+      'dist',
+      `sites/${slug}/dist does not exist; build first (npm run build -w site-${slug}) so the locale pages can be checked`,
+    );
+    return failures;
+  }
+  const homes = new Map(); // locale -> { file, html }
+  for (const locale of config.locales) {
+    const file = localeIndexFile(config, locale);
+    if (!existsSync(join(distDir, file))) {
+      const root =
+        locale === config.defaultLocale && !config.prefixDefaultLocale
+          ? ''
+          : `${locale}/`;
+      fail(
+        `dist/${file}`,
+        `the locale ${locale} has no home page: dist/${file} does not exist (create src/pages/${root}index.astro)`,
+      );
+      continue;
+    }
+    homes.set(locale, {
+      file,
+      html: readFileSync(join(distDir, file), 'utf8'),
+    });
+  }
+
+  const alternateMaps = new Map(); // locale -> { hreflang -> href }
+  for (const [locale, { file, html }] of homes) {
+    const label = `dist/${file}`;
+    const lang = htmlLang(html);
+    if (lang.toLowerCase() !== locale)
+      fail(
+        label,
+        `${label} has <html lang="${lang}"> but it is the ${locale} page; the layout takes the language from Astro.currentLocale, so do not pass another lang`,
+      );
+
+    const map = {};
+    for (const { hreflang, href } of alternatesOf(html)) {
+      if (hreflang in map && map[hreflang] !== href)
+        fail(
+          label,
+          `${label} has two different hreflang="${hreflang}" alternates`,
+        );
+      map[hreflang] = href;
+    }
+    alternateMaps.set(locale, map);
+    const missing = [...config.locales, 'x-default'].filter((h) => !(h in map));
+    if (missing.length)
+      fail(
+        label,
+        `${label} has no hreflang alternate for ${missing.join(', ')}; BaseLayout emits one per locale plus x-default on indexable pages (not noindex ones)`,
+      );
+    for (const [hreflang, href] of Object.entries(map))
+      if (!builtFileOf(distDir, href))
+        fail(
+          label,
+          `${label} hreflang="${hreflang}" points to ${href}, which is not a built page`,
+        );
+    const canonical = canonicalOf(html);
+    if (canonical && map[locale] && canonical !== map[locale])
+      fail(
+        label,
+        `${label} canonical (${canonical}) is not its own hreflang alternate (${map[locale]}); each locale page is canonical to itself`,
+      );
+
+    // The language switcher: a real link to every locale, the current one marked.
+    const links = switcherOf(html);
+    if (!links)
+      fail(
+        label,
+        `${label} has no language switcher (<nav data-language-switcher>); add <LanguageSwitcher /> to the header`,
+      );
+    else {
+      const targets = links.map((l) => l.hreflang);
+      if (!sameSet(targets, config.locales))
+        fail(
+          label,
+          `the language switcher on ${label} links ${targets.join(', ') || 'nothing'}, expected ${config.locales.join(', ')}`,
+        );
+      for (const link of links)
+        if (!builtFileOf(distDir, link.href))
+          fail(
+            label,
+            `the language switcher on ${label} links ${link.href} (${link.hreflang}), which is not a built page`,
+          );
+      const current = links.filter((l) => l.current);
+      if (current.length !== 1 || current[0].hreflang !== locale)
+        fail(
+          label,
+          `the language switcher on ${label} must mark exactly the ${locale} link with aria-current (marked: ${current.map((l) => l.hreflang).join(', ') || 'none'})`,
+        );
+    }
+  }
+
+  // Reciprocal: every page lists every other page at the address that page gives itself; one shared x-default.
+  for (const [locale, map] of alternateMaps)
+    for (const [other, otherMap] of alternateMaps) {
+      if (!map[other] || !otherMap[other]) continue;
+      if (map[other] !== otherMap[other])
+        fail(
+          `dist/${homes.get(locale).file}`,
+          `hreflang is not reciprocal: the ${locale} page links the ${other} page at ${map[other]} but the ${other} page is at ${otherMap[other]}`,
+        );
+    }
+  const xDefaults = new Set(
+    [...alternateMaps.values()].map((m) => m['x-default']).filter(Boolean),
+  );
+  if (xDefaults.size > 1)
+    fail(
+      'x-default',
+      `the home pages disagree on hreflang="x-default" (${[...xDefaults].join(', ')}); it is the default locale's page on every locale`,
+    );
+  const defaultSelf = alternateMaps.get(config.defaultLocale)?.[
+    config.defaultLocale
+  ];
+  if (xDefaults.size === 1 && defaultSelf && !xDefaults.has(defaultSelf))
+    fail(
+      'x-default',
+      `hreflang="x-default" (${[...xDefaults][0]}) is not the default locale page (${defaultSelf})`,
+    );
+
+  // No page shows the UI strings of another locale (an untranslated skip link or disclosure, a pasted block).
+  if (ui) {
+    for (const file of distPages(distDir)) {
+      const locale = localeOfFile(config, file);
+      const own = new Set(Object.values(ui.strings[locale] ?? {}).map(squash));
+      const text = squash(
+        htmlToText(readFileSync(join(distDir, file), 'utf8')),
+      );
+      const seen = new Set();
+      for (const other of config.locales) {
+        if (other === locale) continue;
+        for (const [key, value] of Object.entries(ui.strings[other] ?? {})) {
+          const v = squash(value);
+          if (v.length < 8 || own.has(v) || !text.includes(v) || seen.has(v))
+            continue;
+          seen.add(v);
+          fail(
+            `dist/${file}`,
+            `dist/${file} (${locale}) shows the ${other} UI string ${key}: "${value}"; take it from t(Astro.currentLocale) of src/i18n/ui.ts`,
+          );
+        }
+      }
+    }
+  }
+  return failures;
+}
+
+/** Warnings: hreflang needs absolute URLs, which need `site` in astro.config.mjs. */
+export function i18nWarnings(siteDir) {
+  const config = readI18nConfig(siteDir);
+  if (!config || config.problems.length) return [];
+  const file = join(
+    siteDir,
+    'dist',
+    localeIndexFile(config, config.defaultLocale),
+  );
+  if (!existsSync(file)) return [];
+  const alternates = alternatesOf(readFileSync(file, 'utf8'));
+  if (
+    !alternates.length ||
+    alternates.every((a) => /^https?:\/\//i.test(a.href))
+  )
+    return [];
+  return [
+    {
+      rule: 'i18n-absolute-urls',
+      item: 'astro.config.mjs',
+      message:
+        'the hreflang alternates are root-relative because astro.config.mjs has no `site`; search engines want absolute URLs, so set `site` to the production URL once the domain is known',
+    },
+  ];
 }
 
 // --------------------------------------------------------------------------------------------------
@@ -1243,32 +1555,60 @@ export function checkAiProvenance(siteDir, manifest) {
       );
   }
 
-  // Disclosure: the built home page says that some images are AI-generated.
-  const indexPath = join(siteDir, 'dist', 'index.html');
-  if (!existsSync(indexPath))
-    failures.push(
-      failure(
-        'ai-provenance',
-        'dist/index.html',
-        `sites/${slug}/dist/index.html does not exist; build first (npm run build -w site-${slug}) so the AI disclosure can be checked on the page`,
-      ),
+  // Disclosure: the built home page says that some images are AI-generated. A multi-locale site has one home page per
+  // locale and each must carry the disclosure in its own language.
+  const i18n = readI18nConfig(siteDir);
+  const homes =
+    i18n && !i18n.problems.length
+      ? i18n.locales.map((locale) => ({
+          locale,
+          file: `dist/${localeIndexFile(i18n, locale)}`,
+        }))
+      : [{ locale: null, file: 'dist/index.html' }];
+  for (const { locale, file } of homes) {
+    if (!existsSync(join(siteDir, file))) {
+      failures.push(
+        failure(
+          'ai-provenance',
+          file,
+          `sites/${slug}/${file} does not exist; build first (npm run build -w site-${slug}) so the AI disclosure can be checked on the page`,
+        ),
+      );
+      continue;
+    }
+    const disclosure = aiDisclosureIn(
+      readFileSync(join(siteDir, file), 'utf8'),
     );
-  else {
-    const disclosure = aiDisclosureIn(readFileSync(indexPath, 'utf8'));
+    const phrase =
+      locale && locale.split('-')[0] === 'es'
+        ? '"Algunas imágenes de esta página se generaron con IA."'
+        : '"Some images on this page were generated with AI."';
     if (!disclosure)
       failures.push(
         failure(
           'ai-provenance',
-          'dist/index.html',
-          `the site uses AI images but dist/index.html has no element with data-ai-disclosure; add <p data-ai-disclosure> "Some images on this page were generated with AI." to the footer`,
+          file,
+          `the site uses AI images but ${file} has no element with data-ai-disclosure; add <p data-ai-disclosure> ${phrase} to the footer${locale ? ` (${locale}, in that language)` : ''}`,
         ),
       );
     else if (disclosure.hidden || !disclosure.text)
       failures.push(
         failure(
           'ai-provenance',
-          'dist/index.html',
-          `the data-ai-disclosure element on dist/index.html is ${disclosure.hidden ? 'hidden' : 'empty'}; the AI disclosure must be visible text`,
+          file,
+          `the data-ai-disclosure element on ${file} is ${disclosure.hidden ? 'hidden' : 'empty'}; the AI disclosure must be visible text`,
+        ),
+      );
+    else if (
+      locale &&
+      locale.split('-')[0] !== 'en' &&
+      /generated with AI/i.test(disclosure.text)
+    )
+      failures.push(
+        failure(
+          'ai-provenance',
+          file,
+          `the AI disclosure on ${file} is in English but the page is ${locale}; write it in that language (the aiDisclosure string of src/i18n/ui.ts)`,
         ),
       );
   }
@@ -1309,6 +1649,7 @@ export async function runChecks({
         ),
     ],
     ['scenes', () => checkScenes(siteDir, manifest)],
+    ...(readI18nConfig(siteDir) ? [['i18n', () => checkI18n(siteDir)]] : []),
     ...(manifest.images.some(isAi)
       ? [['ai-provenance', () => checkAiProvenance(siteDir, manifest)]]
       : []),
@@ -1342,7 +1683,7 @@ export async function runChecks({
     checks: results.map((r) => ({ name: r.name, ok: !r.failures.length })),
     skipped: refs.length ? [] : ['originality'],
     failures,
-    warnings: archetypeWarnings(slug, root),
+    warnings: [...archetypeWarnings(slug, root), ...i18nWarnings(siteDir)],
   };
 }
 
@@ -1376,12 +1717,16 @@ Final check of sites/<slug>/ after site QA passes. Fails, naming the item, when:
   diversity         another site has the same primary color, display font and hero type
   layout-diversity  the layout signature (scripts/layout-signature.mjs) is too close to another site's (qa.config.json: diversity)
   scenes            a built [data-scene] has no poster, a poster missing from assets.json, or the site has more than ${MAX_SCENES} scenes
+  i18n              (only with an i18n block in astro.config.mjs) a locale without its home page, a wrong <html lang>, hreflang
+                    alternates missing, not reciprocal or without x-default, a broken language switcher, config, dictionary and
+                    brief locales that disagree, or a page showing the UI strings of another locale (src/i18n/ui.ts)
   brief-facts       (only with sites/<slug>/brief.json) a non-assumed brief fact (business name, primary CTA URL, email, phone,
                     product names and prices) is missing from dist/index.html, or sits in an element that says "ejemplo"/"example"/"sample"
   ai-provenance     (only when assets.json has AI images) an AI entry without generator, model, prompt, date or terms, or without its
                     file; a brief that does not allow AI images; no visible data-ai-disclosure element on dist/index.html;
                     a prompt that breaks the AI image prompt policy; a subject other than "owner"; an owner portrait without
-                    brand.aiImages and brand.ownerPortrait both "allowed" in a brief
+                    brand.aiImages and brand.ownerPortrait both "allowed" in a brief. With i18n the disclosure must be on
+                    every locale's home page, in that locale's language
   copy-match        (--refs) ${SHINGLE_WORDS} words in a row of the built page also occur in a reference
 
   --site <slug>     the site (required)

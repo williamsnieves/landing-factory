@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-25 (add-personal-brand-support implemented on its branch; PR pending).
+Read this first in a new or compacted session. Last updated: 2026-10-25 (add-bilingual-landing implemented on its branch; PR pending).
 
 ## Working agreements
 
@@ -31,10 +31,11 @@ Read this first in a new or compacted session. Last updated: 2026-10-25 (add-per
 | add-agent-interface (local MCP server: brief, propose, generate jobs, status, QA, report; no publishing) | Implemented on branch `change/add-agent-interface` (working tree, to be reviewed and committed); PR pending. Verified end to end over stdio against the real repository (7 sites listed, `get_landing tupathdigital`, `run_report` job reached `passed`, `propose_landing` with the `NEW_LANDING_SKIP` stub reached `checkpoint`); `claude mcp list` connects to the server (a project-scope entry needs interactive approval). First real `generate_landing` through the server not run yet (30 to 70 minutes, costs tokens) |
 
 | add-personal-brand-support (default 404 page for new sites; AI portrait of the brand owner as the one person exception) | Implemented on branch `change/add-personal-brand-support` (working tree, to be reviewed and committed); PR pending. `new-site` writes `src/pages/404.astro`; brief fields `business.personalBrand` and `brand.ownerPortrait`; `ai-images import --subject owner`; `ai-provenance` and credits updated; `section-shots.mjs --include-404`. Full clean-clone run (task 6.2) still to do |
+| add-bilingual-landing (opt-in multi-locale landings on Astro's i18n routing: `languages` in the brief, `new-site --langs`, hreflang and language switcher, legal pages and AI disclosure per locale, `i18n` rule in check-landing) | Implemented on branch `change/add-bilingual-landing` (from main after PR #26); PR pending. Verified with a throwaway site (`new-site --langs en,es`, build, QA with Lighthouse on `/` and `/es/`: 100 in every category), removed afterwards. Task 8.2 (clean-clone run) is left for the main session. Owner decision 2026-10-25: his personal-brand landing is in English (default) and Spanish; lifts the "no i18n" scope line for opt-in multi-locale landings only |
 
 ## Next: the owner's personal-brand landing (2026-10-25)
 
-After add-personal-brand-support is merged: the owner's personal-brand landing, slug to be decided at brief intake (`/brief-intake <slug>` with `business.personalBrand: true`). The owner supplied an old Vue site (zip), the logo SVG and the ChatGPT-made AI portrait (half human, half machine; import it with `--subject owner` once the brief allows it and keep its prompt free of the business name); deploy target Vercel (no account or token yet, see the deploy follow-ups); the old Netlify blog link is dropped. Read the Vue zip only for content and structure, never copy its code.
+After add-personal-brand-support and add-bilingual-landing are merged (the landing is bilingual, English default and Spanish: put `languages: ["en", "es"]` in its brief at intake): the owner's personal-brand landing, slug to be decided at brief intake (`/brief-intake <slug>` with `business.personalBrand: true`). The owner supplied an old Vue site (zip), the logo SVG and the ChatGPT-made AI portrait (half human, half machine; import it with `--subject owner` once the brief allows it and keep its prompt free of the business name); deploy target Vercel (no account or token yet, see the deploy follow-ups); the old Netlify blog link is dropped. Read the Vue zip only for content and structure, never copy its code.
 
 ## Resume here (2026-10-25)
 
