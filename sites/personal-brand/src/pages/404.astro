@@ -1,0 +1,26 @@
+---
+// Not-found page: the build emits dist/404.html, which static hosts serve with status 404.
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const title = 'Page not found | personal-brand';
+const description = 'This page does not exist.';
+const lang = 'en';
+const heading = 'This page does not exist.';
+const body = 'The link may be old or mistyped.';
+const homeLabel = 'Back to the home page';
+---
+
+<BaseLayout title={title} description={description} lang={lang} noindex>
+  <section class="mx-auto max-w-3xl px-6 py-32 md:py-48">
+    <p class="text-ink-soft text-sm tracking-widest uppercase">404</p>
+    <h1 class="font-display mt-4 text-3xl leading-tight tracking-tight text-balance">
+      {heading}
+    </h1>
+    <p class="text-ink-soft mt-6 text-lg">{body}</p>
+    <p class="mt-8">
+      <a href="/" class="underline underline-offset-4">
+        {homeLabel}
+      </a>
+    </p>
+  </section>
+</BaseLayout>

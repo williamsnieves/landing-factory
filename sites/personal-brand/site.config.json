@@ -1,0 +1,7 @@
+{
+  "target": "cloudflare",
+  "cloudflare": {
+    "pagesProject": "personal-brand",
+    "productionBranch": "main"
+  }
+}

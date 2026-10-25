@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import LanguageSwitcher from '../components/i18n/LanguageSwitcher.astro';
+import { locales, t } from '../i18n/ui';
+
+const title = 'personal-brand';
+const description = 'This site is under construction.';
+const dict = t(Astro.currentLocale);
+const message = dict.underConstruction;
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  skipLabel={dict.skipToContent}
+  noindex
+>
+  <LanguageSwitcher
+    slot="header"
+    locales={locales}
+    label={dict.language}
+    class="mx-auto max-w-3xl px-6 pt-6"
+  />
+  <section class="mx-auto max-w-3xl px-6 py-32 md:py-48">
+    <h1 class="font-display text-3xl leading-tight tracking-tight text-balance">
+      {title}
+    </h1>
+    <p class="text-ink-soft mt-6 text-lg">{message}</p>
+  </section>
+</BaseLayout>
