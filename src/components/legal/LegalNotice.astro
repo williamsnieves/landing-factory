@@ -6,11 +6,13 @@ import { textsFor, type LegalData } from './texts';
 
 interface Props {
   data: LegalData;
+  /** Multi-locale sites: the locale to write the page in (default: Astro.currentLocale, else the data's language). */
+  locale?: string;
   /** Link to the privacy policy page, when the site has one. */
   privacyHref?: string;
 }
-const { data, privacyHref } = Astro.props;
-const t = textsFor(data);
+const { data, privacyHref, locale = Astro.currentLocale } = Astro.props;
+const t = textsFor(data, locale);
 const n = t.notice;
 const fields = ['name', 'taxId', 'address', 'email', 'register'] as const;
 // A row shows when it has a value or when the market requires it (then it renders the pending marker).

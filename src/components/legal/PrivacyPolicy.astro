@@ -6,11 +6,13 @@ import { privacyEmail, textsFor, type LegalData } from './texts';
 
 interface Props {
   data: LegalData;
+  /** Multi-locale sites: the locale to write the page in (default: Astro.currentLocale, else the data's language). */
+  locale?: string;
   /** Link to the legal notice page, when the site has one. */
   noticeHref?: string;
 }
-const { data, noticeHref } = Astro.props;
-const t = textsFor(data);
+const { data, noticeHref, locale = Astro.currentLocale } = Astro.props;
+const t = textsFor(data, locale);
 const p = t.privacy;
 const fields = ['name', 'taxId', 'address', 'email'] as const;
 // Name and email always show; the tax id and address show when given or required.

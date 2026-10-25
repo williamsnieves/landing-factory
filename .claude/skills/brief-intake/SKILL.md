@@ -12,7 +12,7 @@ Capture what a customer wants once, in `sites/<slug>/brief.json`, so that `/new-
 Read `CLAUDE.md` first. Two languages are kept apart:
 
 - **Interview language**: whatever the user writes in (Spanish, English or any other). Never assume one; answer and ask in the language of their latest messages, and switch if they switch.
-- **Page language** (`language` in `brief.json`, a tag such as `es` or `en-GB`): the language of the landing's copy. It may differ from the interview language (a customer can be interviewed in English for a Spanish page). Ask for it explicitly. Only if the user does not say, default it to the interview language and add `{ "field": "language", "reason": "..." }` to `assumed`.
+- **Page language** (`language` in `brief.json`, a tag such as `es` or `en-GB`): the language of the landing's copy. It may differ from the interview language (a customer can be interviewed in English for a Spanish page). Ask for it explicitly. Only if the user does not say, default it to the interview language and add `{ "field": "language", "reason": "..." }` to `assumed`. A landing may be written in more than one language: see "The languages question".
 
 Field names, notes about the process and everything you write into the repo besides customer values are in English; the customer's own values (names, descriptions, labels, tone words) stay in the words they gave.
 
@@ -30,7 +30,7 @@ Field names, notes about the process and everything you write into the repo besi
 1. **Start or resume.** If `sites/<slug>/brief.json` exists, read it and continue from it. Otherwise run `node scripts/brief.mjs init --site <slug> [--lang <tag>] [--niche "<one line>"]` (it creates `sites/<slug>/` holding only `brief.json`; `new-site --allow-existing-docs` accepts that folder later). Never use `--force` without the customer's say-so.
 2. **Read what exists.** Take whatever the customer gives (pasted text, a file, an old brief, public links) and fill the fields it states, using the customer's wording. Local files (logo, photos) are asset entries with a `path` relative to `sites/<slug>/`; put the files there. A link goes in an asset's `url`.
 3. **Find the gaps.** Run `node scripts/brief.mjs missing --site <slug>`. It lists empty required fields first, then recommended ones in this topic order, each with a question hint:
-   business, offer (name, price, currency, link per product), audience, goal (primary and secondary action with real URLs), tone, contact (email, phone, address, hours, social), legal identity (markets, holder, privacy contact, data processing; see "The legal step"), assets (own logo, photos, videos, documents, with owner and permission), brand (colors and fonts to keep, what to avoid, AI-generated images and, for a personal brand, an AI portrait of the owner; see "The AI images question" and "The owner portrait question"), references (liked with why, disliked with why), legal notices (regulated niche, notices, constraints), deploy (target and domain).
+   business, offer (name, price, currency, link per product), page languages (one or more; see "The languages question"), audience, goal (primary and secondary action with real URLs), tone, contact (email, phone, address, hours, social), legal identity (markets, holder, privacy contact, data processing; see "The legal step"), assets (own logo, photos, videos, documents, with owner and permission), brand (colors and fonts to keep, what to avoid, AI-generated images and, for a personal brand, an AI portrait of the owner; see "The AI images question" and "The owner portrait question"), references (liked with why, disliked with why), legal notices (regulated niche, notices, constraints), deploy (target and domain).
 4. **Ask the next 2 to 4 questions** from the first topics that still have gaps, in the user's language, with a short reason when it helps ("so the page can show your real prices"). Offer to skip: "if you don't know, leave it and we will mark it as a placeholder".
 5. **Write and validate after every answer.** Update `brief.json`, then run `node scripts/brief.mjs validate --site <slug>`. Fix the errors it names (each gives the field path and what is expected) before asking more. Required fields that are still empty are expected until you have asked for them.
 6. **Mark choices as assumed.** When the customer says "you choose" for something (the tone, the headline angle, a placeholder price), write the value and add `{ "field": "<dotted.path>", "reason": "<why, who confirms>" }` to `assumed`. Dotted paths look like `tone`, `contact.hours`, `offer[0].price`. Anything the customer skips stays empty.
@@ -43,6 +43,15 @@ Field names, notes about the process and everything you write into the repo besi
    (or `--refs` to add pattern sheets, `--auto` to skip the proposal checkpoint). Do not start the landing yourself, and never commit, push or deploy.
 
 A filled `brief.json` written by hand (a form the customer completed) is accepted the same way: validate it, run `missing`, ask only about the gaps.
+
+## The languages question
+
+Asked once the page language is known (after the business and offer questions), as: "Should the page be in one language or more?" Give the reason in one line: a page in two or more languages gets one version per language, each written for its readers (not a word-for-word translation), a language switcher and the right metadata for search engines.
+
+- **One language:** write `languages: ["<language>"]` so the question is answered; nothing else changes.
+- **More than one:** write every language as a lowercase tag in `languages` (`["en", "es"]`), with the page `language` as the default one (it is served at the root; the others under `/<tag>/`) and part of the list. Ask which is the default if it is not clear, and tell the customer that the factory writes the copy in each language and the customer should have a native speaker read it. Tags are lowercase (`pt-br`, not `pt-BR`). Validation fails on a duplicate or when the default is missing from the list.
+- The legal pages (when a market is named) are generated in every language; the legal text templates exist for English and Spanish, any other language gets English texts until someone translates them.
+- Never assume it: if the customer does not say, record one language (the page `language`).
 
 ## The legal step
 

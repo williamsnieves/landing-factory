@@ -20,6 +20,7 @@ import { main } from '../scripts/brief.mjs';
 import {
   emptyBrief,
   ownerPortraitConsent,
+  briefLocales,
   getPath,
   isAssumed,
   missingFields,
@@ -259,7 +260,8 @@ test('a skeleton is valid except for the required fields still empty, and missin
     'seeded from the niche',
   );
   const recommended = missing.filter((m) => !m.required).map((m) => m.path);
-  assert.equal(recommended[0], 'business.kind');
+  assert.equal(recommended[0], 'languages');
+  assert.equal(recommended[1], 'business.kind');
   assert.ok(recommended.indexOf('offer') < recommended.indexOf('audience.who'));
   assert.ok(
     recommended.indexOf('audience.who') < recommended.indexOf('contact.email'),
@@ -382,7 +384,13 @@ test('missing lists the holder fields and the privacy contact only when a market
   noTax.legal.holder.taxId = '';
   assert.deepEqual(
     missingFields(noTax).map((m) => m.path),
-    ['contact.phone', 'contact.address', 'legal.holder.taxId', 'brand.fonts'],
+    [
+      'languages',
+      'contact.phone',
+      'contact.address',
+      'legal.holder.taxId',
+      'brand.fonts',
+    ],
   );
 });
 
@@ -416,7 +424,7 @@ test('missing reports only what the fixture lacks; summary marks assumed values'
   const brief = fixture();
   assert.deepEqual(
     missingFields(brief).map((m) => m.path),
-    ['contact.phone', 'contact.address', 'brand.fonts'],
+    ['languages', 'contact.phone', 'contact.address', 'brand.fonts'],
   );
   const summary = summarizeBrief(brief);
   assert.match(summary, /^Taller Plantilla \[es\]/);
@@ -510,8 +518,9 @@ test('CLI missing: exit 1 while a required field is empty, 0 once they are fille
   assert.equal(second.code, 0);
   const report = JSON.parse(second.stdout);
   assert.equal(report.requiredMissing, 0);
-  assert.equal(report.missing[0].path, 'business.kind');
-  assert.match(report.missing[0].hint, /products, services/);
+  assert.equal(report.missing[0].path, 'languages');
+  assert.equal(report.missing[1].path, 'business.kind');
+  assert.match(report.missing[1].hint, /products, services/);
 });
 
 test('CLI import copies the brief and its local assets into the site, and validates the copy', () => {

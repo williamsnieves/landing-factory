@@ -19,7 +19,11 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
-import { formatErrors, validateBrief } from './lib/brief-schema.mjs';
+import {
+  briefLocales,
+  formatErrors,
+  validateBrief,
+} from './lib/brief-schema.mjs';
 import { SLUG_PATTERN } from './lib/sites.mjs';
 import { loadDist } from './report/dist-scan.mjs';
 import { externalLoads } from './report/legal.mjs';
@@ -49,6 +53,34 @@ export function templateLanguage(tag) {
   return TEMPLATE_LANGUAGES.includes(base)
     ? { language: base, fallback: false }
     : { language: 'en', fallback: true };
+}
+
+/** URL slug of each legal page by page language (English for any language without a texts file). */
+const LEGAL_SLUGS = {
+  en: { privacy: 'privacy', notice: 'legal-notice' },
+  es: { privacy: 'privacidad', notice: 'aviso-legal' },
+};
+
+/**
+ * Where the legal pages of a multi-locale site live, one entry per locale, default locale first:
+ * `{ locale, language, paths: { privacy: '/privacy/', notice: '/legal-notice/' } }`. The default locale is served at the
+ * root and the others under `/<locale>/`; the slug follows the language (`/es/privacidad/`, `/es/aviso-legal/`).
+ */
+export function localePages(locales, defaultLocale, pages) {
+  return locales.map((locale) => {
+    const { language } = templateLanguage(locale);
+    const prefix = locale === defaultLocale ? '' : `/${locale}`;
+    return {
+      locale,
+      language,
+      paths: Object.fromEntries(
+        pages.map((kind) => [
+          kind,
+          `${prefix}/${LEGAL_SLUGS[language][kind]}/`,
+        ]),
+      ),
+    };
+  });
 }
 
 /** External hosts the built pages load without waiting for consent, sorted. Empty when there is no build. */
@@ -94,12 +126,14 @@ export function legalData(brief, { thirdPartyHosts = [] } = {}) {
   if (rules.pages.includes('privacy') && blank(processing.analytics))
     pending.push('processing.analytics');
 
-  const { language, fallback } = templateLanguage(brief.language);
+  const { language } = templateLanguage(brief.language);
+  const { defaultLocale, locales, multilingual } = briefLocales(brief);
   const warnings = [];
-  if (fallback)
-    warnings.push(
-      `no legal text for the page language "${brief.language}": the pages use English (translate src/components/legal/texts.ts)`,
-    );
+  for (const locale of multilingual ? locales : [brief.language])
+    if (templateLanguage(locale).fallback)
+      warnings.push(
+        `no legal text for the page language "${locale}": the pages use English (translate src/components/legal/texts.ts)`,
+      );
   if (rules.unknown.length)
     warnings.push(
       `no rule set for ${rules.unknown.join(', ')}: no legal page is generated for it`,
@@ -124,6 +158,13 @@ export function legalData(brief, { thirdPartyHosts = [] } = {}) {
       },
       thirdPartyHosts,
       pending,
+      // Multi-locale briefs only (a single-language file keeps exactly the keys it always had).
+      ...(multilingual
+        ? {
+            defaultLocale,
+            locales: localePages(locales, defaultLocale, rules.pages),
+          }
+        : {}),
     },
     warnings,
   };

@@ -43,6 +43,9 @@ const obj = (props) => ({ type: 'object', props });
 export const SCHEMA = obj({
   version: { type: 'version' },
   language: str({ required: true, format: 'language' }),
+  // Every language the page is written in, `language` (the default locale) included. Empty or one entry: a single-language
+  // page; two or more: a multi-locale landing (Astro i18n routing, see openspec/changes/add-bilingual-landing).
+  languages: list(str({ format: 'locale' })),
   business: obj({
     name: str({ required: true }),
     description: str({ required: true }),
@@ -264,6 +267,10 @@ const FORMATS = {
       ? null
       : 'expected a phone number with 7 to 15 digits, for example "+34 600 123 456"';
   },
+  locale: (v) =>
+    /^[a-z]{2,3}(-[a-z0-9]+)*$/.test(v)
+      ? null
+      : 'expected a lowercase language tag such as "en" or "pt-br" (it names the folder src/pages/<locale>/)',
   market: (v) =>
     MARKET.test(v)
       ? null
@@ -389,6 +396,26 @@ export function validateBrief(
       const value = getPath(brief, path);
       return typeof value === 'string' ? value.trim() : '';
     };
+    if (Array.isArray(brief.languages)) {
+      const seen = new Set();
+      brief.languages.forEach((tag, index) => {
+        if (typeof tag !== 'string' || tag.trim() === '') return; // reported above
+        if (seen.has(tag.trim()))
+          fail(`languages[${index}]`, `duplicate language "${tag}"`);
+        seen.add(tag.trim());
+      });
+      const defaultLanguage = text('language');
+      if (
+        seen.size &&
+        defaultLanguage &&
+        FORMATS.language(defaultLanguage) === null && // a malformed "language" is reported on its own
+        !seen.has(defaultLanguage)
+      )
+        fail(
+          'languages',
+          `must include the default language "${defaultLanguage}" (the "language" field); add it, or change "language"`,
+        );
+    }
     if (text('goal.secondary.url') && !text('goal.secondary.label'))
       fail('goal.secondary.label', 'required when goal.secondary.url is set');
     if (Array.isArray(brief?.assets))
@@ -510,6 +537,11 @@ export const MISSING_FIELDS = [
   ['business.description', true, 'What does it do, in a sentence or two?'],
   ['language', true, 'Which language should the page copy be written in?'],
   [
+    'languages',
+    false,
+    'One language or more? If more, list them all (the page language is the default one); the page is then written in each.',
+  ],
+  [
     'business.kind',
     false,
     'Is it selling products, services, an event or content?',
@@ -623,6 +655,19 @@ export const MISSING_FIELDS = [
 export const hasMarkets = (brief) =>
   Array.isArray(brief?.legal?.markets) && brief.legal.markets.some(isFilled);
 
+/**
+ * The locales of a brief: `language` (the default locale) first, then the other `languages` in order, without duplicates.
+ * A brief with no `languages` has one locale. Returns { defaultLocale, locales, multilingual }.
+ */
+export function briefLocales(brief) {
+  const defaultLocale = String(brief?.language ?? '').trim();
+  const others = (Array.isArray(brief?.languages) ? brief.languages : [])
+    .map((tag) => String(tag ?? '').trim())
+    .filter((tag) => tag && tag !== defaultLocale);
+  const locales = [...new Set([defaultLocale, ...others].filter(Boolean))];
+  return { defaultLocale, locales, multilingual: locales.length > 1 };
+}
+
 /** Is the business a person (business.personalBrand)? Only then is the owner-portrait question asked. */
 export const isPersonalBrand = (brief) =>
   brief?.business?.personalBrand === true;
@@ -658,7 +703,10 @@ export function summarizeBrief(brief) {
       lines.push(`${label}: ${mark(path, String(value))}`);
   };
   const business = brief.business ?? {};
-  lines.push(`${business.name || '(no name yet)'} [${brief.language || '?'}]`);
+  const { locales, multilingual } = briefLocales(brief);
+  lines.push(
+    `${business.name || '(no name yet)'} [${multilingual ? `${locales.join(', ')}; default ${locales[0]}` : brief.language || '?'}]`,
+  );
   field('Description', 'business.description');
   field('Kind', 'business.kind');
   const place = [business.city, business.country].filter(Boolean).join(', ');

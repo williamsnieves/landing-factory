@@ -1,0 +1,70 @@
+---
+// Language switcher for a multi-locale site (astro.config.mjs has an `i18n` block). Real links to the equivalent
+// page in each locale, so it works without JavaScript; the active language carries aria-current. There is no
+// automatic redirect by browser language: the visitor chooses (static output cannot read Accept-Language).
+// Use it only in sites with i18n: `astro:i18n` does not exist otherwise.
+import { localeHref, pathWithoutLocale } from './paths';
+
+interface Props {
+  /** The site's locales (src/i18n/ui.ts `locales`). */
+  locales: readonly string[];
+  /** Unprefixed slug of this page per locale when it differs (`{ en: 'privacy', es: 'privacidad' }`). */
+  slugs?: Record<string, string>;
+  /** Visible name per locale; default is the language's own name (Intl.DisplayNames). */
+  names?: Record<string, string>;
+  /** Accessible name of the navigation landmark. */
+  label?: string;
+  class?: string;
+}
+
+const {
+  locales,
+  slugs,
+  names,
+  label = 'Language',
+  class: className,
+} = Astro.props;
+const current = Astro.currentLocale ?? locales[0];
+const rest = pathWithoutLocale(Astro.url.pathname, locales);
+
+const nameOf = (locale: string) => {
+  if (names?.[locale]) return names[locale];
+  try {
+    const own = new Intl.DisplayNames([locale], { type: 'language' }).of(
+      locale,
+    );
+    return own
+      ? own.charAt(0).toLocaleUpperCase(locale) + own.slice(1)
+      : locale;
+  } catch {
+    return locale;
+  }
+};
+
+const items = locales.map((locale) => ({
+  locale,
+  name: nameOf(locale),
+  href: localeHref(locale, slugs?.[locale] ?? rest),
+  active: locale === current,
+}));
+---
+
+<nav aria-label={label} class={className} data-language-switcher>
+  <ul class="flex items-center gap-4">
+    {items.map((item) => (
+      <li>
+        <a
+          href={item.href}
+          hreflang={item.locale}
+          lang={item.locale}
+          aria-current={item.active ? 'true' : undefined}
+          class={
+            item.active ? 'font-medium underline underline-offset-4' : undefined
+          }
+        >
+          {item.name}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
