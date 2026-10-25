@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "language": "en",
+  "business": {
+    "name": "tupathdigital",
+    "domain": ""
+  },
+  "markets": ["US", "EU"],
+  "pages": ["privacy"],
+  "unknownMarkets": ["US"],
+  "holder": {
+    "name": "tupathdigital",
+    "taxId": "",
+    "address": "",
+    "email": "tupathdigital@gmail.com",
+    "register": ""
+  },
+  "privacyContact": "tupathdigital@gmail.com",
+  "processing": {
+    "analytics": "none",
+    "forms": false,
+    "embeds": []
+  },
+  "hosting": {
+    "target": "undecided",
+    "name": "Cloudflare Pages"
+  },
+  "thirdPartyHosts": [],
+  "pending": []
+}
