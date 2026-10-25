@@ -1,3 +1,19 @@
 {
-  "images": []
+  "images": [
+    {
+      "file": "portrait-ai.webp",
+      "title": "AI-generated portrait of the owner, half human half machine",
+      "source": "ai",
+      "generator": "ChatGPT",
+      "model": "GPT-6 (owner's statement)",
+      "prompt": "tengo estas 3 imagenes quiero que empecemos a generar una por una sin perder ningun rasgo facil una mezcla entre IA y la persona vamos a generar como una mezcla entre maquina y humano para ver como queda espero que comprendas mi peticion, crearemos 3 imagenes de cada referencia a ver como es el resultado, vamos con la primera",
+      "revisedPrompt": "",
+      "createdAt": "2026-10-25T00:00:00.000Z",
+      "terms": "https://openai.com/policies/terms-of-use/",
+      "imported": true,
+      "subject": "owner",
+      "credit": false,
+      "note": "Prompt as recalled by the owner (approximate, Spanish, his words); made from his own photos. Exact creation date unknown: the owner supplied the file on 2026-10-25."
+    }
+  ]
 }

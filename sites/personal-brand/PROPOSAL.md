@@ -1,6 +1,6 @@
 # Proposal: personal-brand
 
-Status: **proposed**. Review it, edit anything, then continue with `scripts/new-landing.sh personal-brand --brief sites/personal-brand/brief.json --refs product-inc,sankar-work,sebg-ch --lang en --langs en,es --resume --auto`.
+Status: **approved by the owner (2026-10-25)**, with the confirmations under Decisions. Review it, edit anything, then continue with `scripts/new-landing.sh personal-brand --brief sites/personal-brand/brief.json --refs product-inc,sankar-work,sebg-ch --lang en --langs en,es --resume --auto`.
 
 ## Brief
 
@@ -92,10 +92,11 @@ Online shop, cart, payments, backend forms, CMS, a blog (dropped by the owner), 
 ## Decisions
 
 1. **Locales:** en (default, at `/`) and es (at `/es/`), natural copy in each, same sections. A native speaker of Spanish and of English should read the copy before launch. The old site had both languages.
-2. **Assumed (confirm at the checkpoint):** `goal.primary` is his LinkedIn profile (`https://www.linkedin.com/in/willians-nieves`, the CV's address, not the old site's with the numeric suffix), shown as a quiet text link, because the owner wants no call to action for now.
+2. **Confirmed by the owner:** the only access link is his LinkedIn profile (`https://www.linkedin.com/in/willians-nieves`, the CV's address, not the old site's with the numeric suffix), shown as a quiet text link, because the owner wants no call to action for now.
 3. **Empty fields and what the page does:** no offer (no products or prices, so none are shown), no email, phone or address (owner's decision, nothing is invented), no `business.kind`, `audience.needs` or `objections`, no brand colors or fonts (free, creative). No testimonials, ratings, awards or figures that are not in `CONTENT.md`.
 4. **Facts come only from `CONTENT.md` and the brief.** Open points to confirm: the I-Surance dates (CV: Aug 2018 to Sep 2020; old site: Aug 2018 to Feb 2020; the page uses the CV's); the skill the owner wrote as "jev" is shown as JEV, "a System 1 decision model" in his wording, to be confirmed; the CV repeats the Instaply bullets for I-Surance, so only its stack is used.
 5. **AI images:** `brand.aiImages` and `brand.ownerPortrait` are `allowed`. The portrait is the one permitted AI portrait of a person (alt: "AI-generated portrait of Willians Nieves", never "photo"; it is not a testimonial). Its provenance (generator ChatGPT, model, prompt, creation date, terms link) is needed for `ai-images.mjs import`; if the owner does not have the model and prompt, the page cannot ship it and the run lists it under "To fetch by the owner". The footer carries `data-ai-disclosure` in each locale's language.
 6. **Legal:** the brief names no market and the owner asked to skip legal pages ("legal requirements unknown"): no notice or privacy page is added, the report will warn. No cookies, no analytics, no embeds, no third-party hosts (fonts self-hosted), so no banner is needed.
 7. **Deploy:** the brief asks for Vercel; `node scripts/deploy/config.mjs --site personal-brand --from-brief --write` completes `site.config.json`, and `site` in `astro.config.mjs` is `https://williansnieves.com` (absolute canonical and hreflang). Secrets (`VERCEL_TOKEN`) are set in the repository by the owner; the live domain move from Netlify is the owner's step.
 8. **Customer assets:** `assets/logo.svg` (header, footer, favicon candidate, used as supplied) and `assets/portrait-ai.webp` (hero and the AI stage only: at most twice in the page, never twice in one section).
+9. **Owner confirmations at the checkpoint (2026-10-25):** proposal approved with no changes; LinkedIn is the only access link (quiet, no button); the I-Surance dates follow the CV (Aug 2018 to Sep 2020); "JEV, a System 1 decision model" is right. The portrait is recorded in `assets.json` with `ai-images.mjs import --subject owner` (ChatGPT, GPT-6 per the owner, his recalled prompt, terms link); its exact creation date is unknown (file supplied on 2026-10-25).
