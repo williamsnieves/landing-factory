@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "language": "",
+  "business": {
+    "name": "Willians Nieves",
+    "description": "Front end developer, passionate about the JavaScript ecosystem; keeps learning new tech, patterns and best practices of modern front end development. Father, guitar player, plays and makes video games.",
+    "city": "",
+    "country": "",
+    "kind": "",
+    "personalBrand": true
+  },
+  "offer": [],
+  "audience": {
+    "who": "",
+    "needs": "",
+    "objections": ""
+  },
+  "goal": {
+    "primary": {
+      "label": "",
+      "url": ""
+    },
+    "secondary": {
+      "label": "",
+      "url": ""
+    }
+  },
+  "tone": [],
+  "contact": {
+    "email": "",
+    "phone": "",
+    "address": "",
+    "hours": "",
+    "social": [
+      {
+        "network": "GitHub",
+        "url": "https://github.com/williamsnieves"
+      },
+      {
+        "network": "LinkedIn",
+        "url": "https://www.linkedin.com/in/willians-nieves-84a20643/"
+      }
+    ]
+  },
+  "assets": [
+    {
+      "kind": "logo",
+      "path": "assets/logo.svg",
+      "owner": "Willians Nieves",
+      "permission": "Owner's own logo, for this site"
+    },
+    {
+      "kind": "photo",
+      "path": "assets/portrait-ai.webp",
+      "owner": "Willians Nieves",
+      "permission": "Owner's AI-generated portrait of himself (ChatGPT), made and approved by him for this site"
+    }
+  ],
+  "brand": {
+    "colors": [],
+    "fonts": [],
+    "keep": "",
+    "avoid": "",
+    "aiImages": "",
+    "ownerPortrait": ""
+  },
+  "references": {
+    "liked": [],
+    "disliked": []
+  },
+  "legal": {
+    "regulated": false,
+    "notices": [],
+    "constraints": "",
+    "markets": [],
+    "holder": {
+      "name": "",
+      "taxId": "",
+      "address": "",
+      "email": "",
+      "register": ""
+    },
+    "privacyContact": "",
+    "processing": {
+      "analytics": "",
+      "forms": false,
+      "embeds": []
+    }
+  },
+  "deploy": {
+    "target": "vercel",
+    "domain": "williansnieves.com"
+  },
+  "assumed": [],
+  "notes": "Owner (2026-10-25): his personal-brand site, rebuilt from the old Vue site (content source: old src/content.json and translations.js, en and es: about text, 18 skills, 8 jobs from EF 2023-2025 back to Teravision 2015; links GitHub and LinkedIn). The old blog link (personal-blog on Netlify) is dropped: the blog was never made. Current site williansnieves.com is on Netlify, repo on Bitbucket; it moves to Vercel. This landing will later move to its own repository, deployed from there, with its own maintenance. Portrait: made by the owner with ChatGPT (half human, half machine). Logo: the {W} code-brace mark, SVG from the owner."
+}
