@@ -20,11 +20,15 @@ Sites SHALL share the factory's dependency versions through workspaces, so one i
 - **THEN** every site under `sites/` can be built without a separate install
 
 ### Requirement: Scaffold a new site
-The repo SHALL offer a command that creates `sites/<slug>/` from the starter: layout, motion layer, styles, security headers and configuration, without the starter's demo pages, with a placeholder home page and an empty credits file. It MUST refuse invalid slugs and existing folders, except, when asked to keep planning material, a folder that holds only top-level Markdown docs, `brief.json` and, next to a brief, an `assets/` folder; that material is kept and never overwritten.
+The repo SHALL offer a command that creates `sites/<slug>/` from the starter: layout, motion layer, styles, security headers and configuration, without the starter's demo pages, with a placeholder home page, a default `noindex` 404 page that links home (in English or the requested language) and an empty credits file. It MUST refuse invalid slugs and existing folders, except, when asked to keep planning material, a folder that holds only top-level Markdown docs, `brief.json` and, next to a brief, an `assets/` folder; that material is kept and never overwritten.
 
 #### Scenario: New site
 - **WHEN** the scaffold command runs with slug `cafeteria`
 - **THEN** `sites/cafeteria/` exists, builds, and its site configuration names its own Pages project
+
+#### Scenario: Default 404 page
+- **WHEN** the scaffold command runs with slug `cafeteria` and `--lang es`, and the site is built
+- **THEN** `sites/cafeteria/dist/404.html` exists, is `noindex`, has `lang="es"` and links to `/`, and the landing report's 404 item passes
 
 #### Scenario: Existing site
 - **WHEN** the scaffold command runs with a slug whose folder already exists
