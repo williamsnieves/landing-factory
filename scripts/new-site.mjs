@@ -141,6 +141,59 @@ ${constLine('message', message)}
 `;
 }
 
+/** Texts of the default 404 page, by language (English for any other language tag). */
+const NOT_FOUND_TEXTS = {
+  en: {
+    title: 'Page not found',
+    description: 'This page does not exist.',
+    heading: 'This page does not exist.',
+    body: 'The link may be old or mistyped.',
+    link: 'Back to the home page',
+  },
+  es: {
+    title: 'Página no encontrada',
+    description: 'Esta página no existe.',
+    heading: 'Esta página no existe.',
+    body: 'El enlace puede estar desactualizado o mal escrito.',
+    link: 'Volver al inicio',
+  },
+};
+
+/**
+ * Default 404 page (src/pages/404.astro): noindex, BaseLayout, a heading and a link home. The build emits dist/404.html
+ * from it, which the landing report's 404 item needs; the /new-landing build phase restyles it in the landing's design.
+ */
+export function notFoundPage({ title, lang }) {
+  const text = NOT_FOUND_TEXTS[lang.split('-')[0]] ?? NOT_FOUND_TEXTS.en;
+  return `---
+// Not-found page: the build emits dist/404.html, which static hosts serve with status 404.
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+${constLine('title', `${text.title} | ${title}`)}
+${constLine('description', text.description)}
+${constLine('lang', lang)}
+${constLine('heading', text.heading)}
+${constLine('body', text.body)}
+${constLine('homeLabel', text.link)}
+---
+
+<BaseLayout title={title} description={description} lang={lang} noindex>
+  <section class="mx-auto max-w-3xl px-6 py-32 md:py-48">
+    <p class="text-ink-soft text-sm tracking-widest uppercase">404</p>
+    <h1 class="font-display mt-4 text-3xl leading-tight tracking-tight text-balance">
+      {heading}
+    </h1>
+    <p class="text-ink-soft mt-6 text-lg">{body}</p>
+    <p class="mt-8">
+      <a href="/" class="underline underline-offset-4">
+        {homeLabel}
+      </a>
+    </p>
+  </section>
+</BaseLayout>
+`;
+}
+
 export function creditsFile(slug) {
   return `# Credits: ${slug}
 
@@ -378,6 +431,7 @@ export function scaffoldSite({
       lang,
       message,
     }),
+    'src/pages/404.astro': notFoundPage({ title: pageTitle, lang }),
   };
 
   const walk = (dir) =>
@@ -415,7 +469,7 @@ export function scaffoldSite({
 const HELP = `Usage: npm run new-site -- <slug> [options]
 
 Creates sites/<slug>/ from the starter: layout, motion layer, styles, headers
-and configuration, plus a placeholder home page, CREDITS.md, README.md, the
+and configuration, plus a placeholder home page, a default 404 page (src/pages/404.astro), CREDITS.md, README.md, the
 planning templates PROPOSAL.md and RUN.md, and an empty assets.json (image manifest).
 The 3D layer (src/components/three/) is copied with an empty src/scenes/. The starter's demo pages, demo scene and sections are never copied.
 

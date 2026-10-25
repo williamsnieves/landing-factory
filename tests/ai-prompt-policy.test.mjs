@@ -122,3 +122,30 @@ test('formatViolations names every rule with the match and the reason', () => {
   assert.match(text, /\[identity\] "logo"/);
   assert.equal(normalize('  Dueño—Ñandú  '), 'dueno nandu');
 });
+
+test('subject owner skips only the people and real-person rules', () => {
+  const brief = { business: { name: 'Taller Plantilla' }, offer: [] };
+  const rules = (prompt, options) =>
+    checkPrompt(prompt, brief, options)
+      .map((v) => v.rule)
+      .sort();
+  const people = 'Portrait of Maria Lopez, the founder and owner';
+  assert.deepEqual(rules(people), ['people', 'real-person']);
+  assert.deepEqual(rules(people, { subject: 'owner' }), []);
+  // Any other subject (or none) gets no exemption.
+  assert.deepEqual(rules(people, { subject: 'team' }), [
+    'people',
+    'real-person',
+  ]);
+  // The other rules still apply with the exemption.
+  assert.deepEqual(
+    rules('The owner and Taller Plantilla', { subject: 'owner' }),
+    ['brand'],
+  );
+  assert.deepEqual(rules('The owner with a logo', { subject: 'owner' }), [
+    'identity',
+  ]);
+  assert.deepEqual(rules('The owner, antes y después', { subject: 'owner' }), [
+    'results',
+  ]);
+});

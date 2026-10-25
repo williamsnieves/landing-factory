@@ -21,7 +21,9 @@
 //   ai-provenance      (only when assets.json has entries with source "ai") an AI entry lacks a provenance field (generator,
 //                      model, prompt, createdAt, terms, ...) or its image file, the brief does not allow AI images
 //                      (brand.aiImages is not "allowed"), the built dist/index.html has no visible element marked
-//                      data-ai-disclosure with text, or an entry's prompt breaks the AI image prompt policy
+//                      data-ai-disclosure with text, an entry's prompt breaks the AI image prompt policy, an entry has a
+//                      subject other than "owner", or a subject "owner" portrait lacks the owner's consent (brand.aiImages and
+//                      brand.ownerPortrait both "allowed" in a brief)
 //   copy-match         (--refs) 8 words in a row of the built page text also appear in a reference page
 //
 // Warnings (never failures): archetype-target, the built layout signature is outside the ranges of the primary
@@ -38,6 +40,7 @@ import { reexecWithEnvProxy } from '../.claude/skills/analyze-reference/scripts/
 import { AI_REQUIRED_FIELDS, isAi, syncCredits } from './credits.mjs';
 import {
   aiImagesConsent,
+  ownerPortraitConsent,
   formatErrors,
   getPath,
   isAssumed,
@@ -1200,10 +1203,36 @@ export function checkAiProvenance(siteDir, manifest) {
       );
   }
 
+  // Subject: only "owner" exists, and it needs the owner's consent (brand.aiImages and brand.ownerPortrait) in a brief.
+  for (const entry of entries) {
+    if (entry.subject === undefined) continue;
+    if (entry.subject !== 'owner') {
+      failures.push(
+        failure(
+          'ai-provenance',
+          entry.file ?? '(no file)',
+          `AI image ${entry.file ?? '(no file)'} has subject ${JSON.stringify(entry.subject)}; the only subject allowed is "owner" (an AI portrait of the brand owner)`,
+        ),
+      );
+      continue;
+    }
+    const owner = ownerPortraitConsent(brief);
+    if (!owner.allowed)
+      failures.push(
+        failure(
+          'ai-provenance',
+          entry.file ?? '(no file)',
+          `AI image ${entry.file ?? '(no file)'} is an owner portrait (subject "owner") but the owner's consent is missing: ${owner.reason}; remove it or ask the owner`,
+        ),
+      );
+  }
+
   // Prompt policy, so an entry edited by hand cannot slip a forbidden subject through.
   for (const entry of entries) {
     if (typeof entry.prompt !== 'string' || !entry.prompt.trim()) continue;
-    const violations = checkPrompt(entry.prompt, brief);
+    const violations = checkPrompt(entry.prompt, brief, {
+      subject: entry.subject === 'owner' ? 'owner' : undefined,
+    });
     if (violations.length)
       failures.push(
         failure(
@@ -1351,7 +1380,8 @@ Final check of sites/<slug>/ after site QA passes. Fails, naming the item, when:
                     product names and prices) is missing from dist/index.html, or sits in an element that says "ejemplo"/"example"/"sample"
   ai-provenance     (only when assets.json has AI images) an AI entry without generator, model, prompt, date or terms, or without its
                     file; a brief that does not allow AI images; no visible data-ai-disclosure element on dist/index.html;
-                    a prompt that breaks the AI image prompt policy
+                    a prompt that breaks the AI image prompt policy; a subject other than "owner"; an owner portrait without
+                    brand.aiImages and brand.ownerPortrait both "allowed" in a brief
   copy-match        (--refs) ${SHINGLE_WORDS} words in a row of the built page also occur in a reference
 
   --site <slug>     the site (required)

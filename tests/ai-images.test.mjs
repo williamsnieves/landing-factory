@@ -591,3 +591,162 @@ test('the new-landing skill orders the image sources, limits AI to illustrative 
   assert.ok(skill.indexOf('**AI images**') < skill.indexOf('**3D scenes**'));
   assert.doesNotMatch(skill, /sk-[A-Za-z0-9]/);
 });
+
+// --------------------------------------------------------------------------------------------------
+// Owner portrait (--subject owner)
+
+const PORTRAIT_FLAGS = [
+  '--generator',
+  'ChatGPT',
+  '--model',
+  'gpt-image-1.5',
+  '--created',
+  '2026-10-20',
+  '--terms',
+  'https://openai.com/policies/terms-of-use/',
+];
+const PORTRAIT_PROMPT =
+  'A half-human, half-machine portrait of the author, soft light';
+const portraitImport = (extra = [], prompt = PORTRAIT_PROMPT) => [
+  'import',
+  'demo',
+  join(tmp, 'owner.png'),
+  ...PORTRAIT_FLAGS,
+  '--prompt',
+  prompt,
+  ...extra,
+];
+const ownerBrief = (aiImages = 'allowed', ownerPortrait = 'allowed') => {
+  const brief = briefFixture();
+  brief.business.personalBrand = true;
+  brief.brand.aiImages = aiImages;
+  brief.brand.ownerPortrait = ownerPortrait;
+  return brief;
+};
+
+test('import --subject owner is accepted with both consents and records subject owner', async () => {
+  writeFileSync(join(tmp, 'owner.png'), Buffer.from(TINY_PNG, 'base64'));
+  const root = makeRoot({ brief: ownerBrief() });
+  const { code, stdout } = await run(portraitImport(['--subject', 'owner']), {
+    root,
+  });
+  assert.equal(code, 0, stdout);
+  const [entry] = manifestOf(root).images;
+  assert.equal(entry.subject, 'owner');
+  assert.equal(entry.source, 'ai');
+  assert.equal(entry.imported, true);
+  assert.equal(entry.file, 'owner.png');
+  // Without the flag the same prompt is a people prompt and stays refused.
+  const plain = await run(
+    portraitImport([], 'Portrait of the owner, half machine'),
+    { root: makeRoot({ brief: ownerBrief() }) },
+  );
+  assert.equal(plain.code, 1);
+  assert.match(plain.stderr, /\[people\]/);
+});
+
+test('import --subject owner is refused without a brief, without the portrait consent and without AI consent, and changes nothing', async () => {
+  writeFileSync(join(tmp, 'owner.png'), Buffer.from(TINY_PNG, 'base64'));
+  const args = portraitImport(['--subject', 'owner']);
+  const cases = [
+    [makeRoot(), /needs a brief\.json that names the owner/],
+    [
+      makeRoot({ brief: ownerBrief('allowed', '') }),
+      /brand\.ownerPortrait is empty/,
+    ],
+    [
+      makeRoot({ brief: ownerBrief('allowed', 'not-allowed') }),
+      /brand\.ownerPortrait is not-allowed/,
+    ],
+    [
+      makeRoot({ brief: ownerBrief('not-allowed', 'allowed') }),
+      /brand\.aiImages is not-allowed/,
+    ],
+    [
+      makeRoot({ brief: ownerBrief('', 'allowed') }),
+      /brand\.aiImages is empty/,
+    ],
+  ];
+  for (const [root, message] of cases) {
+    const { code, stderr } = await run(args, { root });
+    assert.equal(code, 1, stderr);
+    assert.match(
+      stderr,
+      /an AI portrait of the owner needs the owner's consent/,
+    );
+    assert.match(stderr, message);
+    assert.deepEqual(manifestOf(root).images, []);
+    assert.equal(existsSync(join(root, 'sites/demo/src')), false);
+  }
+  // A portrait consent listed as assumed does not count (validation also refuses the brief).
+  const assumed = ownerBrief();
+  assumed.assumed.push({ field: 'brand.ownerPortrait', reason: 'x' });
+  const { code } = await run(args, { root: makeRoot({ brief: assumed }) });
+  assert.equal(code, 1);
+});
+
+test('generate never accepts --subject, and import accepts only the subject owner', async () => {
+  const api = await startFakeApi();
+  try {
+    const root = makeRoot({ brief: ownerBrief() });
+    const generated = await run(generate(['--subject', 'owner']), {
+      root,
+      api,
+    });
+    assert.equal(generated.code, 2);
+    assert.match(generated.stderr, /--subject is only for import/);
+    assert.equal(api.requests.length, 0);
+    assert.deepEqual(manifestOf(root).images, []);
+    writeFileSync(join(tmp, 'owner.png'), Buffer.from(TINY_PNG, 'base64'));
+    const other = await run(portraitImport(['--subject', 'team']), { root });
+    assert.equal(other.code, 2);
+    assert.match(other.stderr, /--subject must be "owner"/);
+  } finally {
+    await api.close();
+  }
+});
+
+test('the owner exemption skips only the people and real-person rules: brand, logo and results are still refused', async () => {
+  writeFileSync(join(tmp, 'owner.png'), Buffer.from(TINY_PNG, 'base64'));
+  const subject = ['--subject', 'owner'];
+  const refused = [
+    [`Portrait of Taller Plantilla, the author`, 'brand'],
+    ['The author next to a logo, half machine', 'identity'],
+    ['The author, before and after the program', 'results'],
+  ];
+  for (const [prompt, rule] of refused) {
+    const root = makeRoot({ brief: ownerBrief() });
+    const { code, stderr } = await run(portraitImport(subject, prompt), {
+      root,
+    });
+    assert.equal(code, 1, prompt);
+    assert.match(stderr, new RegExp(`\\[${rule}\\]`), prompt);
+    assert.deepEqual(manifestOf(root).images, []);
+  }
+  // A founder/owner/named-person prompt passes only with the subject.
+  const allowed = await run(
+    portraitImport(subject, 'Portrait of Maria Lopez, the founder and owner'),
+    { root: makeRoot({ brief: ownerBrief() }) },
+  );
+  assert.equal(allowed.code, 0, allowed.stderr);
+});
+
+test('the new-landing skill limits the owner portrait to a personal brand with both consents, an import, honest alt text and the disclosure; and describes the 404 page', () => {
+  const skill = readFileSync(
+    join(ROOT, '.claude/skills/new-landing/SKILL.md'),
+    'utf8',
+  );
+  for (const needle of [
+    'the only AI image allowed to depict a person',
+    '`business.personalBrand`',
+    '`brand.aiImages` and `brand.ownerPortrait` both `allowed`',
+    '--subject owner',
+    '`generate` refuses `--subject`',
+    '"AI-generated portrait of <name>"',
+    'The page disclosure below stays',
+    '**404 page** (every landing has one)',
+    'keep `noindex`'.replace('keep', 'Keep'),
+    'section-shots.mjs --site <slug> --include-404',
+  ])
+    assert.ok(skill.includes(needle), needle);
+});

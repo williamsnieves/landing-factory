@@ -415,3 +415,29 @@ test('AI images get their own table with tool, model, date and terms, no footer 
   );
   assert.equal(result.status, 0, result.stdout + result.stderr);
 });
+
+test('an owner portrait is listed under AI-generated images, noting it is a portrait of the owner made with their consent', () => {
+  const root = freshRoot();
+  const manifestPath = join(root, 'sites/demo/assets.json');
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+  manifest.images.push(
+    aiEntry({
+      file: 'owner.png',
+      imported: true,
+      subject: 'owner',
+      note: 'Made with ChatGPT.',
+    }),
+    aiEntry({ file: 'plain.webp' }),
+  );
+  writeFileSync(manifestPath, JSON.stringify(manifest));
+  syncCredits({ slug: 'demo', root });
+  const credits = read(root, 'CREDITS.md');
+  assert.match(
+    credits,
+    /\| `owner\.png`[^\n]*\| Portrait of the owner, made with their consent\. Made with ChatGPT\s+\|/,
+  );
+  const plain = credits.split('\n').find((l) => l.includes('`plain.webp`'));
+  assert.doesNotMatch(plain, /Portrait of the owner/);
+  // It adds no footer credit line, like any AI image.
+  assert.doesNotMatch(read(root, 'src/data/credits.json'), /owner\.png/);
+});

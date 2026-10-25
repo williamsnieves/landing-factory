@@ -126,7 +126,7 @@ export function createTools({ root, jobs }) {
     {
       name: 'brief_update',
       description:
-        'Deep-merge a patch into the brief (arrays are replaced) and save it only if the result validates. Identity, legal holder and AI-image consent can never be marked assumed.',
+        'Deep-merge a patch into the brief (arrays are replaced) and save it only if the result validates. Identity, legal holder, AI-image consent and owner-portrait consent can never be marked assumed.',
       inputSchema: obj(
         {
           slug,

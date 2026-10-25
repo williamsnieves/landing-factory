@@ -43,7 +43,7 @@ Jobs run `claude -p`, `node` and `bash` from the checkout, so start the client f
 
 Job tools return a job id at once. A tool failure comes back as a result with `isError: true` and a text explanation; an unknown tool is a JSON-RPC error.
 
-`brief_update` refuses to mark identity, consent or legal holder fields (`legal`, `legal.holder`, `legal.privacyContact`, `brand.aiImages`) as assumed, as the CLI does. Ask the customer for them.
+`brief_update` refuses to mark identity, consent or legal holder fields (`legal`, `legal.holder`, `legal.privacyContact`, `brand.aiImages`, `brand.ownerPortrait`) as assumed, as the CLI does. Ask the customer for them.
 
 ## A typical flow
 

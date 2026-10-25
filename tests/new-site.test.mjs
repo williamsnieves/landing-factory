@@ -58,6 +58,7 @@ const EXPECTED_FILES = [
   'src/env.d.ts',
   'src/layouts/BaseLayout.astro',
   'src/layouts/README.md',
+  'src/pages/404.astro',
   'src/pages/index.astro',
   'src/scenes/.gitkeep',
   'src/styles/global.css',
@@ -190,6 +191,33 @@ test('the placeholder page is noindex, uses the given language and escapes its t
   assert.match(page, /const title = 'Cafe "Uno" <b>';/);
   assert.equal(jsString("it's a \\ b"), "'it\\'s a \\\\ b'");
   assert.match(page, /En construcción\./);
+});
+
+test('the default 404 page is noindex, uses the language, links home and escapes its text', () => {
+  const sitesDir = freshSites();
+  scaffoldSite({ slug: 'cafeteria', sitesDir, title: 'Cafe "Uno" <b>' });
+  scaffoldSite({ slug: 'cafe-es', sitesDir, lang: 'es' });
+  scaffoldSite({ slug: 'cafe-fr', sitesDir, lang: 'fr' });
+  const read = (slug) =>
+    readFileSync(join(sitesDir, slug, 'src/pages/404.astro'), 'utf8');
+  const en = read('cafeteria');
+  assert.match(
+    en,
+    /import BaseLayout from '\.\.\/layouts\/BaseLayout\.astro';/,
+  );
+  assert.match(en, /\bnoindex\b/);
+  assert.match(en, /const lang = 'en';/);
+  assert.match(en, /const title = 'Page not found \| Cafe "Uno" <b>';/);
+  assert.match(en, /href="\/"/);
+  assert.match(en, /Back to the home page/);
+  const es = read('cafe-es');
+  assert.match(es, /const lang = 'es';/);
+  assert.match(es, /Página no encontrada \| cafe-es/);
+  assert.match(es, /Volver al inicio/);
+  // Other language tags fall back to English text but keep the tag.
+  const fr = read('cafe-fr');
+  assert.match(fr, /const lang = 'fr';/);
+  assert.match(fr, /Back to the home page/);
 });
 
 test('the copied stylesheet drops the root-only source exclusions', () => {
@@ -357,6 +385,11 @@ test('a scaffolded site carries the hardened starter: script CSP config, HSTS an
       readFileSync(join(site, 'dist/_headers'), 'utf8'),
       /Strict-Transport-Security/,
     );
+    // The default 404 page is built (the landing report's 404 item needs dist/404.html), noindex and linking home.
+    const notFound = readFileSync(join(site, 'dist/404.html'), 'utf8');
+    assert.match(notFound, /<meta name="robots" content="noindex"/);
+    assert.match(notFound, /<html lang="en"/);
+    assert.match(notFound, /<a href="\/"/);
   } finally {
     rmSync(sitesDir, { recursive: true, force: true });
   }

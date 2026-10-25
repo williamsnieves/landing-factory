@@ -943,3 +943,103 @@ test('ai-provenance: two AI images with the same title are not one photo for the
     [],
   );
 });
+
+// --- ai-provenance: owner portrait (add-personal-brand-support) -----------------------------------------
+
+const OWNER_PROMPT = 'A half-human, half-machine portrait of the author';
+const ownerBriefFor = (aiImages = 'allowed', ownerPortrait = 'allowed') => {
+  const brief = JSON.parse(
+    readFileSync(join(BRIEF_FIXTURE, 'brief.json'), 'utf8'),
+  );
+  brief.business.personalBrand = true;
+  brief.brand.aiImages = aiImages;
+  brief.brand.ownerPortrait = ownerPortrait;
+  return brief;
+};
+const ownerEntry = (extra = {}) => ({
+  prompt: OWNER_PROMPT,
+  imported: true,
+  subject: 'owner',
+  ...extra,
+});
+
+test('ai-provenance: an owner portrait passes with both consents and the disclosure', async () => {
+  const root = await aiRoot({ entry: ownerEntry(), brief: ownerBriefFor() });
+  const { failures } = await aiFailures(root);
+  assert.deepEqual(failures, []);
+});
+
+test('ai-provenance: an owner portrait without both consents, or without a brief, fails naming the file', async () => {
+  for (const [brief, reason] of [
+    [ownerBriefFor('allowed', ''), /brand\.ownerPortrait is empty/],
+    [
+      ownerBriefFor('allowed', 'not-allowed'),
+      /brand\.ownerPortrait is not-allowed/,
+    ],
+    [undefined, /needs a brief\.json that names the owner/],
+  ]) {
+    const root = await aiRoot({ entry: ownerEntry(), brief });
+    const { failures } = await aiFailures(root);
+    const failure = failures.find((f) => /owner portrait/.test(f.message));
+    assert.ok(failure, String(reason));
+    assert.equal(failure.item, 'glass.webp');
+    assert.match(failure.message, reason);
+  }
+  // Without brand.aiImages the existing consent failure fires as well.
+  const noAi = await aiRoot({
+    entry: ownerEntry(),
+    brief: ownerBriefFor('', 'allowed'),
+  });
+  const messages = (await aiFailures(noAi)).failures.map((f) => f.message);
+  assert.ok(messages.some((m) => /brand\.aiImages is .*not "allowed"/.test(m)));
+  assert.ok(messages.some((m) => /owner portrait/.test(m)));
+});
+
+test('ai-provenance: a subject other than owner fails', async () => {
+  const root = await aiRoot({
+    entry: { subject: 'team' },
+    brief: ownerBriefFor(),
+  });
+  const { failures } = await aiFailures(root);
+  assert.equal(failures.length, 1);
+  assert.match(
+    failures[0].message,
+    /subject "team".*only subject allowed is "owner"/,
+  );
+});
+
+test('ai-provenance: the people exemption needs the owner subject, the disclosure still applies and other rules stay', async () => {
+  // The same people prompt without the subject breaks the policy.
+  const people = await aiRoot({
+    entry: { prompt: 'Portrait of Maria Lopez, the founder' },
+    brief: ownerBriefFor(),
+  });
+  assert.ok(
+    (await aiFailures(people)).failures.some((f) =>
+      /breaks the prompt policy: \[people\]/.test(f.message),
+    ),
+  );
+  // With the subject and the consents the people rules are skipped, a brand name is not.
+  const owner = await aiRoot({
+    entry: ownerEntry({ prompt: 'Portrait of Maria Lopez, the founder' }),
+    brief: ownerBriefFor(),
+  });
+  assert.deepEqual((await aiFailures(owner)).failures, []);
+  const brand = await aiRoot({
+    entry: ownerEntry({ prompt: 'The author of Taller Plantilla' }),
+    brief: ownerBriefFor(),
+  });
+  assert.ok(
+    (await aiFailures(brand)).failures.some((f) => /\[brand\]/.test(f.message)),
+  );
+  const noDisclosure = await aiRoot({
+    entry: ownerEntry(),
+    brief: ownerBriefFor(),
+    html: '<footer>no disclosure</footer>',
+  });
+  assert.ok(
+    (await aiFailures(noDisclosure)).failures.some((f) =>
+      /data-ai-disclosure/.test(f.message),
+    ),
+  );
+});

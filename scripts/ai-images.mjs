@@ -3,7 +3,7 @@
 // provenance in sites/<slug>/assets.json (the manifest scripts/credits.mjs and scripts/check-landing.mjs read).
 //
 //   node scripts/ai-images.mjs generate <slug> --prompt "..." --as <name> [--size S] [--quality Q] [--model M] [--title T] [--note N] [--dry-run] [--json]
-//   node scripts/ai-images.mjs import   <slug> <file> --generator G --model M --prompt P --created <date> --terms <url> [--title T] [--as name] [--note N] [--json]
+//   node scripts/ai-images.mjs import   <slug> <file> --generator G --model M --prompt P --created <date> --terms <url> [--title T] [--as name] [--note N] [--subject owner] [--json]
 //   node scripts/ai-images.mjs count    <slug> [--json]
 //
 // The key is read only from OPENAI_API_KEY and never printed, stored or passed as an argument. OPENAI_BASE_URL
@@ -25,7 +25,7 @@ import { parseArgs } from 'node:util';
 import { reexecWithEnvProxy } from '../.claude/skills/analyze-reference/scripts/proxy.mjs';
 import { readManifest, writeManifest } from './find-images.mjs';
 import { validateSlug } from './new-site.mjs';
-import { aiImagesConsent } from './lib/brief-schema.mjs';
+import { aiImagesConsent, ownerPortraitConsent } from './lib/brief-schema.mjs';
 import { checkPrompt, formatViolations } from './lib/ai-prompt-policy.mjs';
 import {
   FORMATS,
@@ -106,13 +106,20 @@ function siteContext(root, slug) {
 }
 
 /** Consent, then policy; throws Refused with the reasons. The cap is checked by the caller for generation. */
-function requireAllowed({ brief, slug, prompt }) {
+function requireAllowed({ brief, slug, prompt, subject }) {
+  if (subject === 'owner') {
+    const owner = ownerPortraitConsent(brief);
+    if (!owner.allowed)
+      throw new Refused(
+        `an AI portrait of the owner needs the owner's consent in sites/${slug}/brief.json (brand.aiImages and brand.ownerPortrait both "allowed", and a business name): ${owner.reason}`,
+      );
+  }
   const { allowed, value } = consent(brief);
   if (!allowed)
     throw new Refused(
       `the customer did not allow AI images (sites/${slug}/brief.json brand.aiImages is ${value}); use the customer's files, Commons or The Met instead`,
     );
-  const violations = checkPrompt(prompt, brief);
+  const violations = checkPrompt(prompt, brief, { subject });
   if (violations.length)
     throw new Refused(
       `prompt refused by the AI image policy: ${formatViolations(violations)}. AI images are for abstract art, textures, generic objects and scenes; reword the prompt`,
@@ -196,6 +203,10 @@ const defaultTitle = (prompt) => {
 
 async function generate({ args, values, io, deps, root }) {
   const [slug, ...rest] = args;
+  if (values.subject !== undefined)
+    throw new Usage(
+      '--subject is only for import: generation never makes a portrait of a person (text-only prompts); make the portrait with your own tool and import it',
+    );
   if (!slug || rest.length) throw new Usage('generate needs exactly <slug>');
   const prompt = String(values.prompt ?? '').trim();
   if (!prompt) throw new Usage('generate needs --prompt "<text>"');
@@ -308,9 +319,14 @@ function importImage({ args, values, io, root }) {
   if (!terms || !/^https?:$/.test(terms.protocol))
     throw new Usage('--terms must be an http(s) URL of the generator terms');
 
+  if (values.subject !== undefined && values.subject !== 'owner')
+    throw new Usage(
+      `--subject must be "owner" (the only subject allowed), got "${values.subject}"`,
+    );
+  const subject = values.subject;
   const ctx = siteContext(root, slug);
   const prompt = String(values.prompt).trim();
-  requireAllowed({ brief: ctx.brief, slug, prompt });
+  requireAllowed({ brief: ctx.brief, slug, prompt, subject });
 
   const path = resolve(source);
   if (!existsSync(path)) throw new Refused(`${source} does not exist`);
@@ -337,6 +353,7 @@ function importImage({ args, values, io, root }) {
     createdAt: new Date(created).toISOString(),
     terms: terms.href,
     imported: true,
+    ...(subject ? { subject } : {}),
     credit: false,
     note: values.note ?? '',
   };
@@ -378,7 +395,7 @@ function count({ args, values, io, root }) {
 
 const HELP = `Usage:
   node scripts/ai-images.mjs generate <slug> --prompt "<text>" --as <name> [--size S] [--quality Q] [--model M] [--title T] [--note N] [--dry-run] [--json]
-  node scripts/ai-images.mjs import <slug> <file> --generator <tool> --model <id> --prompt "<text>" --created <date> --terms <url> [--title T] [--as <name>] [--note N] [--json]
+  node scripts/ai-images.mjs import <slug> <file> --generator <tool> --model <id> --prompt "<text>" --created <date> --terms <url> [--title T] [--as <name>] [--note N] [--subject owner] [--json]
   node scripts/ai-images.mjs count <slug> [--json]
 
 generate  Create one image with the OpenAI Images API, save it in sites/<slug>/src/assets/images/ and append its
@@ -389,6 +406,9 @@ generate  Create one image with the OpenAI Images API, save it in sites/<slug>/s
             --model M      a model id (default: qa.config.json aiImages.model)
             --dry-run      print the request (never the key) and change nothing
 import    Record an AI image made with your own tool (same provenance fields, all required), copied into the site.
+            --subject owner  an AI portrait of the brand owner: only with a brief that has brand.aiImages and
+                           brand.ownerPortrait both "allowed" (never without a brief); the people and real-person
+                           rules are skipped for it, brand, logo and results still apply. generate refuses --subject.
 count     AI images on the site, the cap and the customer's consent.
 
 The key comes only from the ${KEY_VARIABLE} environment variable. Refused before any request: the customer did
@@ -414,6 +434,7 @@ export async function main(argv, io = console, deps = {}) {
         generator: { type: 'string' },
         created: { type: 'string' },
         terms: { type: 'string' },
+        subject: { type: 'string' },
         'dry-run': { type: 'boolean' },
         json: { type: 'boolean' },
         help: { type: 'boolean' },
