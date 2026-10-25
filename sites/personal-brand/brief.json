@@ -25,7 +25,11 @@
       "url": ""
     }
   },
-  "tone": [],
+  "tone": [
+    "like himself, as in his own words",
+    "a touch of humor",
+    "professional"
+  ],
   "contact": {
     "email": "",
     "phone": "",
@@ -59,7 +63,7 @@
   "brand": {
     "colors": [],
     "fonts": [],
-    "keep": "",
+    "keep": "The {W} code-brace logo as supplied (its colors belong to the mark); the rest of the palette is free: be creative (owner)",
     "avoid": "",
     "aiImages": "allowed",
     "ownerPortrait": "allowed"
@@ -68,17 +72,17 @@
     "liked": [
       {
         "url": "https://www.product.inc/",
-        "why": "Interesting ideas to draw inspiration from (owner)",
+        "why": "The overall concept; creativity (owner)",
         "sheet": ""
       },
       {
         "url": "https://sankar.work/#hero",
-        "why": "Interesting ideas to draw inspiration from (owner)",
+        "why": "Some of its colors and some ways of showing projects; creativity (owner)",
         "sheet": ""
       },
       {
         "url": "https://www.sebg.ch/",
-        "why": "Interesting ideas to draw inspiration from (owner)",
+        "why": "The creativity of a character that moves through each section (owner)",
         "sheet": ""
       }
     ],
@@ -113,5 +117,5 @@
       "reason": "Required field; the owner wants no call to action for now (2026-10-25), so his LinkedIn profile is the quiet primary link, not a big button. Owner to confirm or change."
     }
   ],
-  "notes": "Owner (2026-10-25): his personal-brand site, rebuilt from the old Vue site (content source: old src/content.json and translations.js, en and es: about text, 18 skills, 8 jobs from EF 2023-2025 back to Teravision 2015; links GitHub and LinkedIn). The old blog link (personal-blog on Netlify) is dropped: the blog was never made. Current site williansnieves.com is on Netlify, repo on Bitbucket; it moves to Vercel. This landing will later move to its own repository, deployed from there, with its own maintenance. Portrait: made by the owner with ChatGPT (half human, half machine). Logo: the {W} code-brace mark, SVG from the owner. Owner (2026-10-25, intake): page in both English and Spanish, like the old site. Keep the old site theme: who he is, his skills (add context engineering, harness engineering, SDD with OpenSpec, graph engineering, Claude Code, Codex, vector databases, LangChain, LangGraph, multi-agent orchestration, and one he wrote as \"jev\", to be confirmed), his career path, and the same footer links without the blog. A couple of soft, AI-themed AI-generated background images. Room for something creative. Owner (2026-10-25): English is the default locale, Spanish the second (bilingual landing, change add-bilingual-landing). No call to action and no contact email on the page for now. CV received: facts are in CONTENT.md (phone and email left out on purpose). JEV is a System 1 decision model (owner wording)."
+  "notes": "Owner (2026-10-25): his personal-brand site, rebuilt from the old Vue site (content source: old src/content.json and translations.js, en and es: about text, 18 skills, 8 jobs from EF 2023-2025 back to Teravision 2015; links GitHub and LinkedIn). The old blog link (personal-blog on Netlify) is dropped: the blog was never made. Current site williansnieves.com is on Netlify, repo on Bitbucket; it moves to Vercel. This landing will later move to its own repository, deployed from there, with its own maintenance. Portrait: made by the owner with ChatGPT (half human, half machine). Logo: the {W} code-brace mark, SVG from the owner. Owner (2026-10-25, intake): page in both English and Spanish, like the old site. Keep the old site theme: who he is, his skills (add context engineering, harness engineering, SDD with OpenSpec, graph engineering, Claude Code, Codex, vector databases, LangChain, LangGraph, multi-agent orchestration, and one he wrote as \"jev\", to be confirmed), his career path, and the same footer links without the blog. A couple of soft, AI-themed AI-generated background images. Room for something creative. Owner (2026-10-25): English is the default locale, Spanish the second (bilingual landing, change add-bilingual-landing). No call to action and no contact email on the page for now. CV received: facts are in CONTENT.md (phone and email left out on purpose). JEV is a System 1 decision model (owner wording). Owner (2026-10-25): skip legal pages for this portfolio (no market named; he never had them; the report then warns \"requirements unknown\"). Palette free and creative; the three references inspire together with his own description, none is a template."
 }
