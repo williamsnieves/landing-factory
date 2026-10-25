@@ -1,0 +1,237 @@
+---
+// AI engineering stage: the one pinned section. From 768 px the stage holds the viewport for one extra screen
+// while three steps take turns (the portrait turns to the machine half, one step opens, its chips light up).
+// Under reduced motion, without JavaScript and on phones it is a plain block: portrait, then all steps open.
+import { Image } from 'astro:assets';
+import portrait from '../../assets/images/portrait-ai.webp';
+import SectionHead from './SectionHead.astro';
+import type { Content } from '../../content/types';
+
+interface Props {
+  content: Content['ai'];
+}
+const { content } = Astro.props;
+---
+
+<section
+  id="ai"
+  class="ai bg-field-2"
+  data-pin
+  data-pin-distance="100%"
+  data-pin-min="md"
+  data-stage
+  aria-labelledby="ai-heading"
+>
+  <div class="wrap ai-inner">
+    <SectionHead
+      label={content.label}
+      heading={content.heading}
+      intro={content.intro}
+      headingId="ai-heading"
+    />
+    <div class="mt-10 grid grid-cols-12 items-center gap-x-6 gap-y-8 md:mt-10">
+      <figure class="stage-fig col-span-12 m-0 md:col-span-5">
+        <div class="frame" data-reveal>
+          <Image
+            src={portrait}
+            alt={content.portraitAlt}
+            widths={[420, 640, 860]}
+            sizes="(min-width: 768px) 40vw, 92vw"
+            loading="lazy"
+            decoding="async"
+            class="block h-full w-full object-cover"
+          />
+          <span class="frame-edge" aria-hidden="true"></span>
+        </div>
+        <figcaption class="label text-ink mt-3">
+          {content.portraitCaption}
+        </figcaption>
+      </figure>
+
+      <ol class="col-span-12 m-0 grid list-none gap-3 p-0 md:col-span-7">
+        {content.steps.map((step, i) => (
+          <li class="step" data-step-item>
+            <div class="flex items-baseline gap-4">
+              <span class="label step-num">
+                {content.stepLabel} {String(i + 1).padStart(2, '0')}
+              </span>
+              <h3 class="step-title font-display text-xl leading-tight font-bold">
+                {step.title}
+              </h3>
+            </div>
+            <div class="body-wrap" data-qa-allow-clip>
+              <div class="body-clip" data-qa-allow-clip>
+                <p class="text-ink mt-3 max-w-[54ch] text-sm leading-relaxed">
+                  {step.body}
+                </p>
+              </div>
+            </div>
+            <ul class="mt-3 flex list-none flex-wrap gap-2 p-0">
+              {step.chips.map((chip) => (
+                <li class="chip">{chip}</li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ai-inner {
+    padding-block: 3.5rem;
+  }
+  @media (min-width: 768px) {
+    .ai {
+      min-height: 100svh;
+    }
+    .ai-inner {
+      padding-top: 5.5rem;
+      padding-bottom: 2.5rem;
+    }
+  }
+  @media (min-width: 768px) {
+    .stage-fig {
+      transform: rotate(0.9deg);
+    }
+  }
+  .frame {
+    border-radius: var(--radius-lg);
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--color-paper);
+  }
+  @media (min-width: 768px) {
+    .frame {
+      aspect-ratio: 4 / 5;
+      max-height: 56svh;
+      width: 100%;
+    }
+  }
+  .frame img {
+    transform: scale(var(--zoom, 1.25));
+    transform-origin: var(--ox, 78%) var(--oy, 40%);
+    object-position: 70% 40%;
+    transition: transform var(--duration-stage) var(--ease-in-out);
+  }
+  .frame-edge {
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--color-cool);
+    pointer-events: none;
+  }
+  .step {
+    border: 1px solid color-mix(in oklab, var(--color-ink) 35%, transparent);
+    border-left-width: 4px;
+    padding: 1rem 1.25rem;
+    background: color-mix(in oklab, var(--color-paper) 30%, transparent);
+    transition:
+      border-color var(--duration-instant) var(--ease-snap),
+      background-color var(--duration-instant) var(--ease-snap);
+  }
+  .step-num {
+    color: var(--color-ink);
+    white-space: nowrap;
+  }
+  .body-wrap {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows var(--duration-base) var(--ease-out);
+  }
+  .body-clip {
+    min-height: 0;
+  }
+
+  /* Pinned state: only with JavaScript, motion allowed and from 768 px (the script sets data-step). */
+  @media (min-width: 768px) {
+    :global(.js-motion) .ai[data-step] .step {
+      border-left-color: var(--color-ink-soft);
+    }
+    :global(.js-motion) .ai[data-step] .body-wrap {
+      grid-template-rows: 0fr;
+    }
+    :global(.js-motion) .ai[data-step] .body-clip {
+      overflow: hidden;
+    }
+    :global(.js-motion) .ai[data-step] .step[data-active] {
+      border-color: var(--color-accent);
+      background: var(--color-paper);
+    }
+    :global(.js-motion) .ai[data-step] .step[data-active] .body-wrap {
+      grid-template-rows: 1fr;
+    }
+    :global(.js-motion) .ai[data-step] .step[data-active] .step-title {
+      color: var(--color-accent);
+    }
+    :global(.js-motion) .ai[data-step] .step[data-active] .chip {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: var(--color-primary-contrast);
+    }
+    .ai[data-step='1'] .frame {
+      --zoom: 1.2;
+      --ox: 75%;
+      --oy: 45%;
+    }
+    .ai[data-step='2'] .frame {
+      --zoom: 1.9;
+      --ox: 80%;
+      --oy: 34%;
+    }
+    .ai[data-step='3'] .frame {
+      --zoom: 1.9;
+      --ox: 72%;
+      --oy: 82%;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .frame img,
+    .body-wrap,
+    .step {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  // Drives the three steps from the progress of the pin. Mirrors the pin of the motion layer (same start and
+  // distance), so it only runs when that pin runs: JavaScript, motion allowed, 768 px and up.
+  const stage = document.querySelector<HTMLElement>('[data-stage]');
+  const pinned =
+    document.documentElement.classList.contains('js-motion') &&
+    window.matchMedia('(min-width: 768px)').matches;
+
+  if (stage && pinned) {
+    const items = Array.from(
+      stage.querySelectorAll<HTMLElement>('[data-step-item]'),
+    );
+    const show = (n: number) => {
+      stage.dataset.step = String(n);
+      items.forEach((el, i) => el.toggleAttribute('data-active', i + 1 === n));
+    };
+    show(1);
+    Promise.all([import('gsap'), import('gsap/ScrollTrigger')])
+      .then(([{ gsap }, { ScrollTrigger }]) => {
+        gsap.registerPlugin(ScrollTrigger);
+        ScrollTrigger.create({
+          trigger: stage,
+          start: 'top top',
+          end: `+=${stage.dataset.pinDistance ?? '100%'}`,
+          onUpdate: (self) =>
+            show(
+              Math.min(
+                items.length,
+                Math.floor(self.progress * items.length) + 1,
+              ),
+            ),
+        });
+      })
+      .catch(() => {
+        // Without the scroll driver, leave every step open.
+        delete stage.dataset.step;
+        items.forEach((el) => el.removeAttribute('data-active'));
+      });
+  }
+</script>

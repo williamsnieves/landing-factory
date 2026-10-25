@@ -1,0 +1,91 @@
+{
+  "site": "personal-brand",
+  "version": 1,
+  "page": "/",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "features": {
+    "sectionCount": 7,
+    "cols1Share": 0.29,
+    "cols2Share": 0.71,
+    "cols3Share": 0,
+    "splitRatio": 0.09,
+    "fullBleedShare": 0,
+    "imageRadius": 4,
+    "buttonRadius": 0,
+    "buttonShape": "rect",
+    "headingScale": 10.4,
+    "headingAlign": "left",
+    "headingCase": 0.2,
+    "eyebrowShare": 1,
+    "wordsPerScreen": 102,
+    "footerType": "columns",
+    "mediaPerScreen": 0.2,
+    "rotatedShare": 1,
+    "overlapShare": 0,
+    "stickyCount": 1
+  },
+  "sections": [
+    {
+      "id": "top",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": "about",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": "ai",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": "path",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": "skills",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": "beyond",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": "education",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": true
+    }
+  ],
+  "mobile": {
+    "screens": 14.74,
+    "wordsPerScreen": 67,
+    "sectionCount": 7
+  },
+  "hashes": [
+    "1e3f8fcc8c8c8d0c",
+    "16d9f8343030e002",
+    "0ec48389082b2984",
+    "c6c4a94969a02881",
+    "a6c59a82c2828a82",
+    "82e29292c2b29282",
+    "be8282a291908000",
+    "ce81a1b194890c4c",
+    "1ec1c22d25696984",
+    "1ed1d913409c9492"
+  ]
+}

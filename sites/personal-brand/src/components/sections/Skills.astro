@@ -1,0 +1,57 @@
+---
+// Skills as a bento of mixed 7- and 5-column tiles. Chips, no proficiency bars (the CV gives no levels).
+import SectionHead from './SectionHead.astro';
+import type { Content } from '../../content/types';
+
+interface Props {
+  content: Content['skills'];
+}
+const { content } = Astro.props;
+---
+
+<section
+  id="skills"
+  class="bg-surface border-line section-pad border-y"
+  aria-labelledby="skills-heading"
+>
+  <div class="wrap">
+    <SectionHead
+      label={content.label}
+      heading={content.heading}
+      intro={content.intro}
+      headingId="skills-heading"
+    />
+    <ul class="mt-12 grid list-none grid-cols-1 gap-4 p-0 md:grid-cols-12 lg:mt-16">
+      {content.groups.map((group, i) => (
+        <li
+          data-reveal
+          data-reveal-delay={(i % 2) * 0.1}
+          class:list={[
+            'border-line border p-5 md:p-6',
+            group.size === 'wide' ? 'md:col-span-7' : 'md:col-span-5',
+            group.tone === 'ai' ? 'bg-field-2 border-cool' : 'bg-paper',
+          ]}
+        >
+          <h3 class="font-display text-xl font-bold tracking-[-0.01em]">
+            {group.title}
+          </h3>
+          <ul class="mt-4 flex list-none flex-wrap gap-2 p-0">
+            {group.items.map((item) => (
+              <li
+                class:list={['chip', group.tone === 'ai' ? '' : 'skill-chip']}
+              >
+                {item}
+              </li>
+            ))}
+          </ul>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .skill-chip {
+    background: var(--color-surface);
+  }
+</style>

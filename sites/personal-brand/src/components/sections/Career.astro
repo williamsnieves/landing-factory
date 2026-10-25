@@ -1,0 +1,110 @@
+---
+// Career path: a dotted vertical rail, one flat color card per recent employer, and the earlier roles as a
+// compact two-ended list. Dates are in mono beside the employer, never above it.
+import SectionHead from './SectionHead.astro';
+import type { Content } from '../../content/types';
+
+interface Props {
+  content: Content['path'];
+}
+const { content } = Astro.props;
+const tones = { 3: 'bg-field-3', 5: 'bg-field-5' } as const;
+---
+
+<section
+  id="path"
+  class="grid-lines section-pad"
+  aria-labelledby="path-heading"
+>
+  <div class="wrap">
+    <SectionHead
+      label={content.label}
+      heading={content.heading}
+      intro={content.intro}
+      headingId="path-heading"
+    />
+
+    <ol class="rail mt-12 ml-1 grid list-none gap-6 p-0 pl-6 md:ml-[calc(2rem+0.5rem)] md:pl-12 lg:mt-20">
+      {content.jobs.map((job) => (
+        <li class="job relative" data-reveal data-reveal-y="40">
+          <span class="dot" aria-hidden="true" />
+          <article class={`${tones[job.tone]} border-ink/25 border p-5 md:p-8`}>
+            <header class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+              <h3 class="font-display text-2xl leading-none font-extrabold tracking-[-0.015em]">
+                {job.employer}
+              </h3>
+              <p class="label text-ink">{job.dates}</p>
+            </header>
+            <p class="text-ink mt-2 text-base">
+              {job.role}, {job.place}
+            </p>
+            {job.bullets.length > 0 && (
+              <ul class="text-ink mt-5 grid max-w-[68ch] list-none gap-3 p-0 text-base leading-relaxed">
+                {job.bullets.map((bullet) => (
+                  <li class="bullet">{bullet}</li>
+                ))}
+              </ul>
+            )}
+            <p class="label text-ink mt-6 mb-2">{content.stackLabel}</p>
+            <ul class="flex list-none flex-wrap gap-2 p-0">
+              {job.stack.map((item) => (
+                <li class="chip">{item}</li>
+              ))}
+            </ul>
+          </article>
+        </li>
+      ))}
+    </ol>
+
+    <div class="mt-14 max-w-[40rem] md:ml-[calc(2rem+0.5rem+3rem)]" data-reveal>
+      <h3 class="label text-ink border-line border-b pb-3">
+        {content.earlierLabel}
+      </h3>
+      <ul class="m-0 list-none p-0">
+        {content.earlier.map((role) => (
+          <li class="border-line flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b py-3">
+            <p class="text-ink text-base">
+              <span class="font-display font-bold">{role.employer}</span>
+              <span class="text-ink-soft">, {role.role}</span>
+            </p>
+            <p class="label text-ink-soft">{role.dates}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .rail {
+    border-left: 2px dotted var(--color-bridge);
+  }
+  .dot {
+    position: absolute;
+    top: 1.75rem;
+    left: calc(-1.5rem - 1px - 0.4375rem);
+    width: 0.875rem;
+    height: 0.875rem;
+    background: var(--color-primary);
+    box-shadow: 0 0 0 4px var(--color-paper);
+  }
+  @media (min-width: 768px) {
+    .dot {
+      left: calc(-3rem - 1px - 0.4375rem);
+      top: 2.25rem;
+    }
+  }
+  .bullet {
+    position: relative;
+    padding-left: 1.25rem;
+  }
+  .bullet::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.7em;
+    width: 0.5rem;
+    height: 2px;
+    background: var(--color-accent);
+  }
+</style>

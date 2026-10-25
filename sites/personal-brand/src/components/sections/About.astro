@@ -1,0 +1,59 @@
+---
+// About, "Two halves": the human chapter. A warm flat field, a mono fact column on the left and a statement-sized
+// paragraph on the right with one phrase in the highlight color. No photo here (the portrait is used twice at most).
+import SectionHead from './SectionHead.astro';
+import type { Content } from '../../content/types';
+
+interface Props {
+  content: Content['about'];
+}
+const { content } = Astro.props;
+---
+
+<section
+  id="about"
+  class="bg-field-1 section-pad"
+  aria-labelledby="about-heading"
+>
+  <div class="wrap">
+    <SectionHead
+      label={content.label}
+      heading={content.heading}
+      headingId="about-heading"
+    />
+    <div class="mt-12 grid grid-cols-12 gap-x-6 gap-y-12 lg:mt-20">
+      <dl
+        class="col-span-12 grid content-start gap-5 sm:grid-cols-2 lg:col-span-3 lg:grid-cols-1"
+        data-reveal
+      >
+        {content.facts.map((fact) => (
+          <div class="border-ink/40 border-t pt-3">
+            <dt class="label text-ink">{fact.key}</dt>
+            <dd class="font-display mt-1 text-lg font-bold">{fact.value}</dd>
+          </div>
+        ))}
+      </dl>
+      <div class="col-span-12 lg:col-span-8 lg:col-start-5">
+        <p
+          data-reveal
+          class="font-display text-2xl leading-[1.12] tracking-[-0.01em] font-semibold text-balance"
+        >
+          {content.statement.before}
+          <span class="text-accent">{content.statement.accent}</span>
+          {content.statement.after}
+        </p>
+        <div class="mt-10 grid max-w-[62ch] gap-5 lg:mt-14">
+          {content.paragraphs.map((paragraph, i) => (
+            <p
+              data-reveal
+              data-reveal-delay={i * 0.08}
+              class="text-ink text-base leading-relaxed"
+            >
+              {paragraph}
+            </p>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

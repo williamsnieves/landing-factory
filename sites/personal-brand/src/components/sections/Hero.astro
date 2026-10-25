@@ -1,0 +1,223 @@
+---
+// Hero collage: the giant name in two cuts (one light, one heavy), the portrait with the seam through the face
+// (human half warm on the left, machine half cool on the right), tags overlapping the portrait.
+import { Image } from 'astro:assets';
+import heroPortrait from '../../assets/images/portrait-ai.webp';
+import type { Content } from '../../content/types';
+import { t } from '../../i18n/ui';
+
+interface Props {
+  content: Content['hero'];
+  locale: string;
+}
+const { content, locale } = Astro.props;
+const dict = t(locale);
+---
+
+<section
+  id="top"
+  class="hero grid-lines relative overflow-x-clip pt-8 lg:pt-10"
+  aria-labelledby="hero-name"
+>
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="wrap grid grid-cols-12 items-end gap-x-6 gap-y-10 lg:min-h-[calc(100svh-8.5rem)]">
+    <div class="relative z-10 col-span-12 lg:col-span-7 lg:self-center">
+      <p data-reveal class="label text-accent mb-6 lg:mb-8">
+        {content.role}
+      </p>
+      <h1
+        id="hero-name"
+        class="font-display text-4xl leading-[0.88] tracking-[-0.035em]"
+      >
+        <span data-reveal data-reveal-y="48" class="name-light block">
+          Willians
+        </span>{' '}
+        <span
+          data-reveal
+          data-reveal-y="48"
+          data-reveal-delay="0.12"
+          class="name-heavy text-primary block"
+        >
+          Nieves
+        </span>
+      </h1>
+      <p
+        data-reveal
+        data-reveal-delay="0.2"
+        class="text-ink mt-8 max-w-[40ch] text-lg leading-relaxed lg:mt-10 lg:text-xl"
+      >
+        {content.lead}
+      </p>
+      <p
+        data-reveal
+        data-reveal-delay="0.3"
+        class="label text-ink-soft mt-6 flex flex-wrap items-center gap-x-5 gap-y-1"
+      >
+        <span>{content.findMe}</span>
+        <a
+          class="text-link py-2"
+          href="https://www.linkedin.com/in/willians-nieves"
+          rel="me noopener"
+        >
+          {dict.linkedin}
+        </a>
+        <a
+          class="text-link py-2"
+          href="https://github.com/williamsnieves"
+          rel="me noopener"
+        >
+          {dict.github}
+        </a>
+      </p>
+    </div>
+
+    <div class="collage relative col-span-12 mx-auto w-full max-w-[34rem] lg:col-span-5 lg:max-w-none">
+      <p class="halves label mb-3 grid" aria-hidden="true">
+        <span class="text-primary pr-3 text-right">{content.humanLabel}</span>
+        <span class="text-cool pl-3">{content.machineLabel}</span>
+      </p>
+      <figure class="portrait relative m-0" data-reveal data-reveal-delay="0.1">
+        <Image
+          src={heroPortrait}
+          alt={content.portraitAlt}
+          widths={[420, 640, 860]}
+          sizes="(min-width: 1024px) 42vw, 92vw"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+          class="block aspect-square h-auto w-full object-cover"
+        />
+        <span class="tint" aria-hidden="true"></span>
+        <span class="seam" aria-hidden="true"></span>
+        <ul class="tags label pointer-events-none" aria-label="Stack">
+          {content.chips.map((chip, i) => (
+            <li class={`chip tag-${i + 1}`}>{chip}</li>
+          ))}
+        </ul>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero-glow {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        46rem 34rem at 8% 100%,
+        color-mix(in oklab, var(--color-field-1) 75%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        52rem 40rem at 92% 30%,
+        color-mix(in oklab, var(--color-field-2) 85%, transparent),
+        transparent 70%
+      );
+  }
+  /* Collage: the portrait block sits a little off the grid, like a print pinned to a board. */
+  @media (min-width: 1024px) {
+    .collage {
+      transform: rotate(-0.9deg);
+    }
+  }
+  .portrait img {
+    border-radius: var(--radius-lg);
+  }
+  .name-light {
+    font-weight: var(--font-weight-display-light);
+  }
+  .name-heavy {
+    font-weight: var(--font-weight-display-heavy);
+  }
+  .halves {
+    grid-template-columns: 55.5% 44.5%;
+  }
+  .seam {
+    position: absolute;
+    top: -2.25rem;
+    bottom: 0;
+    left: 55.5%;
+    width: 2px;
+    margin-left: -1px;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      var(--color-bridge) 14%,
+      var(--color-bridge)
+    );
+    pointer-events: none;
+  }
+  .tint {
+    position: absolute;
+    inset: 0 0 0 55.5%;
+    background: color-mix(in oklab, var(--color-cool) 55%, transparent);
+    mix-blend-mode: soft-light;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .tags {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tags .chip {
+    position: absolute;
+    border-color: var(--color-ink);
+  }
+  .tag-1 {
+    left: 0.5rem;
+    bottom: 16%;
+    transform: rotate(-3deg);
+  }
+  .tag-2 {
+    right: 0.5rem;
+    top: 12%;
+    transform: rotate(2deg);
+  }
+  .tag-3 {
+    left: 0.5rem;
+    bottom: 6%;
+    transform: rotate(1.5deg);
+  }
+  .tag-4 {
+    right: 0.5rem;
+    bottom: 12%;
+    transform: rotate(-2deg);
+  }
+  @media (min-width: 1024px) {
+    .tag-1 {
+      left: -1.75rem;
+    }
+    .tag-3 {
+      left: -0.75rem;
+    }
+    .tag-2 {
+      right: -1.25rem;
+    }
+  }
+  /* The machine half takes over as the hero scrolls away (where scroll-driven animations exist). */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .tint {
+        animation: tint-in linear both;
+        animation-timeline: view();
+        animation-range: exit 0% exit 90%;
+      }
+      @keyframes tint-in {
+        to {
+          opacity: 1;
+        }
+      }
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tint {
+      opacity: 0.4;
+    }
+  }
+</style>

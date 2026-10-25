@@ -1,6 +1,15 @@
 {
   "images": [
     {
+      "file": "logo.svg",
+      "title": "Logo: the {W} code-brace mark, used as supplied",
+      "source": "customer",
+      "owner": "Willians Nieves",
+      "permission": "Owner's own logo, for this site",
+      "credit": false,
+      "note": "Used unchanged in the header, the footer and as the favicon (public/favicon.svg is a copy)."
+    },
+    {
       "file": "portrait-ai.webp",
       "title": "AI-generated portrait of the owner, half human half machine",
       "source": "ai",

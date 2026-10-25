@@ -1,0 +1,50 @@
+---
+// The home page of every locale: one component, the copy comes from src/content/<locale>.ts and the short
+// interface strings from src/i18n/ui.ts. src/pages/index.astro (en) and src/pages/es/index.astro render it.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Motion from './motion/Motion.astro';
+import Ticker from './sections/Ticker.astro';
+import SiteHeader from './sections/SiteHeader.astro';
+import Hero from './sections/Hero.astro';
+import About from './sections/About.astro';
+import AiStage from './sections/AiStage.astro';
+import Career from './sections/Career.astro';
+import Skills from './sections/Skills.astro';
+import Beyond from './sections/Beyond.astro';
+import Education from './sections/Education.astro';
+import SiteFooter from './sections/SiteFooter.astro';
+import { getContent } from '../content';
+import { defaultLocale, t } from '../i18n/ui';
+
+const locale = Astro.currentLocale ?? defaultLocale;
+const dict = t(locale);
+const content = getContent(locale);
+const homeHref = locale === defaultLocale ? '/' : `/${locale}/`;
+---
+
+<BaseLayout
+  title={content.meta.title}
+  description={content.meta.description}
+  skipLabel={dict.skipToContent}
+>
+  <Motion slot="head" />
+  <Fragment slot="header">
+    <Ticker items={content.ticker} />
+    <SiteHeader locale={locale} homeHref={homeHref} />
+  </Fragment>
+
+  <Hero content={content.hero} locale={locale} />
+  <About content={content.about} />
+  <AiStage content={content.ai} />
+  <Career content={content.path} />
+  <Skills content={content.skills} />
+  <Beyond content={content.beyond} />
+  <Education content={content.edu} />
+
+  <SiteFooter
+    slot="footer"
+    locale={locale}
+    homeHref={homeHref}
+    tagline={content.footer.tagline}
+  />
+</BaseLayout>

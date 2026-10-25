@@ -1,0 +1,49 @@
+---
+// Education and languages: a compact strip on a quiet navy field.
+import SectionHead from './SectionHead.astro';
+import type { Content } from '../../content/types';
+
+interface Props {
+  content: Content['edu'];
+}
+const { content } = Astro.props;
+---
+
+<section
+  id="education"
+  class="bg-field-6 section-pad"
+  aria-labelledby="education-heading"
+>
+  <div class="wrap">
+    <SectionHead
+      label={content.label}
+      heading={content.heading}
+      headingId="education-heading"
+    />
+    <div class="mt-10 grid gap-8 md:grid-cols-2 md:gap-6 lg:mt-14">
+      <div data-reveal class="border-ink/40 border-t pt-4">
+        <h3 class="label text-ink">{content.educationTitle}</h3>
+        <p class="font-display mt-3 text-xl font-bold">{content.degree}</p>
+        <p class="text-ink mt-1 text-base">{content.school}</p>
+        <p class="label text-ink-soft mt-2">{content.years}</p>
+      </div>
+      <div
+        data-reveal
+        data-reveal-delay="0.1"
+        class="border-ink/40 border-t pt-4"
+      >
+        <h3 class="label text-ink">{content.languagesTitle}</h3>
+        <ul class="m-0 mt-3 grid list-none gap-3 p-0">
+          {content.languages.map((language) => (
+            <li class="flex flex-wrap items-baseline justify-between gap-x-6">
+              <span class="font-display text-xl font-bold">
+                {language.name}
+              </span>
+              <span class="label text-ink">{language.level}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>

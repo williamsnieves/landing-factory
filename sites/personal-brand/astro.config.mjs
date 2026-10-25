@@ -5,6 +5,8 @@ import tailwindcss from '@tailwindcss/vite';
 // Static output: deployable to Cloudflare Pages without an adapter.
 export default defineConfig({
   output: 'static',
+  // Production URL (brief deploy.domain): canonical and hreflang URLs are absolute.
+  site: 'https://williansnieves.com',
   // Multi-locale site (npm run new-site -- <slug> --langs ...): Astro's built-in i18n routing. The default locale
   // is served at the root and every other locale under /<locale>/, so src/pages/<locale>/ folders must match
   // `locales` exactly. There is no redirect by browser language (static output): the language switcher links.
