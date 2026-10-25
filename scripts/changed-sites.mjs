@@ -3,7 +3,8 @@
 // sites whose sites/<slug>/ files changed, or every site when a shared path changed.
 // Only folders with a package.json count as sites. Run with --help for options.
 import { execFileSync } from 'node:child_process';
-import { dirname, resolve } from 'node:path';
+import { existsSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { listSites } from './lib/sites.mjs';
@@ -46,15 +47,21 @@ export function isSharedPath(file) {
  * @param {object} o
  * @param {string[]} o.files  changed file paths, relative to the repo root
  * @param {string[]} o.sites  slugs of every existing site
+ * @param {string[]} [o.exported] slugs of sites that live in their own repository (`EXPORTED.json`); never selected
  * @returns {string[]} sorted slugs to build and deploy
  */
-export function changedSites({ files, sites }) {
+export function changedSites({ files, sites, exported = [] }) {
   const paths = files.map(normalize).filter(Boolean);
-  if (paths.some(isSharedPath)) return [...sites].sort();
-  return [...sites]
+  const live = sites.filter((slug) => !exported.includes(slug));
+  if (paths.some(isSharedPath)) return [...live].sort();
+  return [...live]
     .filter((slug) => paths.some((path) => path.startsWith(`sites/${slug}/`)))
     .sort();
 }
+
+/** A site that carries EXPORTED.json lives in its own repository: this repository no longer builds or deploys it. */
+export const isExported = (sitesDir, slug) =>
+  existsSync(join(sitesDir, slug, 'EXPORTED.json'));
 
 const HELP = `Usage: node scripts/changed-sites.mjs [options]
 
@@ -66,6 +73,8 @@ Prints a JSON array of site slugs to build and deploy, for example ["panaderia"]
   --all          Print every site (for manual runs).
   --root <dir>   Repo root (default: this repository).
   --help         Show this help.
+
+Sites with an EXPORTED.json (exported to their own repository, see docs/export.md) are never listed.
 
 If the diff cannot be computed (for example a shallow clone), every site is printed
 and a warning goes to stderr, so a broken diff builds too much rather than too little.`;
@@ -93,7 +102,10 @@ function main() {
     return 0;
   }
   const root = resolve(values.root ?? ROOT);
-  const sites = listSites(resolve(root, 'sites'));
+  const sitesDir = resolve(root, 'sites');
+  const sites = listSites(sitesDir).filter(
+    (slug) => !isExported(sitesDir, slug),
+  );
   if (values.all) {
     console.log(JSON.stringify(sites));
     return 0;

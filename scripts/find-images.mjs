@@ -21,7 +21,7 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
-import { reexecWithEnvProxy } from '../.claude/skills/analyze-reference/scripts/proxy.mjs';
+import { reexecWithEnvProxy } from './lib/proxy.mjs';
 import { validateSlug } from './new-site.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');

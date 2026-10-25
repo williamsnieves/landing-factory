@@ -39,14 +39,14 @@
 ## Decisions
 
 1. **The site sits at the repository root, and the scripts run without `--site`.**
-   - Root mode is already tested, so the copied scripts need no change.
+   - Root mode is already tested, so the copied scripts need almost no change. One change: in root mode the report now reads `brief.json` at the project root when it exists (the starter has none, so its output is unchanged); otherwise an exported brief would never reach the legal checks.
    - Alternative rejected: keeping `sites/<slug>/` inside the new repository, which would carry the factory's layout into a single-site project.
 
 2. **The script list is the import closure of fixed entry points.**
    - **Entry points:**
      - `scripts/qa.mjs`, `scripts/landing-report.mjs`, `scripts/deploy.mjs` and `scripts/deploy/config.mjs` (CI calls it directly);
-     - `scripts/parse-wrangler-output.mjs`, `scripts/credits.mjs`;
-     - `scripts/legal.mjs`, when the brief is copied.
+     - `scripts/parse-wrangler-output.mjs`.
+   - `credits.mjs` and `legal.mjs` are not exported: both work only on `sites/<slug>/` (they require `--site`). Credits and legal data are regenerated in the factory before exporting; the exported `CREDITS.md`, `src/data/credits.json` and `src/data/legal.json` travel as they are.
    - **The walker** (`scripts/export/closure.mjs`):
      - reads static `import ... from './x'`, `export ... from './x'` and `import('./x')` with relative specifiers;
      - resolves them and recurses;
@@ -66,7 +66,7 @@
      - its version is the one the factory's `package-lock.json` resolved, read from `packages["sites/<slug>/node_modules/<name>"]` and else `packages["node_modules/<name>"]`.
    - **Tooling:** from the root `devDependencies`, the tooling the copied scripts import or run. That is `lighthouse`, `chrome-launcher`, `playwright`, `prettier`, `prettier-plugin-astro` and `sharp` (Astro's image service), plus `wrangler` only when `deploy/config.mjs` says the site can deploy through wrangler (target `cloudflare`, or `vps`/`shared` with a Cloudflare preview fallback).
    - A package missing from the lockfile stops the export, naming it.
-   - **Other fields:** `engines.node` comes from the root. `npm run` scripts: `dev`, `build`, `preview`, `check`, `format`, `format:check`, `qa`, `report`, `deploy`, `credits` (plus `legal` with the brief).
+   - **Other fields:** `engines.node` comes from the root. `npm run` scripts: `dev`, `build`, `preview`, `check`, `format`, `format:check`, `qa`, `report`, `deploy`.
    - **The lockfile:** made by `npm install --package-lock-only --ignore-scripts` in the output folder; `--no-lockfile` skips it when offline and says so.
    - Exact pins keep the exported build identical to what QA passed in the factory.
 

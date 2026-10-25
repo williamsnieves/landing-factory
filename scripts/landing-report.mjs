@@ -14,7 +14,7 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
-import { reexecWithEnvProxy } from '../.claude/skills/analyze-reference/scripts/proxy.mjs';
+import { reexecWithEnvProxy } from './lib/proxy.mjs';
 import { loadConfig } from './qa/config.mjs';
 import { resolveQaPaths } from './qa/site.mjs';
 import { build } from './qa/server.mjs';
@@ -67,21 +67,27 @@ const STATIC_GROUPS = [
 
 class RunError extends Error {}
 
-/** The landing's brief.json, or { brief: null, problem } when there is none (or it cannot be read). */
+/**
+ * The landing's brief.json, or { brief: null, problem } when there is none (or it cannot be read).
+ * Without a site the project is the repo root: the starter has no brief, an exported repository has its own.
+ */
 function readBrief(projectDir, site) {
-  if (!site) return { brief: null, problem: 'the starter has no brief.json' };
   const file = join(projectDir, 'brief.json');
+  const where = site ? `sites/${site}/brief.json` : 'brief.json';
   if (!existsSync(file))
-    return { brief: null, problem: `no sites/${site}/brief.json` };
+    return {
+      brief: null,
+      problem: site ? `no ${where}` : 'the starter has no brief.json',
+    };
   try {
     const brief = JSON.parse(readFileSync(file, 'utf8'));
     return brief && typeof brief === 'object' && !Array.isArray(brief)
       ? { brief, problem: null }
-      : { brief: null, problem: `sites/${site}/brief.json is not an object` };
+      : { brief: null, problem: `${where} is not an object` };
   } catch (error) {
     return {
       brief: null,
-      problem: `cannot read sites/${site}/brief.json: ${error.message}`,
+      problem: `cannot read ${where}: ${error.message}`,
     };
   }
 }

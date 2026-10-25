@@ -168,3 +168,66 @@ test('CLI: an unusable base falls back to every site with a warning', () => {
   assert.deepEqual(r.list, ['cafeteria', 'panaderia']);
   assert.match(r.stderr, /selecting every site/);
 });
+
+// --- exported sites (add-site-export) ---------------------------------------------
+
+test('an exported site is left out when its folder changed and when a shared path changed', () => {
+  assert.deepEqual(
+    changedSites({
+      files: ['sites/panaderia/src/a.astro', 'sites/cafeteria/b.md'],
+      sites: SITES,
+      exported: ['panaderia'],
+    }),
+    ['cafeteria'],
+  );
+  assert.deepEqual(
+    changedSites({
+      files: ['package.json'],
+      sites: SITES,
+      exported: ['panaderia'],
+    }),
+    ['cafeteria'],
+  );
+  assert.deepEqual(
+    changedSites({
+      files: ['sites/panaderia/EXPORTED.json'],
+      sites: SITES,
+      exported: ['panaderia'],
+    }),
+    [],
+  );
+});
+
+test('other sites are unchanged when nothing is exported', () => {
+  assert.deepEqual(
+    changedSites({
+      files: ['package.json'],
+      sites: SITES,
+      exported: [],
+    }),
+    SITES,
+  );
+  assert.deepEqual(
+    changedSites({ files: ['sites/cafeteria/x'], sites: SITES }),
+    ['cafeteria'],
+  );
+});
+
+test('CLI: a site with EXPORTED.json is never listed, changed or not, and --all skips it too', () => {
+  const repo = makeRepo();
+  put(repo, 'sites/panaderia/EXPORTED.json', '{}');
+  git(repo, 'add', '.');
+  git(repo, 'commit', '-q', '-m', 'record export');
+  put(repo, 'sites/panaderia/src/a.astro');
+  put(repo, 'sites/cafeteria/src/a.astro');
+  git(repo, 'add', '.');
+  git(repo, 'commit', '-q', '-m', 'edit both');
+  assert.deepEqual(cli(repo).list, ['cafeteria']);
+  assert.deepEqual(cli(repo, '--all').list, ['cafeteria']);
+  put(repo, 'src/styles/tokens.css');
+  git(repo, 'add', '.');
+  git(repo, 'commit', '-q', '-m', 'shared');
+  assert.deepEqual(cli(repo).list, ['cafeteria']);
+  const unusable = cli(repo, '--base', 'does-not-exist');
+  assert.deepEqual(unusable.list, ['cafeteria']);
+});

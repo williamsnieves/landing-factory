@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Export a site as a standalone repository
-The system SHALL provide `npm run export -- --site <slug> --out <dir>`, which writes into `<dir>` a repository with the site at its root that installs, builds, runs QA and the landing report, and deploys to the site's target without the factory. The scripts it copies SHALL be those that QA, the report, the deploy and the credits import, found by following imports from fixed entry points.
+The system SHALL provide `npm run export -- --site <slug> --out <dir>`, which writes into `<dir>` a repository with the site at its root that installs, builds, runs QA and the landing report, and deploys to the site's target without the factory. The scripts it copies SHALL be those that QA, the report and the deploy import, found by following imports from fixed entry points.
 
 #### Scenario: Export the owner's landing
 - **WHEN** the owner runs `npm run export -- --site personal-brand --out ../williansnieves.com`

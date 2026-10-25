@@ -8,7 +8,7 @@ A landing that goes to its owner should live in its own repository, deployed fro
 
 - New command `npm run export -- --site <slug> --out <dir> [--no-brief] [--record <repo-url>] [--dry-run]` (`scripts/export.mjs`, modules in `scripts/export/`). It writes a self-contained repository with the site at its root:
   - **The site:** the site's own files (sources, public files, `astro.config.mjs`, `tsconfig.json`, `site.config.json`, `assets.json`, `CREDITS.md`, `README.md`).
-  - **Factory scripts:** only the scripts that QA, the landing report, the deploy and the credits need. They are found by following their imports from fixed entry points, so the list stays right when the scripts change.
+  - **Factory scripts:** only the scripts that QA, the landing report and the deploy need. They are found by following their imports from fixed entry points, so the list stays right when the scripts change.
   - **Project files:**
     - its own `package.json`, with the site's dependencies pinned to the versions the factory lockfile resolved and the tooling `devDependencies` QA, the report and the deploy need, plus its own `package-lock.json`;
     - `qa.config.json`, `.nvmrc`, Prettier config and `.gitignore`.
