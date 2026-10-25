@@ -23,6 +23,48 @@
       "subject": "owner",
       "credit": false,
       "note": "Prompt as recalled by the owner (approximate, Spanish, his words); made from his own photos. Exact creation date unknown: the owner supplied the file on 2026-10-25."
+    },
+    {
+      "file": "bg-hero.webp",
+      "title": "Abstract hero background: coral and blue glows",
+      "source": "ai",
+      "generator": "ChatGPT",
+      "model": "GPT-6 (owner's statement)",
+      "prompt": "Abstract dark background for a website hero, landscape 3:2. Deep near-black navy base (#0a0d16). A soft, out-of-focus glow of warm coral orange (#ff6f3c) rising from the lower left, and a cool electric blue glow (#2fb8ff) from the upper right, meeting in a faint violet haze (#a37bff) in the middle. Very subtle fine grid of thin lines and tiny scattered light particles, like a quiet neural network seen through fog. Smooth gradients, low contrast, lots of empty dark space on the left for text. No people, no faces, no text, no logos, no symbols.",
+      "revisedPrompt": "",
+      "createdAt": "2026-10-25T00:00:00.000Z",
+      "terms": "https://openai.com/policies/terms-of-use/",
+      "imported": true,
+      "credit": false,
+      "note": ""
+    },
+    {
+      "file": "bg-ai.webp",
+      "title": "Abstract AI section background: blue node network",
+      "source": "ai",
+      "generator": "ChatGPT",
+      "model": "GPT-6 (owner's statement)",
+      "prompt": "Abstract background for a website section about AI engineering, landscape 3:2. Rich deep blue base (#0d3f8f) fading to near-black navy at the edges. Faint, softly blurred network of nodes and connecting lines, like data flowing between agents, glowing in light cyan (#2fb8ff) with a few tiny violet sparks (#a37bff). Gentle depth of field, calm and minimal, low contrast so white text stays readable on top. No people, no faces, no robots, no text, no logos.",
+      "revisedPrompt": "",
+      "createdAt": "2026-10-25T00:00:00.000Z",
+      "terms": "https://openai.com/policies/terms-of-use/",
+      "imported": true,
+      "credit": false,
+      "note": ""
+    },
+    {
+      "file": "bg-beyond.webp",
+      "title": "Abstract warm background: blurred light waves",
+      "source": "ai",
+      "generator": "ChatGPT",
+      "model": "GPT-6 (owner's statement)",
+      "prompt": "Abstract warm background for a website section about the human side of a developer, landscape 3:2. Deep wine-magenta base (#7b1d4e) fading to near-black. Soft, blurred flowing light waves in coral orange (#ff6f3c) and warm amber (#ffc46b), like vibrating guitar strings or sound waves seen out of focus. Organic, calm, low contrast, plenty of dark space. No people, no faces, no instruments drawn literally, no text, no logos.",
+      "revisedPrompt": "",
+      "createdAt": "2026-10-25T00:00:00.000Z",
+      "terms": "https://openai.com/policies/terms-of-use/",
+      "imported": true,
+      "credit": false,
+      "note": ""
     }
   ]
 }

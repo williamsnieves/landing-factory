@@ -3,6 +3,8 @@
 // (human half warm on the left, machine half cool on the right), tags overlapping the portrait.
 import { Image } from 'astro:assets';
 import heroPortrait from '../../assets/images/portrait-ai.webp';
+import heroBackdrop from '../../assets/images/bg-hero.webp';
+import Backdrop from './Backdrop.astro';
 import type { Content } from '../../content/types';
 import { t } from '../../i18n/ui';
 
@@ -16,9 +18,10 @@ const dict = t(locale);
 
 <section
   id="top"
-  class="hero grid-lines relative overflow-x-clip pt-8 lg:pt-10"
+  class="hero grid-lines relative isolate overflow-x-clip pt-8 lg:pt-10"
   aria-labelledby="hero-name"
 >
+  <Backdrop src={heroBackdrop} strength={0.75} position="center" eager />
   <div class="hero-glow" aria-hidden="true"></div>
   <div class="wrap grid grid-cols-12 items-end gap-x-6 gap-y-10 lg:min-h-[calc(100svh-8.5rem)]">
     <div class="relative z-10 col-span-12 lg:col-span-7 lg:self-center">

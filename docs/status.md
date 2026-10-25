@@ -39,7 +39,7 @@ Read this first in a new or compacted session. Last updated: 2026-10-25 (add-bil
 
 Open for this landing:
 - Deploy target: the brief says Vercel, `site.config.json` still says `cloudflare` (the run could not write it, see below), which gives a Cloudflare preview on the PR. Switch to Vercel with `node scripts/deploy/config.mjs --site personal-brand --from-brief --write` plus the `VERCEL_TOKEN` secret, or when the landing moves to its own repository (owner plan).
-- The two soft AI background images were not generated (blocked, see below): the backgrounds are CSS gradients. Generate them if the owner still wants them.
+- AI backgrounds: done. The owner made three in ChatGPT (GPT-6) from prompts written for the palette (hero, AI stage, beyond the code); imported with full provenance and shown through `src/components/sections/Backdrop.astro` (decorative, dark veil for contrast). QA after: Lighthouse 98/100/100/100 on `/` and `/es/`. The import first hit a false positive of the prompt policy ("no logos" matched the identity rule); fixed in `scripts/lib/ai-prompt-policy.mjs` (short exclusion clauses are skipped) with tests.
 - Native readers for the Spanish and English copy; mobile LCP 2.6 s (warn), a smaller portrait for phones would help.
 
 Factory follow-ups found in this run:

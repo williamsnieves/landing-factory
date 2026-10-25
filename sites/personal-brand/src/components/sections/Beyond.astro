@@ -2,6 +2,8 @@
 // Beyond the code: the human half. Three short cards on a wine field and one playful moment, a row of guitar
 // strings (SVG) that vibrates on hover or keyboard focus. Under reduced motion the strings only change color.
 import SectionHead from './SectionHead.astro';
+import beyondBackdrop from '../../assets/images/bg-beyond.webp';
+import Backdrop from './Backdrop.astro';
 import type { Content } from '../../content/types';
 
 interface Props {
@@ -13,9 +15,10 @@ const strings = [14, 30, 46, 62, 78, 94];
 
 <section
   id="beyond"
-  class="bg-field-4 section-pad"
+  class="bg-field-4 section-pad relative isolate"
   aria-labelledby="beyond-heading"
 >
+  <Backdrop src={beyondBackdrop} strength={0.85} />
   <div class="wrap">
     <SectionHead
       label={content.label}

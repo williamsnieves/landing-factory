@@ -4,6 +4,8 @@
 // Under reduced motion, without JavaScript and on phones it is a plain block: portrait, then all steps open.
 import { Image } from 'astro:assets';
 import portrait from '../../assets/images/portrait-ai.webp';
+import aiBackdrop from '../../assets/images/bg-ai.webp';
+import Backdrop from './Backdrop.astro';
 import SectionHead from './SectionHead.astro';
 import type { Content } from '../../content/types';
 
@@ -15,13 +17,14 @@ const { content } = Astro.props;
 
 <section
   id="ai"
-  class="ai bg-field-2"
+  class="ai bg-field-2 relative isolate"
   data-pin
   data-pin-distance="100%"
   data-pin-min="md"
   data-stage
   aria-labelledby="ai-heading"
 >
+  <Backdrop src={aiBackdrop} strength={0.9} />
   <div class="wrap ai-inner">
     <SectionHead
       label={content.label}
