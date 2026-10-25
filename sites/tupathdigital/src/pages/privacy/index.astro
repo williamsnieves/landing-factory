@@ -1,0 +1,79 @@
+---
+// The privacy policy. The text comes from the starter's legal components and src/data/legal.json (written from
+// brief.json by `node scripts/legal.mjs --site tupathdigital --write`). Templates support compliance and are not
+// legal advice; a person must review this page before production.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PrivacyPolicy from '../../components/legal/PrivacyPolicy.astro';
+import Footer from '../../components/sections/Footer.astro';
+import legal from '../../data/legal.json';
+import { BUSINESS, PRIMARY, SECONDARY } from '../../data/catalog';
+import type { LegalData } from '../../components/legal/texts';
+
+const data = legal as LegalData;
+---
+
+<BaseLayout
+  title="Privacy policy | tupathdigital"
+  description="How tupathdigital handles personal data: no cookies, no analytics, no forms, and purchases handled by Etsy and Gumroad."
+  lang="en"
+>
+  <header slot="header" class="bar-wrap">
+    <div class="wrap">
+      <a
+        href="/"
+        class="back"
+        aria-label={`${BUSINESS}, back to the home page`}
+      >
+        <span>{BUSINESS}</span>
+      </a>
+    </div>
+  </header>
+
+  <PrivacyPolicy data={data} />
+
+  <section class="mx-auto max-w-3xl px-6 pb-16 md:pb-24">
+    <h2 class="font-display text-xl">Purchases and links to the stores</h2>
+    <p class="text-ink-soft mt-3">
+      This website does not sell anything and has no checkout. Its buttons lead
+      to the {BUSINESS} shops on{' '}
+      <a
+        href={PRIMARY.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-ink underline underline-offset-4"
+      >
+        Etsy
+      </a>{' '}
+      and{' '}
+      <a
+        href={SECONDARY.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-ink underline underline-offset-4"
+      >
+        Gumroad
+      </a>
+      , and its social links lead to X and Instagram. When you follow a link,
+      the other service handles your data under its own privacy policy; payment
+      and order data are handled by the store you buy from, not by this website.
+    </p>
+  </section>
+
+  <Footer slot="footer" />
+</BaseLayout>
+
+<style>
+  .bar-wrap {
+    padding-top: 1rem;
+  }
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    color: var(--color-ink);
+    font-family: var(--font-display);
+    font-weight: 600;
+    text-decoration: none;
+  }
+</style>
