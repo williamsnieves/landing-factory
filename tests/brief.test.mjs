@@ -19,6 +19,7 @@ import { fileURLToPath } from 'node:url';
 import { main } from '../scripts/brief.mjs';
 import {
   emptyBrief,
+  ownerPortraitConsent,
   getPath,
   isAssumed,
   missingFields,
@@ -823,6 +824,109 @@ test('the brief-intake skill asks the AI-image question and never assumes the an
     'never list it in `assumed`',
     'AI-image consent cannot be assumed',
     'an empty value counts as not allowed',
+  ])
+    assert.ok(skill.includes(needle), needle);
+});
+
+test('brand.ownerPortrait accepts allowed, not-allowed and empty, rejects other values and an older brief stays valid', () => {
+  for (const value of ['allowed', 'not-allowed', '']) {
+    const brief = fixture();
+    brief.brand.ownerPortrait = value;
+    assert.deepEqual(errorsOf(brief), [], value || '(empty)');
+  }
+  const bad = fixture();
+  bad.brand.ownerPortrait = 'maybe';
+  const errors = errorsOf(bad);
+  assert.deepEqual(paths(errors), ['brand.ownerPortrait']);
+  assert.match(errors[0].message, /expected one of allowed, not-allowed/);
+  const older = fixture();
+  assert.equal(getPath(older, 'brand.ownerPortrait'), undefined);
+  assert.equal(getPath(older, 'business.personalBrand'), undefined);
+  assert.deepEqual(errorsOf(older), []);
+  assert.equal(emptyBrief().brand.ownerPortrait, '');
+  assert.equal(emptyBrief().business.personalBrand, false);
+  const notBoolean = fixture();
+  notBoolean.business.personalBrand = 'yes';
+  assert.deepEqual(paths(errorsOf(notBoolean)), ['business.personalBrand']);
+});
+
+test('owner-portrait consent cannot be assumed, directly', () => {
+  for (const value of ['allowed', '']) {
+    const brief = fixture();
+    brief.brand.ownerPortrait = value;
+    brief.assumed.push({
+      field: 'brand.ownerPortrait',
+      reason: 'the agent chose it',
+    });
+    const errors = errorsOf(brief);
+    assert.equal(errors.length, 1, value);
+    assert.equal(errors[0].path, `assumed[${brief.assumed.length - 1}].field`);
+    assert.match(errors[0].message, /owner-portrait consent cannot be assumed/);
+  }
+});
+
+test('missing asks brand.ownerPortrait only for a personal brand; summary shows it', () => {
+  const brief = emptyBrief({ language: 'es', niche: 'x' });
+  assert.ok(
+    !missingFields(brief).some((m) => m.path === 'brand.ownerPortrait'),
+  );
+  brief.business.personalBrand = true;
+  const recommended = missingFields(brief).map((m) => m.path);
+  const at = recommended.indexOf('brand.ownerPortrait');
+  assert.ok(at > recommended.indexOf('brand.aiImages'));
+  assert.ok(at < recommended.indexOf('references.liked'));
+  brief.brand.ownerPortrait = 'not-allowed';
+  assert.ok(
+    !missingFields(brief).some((m) => m.path === 'brand.ownerPortrait'),
+  );
+  const summary = summarizeBrief(brief);
+  assert.match(summary, /Personal brand: yes/);
+  assert.match(summary, /Owner portrait: not-allowed/);
+  assert.doesNotMatch(
+    summarizeBrief(fixture()),
+    /Personal brand|Owner portrait/,
+  );
+});
+
+test('ownerPortraitConsent needs a brief naming the owner and both consents, not assumed', () => {
+  const ok = fixture();
+  ok.brand.ownerPortrait = 'allowed';
+  assert.equal(ownerPortraitConsent(ok).allowed, true);
+  assert.match(ownerPortraitConsent(null).reason, /needs a brief\.json/);
+  const noName = structuredClone(ok);
+  noName.business.name = ' ';
+  assert.match(ownerPortraitConsent(noName).reason, /business\.name/);
+  for (const [aiImages, portrait, reason] of [
+    ['', 'allowed', /brand\.aiImages is empty/],
+    ['not-allowed', 'allowed', /brand\.aiImages is not-allowed/],
+    ['allowed', '', /brand\.ownerPortrait is empty/],
+    ['allowed', 'not-allowed', /brand\.ownerPortrait is not-allowed/],
+  ]) {
+    const brief = structuredClone(ok);
+    brief.brand.aiImages = aiImages;
+    brief.brand.ownerPortrait = portrait;
+    const result = ownerPortraitConsent(brief);
+    assert.equal(result.allowed, false);
+    assert.match(result.reason, reason);
+  }
+  const assumed = structuredClone(ok);
+  assumed.assumed.push({ field: 'brand', reason: 'x' });
+  assert.equal(ownerPortraitConsent(assumed).allowed, false);
+});
+
+test('the brief-intake skill asks the owner-portrait question only for a personal brand and never assumes the answer', () => {
+  const skill = readFileSync(
+    join(ROOT, '.claude/skills/brief-intake/SKILL.md'),
+    'utf8',
+  );
+  for (const needle of [
+    '## The owner portrait question',
+    'May the page show an AI-generated portrait of you, which you made and approve?',
+    'business.personalBrand',
+    'brand.ownerPortrait',
+    'Never assume it',
+    'owner-portrait consent cannot be assumed',
+    'For a business that is not a person, do not ask',
   ])
     assert.ok(skill.includes(needle), needle);
 });

@@ -2,7 +2,9 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import {
+  copyFileSync,
   existsSync,
+  mkdirSync,
   mkdtempSync,
   readdirSync,
   rmSync,
@@ -71,4 +73,26 @@ test('CLI exit codes: 2 for bad usage, 1 when dist is missing, 0 on success', as
   );
   assert.equal(help.status, 0);
   assert.ok(!existsSync(join(ROOT, 'qa/no-such-site-here')));
+});
+
+test('404.html is skipped unless --include-404 is given', async () => {
+  const dist = join(tmp, 'dist-404');
+  mkdirSync(dist, { recursive: true });
+  copyFileSync(join(FIXTURE, 'index.html'), join(dist, 'index.html'));
+  copyFileSync(join(FIXTURE, 'index.html'), join(dist, '404.html'));
+  const without = join(tmp, 'no-404');
+  assert.equal(
+    await main(['--dist', dist, '--widths', '375', '--out', without], quiet),
+    0,
+  );
+  assert.ok(!readdirSync(without).some((f) => f.startsWith('404')));
+  const withIt = join(tmp, 'with-404');
+  assert.equal(
+    await main(
+      ['--dist', dist, '--widths', '375', '--out', withIt, '--include-404'],
+      quiet,
+    ),
+    0,
+  );
+  assert.ok(readdirSync(withIt).some((f) => f.startsWith('404-')));
 });

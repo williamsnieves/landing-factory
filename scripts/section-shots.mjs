@@ -3,7 +3,7 @@
 // Full-page captures show pinned sections as empty space; these scroll each section to the top of the
 // viewport first.
 //
-//   node scripts/section-shots.mjs --site <slug> [--widths 375,768,1440] [--out <dir>]
+//   node scripts/section-shots.mjs --site <slug> [--widths 375,768,1440] [--out <dir>] [--include-404]
 //
 // Serves sites/<slug>/dist itself (build first: npm run build -w site-<slug>) and always shuts the server
 // down, also on errors and SIGINT/SIGTERM. Chromium: QA_CHROME_PATH or CHROME_PATH, else Playwright's.
@@ -24,7 +24,7 @@ export const DEFAULT_WIDTHS = [375, 768, 1440];
 const HEIGHTS = { 375: 812, 768: 1024, 1440: 900 };
 export const SELECTOR = 'section[id], header, footer';
 
-const HELP = `Usage: node scripts/section-shots.mjs --site <slug> [--widths 375,768,1440] [--out <dir>]
+const HELP = `Usage: node scripts/section-shots.mjs --site <slug> [--widths 375,768,1440] [--out <dir>] [--include-404]
 
 Writes one viewport screenshot per section (section[id], header, footer) per width to
 qa/<slug>/sections/ (or --out). Build the site first: npm run build -w site-<slug>.
@@ -32,6 +32,7 @@ qa/<slug>/sections/ (or --out). Build the site first: npm run build -w site-<slu
   --dist <dir>      serve any built folder instead (tests); needs --out or --site for the output
   --widths a,b      viewport widths in px (default ${DEFAULT_WIDTHS.join(',')})
   --out <dir>       output folder
+  --include-404     also capture 404.html (skipped by default, like QA does)
 Exit codes: 0 ok, 1 nothing captured or failed, 2 bad usage.`;
 
 const slugify = (text) =>
@@ -45,6 +46,7 @@ export async function captureSections({
   distDir,
   outDir,
   widths,
+  include404 = false,
   log = () => {},
 }) {
   const envChrome = process.env.QA_CHROME_PATH || process.env.CHROME_PATH;
@@ -53,7 +55,7 @@ export async function captureSections({
     throw new Error(
       `Chromium not found at ${chromePath}. Run \`npx playwright install chromium\` or set QA_CHROME_PATH.`,
     );
-  const pages = discoverPages(distDir, ['404.html']);
+  const pages = discoverPages(distDir, include404 ? [] : ['404.html']);
   if (!pages.length) throw new Error(`No .html pages found in ${distDir}`);
   await mkdir(outDir, { recursive: true });
 
@@ -153,6 +155,7 @@ export async function main(argv, io = console) {
         dist: { type: 'string' },
         widths: { type: 'string' },
         out: { type: 'string' },
+        'include-404': { type: 'boolean' },
         help: { type: 'boolean' },
       },
     }));
@@ -196,6 +199,7 @@ export async function main(argv, io = console) {
       distDir,
       outDir,
       widths,
+      include404: values['include-404'],
       log: (m) => io.log(m),
     });
     if (!files.length) {

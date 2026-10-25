@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-25 (add-agent-interface implemented on its branch; PR pending).
+Read this first in a new or compacted session. Last updated: 2026-10-25 (add-personal-brand-support implemented on its branch; PR pending).
 
 ## Working agreements
 
@@ -29,6 +29,12 @@ Read this first in a new or compacted session. Last updated: 2026-10-25 (add-age
 | add-ai-images (AI-generated images as a recorded source) | Merged (PR #20); archived with the real OpenAI smoke test in PR #21 (`gpt-image-1.5`, low quality, 1536x1024; also fixed the CLI falling back to `process.env` for the key) |
 | add-deploy-adapters (Vercel, VPS, shared hosting from CI; headers on every target) | Merged (PR #22) and archived 2026-10-25; every existing site still deploys to Cloudflare; real deploys per target pending accounts |
 | add-agent-interface (local MCP server: brief, propose, generate jobs, status, QA, report; no publishing) | Implemented on branch `change/add-agent-interface` (working tree, to be reviewed and committed); PR pending. Verified end to end over stdio against the real repository (7 sites listed, `get_landing tupathdigital`, `run_report` job reached `passed`, `propose_landing` with the `NEW_LANDING_SKIP` stub reached `checkpoint`); `claude mcp list` connects to the server (a project-scope entry needs interactive approval). First real `generate_landing` through the server not run yet (30 to 70 minutes, costs tokens) |
+
+| add-personal-brand-support (default 404 page for new sites; AI portrait of the brand owner as the one person exception) | Implemented on branch `change/add-personal-brand-support` (working tree, to be reviewed and committed); PR pending. `new-site` writes `src/pages/404.astro`; brief fields `business.personalBrand` and `brand.ownerPortrait`; `ai-images import --subject owner`; `ai-provenance` and credits updated; `section-shots.mjs --include-404`. Full clean-clone run (task 6.2) still to do |
+
+## Next: the owner's personal-brand landing (2026-10-25)
+
+After add-personal-brand-support is merged: the owner's personal-brand landing, slug to be decided at brief intake (`/brief-intake <slug>` with `business.personalBrand: true`). The owner supplied an old Vue site (zip), the logo SVG and the ChatGPT-made AI portrait (half human, half machine; import it with `--subject owner` once the brief allows it and keep its prompt free of the business name); deploy target Vercel (no account or token yet, see the deploy follow-ups); the old Netlify blog link is dropped. Read the Vue zip only for content and structure, never copy its code.
 
 ## Resume here (2026-10-25)
 

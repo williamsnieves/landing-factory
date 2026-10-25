@@ -209,7 +209,14 @@ export function renderAiSection(entries) {
     `${entry.generator} ${entry.model}${entry.imported ? ' (imported)' : ''}`,
     String(entry.createdAt).slice(0, 10),
     entry.terms,
-    String(entry.note ?? '').replace(/\.$/, ''),
+    [
+      entry.subject === 'owner'
+        ? 'Portrait of the owner, made with their consent'
+        : '',
+      String(entry.note ?? '').replace(/\.$/, ''),
+    ]
+      .filter(Boolean)
+      .join('. '),
   ]);
   return `### AI-generated images\n\nGenerated, not photographed: the page says so in its footer. The prompt, size and request of each image are in \`assets.json\`.\n\n${markdownTable(
     [

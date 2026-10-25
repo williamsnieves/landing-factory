@@ -24,6 +24,8 @@ export const ASSET_KINDS = [
 export const ANALYTICS_MODES = ['none', 'cookieless', 'cookies'];
 /** Does the customer allow AI-generated images on the page? Empty means not decided, which counts as not allowed. */
 export const AI_IMAGE_MODES = ['allowed', 'not-allowed'];
+/** May the page show an AI portrait of the brand owner (a personal brand)? Empty means not decided, which counts as not allowed. */
+export const OWNER_PORTRAIT_MODES = ['allowed', 'not-allowed'];
 export const DEPLOY_TARGETS = [
   'cloudflare-pages',
   'vercel',
@@ -47,6 +49,8 @@ export const SCHEMA = obj({
     city: str(),
     country: str(),
     kind: str({ enum: BUSINESS_KINDS }),
+    // The business is a person (a personal brand, freelancer or portfolio): the interview then asks brand.ownerPortrait.
+    personalBrand: { type: 'boolean' },
   }),
   offer: list(
     obj({
@@ -95,6 +99,8 @@ export const SCHEMA = obj({
     avoid: str(),
     // AI-generated illustrations (scripts/ai-images.mjs): only the customer decides, never assumed.
     aiImages: str({ enum: AI_IMAGE_MODES }),
+    // An AI portrait of the owner of a personal brand (the one exception to "AI images never show people"): the owner decides, never assumed.
+    ownerPortrait: str({ enum: OWNER_PORTRAIT_MODES }),
   }),
   references: obj({
     liked: list(
@@ -231,6 +237,8 @@ const HOLDER_IDENTITY = /^legal(\.(holder|privacyContact)([.[].*)?)?$/;
 
 /** The customer's AI-image consent is their decision: it can never be listed as assumed. */
 const AI_CONSENT = /^brand\.aiImages$/;
+/** The owner's consent to an AI portrait of themselves is theirs alone, never assumed. */
+const PORTRAIT_CONSENT = /^brand\.ownerPortrait$/;
 
 /** Each check returns an error text (what was expected) or null. `ctx` carries baseDir and patternsDir. */
 const FORMATS = {
@@ -408,6 +416,11 @@ export function validateBrief(
             path,
             `AI-image consent cannot be assumed ("${field}"): the customer must decide it, or leave it empty (empty counts as not allowed)`,
           );
+        if (PORTRAIT_CONSENT.test(field))
+          return fail(
+            path,
+            `owner-portrait consent cannot be assumed ("${field}"): the owner must decide it, or leave it empty (empty counts as not allowed)`,
+          );
         if (!parsePath(field))
           return fail(
             path,
@@ -454,6 +467,38 @@ export function aiImagesConsent(brief) {
     allowed: value === 'allowed' && !isAssumed(brief, 'brand.aiImages'),
     value: value || 'empty',
   };
+}
+
+/**
+ * May the page show an AI portrait of the brand owner? Needs a brief that names the business (the owner), brand.aiImages
+ * `allowed` and brand.ownerPortrait `allowed`, neither listed as assumed. No brief: never. Returns { allowed, reason }.
+ */
+export function ownerPortraitConsent(brief) {
+  if (!brief)
+    return {
+      allowed: false,
+      reason:
+        'an owner portrait needs a brief.json that names the owner; there is none',
+    };
+  if (!String(brief.business?.name ?? '').trim())
+    return {
+      allowed: false,
+      reason:
+        'the brief does not name the business or its owner (business.name)',
+    };
+  const images = aiImagesConsent(brief);
+  if (!images.allowed)
+    return {
+      allowed: false,
+      reason: `brand.aiImages is ${images.value}, not "allowed"`,
+    };
+  const value = String(brief.brand?.ownerPortrait ?? '').trim();
+  if (value !== 'allowed' || isAssumed(brief, 'brand.ownerPortrait'))
+    return {
+      allowed: false,
+      reason: `brand.ownerPortrait is ${value || 'empty'}, not "allowed"`,
+    };
+  return { allowed: true, reason: '' };
 }
 
 // --------------------------------------------------------------------------------------------------
@@ -552,6 +597,12 @@ export const MISSING_FIELDS = [
     false,
     'May the page use AI-generated illustrations (never photos of your people or products)? Empty counts as not allowed.',
   ],
+  [
+    'brand.ownerPortrait',
+    false,
+    'May the page show an AI-generated portrait of you, which you made and approve? It is always labeled as AI, never as a photo. Empty counts as not allowed.',
+    'personal-brand',
+  ],
   ['references.liked', false, 'Which sites do you like, and what about them?'],
   ['references.disliked', false, 'Which sites do you dislike, and why?'],
   [
@@ -572,11 +623,16 @@ export const MISSING_FIELDS = [
 export const hasMarkets = (brief) =>
   Array.isArray(brief?.legal?.markets) && brief.legal.markets.some(isFilled);
 
+/** Is the business a person (business.personalBrand)? Only then is the owner-portrait question asked. */
+export const isPersonalBrand = (brief) =>
+  brief?.business?.personalBrand === true;
+
 /** Fields still empty: required first, then recommended in interview order. */
 export function missingFields(brief) {
   const empty = MISSING_FIELDS.filter(
     ({ path, when }) =>
       (when !== 'markets' || hasMarkets(brief)) &&
+      (when !== 'personal-brand' || isPersonalBrand(brief)) &&
       !isFilled(getPath(brief, path)),
   ).map(({ when, ...field }) => field);
   return [
@@ -643,6 +699,8 @@ export function summarizeBrief(brief) {
   field('Keep', 'brand.keep');
   field('Avoid', 'brand.avoid');
   field('AI images', 'brand.aiImages');
+  if (isPersonalBrand(brief)) lines.push('Personal brand: yes');
+  field('Owner portrait', 'brand.ownerPortrait');
   (brief.references?.liked ?? []).forEach((r) =>
     lines.push(
       `Likes: ${r.url}${r.sheet ? ` (sheet ${r.sheet})` : ''}${r.why ? `, ${r.why}` : ''}`,

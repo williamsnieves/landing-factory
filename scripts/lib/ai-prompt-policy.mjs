@@ -119,11 +119,17 @@ export function brandNames(brief) {
   });
 }
 
+/** The rules an owner portrait is exempt from (nothing broader): the owner may be shown, as an AI portrait. */
+export const OWNER_EXEMPT_RULES = ['people', 'real-person'];
+
 /**
  * Check a prompt. Returns [{ rule, reason, match }]; empty means the prompt is allowed.
  * `brief` is the parsed brief.json, or null/undefined for a site without one (the brand rule then has nothing to match).
+ * `subject: 'owner'` (an AI portrait of the brand owner, allowed by the caller's consent check) skips only the
+ * `people` and `real-person` rules; `brand`, `identity` and `results` still apply.
  */
-export function checkPrompt(prompt, brief = null) {
+export function checkPrompt(prompt, brief = null, { subject } = {}) {
+  const exempt = subject === 'owner' ? OWNER_EXEMPT_RULES : [];
   const text = String(prompt ?? '');
   const normal = ` ${normalize(text)} `;
   const violations = [];
@@ -137,6 +143,7 @@ export function checkPrompt(prompt, brief = null) {
       });
   }
   for (const rule of RULES) {
+    if (exempt.includes(rule.id)) continue;
     const match = find(rule.patterns, normal);
     if (match)
       violations.push({
@@ -147,7 +154,7 @@ export function checkPrompt(prompt, brief = null) {
   }
   const person = NAMED_PERSON.exec(text);
   const famous = find(FAMOUS, normal);
-  if (person || famous)
+  if ((person || famous) && !exempt.includes('real-person'))
     violations.push({
       rule: 'real-person',
       reason:
