@@ -1,0 +1,371 @@
+# CI of an exported landing: format check, types, QA and the static landing report, then (only if they
+# passed, the target's secrets exist and the pull request is not from a fork) the deploy to the site's
+# target, the live report and one sticky preview comment. Written by `npm run export` in landing-factory.
+# Everything site-specific (target, Pages project, secrets needed) is read at run time from
+# site.config.json by scripts/deploy/config.mjs, so this file has no placeholders.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      report_static: ${{ steps.report_summary.outputs.static }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Types and Astro diagnostics
+        run: npm run check
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      # Lighthouse takes the median of 3 runs: one slow runner pass must not fail the site
+      # (the thresholds stay the same).
+      - name: QA (build, screenshots, overflow, reduced motion, Lighthouse, impeccable)
+        run: npm run qa -- --runs 3
+
+      # Security (OWASP Top 10), performance and legal report of the build QA just checked. A failing item stops
+      # the job here, so a failing report never publishes dist/.
+      - name: Landing report (static checks)
+        run: npm run report -- --only static
+
+      # Only reached when every step above passed, so a failing QA or report never publishes dist/.
+      - name: Upload built site
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-dist
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+
+      # qa/latest is a symlink; upload-artifact does not follow it, so resolve it.
+      - name: Resolve report directory
+        if: always()
+        id: report
+        run: |
+          if [ -e qa/latest ]; then
+            echo "dir=$(readlink -f qa/latest)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload QA report and screenshots
+        if: always() && steps.report.outputs.dir != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-report
+          path: ${{ steps.report.outputs.dir }}
+          if-no-files-found: warn
+          retention-days: 14
+
+      # The verdict line goes to the pull request comment of the deploy job.
+      - name: Summarize landing report
+        if: always()
+        id: report_summary
+        run: |
+          line=$(node scripts/landing-report.mjs --summary qa/report | sed -n 's/^static: //p')
+          echo "static=$line" >> "$GITHUB_OUTPUT"
+
+      # qa/report/latest is a symlink and is left out; every run folder is uploaded.
+      - name: Upload landing report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: landing-report
+          path: |
+            qa/report/
+            !qa/report/latest
+          if-no-files-found: warn
+          retention-days: 14
+
+  deploy:
+    needs: qa
+    if: needs.qa.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+    outputs:
+      url: ${{ steps.output.outputs.url || steps.target_deploy.outputs.url }}
+      alias: ${{ steps.output.outputs.alias || steps.target_deploy.outputs.alias }}
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      # Production is the target's production branch (main); every other branch is a preview.
+      BRANCH: ${{ github.head_ref || github.ref_name }}
+      COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # site.config.json decides how this run deploys and which secrets it needs (scripts/deploy/config.mjs).
+      - name: Read deploy target
+        id: target
+        run: node scripts/deploy/config.mjs --branch "$BRANCH" --github-output
+
+      # Secret values are only tested for emptiness, never printed.
+      - name: Check deploy prerequisites
+        id: gate
+        env:
+          IS_FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+          TARGET: ${{ steps.target.outputs.target }}
+          EFFECTIVE_TARGET: ${{ steps.target.outputs.effective_target }}
+          DEPLOY_VIA: ${{ steps.target.outputs.deploy_via }}
+          NEEDED_SECRETS: ${{ steps.target.outputs.secrets }}
+          # Only booleans reach this step; the values of the deploy secrets are used by the deploy step alone.
+          HAS_CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+          HAS_CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+          HAS_VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN != '' }}
+          HAS_DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY != '' }}
+          HAS_DEPLOY_FTP_PASSWORD: ${{ secrets.DEPLOY_FTP_PASSWORD != '' }}
+        run: |
+          missing=""
+          for name in $NEEDED_SECRETS; do
+            [ "$(printenv "HAS_$name")" = "true" ] || missing="${missing:+$missing, }$name"
+          done
+          skip=""
+          if [ "$IS_FORK" = "true" ]; then
+            reason="Pull request from a fork: repository secrets are not available, so no preview is deployed."
+            skip=fork
+          elif [ "$DEPLOY_VIA" = "none" ]; then
+            reason="The $TARGET target has no preview and its previews are set to none, so this branch is not deployed."
+            skip=no-preview
+          elif [ -n "$missing" ]; then
+            reason="Missing GitHub secret(s): $missing. Add them under Settings > Secrets and variables > Actions (see README, Deployment)."
+            skip=missing
+          else
+            reason=""
+          fi
+          echo "skip=$skip" >> "$GITHUB_OUTPUT"
+          if [ -n "$reason" ]; then
+            echo "::warning title=Deploy skipped::$reason"
+            printf '### Deploy skipped\n\n%s\n' "$reason" >> "$GITHUB_STEP_SUMMARY"
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install dependencies
+        if: steps.gate.outputs.enabled == 'true'
+        run: npm ci --ignore-scripts
+
+      - name: Download built site
+        if: steps.gate.outputs.enabled == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: site-dist
+          path: dist
+
+      - name: Read Pages project from site.config.json
+        if: steps.gate.outputs.enabled == 'true' && steps.target.outputs.deploy_via == 'wrangler'
+        id: config
+        run: |
+          echo "project=$(node -p "require('./site.config.json').cloudflare.pagesProject")" >> "$GITHUB_OUTPUT"
+          echo "production_branch=$(node -p "require('./site.config.json').cloudflare.productionBranch")" >> "$GITHUB_OUTPUT"
+
+      - name: Ensure the Pages project exists
+        if: steps.gate.outputs.enabled == 'true' && steps.target.outputs.deploy_via == 'wrangler'
+        env:
+          CF_PAGES_PROJECT: ${{ steps.config.outputs.project }}
+          CF_PRODUCTION_BRANCH: ${{ steps.config.outputs.production_branch }}
+        run: |
+          npx wrangler pages project list --json 2>/dev/null > "$RUNNER_TEMP/projects.json"
+          if node -e '
+            const t = require("fs").readFileSync(process.argv[1], "utf8");
+            const list = JSON.parse(t.slice(t.indexOf("[")));
+            process.exit(list.some((p) => p["Project Name"] === process.argv[2]) ? 0 : 1);
+          ' "$RUNNER_TEMP/projects.json" "$CF_PAGES_PROJECT"; then
+            echo "Pages project $CF_PAGES_PROJECT already exists."
+          else
+            echo "Creating Pages project $CF_PAGES_PROJECT (production branch $CF_PRODUCTION_BRANCH)."
+            npx wrangler pages project create "$CF_PAGES_PROJECT" --production-branch "$CF_PRODUCTION_BRANCH"
+          fi
+
+      - name: Deploy to Cloudflare Pages
+        if: steps.gate.outputs.enabled == 'true' && steps.target.outputs.deploy_via == 'wrangler'
+        env:
+          CF_PAGES_PROJECT: ${{ steps.config.outputs.project }}
+          WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.ndjson
+        run: |
+          set -o pipefail
+          npx wrangler pages deploy dist \
+            --project-name "$CF_PAGES_PROJECT" \
+            --branch "$BRANCH" \
+            --commit-hash "$COMMIT_SHA" \
+            --commit-message "CI deploy of $COMMIT_SHA" \
+            --commit-dirty=true 2>&1 | tee "$RUNNER_TEMP/wrangler-stdout.log"
+
+      # VPS and shared hosting (production branch only) and Vercel: scripts/deploy.mjs. The deploy secrets are in
+      # the environment of this step alone; it prints one JSON line and writes url/alias to the step outputs.
+      - name: Install lftp (FTPS fallback only)
+        if: steps.gate.outputs.enabled == 'true' && steps.target.outputs.deploy_via == 'script' && steps.target.outputs.needs_lftp == 'true'
+        run: sudo apt-get install -y lftp
+
+      - name: Deploy to the site's target
+        id: target_deploy
+        if: steps.gate.outputs.enabled == 'true' && steps.target.outputs.deploy_via == 'script'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_FTP_PASSWORD: ${{ secrets.DEPLOY_FTP_PASSWORD }}
+        run: node scripts/deploy.mjs --branch "$BRANCH" --github-output
+
+      # wrangler writes ND-JSON (pages-deploy / pages-deploy-detailed) to WRANGLER_OUTPUT_FILE_PATH;
+      # fall back to scanning stdout for *.pages.dev URLs.
+      - name: Capture deployment URLs
+        if: steps.gate.outputs.enabled == 'true' && steps.target.outputs.deploy_via == 'wrangler'
+        id: output
+        run: |
+          node scripts/parse-wrangler-output.mjs "$RUNNER_TEMP/wrangler-output.ndjson" "$RUNNER_TEMP/wrangler-stdout.log" > "$RUNNER_TEMP/urls.txt"
+          cat "$RUNNER_TEMP/urls.txt" >> "$GITHUB_OUTPUT"
+          url=$(sed -n 's/^url=//p' "$RUNNER_TEMP/urls.txt")
+          alias=$(sed -n 's/^alias=//p' "$RUNNER_TEMP/urls.txt")
+          if [ -z "$url" ]; then
+            echo "::error::Deployment finished but no pages.dev URL was found in wrangler's output."
+            exit 1
+          fi
+          {
+            echo "### Cloudflare Pages deployment"
+            echo ""
+            echo "- Branch: \`$BRANCH\`"
+            echo "- Commit: \`$COMMIT_SHA\`"
+            echo "- Deployment URL: $url"
+            [ -z "$alias" ] || echo "- Branch alias URL: $alias"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Live checks on the deployed URL: TLS, HTTP to HTTPS, headers, caching, private paths, unknown path.
+      # A failure is held until the comment and the artifact are written, then fails the job below.
+      - name: Landing report (live checks)
+        id: live_report
+        if: steps.gate.outputs.enabled == 'true'
+        continue-on-error: true
+        env:
+          DEPLOY_URL: ${{ steps.output.outputs.url || steps.target_deploy.outputs.url }}
+        run: npm run report -- --only live --url "$DEPLOY_URL"
+
+      - name: Summarize live report
+        if: steps.gate.outputs.enabled == 'true'
+        id: live_summary
+        run: |
+          line=$(node scripts/landing-report.mjs --summary qa/report | sed -n 's/^live: //p')
+          echo "live=$line" >> "$GITHUB_OUTPUT"
+
+      - name: Upload live report
+        if: steps.gate.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: landing-report-live
+          path: |
+            qa/report/
+            !qa/report/latest
+          if-no-files-found: warn
+          retention-days: 14
+
+      # One comment per PR, found by its hidden marker and updated on every push.
+      - name: Comment preview URL on the pull request
+        if: steps.gate.outputs.enabled == 'true' && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          DEPLOY_URL: ${{ steps.output.outputs.url || steps.target_deploy.outputs.url }}
+          ALIAS_URL: ${{ steps.output.outputs.alias || steps.target_deploy.outputs.alias }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REPORT_STATIC: ${{ needs.qa.outputs.report_static }}
+          REPORT_LIVE: ${{ steps.live_summary.outputs.live }}
+          TARGET: ${{ steps.target.outputs.target }}
+          PREVIEW_FALLBACK: ${{ steps.target.outputs.preview_fallback }}
+        with:
+          script: |
+            const marker = '<!-- site-preview -->';
+            const { DEPLOY_URL, ALIAS_URL, COMMIT_SHA, RUN_URL, REPORT_STATIC, REPORT_LIVE } = process.env;
+            const lines = [marker, '### Preview deployment', '', `- Preview: ${DEPLOY_URL}`];
+            if (ALIAS_URL) lines.push(`- Branch alias: ${ALIAS_URL}`);
+            if (process.env.PREVIEW_FALLBACK === 'true')
+              lines.push(`- Host: Cloudflare Pages preview. This site deploys to \`${process.env.TARGET}\` from the production branch.`);
+            lines.push(
+              `- Commit: \`${COMMIT_SHA.slice(0, 7)}\``,
+              `- [QA report artifact (\`qa-report\`) on this run](${RUN_URL})`,
+            );
+            if (REPORT_STATIC || REPORT_LIVE)
+              lines.push(
+                `- Report: static ${REPORT_STATIC || 'not available'}; live ${REPORT_LIVE || 'not available'} ([artifacts \`landing-report\`, \`landing-report-live\`](${RUN_URL}))`,
+              );
+            const body = lines.join('\n');
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
+      # A target without previews (vps, shared) and no Cloudflare fallback: say so on the pull request.
+      - name: Comment that the target has no preview
+        if: steps.gate.outputs.enabled != 'true' && (steps.gate.outputs.skip == 'missing' || steps.gate.outputs.skip == 'no-preview') && steps.target.outputs.preview_fallback == 'true' && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          TARGET: ${{ steps.target.outputs.target }}
+          SKIP: ${{ steps.gate.outputs.skip }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REPORT_STATIC: ${{ needs.qa.outputs.report_static }}
+        with:
+          script: |
+            const marker = '<!-- site-preview -->';
+            const { TARGET, SKIP, RUN_URL, REPORT_STATIC } = process.env;
+            const why = SKIP === 'missing' ? 'the Cloudflare secrets for the fallback preview are missing' : 'its previews are set to none';
+            const lines = [
+              marker,
+              '### Preview deployment',
+              '',
+              `- No preview: the \`${TARGET}\` target publishes from its production branch only, and ${why}.`,
+              '- QA and the static report ran on this branch.',
+            ];
+            if (REPORT_STATIC) lines.push(`- Landing report (static): ${REPORT_STATIC} ([artifact \`landing-report\`](${RUN_URL}))`);
+            const body = lines.join('\n');
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number, per_page: 100 });
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+            if (existing) await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            else await github.rest.issues.createComment({ owner, repo, issue_number, body });
+
+      # The preview exists; a failing live report still turns the job red.
+      - name: Fail when the live report failed
+        if: steps.live_report.outcome == 'failure'
+        run: |
+          echo "::error title=Landing report::The live checks on the deployed URL failed. See the landing-report-live artifact."
+          exit 1

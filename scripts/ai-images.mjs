@@ -22,7 +22,7 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
-import { reexecWithEnvProxy } from '../.claude/skills/analyze-reference/scripts/proxy.mjs';
+import { reexecWithEnvProxy } from './lib/proxy.mjs';
 import { readManifest, writeManifest } from './find-images.mjs';
 import { validateSlug } from './new-site.mjs';
 import { aiImagesConsent, ownerPortraitConsent } from './lib/brief-schema.mjs';

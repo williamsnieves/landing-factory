@@ -41,7 +41,7 @@ import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
-import { reexecWithEnvProxy } from '../.claude/skills/analyze-reference/scripts/proxy.mjs';
+import { reexecWithEnvProxy } from './lib/proxy.mjs';
 import { AI_REQUIRED_FIELDS, isAi, syncCredits } from './credits.mjs';
 import {
   aiImagesConsent,
