@@ -142,6 +142,10 @@ Spawn a subagent with: `PROPOSAL.md` (with its "Archetype blend"), `MASTER.md`, 
 - The components and texts support compliance and are not legal advice. List every `pending` field under Decisions and in RUN.md "to confirm before launch", and never fill a pending value yourself: holder identity comes from the customer.
 - After the first build run `node scripts/legal.mjs --site <slug> --write` again (the third-party hosts of the build go into the privacy policy) and rebuild if the file changed. Prefer self-hosted fonts and assets: a font CDN or an embed adds a host to the policy and a warning to the report, and a tracker or an embed that sets cookies without consent fails it.
 
+**Deploy target** (only with a brief; without one `site.config.json` stays on `cloudflare`)
+- Run `node scripts/deploy/config.mjs --site <slug> --from-brief --write`. It maps the brief's `deploy.target` (`cloudflare-pages` is `cloudflare`, `shared-hosting` is `shared`): `vercel` is completed from the slug and written; for `vps` and `shared` it changes nothing, because a host, a user, a folder and a pinned host key are settings the customer's server owner gives. `undecided` or empty keeps `cloudflare`; `netlify` is not supported yet (the command exits 1).
+- Under Decisions and in RUN.md "to confirm before launch" say which target the brief asked for, whether `site.config.json` now has it, and what is missing otherwise (for `vps` or `shared`: the `vps` or `shared` section of `site.config.json`, then `"target"`, and the repository secrets; guides in `docs/deploy/`). Never invent a host, a user or a host key, and never put a secret in the repository.
+
 **Page**
 - Replace the placeholder `src/pages/index.astro`: no `noindex`, a real title and description, `<Motion />` in the head slot, sections in `src/components/sections/` (`.astro` first; React islands only for real interaction with `client:*`).
 - Motion through the existing `data-*` primitives; every effect has a reduced-motion state and the page is complete without JavaScript.

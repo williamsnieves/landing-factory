@@ -118,8 +118,8 @@ jobs:
       contents: read
       pull-requests: write
     outputs:
-      url: ${{ steps.output.outputs.url }}
-      alias: ${{ steps.output.outputs.alias }}
+      url: ${{ steps.output.outputs.url || steps.target_deploy.outputs.url }}
+      alias: ${{ steps.output.outputs.alias || steps.target_deploy.outputs.alias }}
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -128,22 +128,53 @@ jobs:
       COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       WRANGLER_SEND_METRICS: 'false'
     steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # site.config.json decides how this run deploys and which secrets it needs (scripts/deploy/config.mjs).
+      # Without a target (every existing site) it is cloudflare and the wrangler steps below run as before.
+      - name: Read deploy target
+        id: target
+        run: node scripts/deploy/config.mjs --branch "$BRANCH" --github-output
+
       # Secret values are only tested for emptiness, never printed.
       - name: Check deploy prerequisites
         id: gate
         env:
           IS_FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+          TARGET: ${{ steps.target.outputs.target }}
+          EFFECTIVE_TARGET: ${{ steps.target.outputs.effective_target }}
+          DEPLOY_VIA: ${{ steps.target.outputs.deploy_via }}
+          NEEDED_SECRETS: ${{ steps.target.outputs.secrets }}
+          # Only booleans reach this step; the values of the new deploy secrets are used by the deploy step alone.
+          HAS_CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+          HAS_CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+          HAS_VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN != '' }}
+          HAS_DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY != '' }}
+          HAS_DEPLOY_FTP_PASSWORD: ${{ secrets.DEPLOY_FTP_PASSWORD != '' }}
         run: |
           missing=""
-          [ -n "$CLOUDFLARE_API_TOKEN" ] || missing="CLOUDFLARE_API_TOKEN"
-          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || missing="${missing:+$missing, }CLOUDFLARE_ACCOUNT_ID"
+          for name in $NEEDED_SECRETS; do
+            [ "$(printenv "HAS_$name")" = "true" ] || missing="${missing:+$missing, }$name"
+          done
+          skip=""
           if [ "$IS_FORK" = "true" ]; then
             reason="Pull request from a fork: repository secrets are not available, so no preview is deployed."
+            skip=fork
+          elif [ "$DEPLOY_VIA" = "none" ]; then
+            reason="The $TARGET target has no preview and its previews are set to none, so this branch is not deployed."
+            skip=no-preview
           elif [ -n "$missing" ]; then
             reason="Missing GitHub secret(s): $missing. Add them under Settings > Secrets and variables > Actions (see README, Deployment)."
+            skip=missing
           else
             reason=""
           fi
+          echo "skip=$skip" >> "$GITHUB_OUTPUT"
           if [ -n "$reason" ]; then
             echo "::warning title=Deploy skipped::$reason"
             printf '### Deploy skipped\n\n%s\n' "$reason" >> "$GITHUB_STEP_SUMMARY"
@@ -151,15 +182,6 @@ jobs:
           else
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           fi
-
-      - uses: actions/checkout@v4
-        if: steps.gate.outputs.enabled == 'true'
-
-      - uses: actions/setup-node@v4
-        if: steps.gate.outputs.enabled == 'true'
-        with:
-          node-version-file: .nvmrc
-          cache: npm
 
       - name: Install dependencies
         if: steps.gate.outputs.enabled == 'true'
@@ -173,14 +195,14 @@ jobs:
           path: dist
 
       - name: Read Pages project from site.config.json
-        if: steps.gate.outputs.enabled == 'true'
+        if: steps.gate.outputs.enabled == 'true' && steps.target.outputs.deploy_via == 'wrangler'
         id: config
         run: |
           echo "project=$(node -p "require('./site.config.json').cloudflare.pagesProject")" >> "$GITHUB_OUTPUT"
           echo "production_branch=$(node -p "require('./site.config.json').cloudflare.productionBranch")" >> "$GITHUB_OUTPUT"
 
       - name: Ensure the Pages project exists
-        if: steps.gate.outputs.enabled == 'true'
+        if: steps.gate.outputs.enabled == 'true' && steps.target.outputs.deploy_via == 'wrangler'
         env:
           CF_PAGES_PROJECT: ${{ steps.config.outputs.project }}
           CF_PRODUCTION_BRANCH: ${{ steps.config.outputs.production_branch }}
@@ -198,7 +220,7 @@ jobs:
           fi
 
       - name: Deploy to Cloudflare Pages
-        if: steps.gate.outputs.enabled == 'true'
+        if: steps.gate.outputs.enabled == 'true' && steps.target.outputs.deploy_via == 'wrangler'
         env:
           CF_PAGES_PROJECT: ${{ steps.config.outputs.project }}
           WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.ndjson
@@ -211,10 +233,25 @@ jobs:
             --commit-message "CI deploy of $COMMIT_SHA" \
             --commit-dirty=true 2>&1 | tee "$RUNNER_TEMP/wrangler-stdout.log"
 
+      # VPS and shared hosting (production branch only) and Vercel: scripts/deploy.mjs. The deploy secrets are in
+      # the environment of this step alone; it prints one JSON line and writes url/alias to the step outputs.
+      - name: Install lftp (FTPS fallback only)
+        if: steps.gate.outputs.enabled == 'true' && steps.target.outputs.deploy_via == 'script' && steps.target.outputs.needs_lftp == 'true'
+        run: sudo apt-get install -y lftp
+
+      - name: Deploy to the site's target
+        id: target_deploy
+        if: steps.gate.outputs.enabled == 'true' && steps.target.outputs.deploy_via == 'script'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_FTP_PASSWORD: ${{ secrets.DEPLOY_FTP_PASSWORD }}
+        run: node scripts/deploy.mjs --branch "$BRANCH" --github-output
+
       # wrangler writes ND-JSON (pages-deploy / pages-deploy-detailed) to WRANGLER_OUTPUT_FILE_PATH;
       # fall back to scanning stdout for *.pages.dev URLs.
       - name: Capture deployment URLs
-        if: steps.gate.outputs.enabled == 'true'
+        if: steps.gate.outputs.enabled == 'true' && steps.target.outputs.deploy_via == 'wrangler'
         id: output
         run: |
           node scripts/parse-wrangler-output.mjs "$RUNNER_TEMP/wrangler-output.ndjson" "$RUNNER_TEMP/wrangler-stdout.log" > "$RUNNER_TEMP/urls.txt"
@@ -241,7 +278,7 @@ jobs:
         if: steps.gate.outputs.enabled == 'true'
         continue-on-error: true
         env:
-          DEPLOY_URL: ${{ steps.output.outputs.url }}
+          DEPLOY_URL: ${{ steps.output.outputs.url || steps.target_deploy.outputs.url }}
         run: npm run report -- --only live --url "$DEPLOY_URL"
 
       - name: Summarize live report
@@ -267,17 +304,21 @@ jobs:
         if: steps.gate.outputs.enabled == 'true' && github.event_name == 'pull_request'
         uses: actions/github-script@v7
         env:
-          DEPLOY_URL: ${{ steps.output.outputs.url }}
-          ALIAS_URL: ${{ steps.output.outputs.alias }}
+          DEPLOY_URL: ${{ steps.output.outputs.url || steps.target_deploy.outputs.url }}
+          ALIAS_URL: ${{ steps.output.outputs.alias || steps.target_deploy.outputs.alias }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           REPORT_STATIC: ${{ needs.qa.outputs.report_static }}
           REPORT_LIVE: ${{ steps.live_summary.outputs.live }}
+          TARGET: ${{ steps.target.outputs.target }}
+          PREVIEW_FALLBACK: ${{ steps.target.outputs.preview_fallback }}
         with:
           script: |
             const marker = '<!-- landing-factory-preview -->';
             const { DEPLOY_URL, ALIAS_URL, COMMIT_SHA, RUN_URL, REPORT_STATIC, REPORT_LIVE } = process.env;
             const lines = [marker, '### Preview deployment', '', `- Preview: ${DEPLOY_URL}`];
             if (ALIAS_URL) lines.push(`- Branch alias: ${ALIAS_URL}`);
+            if (process.env.PREVIEW_FALLBACK === 'true')
+              lines.push(`- Host: Cloudflare Pages preview. This site deploys to \`${process.env.TARGET}\` from the production branch.`);
             lines.push(
               `- Commit: \`${COMMIT_SHA.slice(0, 7)}\``,
               `- [QA report artifact (\`qa-report\`) on this run](${RUN_URL})`,
@@ -301,6 +342,36 @@ jobs:
             } else {
               await github.rest.issues.createComment({ owner, repo, issue_number, body });
             }
+
+      # A target without previews (vps, shared) and no Cloudflare fallback: say so on the pull request.
+      - name: Comment that the target has no preview
+        if: steps.gate.outputs.enabled != 'true' && (steps.gate.outputs.skip == 'missing' || steps.gate.outputs.skip == 'no-preview') && steps.target.outputs.preview_fallback == 'true' && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          TARGET: ${{ steps.target.outputs.target }}
+          SKIP: ${{ steps.gate.outputs.skip }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REPORT_STATIC: ${{ needs.qa.outputs.report_static }}
+        with:
+          script: |
+            const marker = '<!-- landing-factory-preview -->';
+            const { TARGET, SKIP, RUN_URL, REPORT_STATIC } = process.env;
+            const why = SKIP === 'missing' ? 'the Cloudflare secrets for the fallback preview are missing' : 'its previews are set to none';
+            const lines = [
+              marker,
+              '### Preview deployment',
+              '',
+              `- No preview: the \`${TARGET}\` target publishes from its production branch only, and ${why}.`,
+              '- QA and the static report ran on this branch.',
+            ];
+            if (REPORT_STATIC) lines.push(`- Landing report (static): ${REPORT_STATIC} ([artifact \`landing-report\`](${RUN_URL}))`);
+            const body = lines.join('\n');
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number, per_page: 100 });
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+            if (existing) await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            else await github.rest.issues.createComment({ owner, repo, issue_number, body });
 
       # The preview exists; a failing live report still turns the job red.
       - name: Fail when the live report failed
@@ -413,22 +484,47 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+      # sites/<slug>/site.config.json decides how this run deploys and which secrets it needs
+      # (scripts/deploy/config.mjs). Without a target (every existing site) it is cloudflare and the wrangler
+      # steps below run as before.
+      - name: Read deploy target
+        id: target
+        run: node scripts/deploy/config.mjs --site "$SITE" --branch "$BRANCH" --github-output
+
       # Secret values are only tested for emptiness, never printed.
       - name: Check deploy prerequisites
         id: gate
         env:
           IS_FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+          TARGET: ${{ steps.target.outputs.target }}
+          EFFECTIVE_TARGET: ${{ steps.target.outputs.effective_target }}
+          DEPLOY_VIA: ${{ steps.target.outputs.deploy_via }}
+          NEEDED_SECRETS: ${{ steps.target.outputs.secrets }}
+          # Only booleans reach this step; the values of the new deploy secrets are used by the deploy step alone.
+          HAS_CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+          HAS_CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+          HAS_VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN != '' }}
+          HAS_DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY != '' }}
+          HAS_DEPLOY_FTP_PASSWORD: ${{ secrets.DEPLOY_FTP_PASSWORD != '' }}
         run: |
           missing=""
-          [ -n "$CLOUDFLARE_API_TOKEN" ] || missing="CLOUDFLARE_API_TOKEN"
-          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || missing="${missing:+$missing, }CLOUDFLARE_ACCOUNT_ID"
+          for name in $NEEDED_SECRETS; do
+            [ "$(printenv "HAS_$name")" = "true" ] || missing="${missing:+$missing, }$name"
+          done
+          skip=""
           if [ "$IS_FORK" = "true" ]; then
             reason="Pull request from a fork: repository secrets are not available, so no preview is deployed."
+            skip=fork
+          elif [ "$DEPLOY_VIA" = "none" ]; then
+            reason="The $TARGET target has no preview and its previews are set to none, so this branch is not deployed."
+            skip=no-preview
           elif [ -n "$missing" ]; then
             reason="Missing GitHub secret(s): $missing. Add them under Settings > Secrets and variables > Actions (see README, Deployment)."
+            skip=missing
           else
             reason=""
           fi
+          echo "skip=$skip" >> "$GITHUB_OUTPUT"
           if [ -n "$reason" ]; then
             echo "::warning title=Deploy skipped ($SITE)::$reason"
             printf '### Deploy skipped for %s\n\n%s\n' "$SITE" "$reason" >> "$GITHUB_STEP_SUMMARY"
@@ -438,14 +534,14 @@ jobs:
           fi
 
       - name: Read Pages project from the site configuration
-        if: steps.gate.outputs.enabled == 'true'
+        if: steps.gate.outputs.enabled == 'true' && steps.target.outputs.deploy_via == 'wrangler'
         id: config
         run: |
           echo "project=$(node -p "require('./sites/$SITE/site.config.json').cloudflare.pagesProject")" >> "$GITHUB_OUTPUT"
           echo "production_branch=$(node -p "require('./sites/$SITE/site.config.json').cloudflare.productionBranch")" >> "$GITHUB_OUTPUT"
 
       - name: Ensure the Pages project exists
-        if: steps.gate.outputs.enabled == 'true'
+        if: steps.gate.outputs.enabled == 'true' && steps.target.outputs.deploy_via == 'wrangler'
         env:
           CF_PAGES_PROJECT: ${{ steps.config.outputs.project }}
           CF_PRODUCTION_BRANCH: ${{ steps.config.outputs.production_branch }}
@@ -463,7 +559,7 @@ jobs:
           fi
 
       - name: Deploy to Cloudflare Pages
-        if: steps.gate.outputs.enabled == 'true'
+        if: steps.gate.outputs.enabled == 'true' && steps.target.outputs.deploy_via == 'wrangler'
         env:
           CF_PAGES_PROJECT: ${{ steps.config.outputs.project }}
           WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.ndjson
@@ -476,10 +572,25 @@ jobs:
             --commit-message "CI deploy of $SITE at $COMMIT_SHA" \
             --commit-dirty=true 2>&1 | tee "$RUNNER_TEMP/wrangler-stdout.log"
 
+      # VPS and shared hosting (production branch only) and Vercel: scripts/deploy.mjs. The deploy secrets are in
+      # the environment of this step alone; it prints one JSON line and writes url/alias to the step outputs.
+      - name: Install lftp (FTPS fallback only)
+        if: steps.gate.outputs.enabled == 'true' && steps.target.outputs.deploy_via == 'script' && steps.target.outputs.needs_lftp == 'true'
+        run: sudo apt-get install -y lftp
+
+      - name: Deploy to the site's target
+        id: target_deploy
+        if: steps.gate.outputs.enabled == 'true' && steps.target.outputs.deploy_via == 'script'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_FTP_PASSWORD: ${{ secrets.DEPLOY_FTP_PASSWORD }}
+        run: node scripts/deploy.mjs --site "$SITE" --branch "$BRANCH" --github-output
+
       # wrangler writes ND-JSON (pages-deploy / pages-deploy-detailed) to WRANGLER_OUTPUT_FILE_PATH;
       # fall back to scanning stdout for *.pages.dev URLs.
       - name: Capture deployment URLs
-        if: steps.gate.outputs.enabled == 'true'
+        if: steps.gate.outputs.enabled == 'true' && steps.target.outputs.deploy_via == 'wrangler'
         id: output
         run: |
           node scripts/parse-wrangler-output.mjs "$RUNNER_TEMP/wrangler-output.ndjson" "$RUNNER_TEMP/wrangler-stdout.log" > "$RUNNER_TEMP/urls.txt"
@@ -506,7 +617,7 @@ jobs:
         if: steps.gate.outputs.enabled == 'true'
         continue-on-error: true
         env:
-          DEPLOY_URL: ${{ steps.output.outputs.url }}
+          DEPLOY_URL: ${{ steps.output.outputs.url || steps.target_deploy.outputs.url }}
         run: npm run report -- --site "$SITE" --only live --url "$DEPLOY_URL"
 
       - name: Summarize landing report
@@ -534,11 +645,13 @@ jobs:
         if: steps.gate.outputs.enabled == 'true' && github.event_name == 'pull_request'
         uses: actions/github-script@v7
         env:
-          DEPLOY_URL: ${{ steps.output.outputs.url }}
-          ALIAS_URL: ${{ steps.output.outputs.alias }}
+          DEPLOY_URL: ${{ steps.output.outputs.url || steps.target_deploy.outputs.url }}
+          ALIAS_URL: ${{ steps.output.outputs.alias || steps.target_deploy.outputs.alias }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           REPORT_STATIC: ${{ steps.report_summary.outputs.static }}
           REPORT_LIVE: ${{ steps.report_summary.outputs.live }}
+          TARGET: ${{ steps.target.outputs.target }}
+          PREVIEW_FALLBACK: ${{ steps.target.outputs.preview_fallback }}
         with:
           script: |
             const site = process.env.SITE;
@@ -546,6 +659,8 @@ jobs:
             const { DEPLOY_URL, ALIAS_URL, COMMIT_SHA, RUN_URL, REPORT_STATIC, REPORT_LIVE } = process.env;
             const lines = [marker, `### Preview deployment: ${site}`, '', `- Preview: ${DEPLOY_URL}`];
             if (ALIAS_URL) lines.push(`- Branch alias: ${ALIAS_URL}`);
+            if (process.env.PREVIEW_FALLBACK === 'true')
+              lines.push(`- Host: Cloudflare Pages preview. This site deploys to \`${process.env.TARGET}\` from the production branch.`);
             lines.push(
               `- Commit: \`${COMMIT_SHA.slice(0, 7)}\``,
               `- [QA report artifact (\`qa-report-${site}\`) on this run](${RUN_URL})`,
@@ -569,6 +684,37 @@ jobs:
             } else {
               await github.rest.issues.createComment({ owner, repo, issue_number, body });
             }
+
+      # A target without previews (vps, shared) and no Cloudflare fallback: say so on the pull request.
+      - name: Comment that the target has no preview
+        if: steps.gate.outputs.enabled != 'true' && (steps.gate.outputs.skip == 'missing' || steps.gate.outputs.skip == 'no-preview') && steps.target.outputs.preview_fallback == 'true' && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          TARGET: ${{ steps.target.outputs.target }}
+          SKIP: ${{ steps.gate.outputs.skip }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REPORT_STATIC: ${{ steps.report_summary.outputs.static }}
+          SITE: ${{ matrix.site }}
+        with:
+          script: |
+            const { TARGET, SKIP, RUN_URL, REPORT_STATIC, SITE } = process.env;
+            const marker = `<!-- landing-factory-preview:${SITE} -->`;
+            const why = SKIP === 'missing' ? 'the Cloudflare secrets for the fallback preview are missing' : 'its previews are set to none';
+            const lines = [
+              marker,
+              `### Preview deployment: ${SITE}`,
+              '',
+              `- No preview: the \`${TARGET}\` target publishes from its production branch only, and ${why}.`,
+              '- QA and the static report ran on this branch.',
+            ];
+            if (REPORT_STATIC) lines.push(`- Landing report (static): ${REPORT_STATIC} ([artifact \`landing-report-${SITE}\`](${RUN_URL}))`);
+            const body = lines.join('\n');
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number, per_page: 100 });
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+            if (existing) await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            else await github.rest.issues.createComment({ owner, repo, issue_number, body });
 
       # The preview exists; a failing live report still turns the job red.
       - name: Fail when the live report failed

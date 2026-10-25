@@ -99,7 +99,10 @@ export function siteManifest(slug, rootPackage) {
 }
 
 export function siteConfig(slug) {
-  return { cloudflare: { pagesProject: slug, productionBranch: 'main' } };
+  return {
+    target: 'cloudflare',
+    cloudflare: { pagesProject: slug, productionBranch: 'main' },
+  };
 }
 
 /** A single-quoted JavaScript string literal (the style Prettier keeps). */
@@ -175,7 +178,7 @@ Status: **draft**. Fill every section; the checkpoint waits for approval unless 
 - **Tone:**
 - **Signals:** (comma-separated words from the closed vocabulary of design-archetypes/README.md; the synthesis writes them)
 - **Language:** the copy language (default Spanish unless the brief says otherwise).
-- **Site location:** \`sites/${slug}/\`, its own Cloudflare Pages project.
+- **Site location:** \`sites/${slug}/\`, deployed to the target in its \`site.config.json\` (Cloudflare Pages by default).
 
 ## References used
 
@@ -300,7 +303,7 @@ npm run check -w site-${slug}    # astro check
 npm run qa -- --site ${slug}     # full QA for this site only
 \`\`\`
 
-Pages project and production branch: [site.config.json](site.config.json). Asset licenses: [CREDITS.md](CREDITS.md).
+Deploy target (Cloudflare Pages project by default) and its settings: [site.config.json](site.config.json); guides in docs/deploy/. Asset licenses: [CREDITS.md](CREDITS.md).
 `;
 }
 

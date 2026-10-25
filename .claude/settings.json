@@ -40,7 +40,8 @@
       "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py *)",
       "Bash(node .claude/skills/design-taste-frontend/scripts/*)",
       "Bash(date *)",
-      "Bash(node scripts/section-shots.mjs *)"
+      "Bash(node scripts/section-shots.mjs *)",
+      "Bash(node scripts/deploy.mjs --site * --dry-run)"
     ]
   },
   "hooks": {

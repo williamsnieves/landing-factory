@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-24 (add-ai-images merged and verified against the real API).
+Read this first in a new or compacted session. Last updated: 2026-10-24 (add-ai-images done; next: add-deploy-adapters).
 
 ## Working agreements
 
@@ -30,9 +30,7 @@ Read this first in a new or compacted session. Last updated: 2026-10-24 (add-ai-
 
 ## Resume here (2026-10-24)
 
-Branch `change/ai-images-smoke-test` (from main after PR #20): archives add-ai-images and records the real smoke test (task 6.1, passed: `gpt-image-1.5` works as the default). `OPENAI_API_KEY` (environment variable) and `api.openai.com` (allowed domain) are set in the cloud environment from 2026-10-24.
-
-Next, after this PR merges (owner decides): the tupathdigital legal follow-up (needs the owner's markets and holder data) or `add-deploy-adapters`.
+Branch `change/add-deploy-adapters` (from main after PR #21, which archived add-ai-images with its real smoke test). Next: propose `add-deploy-adapters`. Owner (2026-10-24): targets Vercel, VPS (Hostinger VPS, DigitalOcean Droplet) and shared hosting (Hostinger web hosting); no accounts yet for a real deploy, so adapters are tested against fakes and local rsync, and real deploys come when the owner has accounts. Cloud sessions lack rsync/ssh by default (`apt-get install -y rsync openssh-client` works); `api.vercel.com` is not in the allowed domains.
 
 Reminder scheduled for 2026-11-01: the tupathdigital coupons FALL2026 (Etsy) and 92xsh57 (Gumroad) end on 31 October 2026; offer the owner to update or remove them.
 
@@ -45,6 +43,7 @@ Reminder scheduled for 2026-11-01: the tupathdigital coupons FALL2026 (Etsy) and
 
 ## Owner decisions to keep (2026-10-21)
 
+- 2026-10-24: deploy adapters for Vercel, VPS (Hostinger VPS, DigitalOcean Droplet) and shared hosting (Hostinger web hosting); Netlify and DigitalOcean App Platform later.
 - 2026-10-24: AI images from OpenAI GPT image models (owner's choice over Gemini/Imagen, FLUX or import-only).
 - 2026-10-24: legal compliance (cookies, GDPR, legal notice, price claims) as its own change `add-legal-compliance`, before `add-ai-images`.
 - 2026-10-24: security audit framed by the OWASP Top 10; add `add-ai-images` after the report (today images come only from the customer, Commons/The Met or code-rendered posters; the owner can already hand in AI images made with their own tool as customer files).
@@ -79,6 +78,7 @@ Small fixes pending: panaderia process heading covered at 375 px; `new-landing.s
 ## Known gaps and follow-ups
 
 - Existing sites do not have the starter's hardening yet (script CSP, HSTS, COOP in `public/_headers`): `npm run report` warns on each. Follow-up: one small site change per site to opt in (copy `security.csp` from the root `astro.config.mjs` and the two header lines; tupathdigital first if the owner wants it), then check its QA and the live report.
+- First real deploy per target (add-deploy-adapters): the adapters are verified with a fake Vercel API, real rsync between local folders and dry runs only. Once the owner has the account and secrets, run one small follow-up per target and record the result: Vercel (`VERCEL_TOKEN`, then a site with `target: "vercel"`), VPS (host, `DEPLOY_SSH_KEY`, pinned host key), Hostinger shared hosting (SSH key, or `DEPLOY_FTP_PASSWORD` for the FTPS fallback, which has only a plan test).
 - tupathdigital legal follow-up (own site change, after add-legal-compliance merges): the report warns (no market) and flags the "50% off" coupons as price claims. The owner provides the markets (for example `EU`/`ES`) and the holder data (name or company, tax id, address, email, register if a company) and the processing answers; then add them to `sites/tupathdigital/brief.json` (never assumed), run `node scripts/legal.mjs --site tupathdigital --write`, add the legal notice and privacy policy pages with footer links, and review the coupon wording against the EU 30-day lowest-price rule (the coupons FALL2026 and 92xsh57 end on 31 October 2026, so they may simply be removed).
 - Etsy listing pages answer with a bot challenge (never bypassed); product data came from the owner's Etsy CSV export. Gumroad public product pages are readable (title, image, price in JSON-LD).
 
