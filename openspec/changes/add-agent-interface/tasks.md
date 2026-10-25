@@ -69,7 +69,7 @@
   - `get_landing tupathdigital` shows its brief summary and its latest verdicts;
   - `run_report tupathdigital` (static) runs as a job, `get_job` reaches `passed`, and `get_report` returns the verdict;
   - `propose_landing` on a throwaway slug with the `NEW_LANDING_SKIP` stub reaches the checkpoint state; the throwaway site is removed afterwards.
-- [ ] 6.2 Full pre-push run in a clean clone: `npm ci && npx prettier --check . && npm run check && npm run check:sites && npm run validate:patterns && npm run validate:archetypes && npm test && npm run qa`, plus `openspec validate --all --strict`. Verify: every command exits 0.
+- [x] 6.2 Full pre-push run in a clean clone: `npm ci && npx prettier --check . && npm run check && npm run check:sites && npm run validate:patterns && npm run validate:archetypes && npm test && npm run qa`, plus `openspec validate --all --strict`. Verify: every command exits 0.
 
 ## Workflow follow-up
 
