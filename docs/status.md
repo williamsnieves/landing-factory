@@ -1,140 +1,116 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-25 (add-bilingual-landing implemented on its branch; PR pending).
+Read this first in a new or compacted session. Last updated: 2026-10-25 (personal-brand landing merged, PR #28; next: the owner's question about moving it to its own repository, Vercel and his domain).
 
 ## Working agreements
 
-- One OpenSpec change = one branch `change/<name>` = one PR. Pilot work uses `pilot/<slug>`.
+- One OpenSpec change = one branch `change/<name>` = one PR. Site changes (no spec change) also get their own `change/<name>` branch and PR. Pilot work uses `pilot/<slug>`.
 - Never start the next change until the user says the previous PR was merged (a GitHub merge event alone is not the go-ahead).
 - After each merge: archive the change (`openspec archive <name> --yes`) as the first commit of the next branch.
-- Implementation is delegated to a Sonnet subagent; the main session reviews the diff, re-runs the full checks in a clean clone, then commits, pushes, opens the PR and watches CI.
+- Implementation is delegated to a Sonnet subagent; the main session reviews the diff, re-runs the full checks in a clean clone, then commits, pushes, opens the PR and watches CI. Independent work can run in a subagent with `isolation: "worktree"` (create the branch from `origin/main` inside it; remove the worktree after pushing).
 - Chat with the user in Spanish; all repo docs, commits and PR descriptions in English (see CLAUDE.md).
-- Before pushing: `npm ci && npx prettier --check . && npm run check && npm run check:sites && npm run validate:patterns && npm test && npm run qa` (plus `npm run qa -- --site <slug>` when a site changed) and `openspec validate --all --strict`.
+- Before pushing: `npm ci && npx prettier --check . && npm run check && npm run check:sites && npm run validate:patterns && npm run validate:archetypes && npm test && npm run qa` (plus `npm run qa -- --site <slug>` when a site changed) and `openspec validate --all --strict`.
+- This session cannot re-run GitHub Actions jobs (the API answers 403). When a job fails for a reason outside the PR (runner noise, a new Pages project's TLS), explain it once in a PR comment and ask the owner to press "Re-run failed jobs".
 
 ## Where we are
 
 | Roadmap step | State |
 | --- | --- |
 | setup-astro-starter, setup-ai-tooling, add-qa-pipeline, add-cloudflare-preview-deploy, add-analyze-reference-skill, fix-recon-scroll-containers, add-site-workspaces | Merged and archived |
-| Pilot step 1-2: bakery references analyzed, landing proposal approved | Merged (PR #9): `patterns/{sonomabakery,blackstarbakery,bernicebakery}-com.md`, `sites/panaderia/PROPOSAL.md` |
-| Pilot step 3-6: build the bakery landing in `sites/panaderia/` | Merged (PR #11), production https://panaderia-a3o.pages.dev; lessons in `docs/pilot-panaderia-lessons.md` |
-| add-new-landing-skill (`/new-landing`, one command per landing) | Merged (PR #12) and archived; `sites/clinica-dental` in production at https://clinica-dental-9pd.pages.dev |
-| add-3d-scenes (opt-in Three.js scenes, 3D QA budgets, Met images), validated with `sites/samurai` | Merged (PR #13) and archived; production https://samurai-1v4.pages.dev |
-| Product plan (`docs/product-plan.md`): archetypes, intake, report, deploy adapters, agent interface, 3D models | Agreed 2026-10-21 |
-| add-design-archetypes (archetype blends, layout diversity), validated with `sites/{estudio-arquitectura,festival-electronica,app-finanzas}` | Merged (PR #14) and archived 2026-10-22; owner liked the previews, `minLayoutDistance` stays 0.2 |
-| add-brief-intake (`brief.json`, `/brief-intake` interview, generation reads the brief, `brief-facts` check) | Merged (PR #15) and archived 2026-10-22 |
-| Owner's digital-products landing `sites/tupathdigital` (first real customer test) | Merged: build from the brief (PR #16, with polish pass A after the owner's review) and redesign B from the owner's references (PR #17). Production: Pages project `tupathdigital` (https://tupathdigital.pages.dev) |
-| add-landing-report (performance and security audit, OWASP Top 10:2025, starter CSP/HSTS/COOP, planning-folder fix) | Merged (PR #18) and archived 2026-10-24; every landing 0 fail in CI (warnings: existing sites have no script CSP, HSTS, COOP or 404 page) |
-| add-legal-compliance (cookies and trackers, consent banner only when needed, legal notice and privacy policy from the brief, price-claim review) | Merged (PR #19) and archived 2026-10-24; every landing 0 fail (warn: market unknown; tupathdigital also warns on its "50% off" claims) |
-| add-ai-images (AI-generated images as a recorded source) | Merged (PR #20); archived with the real OpenAI smoke test in PR #21 (`gpt-image-1.5`, low quality, 1536x1024; also fixed the CLI falling back to `process.env` for the key) |
-| add-deploy-adapters (Vercel, VPS, shared hosting from CI; headers on every target) | Merged (PR #22) and archived 2026-10-25; every existing site still deploys to Cloudflare; real deploys per target pending accounts |
-| add-agent-interface (local MCP server: brief, propose, generate jobs, status, QA, report; no publishing) | Implemented on branch `change/add-agent-interface` (working tree, to be reviewed and committed); PR pending. Verified end to end over stdio against the real repository (7 sites listed, `get_landing tupathdigital`, `run_report` job reached `passed`, `propose_landing` with the `NEW_LANDING_SKIP` stub reached `checkpoint`); `claude mcp list` connects to the server (a project-scope entry needs interactive approval). First real `generate_landing` through the server not run yet (30 to 70 minutes, costs tokens) |
-
-| add-personal-brand-support (default 404 page for new sites; AI portrait of the brand owner as the one person exception) | Merged (PR #26) and archived 2026-10-25. `new-site` writes `src/pages/404.astro`; brief fields `business.personalBrand` and `brand.ownerPortrait`; `ai-images import --subject owner`; `ai-provenance` and credits updated; `section-shots.mjs --include-404`. Full clean-clone run (task 6.2) still to do |
-| add-bilingual-landing (opt-in multi-locale landings on Astro's i18n routing: `languages` in the brief, `new-site --langs`, hreflang and language switcher, legal pages and AI disclosure per locale, `i18n` rule in check-landing) | Merged (PR #27) and archived 2026-10-25. Verified with a throwaway site (`new-site --langs en,es`, build, QA with Lighthouse on `/` and `/es/`: 100 in every category), removed afterwards. Task 8.2 (clean-clone run) is left for the main session. Owner decision 2026-10-25: his personal-brand landing is in English (default) and Spanish; lifts the "no i18n" scope line for opt-in multi-locale landings only |
-
-## The owner's personal-brand landing (2026-10-25)
-
-`sites/personal-brand/` (branch `change/personal-brand`, PR pending), generated from the brief (`/brief-intake personal-brand`), `CONTENT.md` (facts from his CV and the old Vue site; phone and email left out on purpose) and the pattern sheets `product-inc`, `sankar-work`, `sebg-ch`. English at `/`, Spanish at `/es/`. Concept "Two halves": the half-human, half-machine owner portrait (imported with `--subject owner`: ChatGPT, GPT-6 per the owner) guides a dark, glowing page with a color field per section. No call to action (LinkedIn is the only access link), no email, no legal pages (owner's choice: no market; the report warns). Result: QA passed (Lighthouse 96/100/100 on `/` and `/es/`), report 0 fail, check-landing passed incl. `i18n`. Proposal cost $0.69, build $4.85 (Usage lines in RUN.md).
-
-Open for this landing:
-- Deploy target: the brief says Vercel, `site.config.json` still says `cloudflare` (the run could not write it, see below), which gives a Cloudflare preview on the PR. Switch to Vercel with `node scripts/deploy/config.mjs --site personal-brand --from-brief --write` plus the `VERCEL_TOKEN` secret, or when the landing moves to its own repository (owner plan).
-- AI backgrounds: done. The owner made three in ChatGPT (GPT-6) from prompts written for the palette (hero, AI stage, beyond the code); imported with full provenance and shown through `src/components/sections/Backdrop.astro` (decorative, dark veil for contrast). QA after: Lighthouse 98/100/100/100 on `/` and `/es/`. The import first hit a false positive of the prompt policy ("no logos" matched the identity rule); fixed in `scripts/lib/ai-prompt-policy.mjs` (short exclusion clauses are skipped) with tests.
-- Native readers for the Spanish and English copy; mobile LCP 2.6 s (warn), a smaller portrait for phones would help.
-
-Factory follow-ups found in this run:
-- The skill called `node /home/user/landing-factory/scripts/ai-images.mjs ...` with an absolute path, which the `--allowedTools` patterns (relative `node scripts/...`) do not match, so `ai-images` was blocked in `claude -p`; the skill should always use relative script paths (or the allow list should accept both).
-- `node scripts/deploy/config.mjs --from-brief --write` is not in the allow list, so a run cannot set a non-Cloudflare target.
-- QA's full-page screenshots at 1440 and 375 px repeat the top of the page after the pinned AI section (a capture artifact of a pinned section with motion on; the real page and the reduced-motion capture are correct). Worth a look in `scripts/qa.mjs` (capture full pages with reduced motion, or after `ScrollTrigger.refresh()`).
+| Pilot: bakery references, proposal, build (`sites/panaderia`) | Merged (PR #9, #11), production https://panaderia-a3o.pages.dev; lessons in `docs/pilot-panaderia-lessons.md` |
+| add-new-landing-skill (`/new-landing`) | Merged (PR #12); `sites/clinica-dental` at https://clinica-dental-9pd.pages.dev |
+| add-3d-scenes (opt-in Three.js scenes), validated with `sites/samurai` | Merged (PR #13); https://samurai-1v4.pages.dev |
+| Product plan (`docs/product-plan.md`) | Agreed 2026-10-21 |
+| add-design-archetypes, validated with `sites/{estudio-arquitectura,festival-electronica,app-finanzas}` | Merged (PR #14) |
+| add-brief-intake (`brief.json`, `/brief-intake`) | Merged (PR #15) |
+| Owner's digital-products landing `sites/tupathdigital` | Merged (PR #16, #17); https://tupathdigital.pages.dev |
+| add-landing-report (OWASP Top 10:2025, performance, starter CSP/HSTS/COOP) | Merged (PR #18) |
+| add-legal-compliance (cookies, trackers, legal pages from the brief, price claims) | Merged (PR #19) |
+| add-ai-images (OpenAI images as a recorded source) | Merged (PR #20, smoke test PR #21) |
+| add-deploy-adapters (Vercel, VPS, shared hosting from CI) | Merged (PR #22); real deploys per target pending accounts |
+| add-agent-interface (local MCP server, no publishing; cost per run in `RUN.md`) | Merged (PR #23) and archived. The server connects in Claude Code sessions (`list_landings` worked from a real session). First real `generate_landing` through the server not run yet |
+| tupathdigital legal follow-up (markets US and EU, holder name, privacy contact, `/privacy/`) | Merged (PR #24) |
+| tupathdigital hardening (script CSP, HSTS, COOP, 404 page) | Merged (PR #25); live report 0 warn |
+| add-personal-brand-support (default 404 for new sites; owner AI portrait as the one person exception) | Merged (PR #26) and archived |
+| add-bilingual-landing (opt-in multi-locale landings on Astro i18n routing) | Merged (PR #27) and archived |
+| Owner's personal-brand landing `sites/personal-brand` (bilingual) | Merged (PR #28); Cloudflare project `personal-brand-8i7` (https://personal-brand-8i7.pages.dev once `main` deploys) |
 
 ## Resume here (2026-10-25)
 
-Branch `change/add-agent-interface` (from main after PR #22). The change is implemented in the working tree (server `scripts/mcp/`, `scripts/lib/claude-stream.mjs`, `new-landing.sh` usage recording, `.mcp.json`, settings, docs `docs/agent-interface.md`, tests `tests/mcp-*.test.mjs`); tasks 1.1 to 6.1 are checked. **Next: review the diff, run the full pre-push checks in a clean clone (task 6.2), commit, push, open the PR and watch CI.** Then, when the owner wants it, a first real `generate_landing` through the server.
+`main` has everything above (last merge: PR #28). Branch `change/status-after-personal-brand` only refreshes this file. Nothing is half done.
 
-Owner choices for add-agent-interface (2026-10-25): a **local MCP server over stdio** next to the repo (no public HTTP service yet), offering **every action except publishing** (publishing stays PR plus CI). Design points (implemented as listed; deviations: `exit.json` written by the wrapper next to `job.json`, a `commands.mjs` module for the fixed command table, job tools for the read side `get_job`/`list_jobs`/`tail_job_log` are allowed in settings, only starting or cancelling a job asks):
+**Next, the owner's pending question (he asked to talk about it after the landing):** move `sites/personal-brand` to its own repository and deploy it from there to **Vercel**, then move the domain **williansnieves.com** from Netlify to Vercel. The old site lives in Bitbucket and on Netlify (Vue); it is replaced by this landing. Points to settle with him:
+- How to export one landing as a standalone repository (the product plan's "export command": copy `sites/<slug>/` plus what it needs from the starter, its own `package.json`, lockfile, CI workflow with QA, report and the Vercel deploy step, `scripts/` it uses). Whether to build that export as a factory change first (reusable) or do a one-off move.
+- Vercel needs his account, a project and the `VERCEL_TOKEN` secret (plus org and project ids if the adapter asks); `api.vercel.com` is not in this environment's allowed domains (CI deploys, not this session). In `site.config.json` the target is still `cloudflare` (see the follow-ups).
+- Domain move: DNS at his registrar from Netlify to Vercel (his step, guided); `site` in `astro.config.mjs` is already `https://williansnieves.com`, so canonical and hreflang URLs are right once the domain points to Vercel.
 
-- `scripts/mcp/server.mjs` with modules `protocol`, `tools`, `jobs`, `landings`, `paths`, `redact`; hand-written JSON-RPC 2.0 over newline-delimited stdio, no SDK dependency; `initialize` echoes a supported version (`2025-11-25`, `2025-06-18`, `2025-03-26`, `2024-11-05`) else the newest; `tools/list`, `tools/call`, `ping`; stdout only protocol messages, logs to stderr; tool failures as `isError: true` results.
-- Tools: `list_landings`, `get_landing`, `get_qa`, `get_report`, `brief_init` (never `--force`), `brief_validate`, `brief_missing`, `brief_summary`, `brief_update` (deep-merge, arrays replaced, write only if valid, never assume `legal.holder`, `legal.privacyContact`, `brand.aiImages`), jobs `propose_landing`, `generate_landing`, `run_qa`, `run_report`, and `get_job`, `list_jobs`, `tail_job_log` (masked), `cancel_job`.
-- Jobs in `.cache/jobs/<id>/` (`job.json`, `log.txt`), detached process group plus a wrapper `scripts/mcp/run-job.mjs` that records the exit code, so jobs survive a server restart; states running, passed, failed, cancelled, lost; one generation per slug; fixed command table (no `deploy`, `wrangler`, `git`, `gh`, `push`); argument validation (slug rule, existing pattern sheets, model id pattern, https-only report URL).
-- Cost per run: `new-landing.sh` uses `claude -p --output-format stream-json --verbose` through `scripts/lib/claude-stream.mjs` (readable log kept, final `result` event's usage and `total_cost_usd` to `sites/<slug>/.run-usage.json`, a Usage line in `RUN.md` Totals, "not reported" on failure).
-- Registration: `landing-factory` in `.mcp.json`; `.claude/settings.json` allows read and brief tools (`mcp__landing-factory__...`), not job tools; `mcp` npm script; guide `docs/agent-interface.md`; `docs/product-plan.md` step 7 split into local now, remote later.
+Other items the owner can pick: tupathdigital coupons (reminder below), hardening for the other six sites, the factory follow-ups listed below, `add-3d-models`, the first real `generate_landing` through the MCP server.
 
-After add-agent-interface, open items the owner can pick: the first real deploy per target (needs accounts), the site hardening opt-in (CSP, HSTS, COOP, 404 page), and `add-3d-models`.
+Reminder scheduled for 2026-11-01 (trigger `trig_013qv2DNicfU16Ah9auQ5uWb`): the tupathdigital coupons FALL2026 (Etsy) and 92xsh57 (Gumroad) end on 31 October 2026; offer the owner to update or remove them.
 
-Reminder scheduled for 2026-11-01: the tupathdigital coupons FALL2026 (Etsy) and 92xsh57 (Gumroad) end on 31 October 2026; offer the owner to update or remove them.
+## The owner's personal-brand landing (merged, PR #28)
+
+- **Inputs:** `sites/personal-brand/brief.json` (from `/brief-intake personal-brand`: personal brand, `languages: ["en", "es"]`, tone "like himself, a touch of humor, professional", free palette, no market so no legal pages, no call to action and no email by his choice; LinkedIn `https://www.linkedin.com/in/willians-nieves` is the only access link, GitHub in the footer), `CONTENT.md` (facts from his CV and the old Vue site; phone and email left out on purpose), the pattern sheets `product-inc`, `sankar-work`, `sebg-ch` (owner's references, robots checked), his `{W}` logo SVG and his ChatGPT portrait.
+- **Design:** concept "Two halves": the half-human, half-machine portrait guides a dark, glowing page with a color field per section; sections hero, about, a pinned AI-engineering stage, career path (Glintt 2025 back to Teravision 2015, CV dates), skills (incl. "JEV, a System 1 decision model", owner wording), beyond the code, education; 404 in the same design. English at `/`, Spanish at `/es/`.
+- **AI images (all recorded in `assets.json`):** the owner portrait (`--subject owner`, ChatGPT, GPT-6 per the owner, his recalled prompt, exact date unknown) and three backgrounds he made in ChatGPT (GPT-6) from prompts written for the palette (hero, AI stage, beyond the code), shown through `src/components/sections/Backdrop.astro` with a dark veil. Footer disclosure in both languages.
+- **Results:** QA passed, Lighthouse 98/100/100/100 on `/` and `/es/`; report 0 fail (warns: legal requirements unknown, mobile LCP); live report 0 fail, 0 warn; check-landing passed incl. `i18n`, `ai-provenance`, `brief-facts`. Cost: proposal $0.69, build $4.85.
+- **Open:** deploy target is still `cloudflare` in `site.config.json` (brief says Vercel, see "Resume here"); native readers for the English and Spanish copy; a smaller portrait for phones would help mobile LCP.
+
+## Factory follow-ups (found 2026-10-25)
+
+- `claude -p` runs: the new-landing skill called `node /home/user/landing-factory/scripts/ai-images.mjs ...` with an absolute path, which the `--allowedTools` patterns (relative `node scripts/...`) do not match, so AI generation was blocked during the personal-brand build; also `node scripts/deploy/config.mjs --from-brief --write` is not in the allow list, so a run cannot set a non-Cloudflare target. Fix: make the skill use relative script paths (or allow both forms) and add the deploy config command.
+- CI live report on a brand-new Cloudflare Pages project: it runs right after the first deploy, before Cloudflare issues the TLS certificate for the deployment hostname (about two minutes), so `live-tls` fails once. Fix: wait (bounded) for the URL to answer over TLS before the live checks.
+- QA full-page screenshots with motion on repeat the top of the page after a pinned section (capture artifact; the real page and the reduced-motion capture are correct). Fix in `scripts/qa.mjs` (capture full pages with reduced motion, or refresh ScrollTrigger first).
+- Prompt policy: fixed in PR #28 (short exclusion clauses such as "No people, no logos." are skipped by the word rules; the brand rule still reads the whole prompt).
+- samurai mobile performance is near the limit on CI runners (86 in one CI run, 93 locally); a lighter hero poster would give margin.
 
 ## tupathdigital (owner's landing) facts
 
-- Brief: `sites/tupathdigital/brief.json` (English page; 20 listings, 3 sold in both stores, so 17 cards; prices in USD; coupons 50% until 31 Oct 2026; downloads instant, some via a Google Drive link; about 9 sales, not shown; no domain yet and no public contact block (the owner's email tupathdigital@gmail.com is only the legal holder email and privacy contact, not `contact.email`); deploy target undecided). Product data: Gumroad public pages, Etsy from the owner's CSV export (Etsy listing pages answer with a bot challenge; never bypassed).
+- Brief: `sites/tupathdigital/brief.json` (English page; 20 listings, 3 sold in both stores, so 17 cards; prices in USD; coupons 50% until 31 Oct 2026; downloads instant, some via a Google Drive link; about 9 sales, not shown; no domain yet; legal markets US and EU, holder name `tupathdigital`, legal and privacy email tupathdigital@gmail.com (not `contact.email`), no analytics, forms or embeds; deploy target undecided). Product data: Gumroad public pages, Etsy from the owner's CSV export (Etsy listing pages answer with a bot challenge; never bypassed).
+- Has `/privacy/`, a 404 page, the starter's script CSP, HSTS and COOP. Report warns only on image savings, "no rule set for US" and the "50% off" price claims (review them against the EU 30-day rule or remove the coupons after 31 October).
 - References: `patterns/craftsman-contractor-21st-app.md`, `patterns/crypgo-21st-app.md`. No 3D models (owner).
 - Coupons: codes and end date live in `sites/tupathdigital/src/data/catalog.ts` (`COUPONS`, `COUPON_END`, `COUPON_END_ISO`); the "50%" figure and the page meta description in `src/pages/index.astro` repeat them. Changing a coupon = edit those, update the brief notes, run site QA and `check-landing`, open a PR. A `coupon` field in the brief schema would make this data-driven (candidate for a later change).
-- Pass B idea list not yet done: real reviews or ratings once the owner has them; a "prompt → result" showcase if the owner provides real examples.
 
-## Owner decisions to keep (2026-10-21)
+## Owner decisions to keep
 
-- 2026-10-25: agent interface first as a local MCP server over stdio, every action except publishing; remote HTTP service, PRs from the interface, containers per job and billing later.
+- 2026-10-25: personal-brand landing in English (default) and Spanish, with Astro's built-in i18n; his AI portrait allowed as the one person image; no legal pages for the portfolio (he never had them); no call to action and no email for now; the landing later moves to its own repository and deploys to Vercel; old Netlify blog link dropped.
+- 2026-10-25: the external skill `crear-web-portfolio` was reviewed and not vendored (Hostinger, plain HTML, no license); its portfolio ideas (case studies, one clear path, show then tell) were used in the proposal in our own words.
+- 2026-10-25: tupathdigital markets US and EU (worldwide reach through US stores); its hardening opted in.
+- 2026-10-25: agent interface first as a local MCP server over stdio, every action except publishing.
 - 2026-10-24: deploy adapters for Vercel, VPS (Hostinger VPS, DigitalOcean Droplet) and shared hosting (Hostinger web hosting); Netlify and DigitalOcean App Platform later.
-- 2026-10-24: AI images from OpenAI GPT image models (owner's choice over Gemini/Imagen, FLUX or import-only).
-- 2026-10-24: legal compliance (cookies, GDPR, legal notice, price claims) as its own change `add-legal-compliance`, before `add-ai-images`.
-- 2026-10-24: security audit framed by the OWASP Top 10; add `add-ai-images` after the report (today images come only from the customer, Commons/The Met or code-rendered posters; the owner can already hand in AI images made with their own tool as customer files).
-
+- 2026-10-24: AI images from OpenAI GPT image models; legal compliance as its own change; security audit framed by the OWASP Top 10.
 - Archetypes are only a base: blends are driven by the requirement and the references; reference-led (`custom`) landings are allowed; deviations are logged, never failed.
 - One landing per repository, introduced gradually: monorepo now, then an export command, then generation straight into a repository, then product storage (`docs/product-plan.md`).
-- 3D models later may come from generators such as Meshy, purchases, open licenses or the customer's own files (for example a Drive link in the brief).
-- First real customer test: the owner's own landing to promote their digital products, after `add-design-archetypes` and `add-brief-intake`.
-- The intake interview follows the user's language (Spanish, English or other); the page language is a separate brief field (2026-10-22).
+- 3D models later may come from generators such as Meshy, purchases, open licenses or the customer's own files.
+- The intake interview follows the user's language; the page language is a separate brief field.
 
 ## How to generate a landing
 
 ```bash
 QA_CHROME_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome \
-  npm run new-landing -- <slug> --niche "..." [--refs a,b] [--auto] [--model sonnet]
+  npm run new-landing -- <slug> --brief sites/<slug>/brief.json [--refs a,b] [--auto]
 ```
 
-Without `--auto` it stops after `sites/<slug>/PROPOSAL.md`; continue with `--resume --auto`. A full run takes about an hour (most of it Commons image downloads). Then review `sites/<slug>/RUN.md` and `npm run section-shots -- --site <slug>`, commit, and open a PR (CI deploys the preview to a new Pages project).
-
-## Next
-
-Follow `docs/product-plan.md`:
-
-1. `add-design-archetypes` (archetype blends steered by the requirement and the references, real diversity measure), validated by the three-niche pilot. Archetypes are a starting grammar, not a template; the hard rules are the quality budgets, licensing and originality, and the layout diversity rule.
-2. `add-brief-intake`; then the owner's digital-products landing as the first real customer test.
-3. `add-landing-report`, `add-legal-compliance`, `add-ai-images` and `add-deploy-adapters` (all merged), then `add-agent-interface` (proposed), `add-3d-models`; one landing per repository introduced gradually (export first).
-
-Small fixes pending: panaderia process heading covered at 375 px; `new-landing.sh` final check without `--refs`.
+Without `--auto` it stops after `sites/<slug>/PROPOSAL.md` (review it with the owner, record his confirmations under Decisions); continue with `--resume --auto`. A bilingual brief (`languages` with two tags) makes a multi-locale site. Import the owner's AI images with `node scripts/ai-images.mjs import ...` before the build when they exist. Then review `RUN.md`, take real screenshots while scrolling (QA's full-page captures can repeat sections, see follow-ups), commit and open a PR (CI deploys the preview to a new Pages project).
 
 ## Known gaps and follow-ups
 
-- Done on branch `change/tupathdigital-hardening` (2026-10-25, working tree, PR pending): tupathdigital opted into the starter's hardening (owner request). `sites/tupathdigital/astro.config.mjs` now carries the root `security.csp` block (no change needed: fonts are self-hosted, the only inline script before the meta tag is Motion's, no 3D scene on this site); `public/_headers` has HSTS and COOP; new `src/pages/404.astro` (English, `noindex`, links home and to both stores). Verified in Chromium (scratchpad script, not a repo test): no `securitypolicyviolation` and no console error on `/`, `/privacy/`, `/404.html`, motion layer ran. QA passed (Lighthouse worst 98/100/100 on `/`, 100/100/100 on `/privacy/`); report (static): 0 fail, 3 warn (Lighthouse image savings, US market without rule set, 7 price claims); HSTS, COOP, script-CSP and 404 items pass; check-landing passed. The follow-up below stays open for the other six sites.
-- Existing sites do not have the starter's hardening yet (script CSP, HSTS, COOP in `public/_headers`): `npm run report` warns on each. Follow-up: one small site change per site to opt in (copy `security.csp` from the root `astro.config.mjs`, the two header lines and a 404 page; tupathdigital is done, see above), then check its QA and the live report.
-- First real deploy per target (add-deploy-adapters): the adapters are verified with a fake Vercel API, real rsync between local folders and dry runs only. Once the owner has the account and secrets, run one small follow-up per target and record the result: Vercel (`VERCEL_TOKEN`, then a site with `target: "vercel"`), VPS (host, `DEPLOY_SSH_KEY`, pinned host key), Hostinger shared hosting (SSH key, or `DEPLOY_FTP_PASSWORD` for the FTPS fallback, which has only a plan test).
-- Done on branch `change/tupathdigital-legal` (2026-10-25, working tree, PR pending): tupathdigital legal follow-up. Owner decisions recorded as customer facts in `sites/tupathdigital/brief.json` (never assumed): `legal.markets: ["US", "EU"]` (worldwide reach through Etsy and Gumroad; EU because products are offered to people in the EU, GDPR art. 3(2)), holder name `tupathdigital` only (no tax id, address or register), `legal.holder.email` and `legal.privacyContact` `tupathdigital@gmail.com`, processing `analytics: none`, no forms, no embeds. `src/data/legal.json` written by `scripts/legal.mjs`; the starter's `src/components/legal/` copied into the site; new English page `/privacy/` (privacy policy, plus a section on the Etsy/Gumroad links) with a footer link on both pages. The EU rule set requires only the privacy policy, so there is no legal notice; US has no rule set. Report (static): 0 fail; `legal-cookies` pass, `legal-third-party` pass, `legal-pages` warn (EU pages in place; "no rule set for US: its requirements are unknown"), `legal-price-claims` warn (7 claims). Still open: the "50% off" coupons are left alone (they end on 31 October 2026, see the reminder); review them against the EU 30-day lowest-price rule or remove them; a lawyer should review the policy before production, and US-specific rules (for example state privacy laws) are not covered.
-- Etsy listing pages answer with a bot challenge (never bypassed); product data came from the owner's Etsy CSV export. Gumroad public product pages are readable (title, image, price in JSON-LD).
-
-- `section-shots.mjs` does not clear its output folder, so stale screenshots from earlier passes mix with new ones (seen on estudio-arquitectura). Clear `qa/<slug>/sections/` at the start of each run.
-
-- Layout diversity calibration (2026-10-21, `qa.config.json` `diversity`: `minLayoutDistance` 0.2, `maxHashMatch` 0.5, `hashHamming` 10): panaderia and clinica-dental are close (distance 0.13, they would fail `layout-diversity` against each other); samurai is far from both (0.35 and 0.34). Fixtures: same layout in new colors 0.00 with 100% matching slices, one-feature restyles 0.04 to 0.14, a brutalist page 0.56. CI does not run `check-landing`, so the existing sites do not fail anything; the rule applies to a site under check against the others.
-
-- `new-landing.sh`'s own final check runs `check-landing` without `--refs` (it receives pattern slugs, not URLs), so originality is only checked when the skill passes the sheets' source URLs. Map sheet slugs to their source URL in the script.
-- samurai review (2026-10-21, owner): looks good; the sword was the only clearly 3D element; a navigable 3D samurai needs real models (`add-3d-models`).
-- 3D: headless QA renders WebGL with SwiftShader; it checks errors, fallbacks and budgets, not looks. Mobile performance with scenes sits near the limit (samurai: 93).
-- `sites/samurai`: historical copy should get an expert read before any public use (Muromachi dating of the katana, the ninja/samurai myth row, "in less than ten years" for 1868-1876); `src/data/sources.ts` is hand-written next to `assets.json`.
-
-- panaderia at 375 px: the process heading "Cuatro pasos, ningún atajo." is partly covered by the arch photo (found with `section-shots`; QA does not catch it). Small site fix.
-- clinica-dental (generated, kept as is for the validation): the "Llamar" button text wraps at 375 px; the aligners photo is weak; only 7 distinct photos because of Commons rate limits.
-- Wikimedia Commons rate-limits the shared egress (HTTP 429); image sourcing dominates run time. A second open source (or an Unsplash API key) would help.
-- `claude -p` ignores `.claude/settings.json` permissions in an untrusted folder; `new-landing.sh` passes them with `--allowedTools`. Keep that list reviewed.
-
-- `/analyze-reference` cannot scroll wheel-driven virtual scrollers (main element clipped, content moved by `transform`, as on sonomabakery.com): recon reports `document` and captures one screen. Needs a recon change (drive scrolling with wheel events when scrollTop does not move).
-- CI Lighthouse variance (2026-10-21): festival-electronica scored 67 mobile performance in one CI run while it measures 97 to 99 locally (90 even at 3x the CPU slowdown); site jobs now take the median of 3 runs (`--runs 3`).
-- Deploy task 2.1 (a commit with failing QA must not deploy) is not yet exercised on a real PR.
-- Astro Docs MCP (`mcp.docs.astro.build`) may be blocked by the cloud network policy; add it to the environment's allowed domains if needed.
-- The pattern validator rejects quoted `focus` values longer than 12 words: keep `focus` short.
+- Existing sites other than tupathdigital and personal-brand lack the starter's hardening (script CSP, HSTS, COOP, 404 page): one small site change per site.
+- First real deploy per target (add-deploy-adapters): verified only with a fake Vercel API, local rsync and dry runs. Needs the owner's accounts and secrets: Vercel (`VERCEL_TOKEN`), VPS (host, `DEPLOY_SSH_KEY`, pinned host key), Hostinger shared hosting (SSH key, or `DEPLOY_FTP_PASSWORD` for FTPS).
+- `section-shots.mjs` does not clear its output folder (stale screenshots mix with new ones).
+- `new-landing.sh`'s own final check runs `check-landing` without `--refs` (it receives sheet slugs, not URLs); map sheet slugs to their source URLs.
+- Layout diversity: panaderia and clinica-dental are close (distance 0.13); CI does not run `check-landing`.
+- samurai historical copy needs an expert read before public use; panaderia process heading covered at 375 px; clinica-dental "Llamar" wraps at 375 px.
+- Wikimedia Commons rate-limits the shared egress (HTTP 429).
+- `claude -p` ignores `.claude/settings.json` permissions in an untrusted folder; `new-landing.sh` passes them with `--allowedTools`; keep that list reviewed (see factory follow-ups).
+- `/analyze-reference` cannot scroll wheel-driven virtual scrollers.
+- CI Lighthouse variance: site jobs take the median of 3 runs and can still dip on a slow runner (samurai 86 once).
+- The pattern validator rejects quoted `focus` values longer than 12 words.
 
 ## Environment facts
 
-- Cloudflare Pages projects (names got a suffix because the base names were taken): starter `landing-factory-71t` (https://landing-factory-71t.pages.dev), bakery `panaderia-a3o` (https://panaderia-a3o.pages.dev), dental clinic `clinica-dental-9pd` (https://clinica-dental-9pd.pages.dev), samurai `samurai-1v4` (https://samurai-1v4.pages.dev). A new project's TLS certificate takes a few minutes after its first deploy (browsers show ERR_SSL_VERSION_OR_CIPHER_MISMATCH meanwhile). CI creates a new site's project on its first deploy. Preview aliases: `https://<branch-alias>.<project>.pages.dev`.
-- GitHub secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are repository secrets (not environment secrets).
-- Cloud session network: allowed domains include the three bakery sites, their CDNs (`cdn.sanity.io`, `cdnjs.cloudflare.com`, `unpkg.com`, `use.typekit.net`, `cdn.shopify.com`) and `*.pages.dev`, plus `crazy.studio`, `experience2026.funtech.inc`, `collectionapi.metmuseum.org`, `images.metmuseum.org`, `api.artic.edu`, `www.artic.edu`, Commons and Unsplash hosts. The Art Institute of Chicago image host answers with a bot challenge (never bypassed; source dropped). The Met search API moved to `/public/collection/v1.1/search` on 2026-10-01. New reference sites need their domains added by the user.
-- Cloud environment (2026-10-24): `OPENAI_API_KEY` is set as an environment variable (visible in sessions started after it was added) and `api.openai.com` is an allowed domain; `api.vercel.com` is not allowed. Sessions lack `rsync` and `ssh` by default: `apt-get install -y rsync openssh-client` works (deploy tests need rsync). The `claude` CLI is at `/opt/node22/bin/claude`.
-- Chromium for Playwright: `/opt/pw-browsers/chromium-1194/chrome-linux/chrome` (matches the pinned `playwright@1.56.1`).
+- Cloudflare Pages projects: starter `landing-factory-71t`, `panaderia-a3o`, `clinica-dental-9pd`, `samurai-1v4`, `tupathdigital`, `personal-brand-8i7` (and the archetype pilot sites). A new project's TLS certificate takes about two minutes after its first deploy. CI creates a new site's project on its first deploy. Preview aliases: `https://<branch-alias>.<project>.pages.dev`.
+- GitHub secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are repository secrets.
+- Cloud session network: allowed domains include the bakery and pilot reference sites and CDNs, `*.pages.dev`, Met and Commons hosts, `api.openai.com`, and (added 2026-10-25 for the personal-brand references) `www.product.inc`, `product.inc`, `sankar.work`, `www.sankar.work`, `www.sebg.ch`, `sebg.ch`; a newly added domain worked without a new session. `api.vercel.com` is not allowed. New reference sites need their domains added by the user.
+- `OPENAI_API_KEY` is set in the environment and works in this session (only the `claude -p` allow list blocked it during a build). Sessions lack `rsync` and `ssh` by default (`apt-get install -y rsync openssh-client`). The `claude` CLI is at `/opt/node22/bin/claude`.
+- Chromium for Playwright: `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`. In scratch scripts outside the repo, load Playwright with `createRequire(process.cwd() + '/')('playwright')` from the repo root.
