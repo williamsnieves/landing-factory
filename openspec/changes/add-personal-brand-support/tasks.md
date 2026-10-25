@@ -28,7 +28,7 @@
 ## 6. Full run
 
 - [x] 6.1 In the working tree: `npx prettier --check .`, `npm test`, `npm run check`, `npm run check:sites` (existing sites unchanged), `openspec validate --all --strict`. (verified: see the report of the implementing session)
-- [ ] 6.2 Full pre-push run in a clean clone (main session): `npm ci && npx prettier --check . && npm run check && npm run check:sites && npm run validate:patterns && npm run validate:archetypes && npm test && npm run qa`, plus `openspec validate --all --strict`.
+- [x] 6.2 Full pre-push run in a clean clone (main session): `npm ci && npx prettier --check . && npm run check && npm run check:sites && npm run validate:patterns && npm run validate:archetypes && npm test && npm run qa`, plus `openspec validate --all --strict`.
 
 ## Workflow follow-up
 
