@@ -59,3 +59,14 @@ The export SHALL refuse, with exit 2 and nothing written, an invalid slug, a sit
 #### Scenario: Recording the owner's repository
 - **WHEN** the owner exports with `--record https://github.com/<owner>/<repo>`
 - **THEN** `sites/personal-brand/EXPORTED.json` holds that URL, the date, the factory commit and `vercel`
+
+### Requirement: Lint in the exported repository
+The exported repository SHALL include the lint configuration for one site, the pinned lint devDependencies and an `npm run lint` script, and its workflow SHALL run `npm run lint` after the format check. The export SHALL refuse a site that holds an unused layer (exit 1, asking to prune it first).
+
+#### Scenario: Exporting a pruned site
+- **WHEN** a pruned site is exported and `npm ci && npm run lint` runs in the output folder
+- **THEN** lint passes with no file of the factory present
+
+#### Scenario: Exporting a site with an unused layer
+- **WHEN** the site still holds the 3D layer without any scene
+- **THEN** the export exits 1 naming the layer and writes nothing

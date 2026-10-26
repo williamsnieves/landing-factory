@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-25 (personal-brand landing merged, PR #28; next: the owner's question about moving it to its own repository, Vercel and his domain).
+Read this first in a new or compacted session. Last updated: 2026-10-26 (the owner's personal-brand landing moved to its own repository, deployed to Vercel at williansnieves.com; next: add-landing-handoff, add-landing-preview, channels).
 
 ## Working agreements
 
@@ -33,20 +33,25 @@ Read this first in a new or compacted session. Last updated: 2026-10-25 (persona
 | tupathdigital hardening (script CSP, HSTS, COOP, 404 page) | Merged (PR #25); live report 0 warn |
 | add-personal-brand-support (default 404 for new sites; owner AI portrait as the one person exception) | Merged (PR #26) and archived |
 | add-bilingual-landing (opt-in multi-locale landings on Astro i18n routing) | Merged (PR #27) and archived |
-| Owner's personal-brand landing `sites/personal-brand` (bilingual) | Merged (PR #28); Cloudflare project `personal-brand-8i7` (https://personal-brand-8i7.pages.dev once `main` deploys) |
+| Owner's personal-brand landing `sites/personal-brand` (bilingual) | Merged (PR #28); moved to its own repository (see the next rows) |
+| add-site-export (`npm run export`: one site as a standalone repository) | Merged (PR #29) and archived |
+| add-code-quality (ESLint, knip, optional site layers, architecture contract) | Merged (PR #30) and archived |
+| personal-brand handoff (Vercel target, export, `EXPORTED.json`) | This branch, `change/personal-brand-handoff`. Live at https://williansnieves.com from https://github.com/williamsnieves/personal-brand |
 
-## Resume here (2026-10-25)
+## Resume here (2026-10-26)
 
-`main` has everything above (last merge: PR #28). Branch `change/status-after-personal-brand` only refreshes this file. Nothing is half done.
+`main` has everything up to PR #30 (add-code-quality). Branch `change/personal-brand-handoff` archives add-code-quality, switches `sites/personal-brand` to the Vercel target and records its export (`sites/personal-brand/EXPORTED.json`). Nothing else is half done.
 
-**Next, the owner's pending question (he asked to talk about it after the landing):** move `sites/personal-brand` to its own repository and deploy it from there to **Vercel**, then move the domain **williansnieves.com** from Netlify to Vercel. The old site lives in Bitbucket and on Netlify (Vue); it is replaced by this landing. Points to settle with him:
-- How to export one landing as a standalone repository (the product plan's "export command": copy `sites/<slug>/` plus what it needs from the starter, its own `package.json`, lockfile, CI workflow with QA, report and the Vercel deploy step, `scripts/` it uses). Whether to build that export as a factory change first (reusable) or do a one-off move.
-- Vercel needs his account, a project and the `VERCEL_TOKEN` secret (plus org and project ids if the adapter asks); `api.vercel.com` is not in this environment's allowed domains (CI deploys, not this session). In `site.config.json` the target is still `cloudflare` (see the follow-ups).
-- Domain move: DNS at his registrar from Netlify to Vercel (his step, guided); `site` in `astro.config.mjs` is already `https://williansnieves.com`, so canonical and hreflang URLs are right once the domain points to Vercel.
+**The owner's landing moved (2026-10-26), the first real handoff and the first real Vercel deploy of the factory:**
+- Repository: https://github.com/williamsnieves/personal-brand (public, owner's account), one initial commit made from `npm run export -- --site personal-brand --no-brief`. The owner created the empty repository: the Claude GitHub App cannot create repositories (403 "Resource not accessible by integration") nor dispatch workflows; it can push once the repository is in the app's access (the owner's installation covers all repositories).
+- CI there: run 1 (push) passed QA, lint and the static report and skipped the deploy without `VERCEL_TOKEN`; run 2 (manual, after the owner added the secret) deployed to Vercel production through `scripts/deploy.mjs` (project `personal-brand` in the owner's personal account, scope `willians-nieves-projects`, alias https://personal-brand-theta-ten.vercel.app) and the live report on the deployment URL passed (0 fail, 3 warn).
+- Domain: the DNS was Netlify DNS (Namecheap "Custom DNS" `dns1-4.p05.nsone.net`, two Netlify records, no MX). Now Namecheap BasicDNS with `A @ 216.198.79.1` and `CNAME www e23985b8cab511d7.vercel-dns-017.com` (values Vercel showed; the legacy `76.76.21.21` and `cname.vercel-dns.com` still work). In Vercel, `williansnieves.com` is the production domain (apex kept, since `site` in `astro.config.mjs` and the canonical and hreflang URLs use it; Vercel's "redirect apex to www" default was unchecked) and `www` redirects with a 308. The owner confirmed the domain serves the new site.
+- Pending: the live report on `https://williansnieves.com` (this session's proxy blocks the domain and `*.vercel.app`; the owner can add `williansnieves.com` and `www.williansnieves.com` to the allowed domains), and the owner's cleanup of Netlify (remove the domain from the old site, delete the DNS zone, then the site) and of the old Bitbucket repository if wanted.
 
-**Update (add-site-export, implemented on branch `change/add-site-export`, not merged yet):** the export command now exists. `npm run export -- --site <slug> --out <dir>` writes a standalone repository (site at the root, only the scripts QA, the report and the deploy need, pinned `package.json` and lockfile, one-site GitHub Actions workflow, README, `docs/factory/`); `--record <https-url>` writes `sites/<slug>/EXPORTED.json` and the factory's CI then skips the site. It was run end to end on `personal-brand` into a scratch folder (npm ci, check, format:check, build, QA passed, static report 0 fail, deploy dry run for `cloudflare` and for `vercel`). The real move is a separate site change: set `sites/personal-brand/site.config.json` to `vercel`, export into the owner's new repository with `--record`, add `VERCEL_TOKEN`, then the owner moves the domain (`docs/export.md`, `docs/deploy/vercel.md`). The first real Vercel deploy is still unverified.
-
-**Update (add-code-quality, implemented on branch `change/add-code-quality`, not merged yet):** `npm run lint` (ESLint with TypeScript, Astro and accessibility rules on every `src/`, `knip` for unused files and dependencies, and `scripts/site-layers.mjs check`) now gates the CI `qa` job; the eight sites were pruned of the 3D layer and legal components they do not use (only `festival-electronica` and `samurai` keep 3D, only `tupathdigital` keeps legal; the lockfile follows), `estudio-arquitectura`'s two accessibility findings and a `var` in `samurai`'s inline script were fixed, the `/new-landing` skill has the architecture contract and a prune step, and exports carry the lint configuration and refuse an unpruned site. Next is still the move of `personal-brand` to its own repository (it now exports without dead layers).
+**Next (product plan steps 11 and 12, `docs/product-plan.md`):**
+1. `add-landing-handoff`: a skill (and the factory pieces it needs) that repeats this handoff for any landing: preflight, target, export (`--no-brief` for public repositories), owner steps (repository, secret), first push and CI, domain guide and the live report on the final domain, and the factory record. Lessons from this run: the app cannot create repositories or dispatch workflows; the Vercel apex/www choice must match `site`; Namecheap only shows host records after switching to BasicDNS; preview and deployment URLs need the domain in this session's allowed list to be checked from here. For customers, the managed model (a factory GitHub organization and Vercel team, transfer on request) needs a GitHub App that can create repositories.
+2. `add-landing-preview`: 2 or 3 short visual directions for the customer to choose from before the full build, and `revise_landing`.
+3. Channels decision (web app as the source of truth, chat for the interview and notifications).
 
 Other items the owner can pick: tupathdigital coupons (reminder below), hardening for the other six sites, the factory follow-ups listed below, `add-3d-models`, the first real `generate_landing` through the MCP server.
 
@@ -58,7 +63,8 @@ Reminder scheduled for 2026-11-01 (trigger `trig_013qv2DNicfU16Ah9auQ5uWb`): the
 - **Design:** concept "Two halves": the half-human, half-machine portrait guides a dark, glowing page with a color field per section; sections hero, about, a pinned AI-engineering stage, career path (Glintt 2025 back to Teravision 2015, CV dates), skills (incl. "JEV, a System 1 decision model", owner wording), beyond the code, education; 404 in the same design. English at `/`, Spanish at `/es/`.
 - **AI images (all recorded in `assets.json`):** the owner portrait (`--subject owner`, ChatGPT, GPT-6 per the owner, his recalled prompt, exact date unknown) and three backgrounds he made in ChatGPT (GPT-6) from prompts written for the palette (hero, AI stage, beyond the code), shown through `src/components/sections/Backdrop.astro` with a dark veil. Footer disclosure in both languages.
 - **Results:** QA passed, Lighthouse 98/100/100/100 on `/` and `/es/`; report 0 fail (warns: legal requirements unknown, mobile LCP); live report 0 fail, 0 warn; check-landing passed incl. `i18n`, `ai-provenance`, `brief-facts`. Cost: proposal $0.69, build $4.85.
-- **Open:** deploy target is still `cloudflare` in `site.config.json` (brief says Vercel, see "Resume here"); native readers for the English and Spanish copy; a smaller portrait for phones would help mobile LCP.
+- **Moved:** now lives in https://github.com/williamsnieves/personal-brand and deploys to Vercel at https://williansnieves.com (see "Resume here"); the factory keeps the folder as the record (`EXPORTED.json`) and its CI no longer builds it. Changes to the landing now happen in that repository.
+- **Open:** native readers for the English and Spanish copy; a smaller portrait for phones would help mobile LCP.
 
 ## Factory follow-ups (found 2026-10-25)
 
