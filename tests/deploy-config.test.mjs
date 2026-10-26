@@ -48,16 +48,24 @@ test('a configuration without target means cloudflare', () => {
   });
 });
 
-test('the root and every existing site configuration still validate as cloudflare', () => {
+test('the root and every existing site configuration validate and dispatch by their target', () => {
   const slugs = readdirSync(join(ROOT, 'sites'), { withFileTypes: true })
     .filter((e) => e.isDirectory())
     .map((e) => e.name);
   assert.ok(slugs.length >= 7);
+  const expected = { cloudflare: 'wrangler', vercel: 'script' };
   for (const slug of ['', ...slugs]) {
     const config = loadSiteConfig(ROOT, slug);
-    assert.equal(config.target, 'cloudflare', slug || 'root');
-    assert.equal(dispatch(config, 'change/x').deployVia, 'wrangler');
+    assert.ok(config.target in expected, slug || 'root');
+    assert.equal(
+      dispatch(config, 'change/x').deployVia,
+      expected[config.target],
+      slug || 'root',
+    );
   }
+  // The root stays on the default target; personal-brand moved to Vercel (2026-10-26).
+  assert.equal(loadSiteConfig(ROOT, '').target, 'cloudflare');
+  assert.equal(loadSiteConfig(ROOT, 'personal-brand').target, 'vercel');
 });
 
 test('an unknown target or setting stops with the field named', () => {
