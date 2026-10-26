@@ -57,7 +57,7 @@ The published site SHALL serve hashed assets with long-lived immutable caching, 
 - **AND** QA passes with no CSP violation in the browser console
 
 ### Requirement: Deploy each changed site
-CI SHALL run QA and, when it passes and the deploy secrets of the site's target are present, deploy every site whose folder changed to its own target (Cloudflare Pages, Vercel, VPS or shared hosting), with production on the main branch and previews on other branches where the target supports them. A site whose folder holds `EXPORTED.json` lives in its own repository: CI SHALL NOT run its site job (QA, report, deploy), even when its folder or a shared path changed; it stays an npm workspace, so the root `check:sites` still type-checks it.
+CI SHALL run QA and, when it passes and the deploy secrets of the site's target are present, deploy every site whose folder changed to its own target (Cloudflare Pages, Vercel, VPS or shared hosting), with production on the main branch and previews on other branches where the target supports them.
 
 #### Scenario: PR touching one site
 - **WHEN** a pull request changes files only under `sites/panaderia/`
@@ -71,10 +71,6 @@ CI SHALL run QA and, when it passes and the deploy secrets of the site's target 
 #### Scenario: Merge of a VPS site
 - **WHEN** a change to a site whose target is `vps` is merged into `main` and the SSH secrets exist
 - **THEN** CI deploys a new release to the server, switches to it and runs the live report on the site's URL
-
-#### Scenario: Exported site
-- **WHEN** a pull request changes `sites/personal-brand/` and that folder holds `EXPORTED.json`
-- **THEN** CI runs no site job for `personal-brand`
 
 ### Requirement: One preview comment per site
 On pull requests, CI SHALL keep one comment per deployed site with that site's preview URLs, updated in place on later pushes.
@@ -93,3 +89,10 @@ CI SHALL run the landing report on each built landing after QA and MUST NOT depl
 #### Scenario: Preview deployed
 - **WHEN** a site's preview is deployed
 - **THEN** the live checks run on the preview URL and the site's preview comment shows the report's verdict and counts per status
+
+### Requirement: Exported sites are skipped
+A site whose folder holds `EXPORTED.json` lives in its own repository: CI SHALL NOT run its site job (QA, report, deploy), even when its folder or a shared path changed. It stays an npm workspace, so the root `check:sites` still type-checks it.
+
+#### Scenario: Exported site
+- **WHEN** a pull request changes `sites/personal-brand/` and that folder holds `EXPORTED.json`
+- **THEN** CI runs no site job for `personal-brand`

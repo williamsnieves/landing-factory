@@ -1,7 +1,7 @@
 # site-export Specification
 
 ## Purpose
-TBD - created by archiving change add-site-export. Update Purpose after archive.
+Turn one site workspace into a standalone repository that builds, runs QA and the landing report, and deploys to its target without the factory, and keep a record of the export in the factory.
 
 ## Requirements
 
