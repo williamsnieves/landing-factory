@@ -1,7 +1,7 @@
 # code-quality Specification
 
 ## Purpose
-TBD - created by archiving change add-code-quality. Update Purpose after archive.
+Judge how every landing's code is written: a lint gate in CI, a check for unused files and dependencies, optional site layers that are pruned when unused, and the architecture contract every landing follows.
 
 ## Requirements
 
