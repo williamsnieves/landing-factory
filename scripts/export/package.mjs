@@ -13,6 +13,15 @@ export const TOOLING = [
   'sharp',
 ];
 
+/** Lint devDependencies of every exported repository (`npm run lint`), pinned like the rest of the tooling. */
+export const LINT_TOOLING = [
+  'eslint',
+  'eslint-plugin-astro',
+  'eslint-plugin-jsx-a11y',
+  'knip',
+  'typescript-eslint',
+];
+
 /** An export stopped by a dependency problem; `packages` names the ones involved. */
 export class PackageError extends Error {
   constructor(message, packages = []) {
@@ -50,6 +59,10 @@ export function exportedScripts() {
     check: 'astro check',
     format: 'prettier --write .',
     'format:check': 'prettier --check .',
+    // The factory's layer check is not exported: the site was pruned there (the export refuses one that was not).
+    lint: 'npm run lint:code && npm run lint:unused',
+    'lint:code': 'eslint src',
+    'lint:unused': 'knip --include files,dependencies --no-config-hints',
     qa: 'node scripts/qa.mjs',
     report: 'node scripts/landing-report.mjs',
     deploy: 'node scripts/deploy.mjs',
@@ -90,7 +103,7 @@ export function buildPackageJson({
     dependencies[name] = pin(name);
   for (const name of Object.keys(sitePackage.devDependencies ?? {}))
     devDependencies[name] = pin(name);
-  const tooling = [...TOOLING];
+  const tooling = [...TOOLING, ...LINT_TOOLING];
   if (needsWrangler(siteConfig)) tooling.push('wrangler');
   for (const name of tooling) {
     if (name in dependencies || name in devDependencies) continue;

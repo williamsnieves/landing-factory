@@ -73,3 +73,18 @@ export const scriptsPlan = ({ root, files }) =>
 /** The text of a planned entry (for the secret scan and for generated files). */
 export const textOf = (entry) =>
   entry.content ?? readFileSync(entry.from, 'utf8');
+
+/**
+ * `knip.json` of an exported single-site repository: the factory's root configuration for one project (no
+ * workspaces). The scripts are entries, since QA, the report and the deploy use the tooling packages; the files
+ * `import.meta.glob` loads are entries too; the layer folders are judged as a unit by the factory's layer check.
+ */
+export function exportedKnipConfig() {
+  return {
+    $schema: 'https://unpkg.com/knip@6/schema.json',
+    entry: ['scripts/**/*.mjs', 'src/i18n/urls.ts', 'src/scenes/*.ts'],
+    project: ['src/**/*.{astro,ts,tsx,css}', 'scripts/**/*.mjs'],
+    ignore: ['src/components/three/**', 'src/components/legal/**'],
+    ignoreDependencies: ['eslint-plugin-jsx-a11y'],
+  };
+}

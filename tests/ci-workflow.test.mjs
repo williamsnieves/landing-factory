@@ -53,6 +53,20 @@ test('the workflow keeps its four jobs', () => {
   ]);
 });
 
+test('root qa job: lint runs right after Prettier and before the type checks', () => {
+  const prettier = index('qa', 'Prettier');
+  const lint = index('qa', 'Lint');
+  assert.equal(lint, prettier + 1, 'Lint follows Prettier');
+  assert.ok(lint < index('qa', 'Types and Astro diagnostics'));
+  assert.match(stepOf('qa', 'Lint').body, /run: npm run lint$/m);
+  assert.doesNotMatch(stepOf('qa', 'Lint').body, /\bif:|continue-on-error/);
+  for (const job of ['deploy', 'sites', 'site-qa-deploy'])
+    assert.ok(
+      !jobs[job].steps.some((step) => step.name === 'Lint'),
+      `${job} does not repeat lint`,
+    );
+});
+
 test('root qa job: the static report runs after QA and before the built site is uploaded', () => {
   const qa = index(
     'qa',

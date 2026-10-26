@@ -89,3 +89,10 @@ CI SHALL run the landing report on each built landing after QA and MUST NOT depl
 #### Scenario: Preview deployed
 - **WHEN** a site's preview is deployed
 - **THEN** the live checks run on the preview URL and the site's preview comment shows the report's verdict and counts per status
+
+### Requirement: Exported sites are skipped
+A site whose folder holds `EXPORTED.json` lives in its own repository: CI SHALL NOT run its site job (QA, report, deploy), even when its folder or a shared path changed. It stays an npm workspace, so the root `check:sites` still type-checks it.
+
+#### Scenario: Exported site
+- **WHEN** a pull request changes `sites/personal-brand/` and that folder holds `EXPORTED.json`
+- **THEN** CI runs no site job for `personal-brand`

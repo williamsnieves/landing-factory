@@ -36,6 +36,7 @@
       "Bash(node scripts/render-poster.mjs *)",
       "Bash(node scripts/pick-archetypes.mjs *)",
       "Bash(node scripts/layout-signature.mjs *)",
+      "Bash(node scripts/site-layers.mjs *)",
       "Bash(node scripts/validate-archetypes.mjs *)",
       "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py *)",
       "Bash(node .claude/skills/design-taste-frontend/scripts/*)",

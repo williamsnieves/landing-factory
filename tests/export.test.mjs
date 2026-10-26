@@ -179,6 +179,11 @@ const lock = {
     'node_modules/prettier-plugin-astro': { version: '1.1.1' },
     'node_modules/sharp': { version: '0.35.5' },
     'node_modules/wrangler': { version: '4.151.1' },
+    'node_modules/eslint': { version: '9.39.5' },
+    'node_modules/eslint-plugin-astro': { version: '1.7.0' },
+    'node_modules/eslint-plugin-jsx-a11y': { version: '6.10.2' },
+    'node_modules/knip': { version: '6.43.0' },
+    'node_modules/typescript-eslint': { version: '8.72.1' },
   },
 };
 const sitePackage = {
@@ -314,6 +319,34 @@ const stepOf = (job, name) => {
 const orderOf = (job, name) =>
   jobs[job].steps.findIndex((s) => s.name === name);
 
+test('package: the lint tooling is pinned from the lockfile and the scripts run it on one site', () => {
+  const pkg = build(vercelConfig());
+  assert.equal(pkg.devDependencies.eslint, '9.39.5');
+  assert.equal(pkg.devDependencies.knip, '6.43.0');
+  for (const name of [
+    'eslint-plugin-astro',
+    'eslint-plugin-jsx-a11y',
+    'typescript-eslint',
+  ])
+    assert.match(pkg.devDependencies[name], /^\d+\.\d+\.\d+$/, name);
+  assert.equal(pkg.scripts['lint:code'], 'eslint src');
+  assert.match(
+    pkg.scripts['lint:unused'],
+    /^knip --include files,dependencies/,
+  );
+  assert.equal(pkg.scripts.lint, 'npm run lint:code && npm run lint:unused');
+  assert.ok(!JSON.stringify(pkg.scripts).includes('site-layers'));
+  assert.throws(
+    () =>
+      build(vercelConfig(), {
+        lock: {
+          packages: { ...lock.packages, 'node_modules/knip': undefined },
+        },
+      }),
+    PackageError,
+  );
+});
+
 test('workflow: has the qa and deploy jobs, and every line is valid enough to parse (indentation and keys)', () => {
   assert.deepEqual(Object.keys(jobs), ['qa', 'deploy']);
   assert.ok(!workflow.includes('\t'));
@@ -326,6 +359,7 @@ test('workflow: the qa job runs ci, format check, astro check, QA with 3 runs an
   const order = [
     'npm ci',
     'Format check',
+    'Lint (ESLint, unused files and dependencies)',
     'Types and Astro diagnostics',
     'Install Chromium',
     'QA (build, screenshots, overflow, reduced motion, Lighthouse, impeccable)',
@@ -341,6 +375,10 @@ test('workflow: the qa job runs ci, format check, astro check, QA with 3 runs an
     [...order].sort((a, b) => a - b),
   );
   assert.match(stepOf('qa', 'Format check').body, /npm run format:check/);
+  assert.match(
+    stepOf('qa', 'Lint (ESLint, unused files and dependencies)').body,
+    /npm run lint$/m,
+  );
   assert.match(
     stepOf('qa', 'Types and Astro diagnostics').body,
     /npm run check$/m,
@@ -501,6 +539,7 @@ function makeFactory({ config = vercelConfig(), brief = true } = {}) {
   put(root, 'scripts/new-site.mjs', 'export const newSite = 1;\n');
   put(root, '.claude/settings.json', '{}\n');
   put(root, '.nvmrc', '22\n');
+  put(root, 'eslint.config.mjs', 'export default [];\n');
   put(
     root,
     '.prettierrc.json',
@@ -684,6 +723,8 @@ test('a full export has the expected files and none of the private or generated 
     'assets/logo.txt',
     'astro.config.mjs',
     'brief.json',
+    'eslint.config.mjs',
+    'knip.json',
     'docs/deploy.md',
     'package.json',
     'public/_headers',
@@ -822,6 +863,47 @@ test('an empty existing --out folder is accepted and a failure afterwards remove
   assert.equal(missing.code, 1);
   assert.match(missing.c.err.join('\n'), /gone-pkg/);
   assert.equal(existsSync(out), false);
+});
+
+test('the exported lint configuration is for one site: eslint config copied, knip without workspaces', () => {
+  const factory = makeFactory();
+  const out = fresh('lint');
+  const { code, c } = run(factory, out);
+  assert.equal(code, 0, c.all());
+  assert.equal(
+    readFileSync(join(out, 'eslint.config.mjs'), 'utf8').trim(),
+    'export default [];',
+  );
+  const knip = JSON.parse(readFileSync(join(out, 'knip.json'), 'utf8'));
+  assert.equal(knip.workspaces, undefined);
+  assert.ok(knip.entry.includes('src/i18n/urls.ts'));
+  assert.ok(knip.entry.includes('src/scenes/*.ts'));
+  assert.ok(knip.ignore.includes('src/components/three/**'));
+  const pkg = JSON.parse(readFileSync(join(out, 'package.json'), 'utf8'));
+  assert.equal(pkg.scripts.lint, 'npm run lint:code && npm run lint:unused');
+  assert.equal(pkg.devDependencies['typescript-eslint'], '8.72.1');
+  const ci = readFileSync(join(out, '.github/workflows/ci.yml'), 'utf8');
+  assert.ok(ci.indexOf('npm run format:check') < ci.indexOf('npm run lint'));
+  assert.ok(ci.indexOf('npm run lint') < ci.indexOf('npm run check'));
+});
+
+test('a site that holds an unused layer exits 1 naming it and writes nothing', () => {
+  const factory = makeFactory();
+  put(factory.site, 'src/components/three/Scene3D.astro', '---\n---\n');
+  const out = fresh('layer');
+  const { code, c } = run(factory, out);
+  assert.equal(code, 1);
+  assert.match(c.err.join('\n'), /3D layer/);
+  assert.match(c.err.join('\n'), /prune it first/);
+  assert.equal(existsSync(out), false);
+  // Once a page imports it the layer is in use and the export goes through.
+  put(
+    factory.site,
+    'src/pages/scene.astro',
+    "---\nimport Scene3D from '../components/three/Scene3D.astro';\n---\n<Scene3D />\n",
+  );
+  const again = run(factory, fresh('layer-ok'));
+  assert.equal(again.code, 0, again.c.all());
 });
 
 test('an import outside scripts/ stops the export with exit 1 and leaves --out empty', () => {

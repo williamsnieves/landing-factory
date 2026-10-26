@@ -97,20 +97,20 @@ const steps = [
 <script is:inline>
   (function () {
     // The pinned stage runs from "top top" for the pin distance (200% of the viewport).
-    var section = document.getElementById('espadas');
+    const section = document.getElementById('espadas');
     if (!section) return;
-    var fig = section.querySelector('[data-scene-scrub]');
-    var steps = document.getElementById('swords-steps');
-    var wide = window.matchMedia('(min-width: 768px)').matches;
-    var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const fig = section.querySelector('[data-scene-scrub]');
+    const steps = document.getElementById('swords-steps');
+    const wide = window.matchMedia('(min-width: 768px)').matches;
+    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!fig || !steps || !wide || calm) return;
     fig.setAttribute('data-scene-start', 'top top');
     fig.setAttribute('data-scene-end', '+=200%');
-    var items = steps.querySelectorAll('li');
+    const items = steps.querySelectorAll('li');
     steps.setAttribute('data-steps-live', '');
-    var apply = function () {
-      var p = parseFloat(fig.getAttribute('data-scene-progress') || '0');
-      var idx = Math.min(items.length - 1, Math.floor(p * items.length));
+    const apply = function () {
+      const p = parseFloat(fig.getAttribute('data-scene-progress') || '0');
+      const idx = Math.min(items.length - 1, Math.floor(p * items.length));
       items.forEach(function (li, i) {
         if (i === idx) li.setAttribute('data-active', '');
         else li.removeAttribute('data-active');

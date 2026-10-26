@@ -34,11 +34,8 @@ import inkPoster from '../../assets/ink-poster.jpg';
     </div>
 
     <div class="mt-8 grid gap-8 md:grid-cols-12 md:gap-x-8">
-      <p
-        data-reveal
-        data-reveal-delay="0.2"
-        class="text-lg leading-snug md:col-span-6 md:col-start-6 lg:col-span-5 lg:col-start-6"
-      >
+      {/* No reveal: this paragraph is the mobile LCP element, so it paints with the first frame. */}
+      <p class="text-lg leading-snug md:col-span-6 md:col-start-6 lg:col-span-5 lg:col-start-6">
         Una guía en cinco capítulos sobre los guerreros de Japón: cómo
         surgieron, qué vestían, cómo eran sus espadas y cómo terminó su clase.
         Con objetos de museo como prueba.

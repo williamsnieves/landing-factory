@@ -34,6 +34,11 @@ jobs:
       - name: Prettier
         run: npx prettier --check .
 
+      # ESLint (TypeScript, Astro and accessibility rules) on every src/, unused files and dependencies (knip),
+      # and sites that hold a 3D or legal layer they do not use. It covers every site, so the site jobs skip it.
+      - name: Lint
+        run: npm run lint
+
       - name: Types and Astro diagnostics
         run: npm run check
 
