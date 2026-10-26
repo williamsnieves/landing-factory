@@ -1,7 +1,7 @@
 {
-  "target": "cloudflare",
-  "cloudflare": {
-    "pagesProject": "personal-brand",
+  "target": "vercel",
+  "vercel": {
+    "project": "personal-brand",
     "productionBranch": "main"
   }
 }
