@@ -23,7 +23,7 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
 import { ClosureError, importClosure } from './export/closure.mjs';
-import { scriptsPlan, sitePlan } from './export/files.mjs';
+import { exportedKnipConfig, scriptsPlan, sitePlan } from './export/files.mjs';
 import { PackageError, buildPackageJson } from './export/package.mjs';
 import {
   readTemplate,
@@ -32,6 +32,7 @@ import {
 } from './export/readme.mjs';
 import { ConfigError, resolveConfig } from './deploy/config.mjs';
 import { SLUG_PATTERN } from './lib/sites.mjs';
+import { LAYERS, unusedLayers } from './site-layers.mjs';
 import { scanTree } from './report/source-scan.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -153,6 +154,13 @@ export function planExport({ root, slug, withBrief }) {
       `No site "${slug}": sites/${slug}/package.json not found`,
     );
 
+  // A layer the site holds without using it never leaves the factory (design Decision 6).
+  const unused = unusedLayers(siteDir);
+  if (unused.length)
+    throw new CheckError(
+      `sites/${slug} holds ${unused.map((l) => `${LAYERS[l].label} (${l})`).join(' and ')} that nothing imports; prune it first: node scripts/site-layers.mjs prune --site ${slug} (then npm install); nothing was written`,
+    );
+
   let closure;
   try {
     closure = importClosure({ root, entries: ENTRY_POINTS });
@@ -233,6 +241,10 @@ export function planExport({ root, slug, withBrief }) {
   });
   entries.push({ to: '.nvmrc', from: join(root, '.nvmrc') });
   entries.push({
+    to: 'eslint.config.mjs',
+    from: join(root, 'eslint.config.mjs'),
+  });
+  entries.push({
     to: '.prettierrc.json',
     from: join(root, '.prettierrc.json'),
   });
@@ -240,6 +252,10 @@ export function planExport({ root, slug, withBrief }) {
     {
       to: 'package.json',
       content: `${JSON.stringify(packageJson, null, 2)}\n`,
+    },
+    {
+      to: 'knip.json',
+      content: `${JSON.stringify(exportedKnipConfig(), null, 2)}\n`,
     },
     { to: '.gitignore', content: GITIGNORE },
     { to: '.prettierignore', content: PRETTIERIGNORE },

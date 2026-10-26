@@ -15,7 +15,7 @@ sites/<slug>/
   RUN.md              run log of /new-landing: phases, QA attempts, decisions, result
   README.md
   qa.config.json      optional: QA thresholds for this site (falls back to the root file)
-  src/                layouts/, components/motion/, components/three/, components/legal/, scenes/, styles/ (tokens.css), pages/ (multi-locale sites also i18n/ and components/i18n/)
+  src/                layouts/, components/motion/, components/three/ and scenes/ (3D layer, pruned when unused), components/legal/ (pruned when unused), styles/ (tokens.css), pages/ (multi-locale sites also i18n/ and components/i18n/)
   public/             _headers, favicon.svg, site assets
   src/data/credits.json  generated list of credited photos for the footer
 ```
@@ -28,13 +28,38 @@ npm install                          # registers the workspace; commit package-l
 npm run build -w site-cafeteria      # -> sites/cafeteria/dist/index.html
 ```
 
-The scaffold copies the layout, motion layer, 3D layer (`src/components/three/`, with an empty `src/scenes/`), the legal components (`src/components/legal/`, used only when the brief names a market), styles and headers from the root starter and writes a `noindex` placeholder home page, a default `noindex` 404 page (`src/pages/404.astro`, restyled by the `/new-landing` build), `site.config.json` (`target: "cloudflare"`, `pagesProject` equals the slug; change it if the name is taken on Cloudflare), `CREDITS.md`, `README.md`, the `PROPOSAL.md` and `RUN.md` templates and an empty `assets.json`. It never copies the starter's demo pages, demo scene or sections. It refuses invalid slugs (`^[a-z0-9]+(-[a-z0-9]+)*$`) and existing folders. For a folder that so far holds only planning docs (for example a `PROPOSAL.md`), pass `--allow-existing-docs`: the `*.md` files stay untouched.
+The scaffold copies the layout, motion layer, 3D layer (`src/components/three/`, with an empty `src/scenes/`), the legal components (`src/components/legal/`, used only when the brief names a market; the `/new-landing` build prunes either one when the landing does not use it), styles and headers from the root starter and writes a `noindex` placeholder home page, a default `noindex` 404 page (`src/pages/404.astro`, restyled by the `/new-landing` build), `site.config.json` (`target: "cloudflare"`, `pagesProject` equals the slug; change it if the name is taken on Cloudflare), `CREDITS.md`, `README.md`, the `PROPOSAL.md` and `RUN.md` templates and an empty `assets.json`. It never copies the starter's demo pages, demo scene or sections. It refuses invalid slugs (`^[a-z0-9]+(-[a-z0-9]+)*$`) and existing folders. For a folder that so far holds only planning docs (for example a `PROPOSAL.md`), pass `--allow-existing-docs`: the `*.md` files stay untouched.
 
 Run `npm run new-site -- --help` for every option.
 
 ### Multi-locale sites
 
 `npm run new-site -- <slug> --langs en,es [--lang <default>]` creates a site with two or more languages on Astro's built-in i18n routing (static output). The default locale (`--lang`, else the first) is served at the root and the others under `/<locale>/`: `astro.config.mjs` gets the `i18n` block (`locales`, `defaultLocale`, `prefixDefaultLocale: false`, the `security.csp` block kept), `src/pages/<locale>/index.astro` exists for each other locale (folder names equal the locales, lowercase tags such as `pt-br`), `src/i18n/ui.ts` holds the typed UI dictionary (`t(locale)`) and `src/components/i18n/LanguageSwitcher.astro` is the switcher (real links, no JavaScript, no redirect by browser language). `BaseLayout` sets `<html lang>` from the current locale and emits `hreflang` alternates plus `x-default` on indexable pages (set `site` in `astro.config.mjs` for absolute URLs). One 404 page, in the default language. The factory's `check-landing` has an `i18n` rule for such sites, QA checks every locale page, and `layout-signature.json` describes the default locale's home page. A site without `--langs` is unchanged.
+
+## Code architecture
+
+Every landing follows one contract, single-language or multi-locale. `/new-landing` builds to it and review enforces what lint cannot see.
+
+- **Copy and data in typed modules.** Section copy and lists (products, steps, FAQs, roles) live in `src/content/<locale>.ts` (multi-locale) or `src/content/site.ts` and `src/data/*.ts` (single-language), never typed inline in markup. A section receives the text through props or imports the module.
+- **One section per component** in `src/components/sections/`, with an `interface Props` when it takes props. A repeated piece (a heading block, a card) is its own component.
+- **Pages only compose** the layout and the sections: no data shaping and no logic beyond picking the locale.
+- **Tokens only.** No raw hex outside `src/styles/tokens.css`, and no sizes outside the type scale.
+- **Lint.** `npm run lint` passes: ESLint (TypeScript, Astro and accessibility recommended rules) on the starter's and every site's `src/`, `knip` for unused files and dependencies, and `node scripts/site-layers.mjs check`. Sites have no ESLint config of their own; the root one reaches them. No rule is turned off to get a pass, and an inline disable comment gives its reason on the same line (`-- reason`). A file loaded through `import.meta.glob` is an entry in the root `knip.json`.
+
+Existing single-language sites keep their inline copy until they are edited; the contract applies to new landings.
+
+### Optional layers
+
+`new-site` copies two optional layers into every site: the 3D layer (`src/components/three/`, `src/scenes/`, and the `three` and `@types/three` dependencies) and the legal components (`src/components/legal/`). A layer is in use when a file of the site's `src/` outside the layer imports it. The build removes the ones a finished landing does not use:
+
+```bash
+node scripts/site-layers.mjs prune --site <slug> [--dry-run]   # remove unused layers and their dependencies
+npm install                                                   # updates the root package-lock.json
+node scripts/site-layers.mjs add <3d|legal> --site <slug>      # copy a layer back from the starter
+node scripts/site-layers.mjs check [--site <slug>]             # exit 1 listing sites that hold an unused layer
+```
+
+`prune` refuses when `src/` has a dynamic `import()` with a non-literal argument. The starter is never checked: it is the template source.
 
 ## Generate a whole site
 

@@ -1,4 +1,4 @@
-# CI of an exported landing: format check, types, QA and the static landing report, then (only if they
+# CI of an exported landing: format check, lint, types, QA and the static landing report, then (only if they
 # passed, the target's secrets exist and the pull request is not from a fork) the deploy to the site's
 # target, the live report and one sticky preview comment. Written by `npm run export` in landing-factory.
 # Everything site-specific (target, Pages project, secrets needed) is read at run time from
@@ -36,6 +36,9 @@ jobs:
 
       - name: Format check
         run: npm run format:check
+
+      - name: Lint (ESLint, unused files and dependencies)
+        run: npm run lint
 
       - name: Types and Astro diagnostics
         run: npm run check
