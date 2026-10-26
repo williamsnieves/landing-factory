@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Security (OWASP Top 10) and performance report of one landing.
 //
-//   npm run report -- [--site <slug>] [--url <deployed-url>] [--external-links] [--only static|live]
+//   npm run report -- [--site <slug>] [--url <deployed-url> | --site-url] [--external-links] [--only static|live]
 //                     [--skip <groups>] [--config <file>] [--out <dir>] [--qa <report.json>] [--allow-http]
 //   npm run report -- --summary <report-dir>
 //
@@ -33,6 +33,7 @@ import {
   loadQaReport,
 } from './report/perf.mjs';
 import { renderMarkdown } from './report/render.mjs';
+import { SiteUrlError, readSiteUrl } from './report/site-url.mjs';
 import { scanHtml } from './report/html.mjs';
 import {
   findSinks,
@@ -100,6 +101,8 @@ report.md to qa/<slug>/report/<timestamp>/ (qa/report/<timestamp>/ for the start
   --site <slug>       report on sites/<slug> (default: the starter at the repo root)
   --url <url>         also run the live checks on the deployed https:// URL (TLS, HTTP to HTTPS, headers,
                       caching, private paths, unknown path)
+  --site-url          the same on the landing's own domain: the origin of the absolute canonical URL in
+                      dist/index.html (needs "site" in astro.config.mjs and a build); not with --url
   --external-links    request each outbound link once (at most 50, sequential) and report broken ones;
                       bot blocks (403, 429, challenges) are listed as unverified, never retried
   --only static|live  static: everything that reads dist/ and the source (default without --url);
@@ -146,6 +149,7 @@ function parse(argv) {
     options: {
       site: { type: 'string' },
       url: { type: 'string' },
+      'site-url': { type: 'boolean' },
       'external-links': { type: 'boolean' },
       only: { type: 'string' },
       skip: { type: 'string' },
@@ -179,20 +183,23 @@ export async function runReport(values, deps = {}) {
       );
   if (values.only && !['static', 'live'].includes(values.only))
     throw new RunError('--only must be "static" or "live"');
-  if (values.only === 'live' && !values.url)
-    throw new RunError('--only live needs --url <deployed-url>');
-  if (values.url) {
+  if (values['site-url'] && values.url)
+    throw new RunError('--site-url and --url cannot be used together');
+  if (values.only === 'live' && !values.url && !values['site-url'])
+    throw new RunError('--only live needs --url <deployed-url> or --site-url');
+  const checkUrl = (flag) => {
     let parsed;
     try {
       parsed = new URL(values.url);
     } catch {
-      throw new RunError(`--url is not a URL: ${values.url}`);
+      throw new RunError(`${flag} is not a URL: ${values.url}`);
     }
     if (parsed.protocol !== 'https:' && !values['allow-http'])
       throw new RunError(
-        `--url must be an https:// URL (got ${values.url}); --allow-http is for local servers only`,
+        `${flag} must be an https:// URL (got ${values.url}); --allow-http is for local servers only`,
       );
-  }
+  };
+  if (values.url) checkUrl('--url');
 
   let paths;
   let config;
@@ -208,6 +215,20 @@ export async function runReport(values, deps = {}) {
     reportConfig = resolveReportConfig(config.report ?? {});
   } catch (error) {
     throw new RunError(error.message);
+  }
+
+  if (values['site-url']) {
+    try {
+      values = {
+        ...values,
+        url: readSiteUrl(join(paths.projectDir, 'dist')),
+      };
+    } catch (error) {
+      if (error instanceof SiteUrlError)
+        throw new RunError(`--site-url: ${error.message}`);
+      throw error;
+    }
+    checkUrl('--site-url');
   }
 
   const runStatic = values.only !== 'live';

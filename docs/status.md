@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-26 (personal-brand handoff merged, PR #31; Netlify and Bitbucket removed by the owner; add-landing-handoff proposed on its branch, waiting for the go-ahead to implement).
+Read this first in a new or compacted session. Last updated: 2026-10-26 (personal-brand handoff merged, PR #31; Netlify and Bitbucket removed by the owner; add-landing-handoff implemented on its branch, PR open).
 
 ## Working agreements
 
@@ -37,11 +37,11 @@ Read this first in a new or compacted session. Last updated: 2026-10-26 (persona
 | add-site-export (`npm run export`: one site as a standalone repository) | Merged (PR #29) and archived |
 | add-code-quality (ESLint, knip, optional site layers, architecture contract) | Merged (PR #30) and archived |
 | personal-brand handoff (Vercel target, export, `EXPORTED.json`) | Merged (PR #31; a site change, nothing to archive). Live at https://williansnieves.com from https://github.com/williamsnieves/personal-brand |
-| add-landing-handoff (handoff preflight and owner checklist, `/landing-handoff` skill, domain live report in exported repositories) | Proposed on `change/add-landing-handoff` (proposal, specs, design, tasks; valid with `--strict`); not implemented yet |
+| add-landing-handoff (handoff preflight and owner checklist, `/landing-handoff` skill, domain live report in exported repositories) | Implemented on `change/add-landing-handoff`, PR open; waiting for CI and the owner's merge |
 
 ## Resume here (2026-10-26)
 
-`main` has everything up to PR #31 (the personal-brand handoff). Branch `change/add-landing-handoff` holds only the proposal of the next change (one commit: `openspec/changes/add-landing-handoff/`). Next step: the owner's go-ahead to implement it (Sonnet subagent, then review, clean-clone checks, PR, CI).
+`main` has everything up to PR #31 (the personal-brand handoff). Branch `change/add-landing-handoff` holds the implemented change (PR open). Next step: the owner's merge, then archive it as the first commit of the next branch and refresh the personal-brand repository.
 
 **add-landing-handoff in short** (see its `proposal.md`, `design.md`, `tasks.md`):
 - `scripts/handoff.mjs check --site <slug> [--visibility public|private]`: read-only preflight (not exported, no unused layer, valid `site.config.json`, `site` set in `astro.config.mjs`, brief `deploy.domain` and `deploy.target` agree; warns when a public repository would carry `brief.json`).
@@ -56,10 +56,10 @@ Read this first in a new or compacted session. Last updated: 2026-10-26 (persona
 - CI there: run 1 (push) passed QA, lint and the static report and skipped the deploy without `VERCEL_TOKEN`; run 2 (manual, after the owner added the secret) deployed to Vercel production through `scripts/deploy.mjs` (project `personal-brand` in the owner's personal account, scope `willians-nieves-projects`, alias https://personal-brand-theta-ten.vercel.app) and the live report on the deployment URL passed (0 fail, 3 warn).
 - Domain: the DNS was Netlify DNS (Namecheap "Custom DNS" `dns1-4.p05.nsone.net`, two Netlify records, no MX). Now Namecheap BasicDNS with `A @ 216.198.79.1` and `CNAME www e23985b8cab511d7.vercel-dns-017.com` (values Vercel showed; the legacy `76.76.21.21` and `cname.vercel-dns.com` still work). In Vercel, `williansnieves.com` is the production domain (apex kept, since `site` in `astro.config.mjs` and the canonical and hreflang URLs use it; Vercel's "redirect apex to www" default was unchecked) and `www` redirects with a 308. The owner confirmed the domain serves the new site.
 - Cleanup done by the owner (2026-10-26): the Netlify site and DNS zone and the old Bitbucket repository are deleted.
-- Pending: the live report on `https://williansnieves.com`. This session's proxy blocks the domain and `*.vercel.app` (the owner can add `williansnieves.com` and `www.williansnieves.com` to the allowed domains); add-landing-handoff makes the owner's CI check it on every production deploy instead.
+- Live report on `https://williansnieves.com` (2026-10-26, from this session through `--site-url` on a fresh export, the proxy now reaches the domain): passed, 0 fail, 1 warn (an unknown path answers 308, Vercel's trailing-slash redirect, before the 404), 1 not run (plain HTTP did not resolve through the proxy). add-landing-handoff also makes the owner's CI check the domain on every production deploy.
 
 **Next (product plan steps 11 and 12, `docs/product-plan.md`):**
-1. `add-landing-handoff` (proposed, see above). Lessons it encodes: the app cannot create repositories or dispatch workflows; the Vercel apex/www choice must match `site`; Namecheap only shows host records after switching to BasicDNS; preview and deployment URLs need the domain in this session's allowed list to be checked from here. For customers, the managed model (a factory GitHub organization and Vercel team, transfer on request) needs a GitHub App that can create repositories.
+1. `add-landing-handoff` (implemented, PR open, see above). Lessons it encodes: the app cannot create repositories or dispatch workflows; the Vercel apex/www choice must match `site`; Namecheap only shows host records after switching to BasicDNS; preview and deployment URLs need the domain in this session's allowed list to be checked from here. For customers, the managed model (a factory GitHub organization and Vercel team, transfer on request) needs a GitHub App that can create repositories.
 2. `add-landing-preview`: 2 or 3 short visual directions for the customer to choose from before the full build, and `revise_landing`.
 3. Channels decision (web app as the source of truth, chat for the interview and notifications).
 

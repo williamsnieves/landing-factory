@@ -2,7 +2,7 @@
 
 ## 1. Handoff script
 
-- [ ] 1.1 `scripts/handoff.mjs check` (design Decision 1): the problems, the public-brief warning, `--json`, and exit codes 0, 1 and 2. Reuse `loadSiteConfig`, `mapBriefTarget` and the layer check; write nothing. Add the npm script `handoff` and allow `Bash(node scripts/handoff.mjs *)` in `.claude/settings.json`.
+- [x] 1.1 `scripts/handoff.mjs check` (design Decision 1): the problems, the public-brief warning, `--json`, and exit codes 0, 1 and 2. Reuse `loadSiteConfig`, `mapBriefTarget` and the layer check; write nothing. Add the npm script `handoff` and allow `Bash(node scripts/handoff.mjs *)` in `.claude/settings.json`.
 
   Verify with `tests/handoff.test.mjs` on fixture factories:
   - each problem is named;
@@ -11,7 +11,7 @@
   - bad usage exits 2;
   - no file changes;
   - on the real repository, `check --site tupathdigital` names its default `cloudflare` target without a brief conflict and no missing `site` problem when it has one (record the real output).
-- [ ] 1.2 `scripts/handoff.mjs plan` (design Decision 1 table).
+- [x] 1.2 `scripts/handoff.mjs plan` (design Decision 1 table).
 
   Verify, with tests:
   - the Vercel apex and Vercel `www` cases give the right redirect direction;
@@ -23,14 +23,14 @@
 
 ## 2. Domain report in exported repositories
 
-- [ ] 2.1 `scripts/report/site-url.mjs` and the `--site-url` option of `landing-report.mjs` (design Decision 3).
+- [x] 2.1 `scripts/report/site-url.mjs` and the `--site-url` option of `landing-report.mjs` (design Decision 3).
 
   Verify with tests:
   - an absolute canonical URL gives its origin;
   - a relative canonical URL or none exits 2 with the reason;
   - `--site-url` with `--url` is bad usage;
   - the existing report tests still pass.
-- [ ] 2.2 `scripts/export/templates/ci.yml`: the production-only `Landing report (live, site domain)` step, the summary lines and the final failure step covering both reports.
+- [x] 2.2 `scripts/export/templates/ci.yml`: the production-only `Landing report (live, site domain)` step, the summary lines and the final failure step covering both reports.
 
   Verify:
   - the template test asserts the step, its production condition, its order after the deployment report and the final step;
@@ -38,10 +38,10 @@
 
 ## 3. Skill and docs
 
-- [ ] 3.1 `.claude/skills/landing-handoff/SKILL.md` (design Decision 2): phases, stop points and hard rules, with the commands of each phase. Also how to refresh an already exported repository's workflow and scripts from a fresh export.
+- [x] 3.1 `.claude/skills/landing-handoff/SKILL.md` (design Decision 2): phases, stop points and hard rules, with the commands of each phase. Also how to refresh an already exported repository's workflow and scripts from a fresh export.
 
   Verify by review: every lesson in the Context of design.md maps to a phase or a rule.
-- [ ] 3.2 `docs/handoff.md` (delivery models, checklist, DNS cases, GitHub App limits), a "Handing off a landing" section in `CLAUDE.md`, a link from `docs/export.md`, and `docs/status.md`.
+- [x] 3.2 `docs/handoff.md` (delivery models, checklist, DNS cases, GitHub App limits), a "Handing off a landing" section in `CLAUDE.md`, a link from `docs/export.md`, and `docs/status.md`.
 
   Verify:
   - `npm run format:check` passes;

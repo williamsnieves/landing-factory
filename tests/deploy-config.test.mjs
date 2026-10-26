@@ -338,6 +338,17 @@ test('--github-output appends the dispatch to $GITHUB_OUTPUT', () => {
   );
 });
 
+test('the GITHUB_OUTPUT lines carry is_production (the exported workflow gates the domain report on it)', () => {
+  const lines = (branch) =>
+    githubOutputLines(dispatch(resolveConfig(vercelConfig()), branch));
+  assert.ok(lines('main').includes('is_production=true'));
+  assert.ok(lines('feature/x').includes('is_production=false'));
+  const vps = githubOutputLines(
+    dispatch(resolveConfig(vpsConfig()), 'change/x'),
+  );
+  assert.ok(vps.includes('is_production=false'));
+});
+
 test('the CLI exits 2 naming the field for an invalid configuration', () => {
   const raw = vpsConfig();
   delete raw.vps.hostKey;
