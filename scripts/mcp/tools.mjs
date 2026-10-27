@@ -6,6 +6,7 @@ import {
   briefSummary,
   briefUpdate,
   briefValidate,
+  chooseDirectionTool,
   getLanding,
   listLandings,
   readQa,
@@ -67,7 +68,7 @@ export function createTools({ root, jobs }) {
     {
       name: 'get_landing',
       description:
-        'Describe one landing: target, brief summary, last run result and phase, run totals and usage, latest QA and report verdicts, preview URL if known.',
+        'Describe one landing: target, brief summary, last run result and phase, run totals and usage, latest QA and report verdicts, preview URL if known, and the visual directions with the recorded choice when there are any.',
       inputSchema: obj({ slug }, ['slug']),
       annotations: READ,
       handler: ({ slug: s }) => getLanding(root, s),
@@ -168,6 +169,45 @@ export function createTools({ root, jobs }) {
       ),
       annotations: JOB,
       handler: startJob('propose'),
+    },
+    {
+      name: 'preview_landing',
+      description:
+        'Start a background job that builds 2 or 3 visual directions (a hero and one section each, noindex pages at /directions/<id>/) and stops with Result: directions, without the full build. Costs tokens. Returns a job id at once; follow it with get_job, then show the customer the previews and record the choice with choose_direction.',
+      inputSchema: obj(
+        {
+          slug,
+          niche,
+          refs,
+          lang: str('Page language tag such as es or en.'),
+          count: {
+            type: 'integer',
+            enum: [2, 3],
+            description: 'How many directions (default 3).',
+          },
+          model,
+        },
+        ['slug'],
+      ),
+      annotations: JOB,
+      handler: startJob('preview'),
+    },
+    {
+      name: 'choose_direction',
+      description:
+        "Record the customer's chosen visual direction and their notes (their own words, at most 2000 characters) in sites/<slug>/directions.json. Writes only that file; refuses an unknown direction and a site already built past the directions. The full build (generate_landing with resume) then starts from the chosen direction.",
+      inputSchema: obj(
+        {
+          slug,
+          direction: str('Direction id.', { enum: ['a', 'b', 'c'] }),
+          notes: str("The customer's comments, relayed as they said them.", {
+            maxLength: 2000,
+          }),
+        },
+        ['slug', 'direction'],
+      ),
+      annotations: WRITE,
+      handler: (args) => chooseDirectionTool(root, args),
     },
     {
       name: 'generate_landing',

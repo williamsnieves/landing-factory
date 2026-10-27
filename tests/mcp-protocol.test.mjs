@@ -27,6 +27,8 @@ const EXPECTED_TOOLS = [
   'brief_summary',
   'brief_update',
   'propose_landing',
+  'preview_landing',
+  'choose_direction',
   'generate_landing',
   'run_qa',
   'run_report',

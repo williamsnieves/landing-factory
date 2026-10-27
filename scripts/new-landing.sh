@@ -33,7 +33,15 @@ sites/<slug>/.run.log. Without --auto the run stops after the proposal so you ca
                           does this on its own; the copy is then written in every locale.
   --title "<text>"        working title for the placeholder page (default: the slug)
   --resume                continue an existing sites/<slug>/ (skips preflight slug check, scaffold and install)
+  --directions            build 2 or 3 visual directions (a hero and one section each, noindex pages at /directions/<id>/)
+                          instead of the landing, record them in directions.json and DIRECTIONS.md, run QA and stop with
+                          "Result: directions". The customer picks one: node scripts/directions.mjs choose ...
+  --count 2|3             how many directions (default 3; only with --directions)
   --help                  show this help
+
+Directions flow: run with --directions, send the customer the preview URLs of the site's branch, record the
+choice with `node scripts/directions.mjs choose --site <slug> --direction <id> [--notes "..."]`, then continue with
+--resume --auto. A resume on a site with directions.json and no recorded choice is refused (exit 1).
 
 Review flow: run without --auto, read sites/<slug>/PROPOSAL.md, edit it if needed, then continue with
   scripts/new-landing.sh <slug> --niche "<niche>" --resume --auto   (or --brief sites/<slug>/brief.json)
@@ -71,6 +79,8 @@ LANGS_TAGS=""
 TITLE=""
 SOURCES=""
 BRIEF=""
+DIRECTIONS=0
+COUNT=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -84,6 +94,8 @@ while [ $# -gt 0 ]; do
     --brief) [ $# -ge 2 ] || die_usage "--brief needs a value"; BRIEF="$2"; shift 2 ;;
     --title) [ $# -ge 2 ] || die_usage "--title needs a value"; TITLE="$2"; shift 2 ;;
     --sources) [ $# -ge 2 ] || die_usage "--sources needs a value"; SOURCES="$2"; shift 2 ;;
+    --count) [ $# -ge 2 ] || die_usage "--count needs a value"; COUNT="$2"; shift 2 ;;
+    --directions) DIRECTIONS=1; shift ;;
     --auto) AUTO=1; shift ;;
     --dry-run) DRY_RUN=1; shift ;;
     --resume) RESUME=1; shift ;;
@@ -102,6 +114,11 @@ if [ -n "$BRIEF" ]; then
 fi
 [[ "$MAX_ATTEMPTS" =~ ^[0-9]+$ ]] || die_usage "--max-attempts must be a non-negative integer, got \"$MAX_ATTEMPTS\""
 [[ "$LANG_TAG" =~ ^[a-z]{2,3}(-[A-Za-z0-9]+)*$ ]] || die_usage "--lang must be a language tag such as es or en, got \"$LANG_TAG\""
+if [ -n "$COUNT" ]; then
+  [ "$DIRECTIONS" -eq 1 ] || die_usage "--count only goes with --directions"
+  [[ "$COUNT" =~ ^[23]$ ]] || die_usage "--count must be 2 or 3, got \"$COUNT\""
+fi
+[ "$DIRECTIONS" -eq 0 ] || [ "$DRY_RUN" -eq 0 ] || die_usage "--directions cannot be combined with --dry-run"
 [ -z "$LANGS_TAGS" ] || [[ "$LANGS_TAGS" =~ ^[a-z]{2,3}(-[a-z0-9]+)*(,[a-z]{2,3}(-[a-z0-9]+)*)+$ ]] || die_usage "--langs takes two or more comma-separated lowercase language tags such as en,es, got \"$LANGS_TAGS\""
 [ -z "$SOURCES" ] || [[ "$SOURCES" =~ ^(commons|met)(,(commons|met))*$ ]] || die_usage "--sources takes a comma list of commons, met, got \"$SOURCES\""
 if [ -n "$REFS" ]; then
@@ -130,6 +147,16 @@ skipped() { case ",${NEW_LANDING_SKIP:-}," in *",$1,"*) return 0 ;; *) return 1 
 
 if [ "$RESUME" -eq 1 ]; then
   [ -f "$SITE_DIR/package.json" ] || die_usage "--resume needs an existing $SITE_DIR (no package.json found)"
+fi
+
+# A site with visual directions builds only after the customer's choice is recorded.
+if [ "$RESUME" -eq 1 ] && [ "$DIRECTIONS" -eq 0 ] && [ -f "$SITE_DIR/directions.json" ]; then
+  has_choice="$(node -e 'try { const d = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")); process.stdout.write(d && d.choice ? "yes" : "no"); } catch { process.stdout.write("no"); }' "$SITE_DIR/directions.json")"
+  if [ "$has_choice" != "yes" ]; then
+    echo "new-landing: $SITE_DIR/directions.json has no recorded choice; the build waits for the customer." >&2
+    echo "Record it with: node scripts/directions.mjs choose --site $SLUG --direction <id> [--notes \"...\"]" >&2
+    exit 1
+  fi
 fi
 
 # 0. The brief, when there is one, must be valid before anything else runs (nothing is created, claude is not started).
@@ -189,6 +216,8 @@ PROMPT="/new-landing $SLUG"
 [ "$AUTO" -eq 0 ] || PROMPT+=" --auto"
 [ "$DRY_RUN" -eq 0 ] || PROMPT+=" --dry-run"
 [ "$RESUME" -eq 0 ] || PROMPT+=" --resume"
+[ "$DIRECTIONS" -eq 0 ] || PROMPT+=" --directions"
+[ -z "$COUNT" ] || PROMPT+=" --count $COUNT"
 PROMPT+=" --max-attempts $MAX_ATTEMPTS --lang $LANG_TAG"
 [ -z "$LANGS_TAGS" ] || PROMPT+=" --langs $LANGS_TAGS"
 
@@ -256,6 +285,13 @@ case "$RESULT" in
     else
       echo "  scripts/new-landing.sh $SLUG --niche \"$NICHE\" --resume --auto"
     fi
+    ;;
+  directions)
+    if ! skipped final-check; then
+      node scripts/directions.mjs check --site "$SLUG" || { echo "new-landing: the directions check failed" >&2; exit 1; }
+    fi
+    echo "new-landing: directions ready for $SLUG (see $SITE_DIR/DIRECTIONS.md). Push the branch for the preview URLs, then record the choice:"
+    echo "  node scripts/directions.mjs choose --site $SLUG --direction <id> [--notes \"...\"]"
     ;;
   dry-run-done)
     echo "new-landing: dry run done: $SITE_DIR/PROPOSAL.md and design-system/$SLUG/MASTER.md"

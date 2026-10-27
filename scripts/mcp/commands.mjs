@@ -26,6 +26,11 @@ export const JOB_KINDS = {
     runner: 'bash',
     script: 'scripts/new-landing.sh',
   },
+  preview: {
+    class: 'generation',
+    runner: 'bash',
+    script: 'scripts/new-landing.sh',
+  },
   generate: {
     class: 'generation',
     runner: 'bash',
@@ -106,7 +111,7 @@ export function buildCommand(kind, input, root) {
   if (!spec) throw new ToolError(`unknown job kind ${JSON.stringify(kind)}`);
   const slug = assertSlug(input.slug);
   const argv = [spec.runner, spec.script, slug];
-  if (kind === 'propose' || kind === 'generate') {
+  if (kind === 'propose' || kind === 'generate' || kind === 'preview') {
     const niche = cleanNiche(input.niche);
     const refs = checkRefs(root, input.refs);
     const model = checkModel(input.model);
@@ -118,9 +123,17 @@ export function buildCommand(kind, input, root) {
         argv.push('--resume');
       }
     }
+    if (kind === 'preview') {
+      argv.push('--directions');
+      if (input.count !== undefined) {
+        if (input.count !== 2 && input.count !== 3)
+          throw new ToolError('count must be 2 or 3');
+        argv.push('--count', String(input.count));
+      }
+    }
     if (niche) argv.push('--niche', niche);
     if (refs.length) argv.push('--refs', refs.join(','));
-    if (kind === 'propose') {
+    if (kind === 'propose' || kind === 'preview') {
       const lang = checkLang(input.lang);
       if (lang) argv.push('--lang', lang);
     }

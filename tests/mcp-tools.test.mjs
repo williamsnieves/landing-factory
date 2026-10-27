@@ -1,6 +1,13 @@
 // Landing, QA, report and brief tools, and the argv each job tool builds, on a temporary fixture repository.
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
 
@@ -364,6 +371,50 @@ test('the argv built for each job tool and option is exact', () => {
   );
 });
 
+test('the preview job builds new-landing.sh --directions with a validated count', () => {
+  const argv = (input) => buildCommand('preview', input, root).argv;
+  assert.deepEqual(argv({ slug: 'alpha' }), [
+    'bash',
+    'scripts/new-landing.sh',
+    'alpha',
+    '--directions',
+  ]);
+  assert.deepEqual(
+    argv({
+      slug: 'newsite',
+      niche: 'dental clinic',
+      refs: ['sheet-b'],
+      lang: 'en',
+      count: 2,
+      model: 'opus',
+    }),
+    [
+      'bash',
+      'scripts/new-landing.sh',
+      'newsite',
+      '--directions',
+      '--count',
+      '2',
+      '--niche',
+      'dental clinic',
+      '--refs',
+      'sheet-b',
+      '--lang',
+      'en',
+      '--model',
+      'opus',
+    ],
+  );
+  for (const [input, pattern] of [
+    [{ slug: 'alpha', count: 4 }, /count must be 2 or 3/],
+    [{ slug: 'alpha', count: '3' }, /count must be 2 or 3/],
+    [{ slug: 'newsite' }, /niche, or create a brief/],
+    [{ slug: '../etc', niche: 'x' }, /invalid slug/],
+    [{ slug: 'alpha', model: 'a; b' }, /invalid model/],
+  ])
+    assert.throws(() => buildCommand('preview', input, root), pattern);
+});
+
 test('bad input is refused before any job starts: slug, sheet, model, URL, shell text', async () => {
   const cases = [
     ['propose_landing', { slug: '../etc', niche: 'x' }, /invalid slug/],
@@ -458,6 +509,7 @@ test('no command in the fixed table can publish: no deploy, wrangler, git, gh or
       assert.doesNotMatch(part, forbidden, `${kind}: ${part}`);
   assert.deepEqual(Object.keys(JOB_KINDS).sort(), [
     'generate',
+    'preview',
     'propose',
     'qa',
     'report',
@@ -466,6 +518,7 @@ test('no command in the fixed table can publish: no deploy, wrangler, git, gh or
   const scripts = new Set(Object.values(JOB_KINDS).map((s) => s.script));
   for (const [kind, input] of [
     ['propose', { slug: 'alpha' }],
+    ['preview', { slug: 'alpha' }],
     ['generate', { slug: 'alpha' }],
     ['qa', { slug: 'alpha' }],
     ['report', { slug: 'alpha' }],
@@ -509,6 +562,7 @@ test('the server is registered in .mcp.json; settings allow read and brief tools
     'brief_missing',
     'brief_summary',
     'brief_update',
+    'choose_direction',
     'get_job',
     'list_jobs',
     'tail_job_log',
@@ -516,6 +570,7 @@ test('the server is registered in .mcp.json; settings allow read and brief tools
     assert.ok(allowed.includes(`mcp__landing-factory__${name}`), name);
   for (const name of [
     'propose_landing',
+    'preview_landing',
     'generate_landing',
     'run_qa',
     'run_report',
@@ -531,4 +586,127 @@ test('the server is registered in .mcp.json; settings allow read and brief tools
     /^sites\/\*\/\.run-usage\.json$/m,
   );
   assert.match(readFileSync(join(repo, '.gitignore'), 'utf8'), /^\.cache\/$/m);
+});
+
+// --- visual directions ---------------------------------------------------------------------------------
+
+const siteFiles = (dir) =>
+  readdirSync(dir, { recursive: true }).map(String).sort();
+const directionsRecord = () => ({
+  version: 1,
+  directions: [
+    {
+      id: 'a',
+      archetype: 'swiss',
+      traits: [],
+      primary: '#92400e',
+      displayFont: 'Fraunces',
+      bodyFont: 'Inter',
+      hero: 'split',
+      idea: 'warm and editorial',
+    },
+    {
+      id: 'b',
+      archetype: 'collage',
+      traits: [],
+      primary: '#1d4ed8',
+      displayFont: 'Inter',
+      bodyFont: 'Inter',
+      hero: 'typographic',
+      idea: 'loud and playful',
+    },
+  ],
+  choice: null,
+});
+
+test('choose_direction writes only directions.json, and get_landing shows the directions and the choice', async () => {
+  const dir = join(root, 'sites/alpha');
+  assert.equal((await ok('get_landing', { slug: 'alpha' })).directions, null);
+  writeFileSync(
+    join(dir, 'directions.json'),
+    JSON.stringify(directionsRecord()),
+  );
+  mkdirSync(join(dir, 'src/pages/directions'), { recursive: true });
+  try {
+    const before = await ok('get_landing', { slug: 'alpha' });
+    assert.deepEqual(before.directions, {
+      directions: [
+        {
+          id: 'a',
+          idea: 'warm and editorial',
+          archetype: 'swiss',
+          previewPath: '/directions/a/',
+        },
+        {
+          id: 'b',
+          idea: 'loud and playful',
+          archetype: 'collage',
+          previewPath: '/directions/b/',
+        },
+      ],
+      choice: null,
+    });
+    const files = siteFiles(dir);
+    const saved = await ok('choose_direction', {
+      slug: 'alpha',
+      direction: 'b',
+      notes: 'warmer photos',
+    });
+    assert.equal(saved.saved, true);
+    assert.equal(saved.choice.direction, 'b');
+    const record = JSON.parse(
+      readFileSync(join(dir, 'directions.json'), 'utf8'),
+    );
+    assert.deepEqual(record.choice, {
+      direction: 'b',
+      notes: 'warmer photos',
+      date: new Date().toISOString().slice(0, 10),
+    });
+    assert.equal(record.directions.length, 2);
+    assert.deepEqual(siteFiles(dir), files, 'no other file was created');
+    const after = await ok('get_landing', { slug: 'alpha' });
+    assert.equal(after.directions.choice.direction, 'b');
+    assert.equal(after.directions.choice.notes, 'warmer photos');
+  } finally {
+    rmSync(join(dir, 'directions.json'), { force: true });
+    rmSync(join(dir, 'src'), { recursive: true, force: true });
+  }
+});
+
+test('choose_direction rejects an unknown direction, a missing record, long notes and a built site, and writes nothing', async () => {
+  const dir = join(root, 'sites/alpha');
+  assert.match(
+    await refused('choose_direction', { slug: 'alpha', direction: 'a' }),
+    /directions\.json does not exist/,
+  );
+  writeFileSync(
+    join(dir, 'directions.json'),
+    JSON.stringify(directionsRecord()),
+  );
+  const bytes = () => readFileSync(join(dir, 'directions.json'), 'utf8');
+  const snapshot = bytes();
+  try {
+    mkdirSync(join(dir, 'src/pages/directions'), { recursive: true });
+    for (const [args, pattern] of [
+      [{ slug: 'alpha', direction: 'c' }, /unknown direction "c"/],
+      [
+        { slug: 'alpha', direction: 'a', notes: 'x'.repeat(2001) },
+        /longer than 2000|maxLength/,
+      ],
+      [{ slug: 'alpha', direction: 'a', notes: 5 }, /notes|string/],
+      [{ slug: '../etc', direction: 'a' }, /invalid slug/],
+    ]) {
+      assert.match(await refused('choose_direction', args), pattern);
+      assert.equal(bytes(), snapshot);
+    }
+    rmSync(join(dir, 'src'), { recursive: true });
+    assert.match(
+      await refused('choose_direction', { slug: 'alpha', direction: 'a' }),
+      /already built past the directions/,
+    );
+    assert.equal(bytes(), snapshot);
+  } finally {
+    rmSync(join(dir, 'directions.json'), { force: true });
+    rmSync(join(dir, 'src'), { recursive: true, force: true });
+  }
 });

@@ -1,8 +1,8 @@
 ---
 name: new-landing
-description: 'Generate a complete, original landing in sites/<slug>/ from a niche or a customer brief (sites/<slug>/brief.json) and 0-3 pattern sheets: brief, proposal (PROPOSAL.md) with a review checkpoint, per-niche design system (MASTER.md and tokens), build with openly licensed Commons photos and credits, a QA loop until `npm run qa -- --site <slug>` passes, impeccable polish, final check and a run log (RUN.md). Use when the user runs /new-landing <slug> --niche "..." [--brief sites/<slug>/brief.json] [--refs a,b] [--auto] [--dry-run] [--resume] [--max-attempts N] [--lang es] [--langs en,es] [--sources commons,met], or asks to generate, build or create a whole landing page for a niche. Normally started by scripts/new-landing.sh. Not for editing an existing landing or for analyzing a reference (use analyze-reference).'
+description: 'Generate a complete, original landing in sites/<slug>/ from a niche or a customer brief (sites/<slug>/brief.json) and 0-3 pattern sheets: brief, proposal (PROPOSAL.md) with a review checkpoint, per-niche design system (MASTER.md and tokens), build with openly licensed Commons photos and credits, a QA loop until `npm run qa -- --site <slug>` passes, impeccable polish, final check and a run log (RUN.md). Use when the user runs /new-landing <slug> --niche "..." [--brief sites/<slug>/brief.json] [--refs a,b] [--auto] [--dry-run] [--resume] [--max-attempts N] [--lang es] [--langs en,es] [--sources commons,met] [--directions [--count 2|3]], or asks to generate, build or create a whole landing page for a niche. Normally started by scripts/new-landing.sh. Not for editing an existing landing or for analyzing a reference (use analyze-reference).'
 user-invocable: true
-argument-hint: '<slug> --niche "..." [--brief sites/<slug>/brief.json] [--refs a,b] [--auto] [--dry-run] [--resume] [--max-attempts N] [--lang es] [--langs en,es] [--sources commons,met]'
+argument-hint: '<slug> --niche "..." [--brief sites/<slug>/brief.json] [--refs a,b] [--auto] [--dry-run] [--resume] [--max-attempts N] [--lang es] [--langs en,es] [--sources commons,met] [--directions [--count 2|3]]'
 ---
 
 # new-landing
@@ -15,7 +15,7 @@ Read `CLAUDE.md` first (language, extract-patterns-don't-clone, licensing, quali
 
 ## Arguments
 
-`<slug>` (required, `^[a-z0-9]+(-[a-z0-9]+)*$`), `--niche "..."` (required unless a brief exists), `--brief sites/<slug>/brief.json` (the customer requirement written by `/brief-intake` or by hand; see "Brief file" below), `--refs a,b` (slugs of `patterns/<slug>.md`, 0 to 3), `--auto` (do not stop at the checkpoint), `--dry-run` (stop after the design system), `--resume`, `--max-attempts N` (default 5), `--lang` (default `es`), `--langs a,b` (a multi-locale landing, see "Languages"), `--sources commons,met` (image sources, default `commons`; use `met` for historical or cultural niches).
+`<slug>` (required, `^[a-z0-9]+(-[a-z0-9]+)*$`), `--niche "..."` (required unless a brief exists), `--brief sites/<slug>/brief.json` (the customer requirement written by `/brief-intake` or by hand; see "Brief file" below), `--refs a,b` (slugs of `patterns/<slug>.md`, 0 to 3), `--auto` (do not stop at the checkpoint), `--dry-run` (stop after the design system), `--resume`, `--max-attempts N` (default 5), `--lang` (default `es`), `--langs a,b` (a multi-locale landing, see "Languages"), `--sources commons,met` (image sources, default `commons`; use `met` for historical or cultural niches), `--directions` (build visual directions instead of the landing, see "Directions run"), `--count 2|3` (how many, default 3, only with `--directions`).
 
 `scripts/new-landing.sh` has already run the preflight and `npm run new-site -- <slug>`, so `sites/<slug>/` exists with `PROPOSAL.md`, `RUN.md` and `assets.json` templates. If it does not (the skill was typed by hand), run `node scripts/preflight.mjs --slug <slug>` and `npm run new-site -- <slug> --lang <lang>` then `npm install --no-audit --no-fund`, and stop on any failure with its message.
 
@@ -29,7 +29,7 @@ Run every subagent and every long command in the **foreground** (Agent tool with
 
 ## Run log and resume rules
 
-`sites/<slug>/RUN.md` is the state. Before each phase set its row in the Phases table to `in-progress` with the start time, and at the end to `done` (or `failed`) with the finish time and a one-line note. Get timestamps with `date -u +%Y-%m-%dT%H:%M:%SZ`. The `Result:` line near the top is read by `scripts/new-landing.sh` for its exit code: `checkpoint`, `dry-run-done`, `passed` or `failed`.
+`sites/<slug>/RUN.md` is the state. Before each phase set its row in the Phases table to `in-progress` with the start time, and at the end to `done` (or `failed`) with the finish time and a one-line note. Get timestamps with `date -u +%Y-%m-%dT%H:%M:%SZ`. The `Result:` line near the top is read by `scripts/new-landing.sh` for its exit code: `checkpoint`, `dry-run-done`, `directions`, `passed` or `failed`.
 
 With `--resume` (or when RUN.md already has finished phases), skip a phase only when its row is `done` AND its artifact exists:
 
@@ -45,6 +45,32 @@ With `--resume` (or when RUN.md already has finished phases), skip a phase only 
 | final-check   | row `done` and `sites/<slug>/layout-signature.json` written                                                    |
 
 A row left `in-progress` or an artifact that is missing means: redo that phase from its start, keeping the files that are already good. Never delete the user's edits to `PROPOSAL.md`: on resume, the proposal on disk is the approved plan.
+
+## Directions run (`--directions`)
+
+A cheap way to show the customer what the landing could look like before the full build (cost and time are a fraction of a build). With `--directions`, run only the Brief phase, the signals part of the Synthesis, and the steps below, then set `Result: directions` and stop. No `PROPOSAL.md` page map, no design-system `MASTER.md`, no design-taste-frontend, no impeccable polish, no layout signature and no final check. Rows of RUN.md use the phases `brief`, `directions`, `qa`.
+
+1. Brief: as in phase 1.
+2. Signals and references only: write the `Signals:` line (as in phase 2) and run `node scripts/pick-archetypes.mjs --site <slug> --top 8 --json`. Choose `--count` blends (default 3) whose **primary archetypes all differ**; a `custom` blend counts as its own primary. Prefer the top candidates; the blends that other sites use are already excluded.
+3. One subagent per direction, `a`, `b`, `c` in order, each using **ui-ux-pro-max only** (not design-taste-frontend, not impeccable). Each direction lives inside the site, scoped by page, so one build serves all of them:
+   - the page `src/pages/directions/<id>/index.astro`: `BaseLayout` with `noindex`, a root element carrying `data-direction="<id>"`, a hero and **one** section built from the brief's real copy (business name, offer, prices, calls to action with their real URLs; assumed or empty fields stay placeholders and are not presented as customer facts), in the language of the page;
+   - the stylesheet `src/styles/directions/<id>.css`, imported by that page only: it redefines the token variables (`--color-*`, `--font-*`, radii) under `[data-direction="<id>"]` and imports its own `@fontsource` packages (installed with the exact `npm install -w site-<slug> @fontsource-variable/<name>` form of phase 4); the tokens of `tokens.css` stay the neutral defaults. Palette and fonts come from ui-ux-pro-max (`python3 .claude/skills/ui-ux-pro-max/scripts/search.py "<niche + direction keywords>" --design-system -p "<Brand>"`), obey the brief's brand constraints, and meet the contrast rules (text >= 4.5);
+   - sections in `src/components/directions/<id>/`, one component each, with an `interface Props` when they take props;
+   - images only from the usual sources (the customer's files, Commons and The Met through `node scripts/find-images.mjs`, AI only where the "AI images" rules allow it), recorded in `assets.json`; no motion beyond reveals;
+   - the direction's palette and fonts are written in `DIRECTIONS.md` as a short MASTER-style block (not as `design-system/<slug>/MASTER.md`).
+4. The home page `src/pages/index.astro` becomes a `noindex` index: one link per direction with its one-line idea, and a note that these are draft directions. Every direction page and the index follow the 404 rule: readable at 375 px.
+5. `node scripts/credits.mjs --site <slug>`.
+6. Write `sites/<slug>/directions.json` (version 1; per direction `id`, `archetype`, `traits`, `primary`, `displayFont`, `bodyFont`, `hero`, `idea`; `choice: null`; see `scripts/lib/directions-schema.mjs`) and `sites/<slug>/DIRECTIONS.md` (one paragraph and the blend per direction, the palette and fonts block, and the run's cost from the usage line).
+7. QA loop as in phase 6 (`npm run qa -- --site <slug>` until it passes or attempts run out; each direction page gets the usual checks).
+8. `node scripts/directions.mjs check --site <slug>` must pass (2 or 3 directions, different primary archetypes, no shared trio of primary color family, display font and hero type, every page built and `noindex`). Fix the directions, never the check.
+9. Set `Result: directions`, mark the rows `done`, write Totals. Never choose for the customer: the owner or the agent records the choice with `node scripts/directions.mjs choose --site <slug> --direction <id> [--notes "..."]`.
+
+**Resume after the choice.** When `sites/<slug>/directions.json` exists and the run is not `--directions`:
+
+- with `choice: null`, stop at once with `Result: failed` and the message "no direction chosen: run node scripts/directions.mjs choose" (`scripts/new-landing.sh` already refuses);
+- with a choice, treat it as approved input: the proposal's "Archetype blend" is the chosen direction's `archetype` and `traits` (no new `pick-archetypes` choice; the twist and reasons are still written), the design system starts from the chosen palette and fonts (ui-ux-pro-max may refine them; every conflict is listed in MASTER.md), and the customer's `choice.notes` are fixed inputs written under Decisions in the proposal, in the customer's words, never invented or softened;
+- before the build, remove `src/pages/directions/`, `src/styles/directions/`, `src/components/directions/`, the `@fontsource` packages only the rejected directions used (and their CREDITS.md font rows), and replace the index page with the real home page. Drop from `assets.json` the images of the rejected directions that the build does not reuse, then run `node scripts/credits.mjs --site <slug>`;
+- keep `directions.json` and `DIRECTIONS.md` as the record. A site without `directions.json` builds exactly as before.
 
 ## Phases
 
