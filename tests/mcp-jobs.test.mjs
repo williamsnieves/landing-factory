@@ -492,6 +492,80 @@ test('a generation without a usage file is "not reported"; a stale file from an 
   assert.deepEqual(done.usage, { reported: false });
 });
 
+test('a revise job writes the feedback to its folder, runs revise-landing.sh on that file and reports REVISION.md', async () => {
+  const site = 'sites/theta';
+  mkdirSync(join(fixture.root, site), { recursive: true });
+  writeFileSync(join(fixture.root, site, 'package.json'), '{}');
+  writeFileSync(
+    join(fixture.root, site, 'RUN.md'),
+    '# Run\n\nResult: passed\n',
+  );
+  control({
+    sleepMs: 200,
+    files: [
+      {
+        path: `${site}/REVISION.md`,
+        content: '# Revision\n\nResult: needs-rebuild\n',
+        when: 'end',
+      },
+    ],
+  });
+  try {
+    const jobs = makeJobs();
+    const feedback = 'Make it "darker" and more editorial. $(not run)';
+    const job = jobs.start('revise', { slug: 'theta', feedback });
+    const dir = join(fixture.root, '.cache/jobs', job.id);
+    const file = join(dir, 'feedback.txt');
+    assert.deepEqual(job.argv, [
+      'bash',
+      'scripts/revise-landing.sh',
+      'theta',
+      '--feedback',
+      file,
+    ]);
+    assert.equal(readFileSync(file, 'utf8'), feedback);
+    // One generation per landing: a second round while this one runs is refused.
+    assert.throws(
+      () => jobs.start('revise', { slug: 'theta', feedback: 'again' }),
+      /already running/,
+    );
+    const done = await settled(jobs, job.id);
+    assert.equal(done.state, 'passed');
+    assert.equal(done.result, 'needs-rebuild');
+    assert.match(
+      readFileSync(join(dir, 'log.txt'), 'utf8'),
+      /stub revise started/,
+    );
+  } finally {
+    rmSync(join(fixture.root, site), { recursive: true, force: true });
+  }
+});
+
+test('a revise job for a transferred landing is refused and leaves no job folder', () => {
+  const site = 'sites/iota';
+  mkdirSync(join(fixture.root, site), { recursive: true });
+  try {
+    writeFileSync(join(fixture.root, site, 'package.json'), '{}');
+    writeFileSync(join(fixture.root, site, 'RUN.md'), 'Result: passed\n');
+    writeFileSync(
+      join(fixture.root, site, 'EXPORTED.json'),
+      JSON.stringify({
+        transferredTo: 'customer',
+        transferredAt: '2026-11-02T00:00:00.000Z',
+      }),
+    );
+    const jobs = makeJobs();
+    const before = jobs.list().length;
+    assert.throws(
+      () => jobs.start('revise', { slug: 'iota', feedback: 'x' }),
+      /was transferred/,
+    );
+    assert.equal(jobs.list().length, before);
+  } finally {
+    rmSync(join(fixture.root, site), { recursive: true, force: true });
+  }
+});
+
 test('QA and report jobs take their result from the verdict written after the job started; qa shows the last [qa] line', async () => {
   const report = (verdict) =>
     JSON.stringify({

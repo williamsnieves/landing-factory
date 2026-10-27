@@ -6,13 +6,13 @@ This is support for the move, not legal advice; the legal pages and the cookie r
 
 ## Delivery models
 
-| Model                              | Who owns the repository and the host                              | State                     |
-| ---------------------------------- | ----------------------------------------------------------------- | ------------------------- |
-| Managed                            | The factory (an organization of its own), the customer sees a URL | Not built                 |
-| Managed, with a transfer at the end | The factory first, then the repository moves to the customer      | Not built                 |
-| The customer's own account         | The customer creates the repository and the host account          | **Automated by this flow** |
+| Model                                                   | Who owns the repository and the host                                                                       | State                                          |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| Managed                                                 | The factory (an organization of its own), the customer sees a URL                                          | Not built                                      |
+| Managed, with a transfer at the end, in the owner's account | The owner (repository and host in his own account) first, then the repository moves to the customer       | **Current model** (owner decision, 2026-10-27) |
+| The customer's own account                              | The customer creates the repository and the host account                                                   | Automated by this flow                         |
 
-Only the third model exists. The first two need a factory GitHub organization and a GitHub App that creates repositories and transfers them, which is out of scope for now.
+The current model is the second one, done in the owner's own GitHub, Vercel or Cloudflare account: this flow creates the repository and the host, `docs/revise.md` covers the customer's change rounds and the sync, and "Transfer" below covers the end. A factory GitHub organization and a GitHub App that creates and transfers repositories (the fully managed model) stay out of scope.
 
 ## The tools
 
@@ -28,7 +28,9 @@ Only the third model exists. The first two need a factory GitHub organization an
 
 - `node scripts/handoff.mjs plan --site <slug> --repo <owner>/<name> --visibility public|private [--old-host <name>]` prints the owner's checklist in Markdown from the site's real configuration. Problems from `check` come first and make the exit code 1; the checklist is still printed when the configuration loads. The secret names and where to create them come from the "Secrets" table of `docs/deploy/<target>.md`; values are never read.
 
-Both are read-only. The skill drives them together with `npm run export`, the deploy configuration and the GitHub tools.
+- `node scripts/handoff.mjs transfer-plan --site <slug> --to <github-owner>` prints the checklist for transferring an exported landing's repository to its customer (see "Transfer"). It exits 1 when the site was never exported or is already transferred.
+
+All three are read-only. The skill drives them together with `npm run export`, the deploy configuration and the GitHub tools.
 
 ## The checklist, explained
 
@@ -70,10 +72,14 @@ When in doubt the owner sends a screenshot of the registrar's name server screen
 - **Can:** push to a repository that is in its access (an installation covering the owner's repositories works), read runs and logs through the GitHub tools.
 - **Cannot:** create a repository or start a workflow run; both answer 403 "Resource not accessible by integration". These two steps stay with the owner, and the skill never tries them.
 
-## Refreshing an exported repository
+## Syncing an exported repository
 
-An exported repository does not follow later factory changes. To bring one up to date (for example to get the domain report step), export the site again into a fresh scratch folder, compare `.github/workflows/ci.yml` and `scripts/` with the repository's, copy them over, copy changed `package.json` dependencies (refresh the lockfile with `npm install --package-lock-only`), and check the result with `npm ci`, `npm run lint` and `npm run build`. Never overwrite the owner's `src/`, content or `site.config.json`. The skill has the same procedure ("Refreshing an already exported repository"). An already recorded site (`EXPORTED.json`) can be exported again; the export does not touch the record.
+An exported repository does not follow later factory changes by itself, neither a revised landing nor a new workflow step or a fixed script. While the landing is managed (not transferred), the factory is the source of truth and `node scripts/sync-export.mjs --site <slug> --into <clone>` carries everything into a clone of the repository: it re-exports the site into a scratch folder, mirrors the result into the clone (add, change, delete), keeps `.git`, ignored paths, the lockfile unless `package.json` changed and the README unless only its export line differs, prints the files, and never commits or pushes. Then check with `npm ci`, `npm run lint` and `npm run build`, push a branch and open a pull request; the repository's CI gives the preview. Details and refusals: `docs/revise.md`. Changes made directly in the repository are overwritten by the next sync. A transferred landing is no longer synced.
+
+## Transfer
+
+When the customer takes the project, `node scripts/handoff.mjs transfer-plan --site <slug> --to <github-owner>` prints the checklist: the owner transfers the repository on GitHub (the Claude GitHub App cannot), the customer creates their host project and adds their own secrets by name, starts the first run, and the domain moves; the owner then removes his host project, secrets and DNS records. `node scripts/transfer.mjs record --site <slug> --to <github-owner>` writes `transferredTo`, `transferredAt` and the new repository URL into `EXPORTED.json`, after which revisions and syncs are refused. See `docs/revise.md`.
 
 ## Out of scope
 
-The managed model, DNS changes through registrar APIs, adding domains through the Vercel or Cloudflare APIs, Bitbucket and other CI systems, and automatic re-syncing of factory updates into exported repositories.
+The fully managed model (a factory organization), DNS changes through registrar APIs, adding domains through the Vercel or Cloudflare APIs, Bitbucket and other CI systems, automatic re-syncing on every factory change, and revisions inside a transferred repository.

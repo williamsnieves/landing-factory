@@ -4,6 +4,7 @@ dist/
 .cache/
 /qa/
 sites/*/.run.log
+sites/*/.revise.log
 sites/*/.run-usage.json
 .env
 .env.*

@@ -16,6 +16,8 @@ import {
   validateBrief,
 } from '../lib/brief-schema.mjs';
 import { validateDirections } from '../lib/directions-schema.mjs';
+import { isTransferred, readExportRecord } from '../lib/export-record.mjs';
+import { validateRevisions } from '../lib/revisions-schema.mjs';
 import { isSiteDir, listSites } from '../lib/sites.mjs';
 import { Refused, chooseDirection } from '../directions.mjs';
 import { ToolError, assertSlug, briefPath, inside, siteDir } from './paths.mjs';
@@ -181,6 +183,49 @@ function directionsOf(root, slug) {
   };
 }
 
+/** Revision rounds of a landing: count and the last round's number, date, result and cost; null without any. */
+function revisionsOf(root, slug) {
+  const path = join(siteDir(root, slug), 'revisions.json');
+  if (!existsSync(path)) return null;
+  const data = readJson(path);
+  const errors = data ? validateRevisions(data) : ['not valid JSON'];
+  if (errors.length)
+    return { error: `revisions.json is invalid: ${errors[0]}` };
+  const last = data.rounds.at(-1) ?? null;
+  return {
+    count: data.rounds.length,
+    last: last
+      ? {
+          n: last.n,
+          date: last.date,
+          result: last.result,
+          costUsd: last.usage?.costUsd ?? null,
+        }
+      : null,
+  };
+}
+
+/** The repository a landing was exported to and the transfer state, or nulls without an EXPORTED.json. */
+function exportOf(root, slug) {
+  let record;
+  try {
+    record = readExportRecord(root, slug);
+  } catch (error) {
+    return { exported: { error: error.message }, transferred: null };
+  }
+  if (!record) return { exported: null, transferred: null };
+  return {
+    exported: {
+      repository: record.repository ?? null,
+      exportedAt: record.exportedAt ?? null,
+      target: record.target ?? null,
+    },
+    transferred: isTransferred(record)
+      ? { to: record.transferredTo, at: record.transferredAt ?? null }
+      : null,
+  };
+}
+
 export function getLanding(root, slug) {
   assertSlug(slug);
   const dir = siteDir(root, slug);
@@ -218,6 +263,8 @@ export function getLanding(root, slug) {
     brief: briefInfo,
     previewUrl: previewUrl(root, slug),
     directions: directionsOf(root, slug),
+    revisions: revisionsOf(root, slug),
+    ...exportOf(root, slug),
     runPhase: run.phase,
     runTotals: run.totals,
     runUsage: readJson(join(dir, '.run-usage.json')),

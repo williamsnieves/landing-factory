@@ -30,6 +30,7 @@ const EXPECTED_TOOLS = [
   'preview_landing',
   'choose_direction',
   'generate_landing',
+  'revise_landing',
   'run_qa',
   'run_report',
   'get_job',

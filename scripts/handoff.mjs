@@ -3,10 +3,12 @@
 //
 //   node scripts/handoff.mjs check --site <slug> [--visibility public|private] [--json]
 //   node scripts/handoff.mjs plan  --site <slug> --repo <owner>/<name> --visibility public|private [--old-host <name>]
+//   node scripts/handoff.mjs transfer-plan --site <slug> --to <github-owner>
 //
 // `check` is the preflight: it names every problem that would stop a clean export or a working domain.
 // `plan` prints the owner's checklist in Markdown from the site's real configuration (target, secrets by name,
-// `site` URL). Secret values are never read. Exit codes: 0 ready (warnings allowed), 1 not ready, 2 bad usage.
+// `site` URL). `transfer-plan` prints the checklist for handing an exported landing's repository to its customer
+// (design: openspec/changes/add-landing-revise). Secret values are never read. Exit codes: 0 ready (warnings allowed), 1 not ready, 2 bad usage.
 // Design: openspec/changes/add-landing-handoff/design.md. Guide: docs/handoff.md.
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -21,6 +23,11 @@ import {
   targetSection,
 } from './deploy/config.mjs';
 import { stripComments } from './export/closure.mjs';
+import {
+  isTransferred,
+  normalizeRepoUrl,
+  readExportRecord,
+} from './lib/export-record.mjs';
 import { SLUG_PATTERN, isSiteDir } from './lib/sites.mjs';
 import { unusedLayers } from './site-layers.mjs';
 
@@ -75,7 +82,7 @@ export function checkSite(root, slug, { visibility } = {}) {
   if (existsSync(join(siteDir, 'EXPORTED.json')))
     problem(
       'exported',
-      `sites/${slug}/EXPORTED.json exists: this landing already lives in its own repository (to refresh that repository's workflow and scripts, see docs/handoff.md)`,
+      `sites/${slug}/EXPORTED.json exists: this landing already lives in its own repository (to carry later changes into it, see node scripts/sync-export.mjs and docs/handoff.md)`,
     );
 
   for (const layer of unusedLayers(siteDir))
@@ -343,17 +350,142 @@ export function renderPlan(
   return lines.join('\n').trimEnd();
 }
 
+// --- transfer-plan -------------------------------------------------------------------------------------------
+
+/** A GitHub user or organization login. */
+const GITHUB_OWNER = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
+
+/**
+ * The Markdown checklist for transferring the repository of an exported landing to `to`, all steps done by the
+ * owner. Returns { problems, markdown }; read-only, secret values are never read.
+ */
+export function renderTransferPlan(root, slug, to, docsRoot = FACTORY_ROOT) {
+  const problems = [];
+  const siteDir = join(root, 'sites', slug);
+  if (!existsSync(siteDir) || !isSiteDir(siteDir))
+    return {
+      problems: [`there is no site "${slug}" under sites/`],
+      markdown: '',
+    };
+  let record = null;
+  try {
+    record = readExportRecord(root, slug);
+  } catch (error) {
+    problems.push(error.message);
+  }
+  if (!problems.length && !record)
+    problems.push(
+      `sites/${slug} has no EXPORTED.json: it was never exported to its own repository, so there is nothing to transfer (run /landing-handoff ${slug} first)`,
+    );
+  if (isTransferred(record))
+    problems.push(
+      `sites/${slug} was already transferred to ${record.transferredTo}`,
+    );
+  let config = null;
+  try {
+    config = loadSiteConfig(root, slug);
+  } catch (error) {
+    if (!(error instanceof ConfigError)) throw error;
+    problems.push(error.message);
+  }
+  if (problems.length || !config) return { problems, markdown: '' };
+
+  const repoPath = normalizeRepoUrl(record.repository);
+  const repoName = repoPath ? repoPath.split('/').slice(1).join('/') : null;
+  const astroFile = join(siteDir, 'astro.config.mjs');
+  const siteUrl = existsSync(astroFile)
+    ? siteUrlOfConfig(readFileSync(astroFile, 'utf8'))
+    : null;
+  let origin = null;
+  try {
+    origin = siteUrl ? new URL(siteUrl).origin : null;
+  } catch {
+    origin = null;
+  }
+  const d = domainPlan(origin);
+  const target = config.target;
+  const section = targetSection(config);
+  const lines = [`# Transfer plan: ${slug}`, ''];
+  lines.push(
+    `Repository: \`${repoPath ?? record.repository}\`. Customer account: \`${to}\`. Target: **${target}**.${d ? ` Production domain: \`${d.production}\`.` : ''}`,
+    '',
+    "Every step is yours or the customer's: the factory transfers nothing and the Claude GitHub App cannot. After step 1 the factory does nothing more with this landing (step 2 records it).",
+    '',
+    '## 1. Transfer the repository',
+    '',
+    `- On GitHub open the repository's **Settings > General > Danger Zone > Transfer ownership** and transfer it to \`${to}\`${repoName ? ` (keep the name \`${repoName}\` unless the customer wants another)` : ''}. The Claude GitHub App cannot do this.`,
+    `- The customer accepts the transfer from the email or notification GitHub sends to \`${to}\`.`,
+    '- GitHub redirects the old repository address, but update bookmarks and remotes to the new one.',
+    '',
+    '## 2. Record the transfer in the factory',
+    '',
+    `- When GitHub shows the repository under \`${to}\`, run \`node scripts/transfer.mjs record --site ${slug} --to ${to}\`. It writes \`transferredTo\`, \`transferredAt\` and the new repository URL into \`sites/${slug}/EXPORTED.json\`.`,
+    '- From then on `scripts/revise-landing.sh`, `scripts/sync-export.mjs` and the MCP revision job refuse this site. Commit the changed record in a factory pull request.',
+    '',
+    "## 3. The customer's host and secrets",
+    '',
+  );
+  const hostLine = {
+    vercel:
+      'a Vercel project for the repository (**Add New > Project**, or the project name in `site.config.json`)',
+    cloudflare: `a Cloudflare Pages project${target === 'cloudflare' ? ` named \`${section.pagesProject}\`` : ''} in their account`,
+    vps: 'access to the server the landing deploys to (host, user and path in `site.config.json`, and the pinned host key)',
+    shared:
+      'access to the hosting account the landing deploys to (host, user and document root in `site.config.json`)',
+  }[target];
+  lines.push(
+    `- The customer creates ${hostLine}.`,
+    "- The customer adds their own secrets under the repository's **Settings > Secrets and variables > Actions**. The owner's secrets do not travel to them and are never shared:",
+  );
+  const descriptions = secretDescriptions(target, docsRoot);
+  for (const name of secretsFor(target, config)) {
+    const text = descriptions.get(name);
+    lines.push(`  - \`${name}\`${text ? `: ${text}` : ''}`);
+  }
+  if (target !== 'cloudflare' && config.previews === 'cloudflare')
+    lines.push(
+      '  - Optional, for per-branch previews on Cloudflare Pages: `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` (docs/deploy/cloudflare.md).',
+    );
+  lines.push(
+    `- How to create them: \`${DOCS_FILE[target]}\`. A value is pasted only into GitHub, never into a chat or a file.`,
+    '- If the customer wants to keep working with Claude on the repository, they install the Claude GitHub App on their own account; that is their choice.',
+    '',
+    '## 4. First run',
+    '',
+    `- The customer starts the first deploy by hand: **Actions > CI > Run workflow** on the \`${section.productionBranch}\` branch. A push alone does not repeat it.`,
+    '- The deployment URL is in the summary of that run.',
+    '',
+    '## 5. Domain',
+    '',
+    ...domainLines(target, config, slug, d),
+    "- Do this only when the customer's deployment answers; the live report in the production run shows when the domain serves the new host.",
+    '',
+    '## 6. Cleanup by the owner',
+    '',
+    `- Only when the domain serves the customer's deployment: remove the owner's ${target} project${target === 'vps' || target === 'shared' ? ' access (keys and accounts)' : ''}, the owner's repository secrets (they are gone with ownership, but check any organization-level secret that included this repository) and the owner's DNS records for the domain.`,
+    "- Remove the repository from the owner's Claude GitHub App access (**GitHub > Settings > Applications > Installed GitHub Apps > Claude > Repository access**) if it is still listed.",
+    `- Keep \`sites/${slug}/\` in the factory as the record: \`check-landing\` still compares new landings with its layout signature.`,
+    '- Do not delete anything before the customer confirms the new site answers on the domain.',
+    '',
+  );
+  return { problems, markdown: lines.join('\n').trimEnd() };
+}
+
 // --- command line -------------------------------------------------------------------------------------------
 
 const HELP = `Usage: node scripts/handoff.mjs check --site <slug> [--visibility public|private] [--json]
        node scripts/handoff.mjs plan --site <slug> --repo <owner>/<name> --visibility public|private [--old-host <name>]
+       node scripts/handoff.mjs transfer-plan --site <slug> --to <github-owner>
 
 check  Preflight: names every problem that would stop a clean handoff (site missing or already exported, unused
        layer, invalid site.config.json, no "site" URL, brief domain or target that disagrees with the site).
        Warns when a public repository would carry brief.json.
 plan   Prints the owner's checklist in Markdown: repository, secrets by name, first runs, domain, DNS, cleanup.
        Problems from check come first; the exit code is 1 when there are any.
-Both are read-only. Exit codes: 0 ready, 1 not ready, 2 bad usage.
+transfer-plan  Prints the checklist for transferring an exported landing's repository to its customer: the transfer
+       (done by the owner), recording it (node scripts/transfer.mjs record), the customer's host project and secrets by
+       name, the first run, the domain, the owner's cleanup. Exit 1 when the site is not exported or already transferred.
+All are read-only. Exit codes: 0 ready, 1 not ready, 2 bad usage.
 Environment: LANDING_FACTORY_ROOT=<dir> uses <dir> as the factory root (tests only).`;
 
 function parse(argv) {
@@ -367,6 +499,7 @@ function parse(argv) {
         repo: { type: 'string' },
         visibility: { type: 'string' },
         'old-host': { type: 'string' },
+        to: { type: 'string' },
         json: { type: 'boolean', default: false },
         help: { type: 'boolean', short: 'h', default: false },
       },
@@ -377,7 +510,7 @@ function parse(argv) {
   const { values, positionals } = parsed;
   if (values.help) return { help: true };
   const [command, ...extra] = positionals;
-  if (!['check', 'plan'].includes(command ?? ''))
+  if (!['check', 'plan', 'transfer-plan'].includes(command ?? ''))
     throw new UsageError(
       command ? `Unknown command "${command}".` : 'A command is required.',
     );
@@ -391,7 +524,21 @@ function parse(argv) {
     !VISIBILITIES.includes(values.visibility)
   )
     throw new UsageError('--visibility must be "public" or "private".');
-  if (command === 'check') {
+  if (command === 'transfer-plan') {
+    if (
+      values.repo !== undefined ||
+      values['old-host'] !== undefined ||
+      values.visibility !== undefined ||
+      values.json
+    )
+      throw new UsageError('transfer-plan takes only --site and --to.');
+    if (typeof values.to !== 'string' || !GITHUB_OWNER.test(values.to))
+      throw new UsageError(
+        'transfer-plan needs --to <github-owner> (a GitHub user or organization name).',
+      );
+  } else if (values.to !== undefined) {
+    throw new UsageError('--to goes only with transfer-plan.');
+  } else if (command === 'check') {
     if (values.repo !== undefined || values['old-host'] !== undefined)
       throw new UsageError('check takes only --site, --visibility and --json.');
   } else {
@@ -423,6 +570,19 @@ export function main(argv, io = console, root = defaultRoot()) {
     return 0;
   }
   const { command, values } = args;
+  if (command === 'transfer-plan') {
+    const { problems, markdown } = renderTransferPlan(
+      root,
+      values.site,
+      values.to,
+    );
+    if (problems.length) {
+      for (const p of problems) io.error(`transfer-plan: ${p}`);
+      return 1;
+    }
+    io.log(markdown);
+    return 0;
+  }
   const result = checkSite(root, values.site, {
     visibility: values.visibility,
   });

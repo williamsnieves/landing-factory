@@ -957,7 +957,7 @@ test('an import outside scripts/ stops the export with exit 1 and leaves --out e
   assert.deepEqual(readdirSync(out), []);
 });
 
-test('--record writes EXPORTED.json with the four fields; without it nothing is written', () => {
+test('--record writes EXPORTED.json with its fields; without it nothing is written', () => {
   const factory = makeFactory();
   rmSync(join(factory.site, 'EXPORTED.json'));
   const first = run(factory, fresh('out'));
@@ -980,15 +980,31 @@ test('--record writes EXPORTED.json with the four fields; without it nothing is 
   assert.deepEqual(Object.keys(record).sort(), [
     'exportedAt',
     'factoryCommit',
+    'noBrief',
     'repository',
     'target',
   ]);
+  assert.equal(record.noBrief, false);
   assert.equal(record.repository, url);
   assert.equal(record.target, 'vercel');
   assert.ok(!Number.isNaN(Date.parse(record.exportedAt)));
   assert.ok(record.factoryCommit);
   // The record never travels into the exported repository.
   assert.ok(!listFiles(out).includes('EXPORTED.json'));
+});
+
+test('--record with --no-brief records noBrief: true', () => {
+  const factory = makeFactory();
+  const { code, c } = run(factory, fresh('out'), [
+    '--no-brief',
+    '--record',
+    'https://github.com/acme/site',
+  ]);
+  assert.equal(code, 0, c.all());
+  const record = JSON.parse(
+    readFileSync(join(factory.site, 'EXPORTED.json'), 'utf8'),
+  );
+  assert.equal(record.noBrief, true);
 });
 
 test('a Cloudflare site exports wrangler and the cloudflare guide', () => {
