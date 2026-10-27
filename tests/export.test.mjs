@@ -466,8 +466,47 @@ test('workflow: both deploy paths, the live report with continue-on-error, the c
   assert.ok(!workflow.includes('landing-factory-preview'));
 });
 
+test('workflow: the production-only domain report runs after the deployment report and the last step covers both', () => {
+  const domain = stepOf('deploy', 'Landing report (live, site domain)');
+  assert.match(domain.body, /id: domain_report/);
+  assert.match(domain.body, /continue-on-error: true/);
+  assert.match(domain.body, /steps\.target\.outputs\.is_production == 'true'/);
+  assert.match(domain.body, /steps\.gate\.outputs\.enabled == 'true'/);
+  assert.match(
+    domain.body,
+    /npm run report -- --only live --site-url --out qa-domain/,
+  );
+  // No site URL, no domain check: the step must not fail an exported site without `site`.
+  assert.match(domain.body, /scripts\/report\/site-url\.mjs dist/);
+  assert.ok(
+    orderOf('deploy', 'Landing report (live checks)') <
+      orderOf('deploy', 'Landing report (live, site domain)'),
+  );
+  assert.ok(
+    orderOf('deploy', 'Landing report (live, site domain)') <
+      orderOf('deploy', 'Summarize live report'),
+  );
+  assert.match(
+    stepOf('deploy', 'Upload domain report').body,
+    /is_production == 'true'/,
+  );
+  const summary = stepOf('deploy', 'Summarize live report');
+  assert.match(summary.body, /qa-domain\/report/);
+  assert.match(summary.body, /GITHUB_STEP_SUMMARY/);
+  const last = jobs.deploy.steps.at(-1);
+  assert.equal(last.name, 'Fail when the live report failed');
+  assert.match(last.body, /steps\.live_report\.outcome == 'failure'/);
+  assert.match(last.body, /steps\.domain_report\.outcome == 'failure'/);
+  // The deployment report is not replaced by the domain one.
+  assert.ok(
+    !/--out qa-domain/.test(
+      stepOf('deploy', 'Landing report (live checks)').body,
+    ),
+  );
+});
+
 test('workflow: no --site, no sites/ paths and no secret values anywhere', () => {
-  assert.ok(!/--site\b/.test(workflow));
+  assert.ok(!/--site(?![-\w])/.test(workflow)); // --site-url is the report option, not a site selector
   assert.ok(!/sites\//.test(workflow));
   assert.ok(!/\$\{\{\s*matrix\./.test(workflow));
   assert.ok(!/SITE\b/.test(workflow));

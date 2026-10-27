@@ -32,7 +32,7 @@ The site sits at the root, so the scripts run in the same "root mode" the starte
   - `package-lock.json` is made by `npm install --package-lock-only --ignore-scripts` in the output folder. That needs the npm registry; with no registry the export stops and says so.
   - After writing, the factory's Prettier formats the output with the copied config, so `npm run format:check` passes from the first commit.
 - **Lint:** `eslint.config.mjs` (the factory's file, unchanged), a one-project `knip.json`, the five lint packages in `devDependencies` pinned from the lockfile and the scripts `lint`, `lint:code` and `lint:unused`. The export refuses (exit 1, nothing written) a site that still holds the 3D layer or the legal components without importing them: run `node scripts/site-layers.mjs prune --site <slug>` and `npm install` first.
-- **CI:** `.github/workflows/ci.yml`, a one-site workflow for GitHub Actions. The `qa` job runs the format check, `npm run lint`, `astro check`, QA (`--runs 3`) and the static report, and uploads `dist/` only when they pass. The `deploy` job (`needs: qa`) reads the target with `node scripts/deploy/config.mjs --github-output`, checks that the target's secrets exist and the pull request is not from a fork (a warning and a green skip otherwise), deploys with wrangler or `scripts/deploy.mjs`, runs the live report, keeps one sticky preview comment and fails last if the live report failed. Nothing in it is specific to the site: the target, the Pages project and the secrets come from `site.config.json` at run time.
+- **CI:** `.github/workflows/ci.yml`, a one-site workflow for GitHub Actions. The `qa` job runs the format check, `npm run lint`, `astro check`, QA (`--runs 3`) and the static report, and uploads `dist/` only when they pass. The `deploy` job (`needs: qa`) reads the target with `node scripts/deploy/config.mjs --github-output`, checks that the target's secrets exist and the pull request is not from a fork (a warning and a green skip otherwise), deploys with wrangler or `scripts/deploy.mjs`, runs the live report on the deployment URL (and, on the production branch, on the landing's own `site` domain), keeps one sticky preview comment and fails last if a live report failed. Nothing in it is specific to the site: the target, the Pages project and the secrets come from `site.config.json` at run time.
 - **Docs:** `docs/deploy.md` is the deploy guide of the target. `docs/factory/` holds what the factory wrote while building the site: `PROPOSAL.md`, `RUN.md`, `CONTENT.md`, `layout-signature.json` and the design system `MASTER.md`.
 
 ## What is never copied
@@ -60,9 +60,13 @@ From then on the factory's CI skips the site: `scripts/changed-sites.mjs` never 
 
 Real deploys run only from CI. Never deploy from a local machine and never commit credentials.
 
+## Handing off to the owner
+
+The whole move (repository, secrets, first runs, domain, DNS, cleanup) is a guided flow: see `docs/handoff.md` and the skill `/landing-handoff <slug>`. `node scripts/handoff.mjs check --site <slug>` is its preflight. In an exported repository the `deploy` job also runs the live report on the landing's own domain on the production branch (`npm run report -- --only live --site-url`; `not-run` and green while the domain does not answer yet).
+
 ## Updating an exported repository
 
-Nothing syncs later factory changes into an exported repository. To pick up a fix to QA, the report or the deploy, export the site again into a fresh folder and compare its `scripts/` (and `package.json` pins) with the repository's. Changes to the site itself are made in the exported repository from then on.
+Nothing syncs later factory changes into an exported repository (the procedure is in `docs/handoff.md`, "Refreshing an exported repository"). To pick up a fix to QA, the report or the deploy, export the site again into a fresh folder and compare its `scripts/` (and `package.json` pins) with the repository's. Changes to the site itself are made in the exported repository from then on.
 
 ## Limits
 

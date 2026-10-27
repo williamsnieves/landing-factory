@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-26 (the owner's personal-brand landing moved to its own repository, deployed to Vercel at williansnieves.com; next: add-landing-handoff, add-landing-preview, channels).
+Read this first in a new or compacted session. Last updated: 2026-10-26 (personal-brand handoff merged, PR #31; Netlify and Bitbucket removed by the owner; add-landing-handoff implemented on its branch, PR open).
 
 ## Working agreements
 
@@ -36,20 +36,30 @@ Read this first in a new or compacted session. Last updated: 2026-10-26 (the own
 | Owner's personal-brand landing `sites/personal-brand` (bilingual) | Merged (PR #28); moved to its own repository (see the next rows) |
 | add-site-export (`npm run export`: one site as a standalone repository) | Merged (PR #29) and archived |
 | add-code-quality (ESLint, knip, optional site layers, architecture contract) | Merged (PR #30) and archived |
-| personal-brand handoff (Vercel target, export, `EXPORTED.json`) | This branch, `change/personal-brand-handoff`. Live at https://williansnieves.com from https://github.com/williamsnieves/personal-brand |
+| personal-brand handoff (Vercel target, export, `EXPORTED.json`) | Merged (PR #31; a site change, nothing to archive). Live at https://williansnieves.com from https://github.com/williamsnieves/personal-brand |
+| add-landing-handoff (handoff preflight and owner checklist, `/landing-handoff` skill, domain live report in exported repositories) | Implemented on `change/add-landing-handoff`, PR open; waiting for CI and the owner's merge |
 
 ## Resume here (2026-10-26)
 
-`main` has everything up to PR #30 (add-code-quality). Branch `change/personal-brand-handoff` archives add-code-quality, switches `sites/personal-brand` to the Vercel target and records its export (`sites/personal-brand/EXPORTED.json`). Nothing else is half done.
+`main` has everything up to PR #31 (the personal-brand handoff). Branch `change/add-landing-handoff` holds the implemented change (PR open). Next step: the owner's merge, then archive it as the first commit of the next branch and refresh the personal-brand repository.
+
+**add-landing-handoff in short** (see its `proposal.md`, `design.md`, `tasks.md`):
+- `scripts/handoff.mjs check --site <slug> [--visibility public|private]`: read-only preflight (not exported, no unused layer, valid `site.config.json`, `site` set in `astro.config.mjs`, brief `deploy.domain` and `deploy.target` agree; warns when a public repository would carry `brief.json`).
+- `scripts/handoff.mjs plan --site <slug> --repo <owner>/<name> --visibility ...`: the owner's checklist in Markdown (empty repository and app access, secrets by name, first run by hand, domain steps with the apex/www choice from `site`, where the DNS really lives, cleanup of the old host).
+- `/landing-handoff <slug>` skill: the 11-phase flow of the first handoff, with stop points and hard rules (no secrets in chat, no repository creation or workflow dispatch by the agent, no DNS changes).
+- Exported repositories: `landing-report.mjs --site-url` (origin of the canonical URL in `dist/index.html`) and a production-only live report on the landing's own domain (unreachable domain: `not-run`, job green; reachable and failing: job red).
+- `docs/handoff.md`: delivery models (managed, managed with transfer, customer's own account; only the last is automated), DNS cases, GitHub App limits.
+- Follow-up after it merges: refresh `williamsnieves/personal-brand`'s workflow and `scripts/` from a fresh export so it gets the domain report (a small push to that repository).
 
 **The owner's landing moved (2026-10-26), the first real handoff and the first real Vercel deploy of the factory:**
 - Repository: https://github.com/williamsnieves/personal-brand (public, owner's account), one initial commit made from `npm run export -- --site personal-brand --no-brief`. The owner created the empty repository: the Claude GitHub App cannot create repositories (403 "Resource not accessible by integration") nor dispatch workflows; it can push once the repository is in the app's access (the owner's installation covers all repositories).
 - CI there: run 1 (push) passed QA, lint and the static report and skipped the deploy without `VERCEL_TOKEN`; run 2 (manual, after the owner added the secret) deployed to Vercel production through `scripts/deploy.mjs` (project `personal-brand` in the owner's personal account, scope `willians-nieves-projects`, alias https://personal-brand-theta-ten.vercel.app) and the live report on the deployment URL passed (0 fail, 3 warn).
 - Domain: the DNS was Netlify DNS (Namecheap "Custom DNS" `dns1-4.p05.nsone.net`, two Netlify records, no MX). Now Namecheap BasicDNS with `A @ 216.198.79.1` and `CNAME www e23985b8cab511d7.vercel-dns-017.com` (values Vercel showed; the legacy `76.76.21.21` and `cname.vercel-dns.com` still work). In Vercel, `williansnieves.com` is the production domain (apex kept, since `site` in `astro.config.mjs` and the canonical and hreflang URLs use it; Vercel's "redirect apex to www" default was unchecked) and `www` redirects with a 308. The owner confirmed the domain serves the new site.
-- Pending: the live report on `https://williansnieves.com` (this session's proxy blocks the domain and `*.vercel.app`; the owner can add `williansnieves.com` and `www.williansnieves.com` to the allowed domains), and the owner's cleanup of Netlify (remove the domain from the old site, delete the DNS zone, then the site) and of the old Bitbucket repository if wanted.
+- Cleanup done by the owner (2026-10-26): the Netlify site and DNS zone and the old Bitbucket repository are deleted.
+- Live report on `https://williansnieves.com` (2026-10-26, from this session through `--site-url` on a fresh export, the proxy now reaches the domain): passed, 0 fail, 1 warn (an unknown path answers 308, Vercel's trailing-slash redirect, before the 404), 1 not run (plain HTTP did not resolve through the proxy). add-landing-handoff also makes the owner's CI check the domain on every production deploy.
 
 **Next (product plan steps 11 and 12, `docs/product-plan.md`):**
-1. `add-landing-handoff`: a skill (and the factory pieces it needs) that repeats this handoff for any landing: preflight, target, export (`--no-brief` for public repositories), owner steps (repository, secret), first push and CI, domain guide and the live report on the final domain, and the factory record. Lessons from this run: the app cannot create repositories or dispatch workflows; the Vercel apex/www choice must match `site`; Namecheap only shows host records after switching to BasicDNS; preview and deployment URLs need the domain in this session's allowed list to be checked from here. For customers, the managed model (a factory GitHub organization and Vercel team, transfer on request) needs a GitHub App that can create repositories.
+1. `add-landing-handoff` (implemented, PR open, see above). Lessons it encodes: the app cannot create repositories or dispatch workflows; the Vercel apex/www choice must match `site`; Namecheap only shows host records after switching to BasicDNS; preview and deployment URLs need the domain in this session's allowed list to be checked from here. For customers, the managed model (a factory GitHub organization and Vercel team, transfer on request) needs a GitHub App that can create repositories.
 2. `add-landing-preview`: 2 or 3 short visual directions for the customer to choose from before the full build, and `revise_landing`.
 3. Channels decision (web app as the source of truth, chat for the interview and notifications).
 
@@ -121,6 +131,6 @@ Without `--auto` it stops after `sites/<slug>/PROPOSAL.md` (review it with the o
 
 - Cloudflare Pages projects: starter `landing-factory-71t`, `panaderia-a3o`, `clinica-dental-9pd`, `samurai-1v4`, `tupathdigital`, `personal-brand-8i7` (and the archetype pilot sites). A new project's TLS certificate takes about two minutes after its first deploy. CI creates a new site's project on its first deploy. Preview aliases: `https://<branch-alias>.<project>.pages.dev`.
 - GitHub secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are repository secrets.
-- Cloud session network: allowed domains include the bakery and pilot reference sites and CDNs, `*.pages.dev`, Met and Commons hosts, `api.openai.com`, and (added 2026-10-25 for the personal-brand references) `www.product.inc`, `product.inc`, `sankar.work`, `www.sankar.work`, `www.sebg.ch`, `sebg.ch`; a newly added domain worked without a new session. `api.vercel.com` is not allowed. New reference sites need their domains added by the user.
+- Cloud session network: `williansnieves.com`, `www.williansnieves.com` and `*.vercel.app` are blocked by the proxy (403 on CONNECT) unless the owner adds them. The Claude GitHub App answers 403 to `create_repository` and to `workflow_dispatch`/re-runs; `add_repo` with push access works for repositories in the app's installation (the owner's covers all repositories). Allowed domains include the bakery and pilot reference sites and CDNs, `*.pages.dev`, Met and Commons hosts, `api.openai.com`, and (added 2026-10-25 for the personal-brand references) `www.product.inc`, `product.inc`, `sankar.work`, `www.sankar.work`, `www.sebg.ch`, `sebg.ch`; a newly added domain worked without a new session. `api.vercel.com` is not allowed. New reference sites need their domains added by the user.
 - `OPENAI_API_KEY` is set in the environment and works in this session (only the `claude -p` allow list blocked it during a build). Sessions lack `rsync` and `ssh` by default (`apt-get install -y rsync openssh-client`). The `claude` CLI is at `/opt/node22/bin/claude`.
 - Chromium for Playwright: `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`. In scratch scripts outside the repo, load Playwright with `createRequire(process.cwd() + '/')('playwright')` from the repo root.

@@ -274,12 +274,39 @@ jobs:
           DEPLOY_URL: ${{ steps.output.outputs.url || steps.target_deploy.outputs.url }}
         run: npm run report -- --only live --url "$DEPLOY_URL"
 
+      # Production only: the same live checks on the landing's own domain (the origin of the canonical URL in
+      # dist/index.html, which is absolute when astro.config.mjs sets `site`). While the domain does not point
+      # at this host yet, every item is not-run and the step passes; once it answers, a failing item fails the
+      # job below. Its reports go to qa-domain/, so they never replace the deployment report.
+      - name: Landing report (live, site domain)
+        id: domain_report
+        if: steps.gate.outputs.enabled == 'true' && steps.target.outputs.is_production == 'true'
+        continue-on-error: true
+        run: |
+          if node scripts/report/site-url.mjs dist > /dev/null 2>&1; then
+            npm run report -- --only live --site-url --out qa-domain
+          else
+            echo "::notice title=Domain report skipped::astro.config.mjs sets no site URL, so the production domain is not checked."
+          fi
+
       - name: Summarize live report
         if: steps.gate.outputs.enabled == 'true'
         id: live_summary
         run: |
           line=$(node scripts/landing-report.mjs --summary qa/report | sed -n 's/^live: //p')
           echo "live=$line" >> "$GITHUB_OUTPUT"
+          domain=$(node scripts/landing-report.mjs --summary qa-domain/report | sed -n 's/^live: //p')
+          echo "domain=$domain" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Landing report"
+            echo ""
+            echo "- Deployment URL: ${line:-not available}"
+            if [ "$IS_PRODUCTION" = "true" ]; then
+              echo "- Site domain: ${domain:-not available}"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+        env:
+          IS_PRODUCTION: ${{ steps.target.outputs.is_production }}
 
       - name: Upload live report
         if: steps.gate.outputs.enabled == 'true'
@@ -289,6 +316,17 @@ jobs:
           path: |
             qa/report/
             !qa/report/latest
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload domain report
+        if: steps.gate.outputs.enabled == 'true' && steps.target.outputs.is_production == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: landing-report-domain
+          path: |
+            qa-domain/report/
+            !qa-domain/report/latest
           if-no-files-found: warn
           retention-days: 14
 
@@ -302,12 +340,13 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           REPORT_STATIC: ${{ needs.qa.outputs.report_static }}
           REPORT_LIVE: ${{ steps.live_summary.outputs.live }}
+          REPORT_DOMAIN: ${{ steps.live_summary.outputs.domain }}
           TARGET: ${{ steps.target.outputs.target }}
           PREVIEW_FALLBACK: ${{ steps.target.outputs.preview_fallback }}
         with:
           script: |
             const marker = '<!-- site-preview -->';
-            const { DEPLOY_URL, ALIAS_URL, COMMIT_SHA, RUN_URL, REPORT_STATIC, REPORT_LIVE } = process.env;
+            const { DEPLOY_URL, ALIAS_URL, COMMIT_SHA, RUN_URL, REPORT_STATIC, REPORT_LIVE, REPORT_DOMAIN } = process.env;
             const lines = [marker, '### Preview deployment', '', `- Preview: ${DEPLOY_URL}`];
             if (ALIAS_URL) lines.push(`- Branch alias: ${ALIAS_URL}`);
             if (process.env.PREVIEW_FALLBACK === 'true')
@@ -320,6 +359,7 @@ jobs:
               lines.push(
                 `- Report: static ${REPORT_STATIC || 'not available'}; live ${REPORT_LIVE || 'not available'} ([artifacts \`landing-report\`, \`landing-report-live\`](${RUN_URL}))`,
               );
+            if (REPORT_DOMAIN) lines.push(`- Site domain report: ${REPORT_DOMAIN}`);
             const body = lines.join('\n');
             const { owner, repo } = context.repo;
             const issue_number = context.issue.number;
@@ -366,9 +406,9 @@ jobs:
             if (existing) await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
             else await github.rest.issues.createComment({ owner, repo, issue_number, body });
 
-      # The preview exists; a failing live report still turns the job red.
+      # The deploy exists; a failing live report (deployment URL or production domain) still turns the job red.
       - name: Fail when the live report failed
-        if: steps.live_report.outcome == 'failure'
+        if: steps.live_report.outcome == 'failure' || steps.domain_report.outcome == 'failure'
         run: |
-          echo "::error title=Landing report::The live checks on the deployed URL failed. See the landing-report-live artifact."
+          echo "::error title=Landing report::The live checks failed (deployment URL: ${{ steps.live_report.outcome }}, site domain: ${{ steps.domain_report.outcome }}). See the landing-report-live and landing-report-domain artifacts."
           exit 1

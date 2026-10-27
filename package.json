@@ -39,6 +39,7 @@
     "ai-images": "node scripts/ai-images.mjs",
     "deploy": "node scripts/deploy.mjs",
     "export": "node scripts/export.mjs",
+    "handoff": "node scripts/handoff.mjs",
     "credits": "node scripts/credits.mjs",
     "legal": "node scripts/legal.mjs",
     "section-shots": "node scripts/section-shots.mjs",
