@@ -15,7 +15,9 @@ import {
   summarizeBrief,
   validateBrief,
 } from '../lib/brief-schema.mjs';
+import { validateDirections } from '../lib/directions-schema.mjs';
 import { isSiteDir, listSites } from '../lib/sites.mjs';
+import { Refused, chooseDirection } from '../directions.mjs';
 import { ToolError, assertSlug, briefPath, inside, siteDir } from './paths.mjs';
 import { readRunLog } from './jobs.mjs';
 
@@ -160,6 +162,25 @@ export function listLandings(root) {
   return listSites(join(root, 'sites')).map((slug) => summaryOf(root, slug));
 }
 
+/** The directions run of a landing (ids, ideas, preview paths) and the recorded choice, or null without one. */
+function directionsOf(root, slug) {
+  const path = join(siteDir(root, slug), 'directions.json');
+  if (!existsSync(path)) return null;
+  const data = readJson(path);
+  const errors = data ? validateDirections(data) : ['not valid JSON'];
+  if (errors.length)
+    return { error: `directions.json is invalid: ${errors[0]}` };
+  return {
+    directions: data.directions.map((d) => ({
+      id: d.id,
+      idea: d.idea,
+      archetype: d.archetype,
+      previewPath: `/directions/${d.id}/`,
+    })),
+    choice: data.choice ?? null,
+  };
+}
+
 export function getLanding(root, slug) {
   assertSlug(slug);
   const dir = siteDir(root, slug);
@@ -196,6 +217,7 @@ export function getLanding(root, slug) {
     isSite: isSiteDir(dir),
     brief: briefInfo,
     previewUrl: previewUrl(root, slug),
+    directions: directionsOf(root, slug),
     runPhase: run.phase,
     runTotals: run.totals,
     runUsage: readJson(join(dir, '.run-usage.json')),
@@ -325,4 +347,24 @@ export function briefUpdate(root, { slug, patch, assumed }) {
     summary: summarizeBrief(merged),
     requiredMissing: missingFields(merged).filter((m) => m.required).length,
   };
+}
+
+// --------------------------------------------------------------------------------------------------
+// Visual directions
+
+/** Record the customer's choice in sites/<slug>/directions.json (the only file written). */
+export function chooseDirectionTool(root, { slug, direction, notes }) {
+  assertSlug(slug);
+  if (notes !== undefined && typeof notes !== 'string')
+    throw new ToolError('notes must be a string');
+  try {
+    const saved = chooseDirection(root, slug, {
+      direction,
+      notes: notes ?? '',
+    });
+    return { slug, saved: true, choice: saved.choice };
+  } catch (error) {
+    if (error instanceof Refused) throw new ToolError(error.message);
+    throw error;
+  }
 }

@@ -534,3 +534,79 @@ test('claude-stream.mjs formats events and summarizes usage', async () => {
     true,
   );
 });
+
+test('--directions and --count go to the skill; --count alone, a bad count and --dry-run are usage errors', () => {
+  const r = run(
+    [
+      slug,
+      '--niche',
+      'dental clinic',
+      '--resume',
+      '--directions',
+      '--count',
+      '2',
+    ],
+    { STUB_RESULT: 'directions' },
+  );
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.equal(
+    recorded()[1],
+    `/new-landing ${slug} --niche "dental clinic" --resume --directions --count 2 --max-attempts 5 --lang es`,
+  );
+  assert.match(r.stdout, /directions ready/);
+  const noCount = run([slug, '--niche', 'x', '--resume', '--directions'], {
+    STUB_RESULT: 'directions',
+  });
+  assert.doesNotMatch(recorded()[1], /--count/);
+  assert.equal(noCount.status, 0);
+  for (const [args, pattern] of [
+    [
+      [slug, '--niche', 'x', '--count', '2'],
+      /--count only goes with --directions/,
+    ],
+    [
+      [slug, '--niche', 'x', '--directions', '--count', '4'],
+      /--count must be 2 or 3/,
+    ],
+    [
+      [slug, '--niche', 'x', '--directions', '--count'],
+      /--count needs a value/,
+    ],
+    [
+      [slug, '--niche', 'x', '--directions', '--dry-run'],
+      /cannot be combined with --dry-run/,
+    ],
+  ]) {
+    const bad = run(args);
+    assert.equal(bad.status, 2, args.join(' '));
+    assert.match(bad.stderr, pattern);
+  }
+});
+
+test('a resume on a site with directions and no choice is refused, then allowed once chosen', () => {
+  const file = join(siteDir, 'directions.json');
+  writeFileSync(
+    file,
+    JSON.stringify({ version: 1, directions: [], choice: null }),
+  );
+  rmSync(argsFile, { force: true });
+  const refused = run([slug, '--niche', 'x', '--resume', '--auto'], {
+    STUB_RESULT: 'passed',
+  });
+  assert.equal(refused.status, 1);
+  assert.match(refused.stderr, /node scripts\/directions\.mjs choose/);
+  assert.ok(!existsSync(argsFile), 'claude was not started');
+  writeFileSync(
+    file,
+    JSON.stringify({
+      version: 1,
+      directions: [],
+      choice: { direction: 'a', notes: '', date: '2026-10-27' },
+    }),
+  );
+  const allowed = run([slug, '--niche', 'x', '--resume', '--auto'], {
+    STUB_RESULT: 'passed',
+  });
+  assert.equal(allowed.status, 0, allowed.stderr);
+  rmSync(file);
+});

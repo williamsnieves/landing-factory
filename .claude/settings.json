@@ -27,6 +27,7 @@
       "Bash(npm view *)",
       "Bash(node scripts/preflight.mjs *)",
       "Bash(node scripts/brief.mjs *)",
+      "Bash(node scripts/directions.mjs *)",
       "Bash(node scripts/find-images.mjs *)",
       "Bash(node scripts/ai-images.mjs *)",
       "Bash(node scripts/credits.mjs *)",
@@ -53,6 +54,7 @@
       "mcp__landing-factory__brief_missing",
       "mcp__landing-factory__brief_summary",
       "mcp__landing-factory__brief_update",
+      "mcp__landing-factory__choose_direction",
       "mcp__landing-factory__get_job",
       "mcp__landing-factory__list_jobs",
       "mcp__landing-factory__tail_job_log"
