@@ -35,6 +35,7 @@ Agreed after the export command (`add-site-export`), in this order:
     - **Web app (source of truth):** previews side by side with comments, approval, structured data such as prices and legal fields, billing, history and the list of landings.
     - **Chat (entry and notifications):** the interview, which suits a conversation, voice notes and photos, plus "your preview is ready" with a link to the web app, and small changes. Telegram first, since its bot API is free and simple. WhatsApp when there are paying customers, because of Meta business verification, templates, the 24-hour window and per-conversation pricing.
     - **Before building either:** run 3 to 5 real customers through the flow by hand, with the owner standing in for the chat. Measure interview completion, time to the first preview, rounds of changes and cost per landing.
+    - **Recorded (owner, 2026-10-28):** `docs/channels.md` holds the decision, the mapping of each channel to the factory's tools, the engine options (VPS, GitHub Actions, cloud sessions; still open) and the gate. Nothing is built until 3 to 5 customers are recorded in `docs/customer-runs.md`.
 
 ### Delivery model (owner, 2026-10-27)
 
