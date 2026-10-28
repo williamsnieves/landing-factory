@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-28 (channels decision merged, PR #35; add-seo implemented, PR open; four reference sheets, PR open; next: the real-estate end-to-end test).
+Read this first in a new or compacted session. Last updated: 2026-10-28 (add-seo merged, PR #37, and archived; reference sheets merged, PR #36; the real-estate end-to-end test `casavela` is running its directions on `change/casavela-test`).
 
 ## Working agreements
 
@@ -41,18 +41,26 @@ Read this first in a new or compacted session. Last updated: 2026-10-28 (channel
 | add-landing-preview (2 or 3 visual directions before the full build, recorded choice, `preview_landing` and `choose_direction`) | Merged (PR #33) and archived. First real directions run not done yet (owner: later) |
 | add-landing-revise (revision rounds, sync to the managed repository, transfer checklist and record, `revise_landing`) | Merged (PR #34) and archived. First real revision round not run yet |
 | Channels decision (product plan step 12) | Merged (PR #35); docs only |
-| Reference sheets linear-app, stripe-com, vercel-com, framer-com (owner references) | On `change/reference-sheets`, PR open (raycast.com skipped: recon screenshot timeout) |
-| add-seo (vendored `seo-audit` and `schema` skills, brief `seo` fields, Open Graph, JSON-LD, sitemap and robots.txt in new sites, `seo` report area) | Implemented on `change/add-seo`, PR open |
+| Reference sheets linear-app, stripe-com, vercel-com, framer-com (owner references) | Merged (PR #36). raycast.com skipped (recon screenshot timeout; retry later) |
+| add-seo (vendored `seo-audit` and `schema` skills, brief `seo` fields, Open Graph, JSON-LD, sitemap and robots.txt in new sites, `seo` report area) | Merged (PR #37) and archived |
+| End-to-end test of track 1: `sites/casavela` (fictional real-estate agency and mortgage adviser, Valencia, Spanish) | Directions run started 2026-10-28T21:56:35Z on `change/casavela-test`, not finished at the last update |
 
 ## Resume here (2026-10-26)
 
-`main` has everything up to PR #35 (channels decision). Open: `change/add-seo` (PR) and `change/reference-sheets` (PR). Next, in this order (owner, 2026-10-28):
+`main` has everything up to PR #37 (add-seo). Branch `change/casavela-test` holds the add-seo archive commit and this status; the casavela files are being written by the run and are not committed yet.
 
-1. Merge both, archive add-seo.
-2. The first real end-to-end run of track 1 (owner builds, then offers): a fictional real-estate agency and mortgage adviser in Spain, in Spanish, with a client-side mortgage calculator and calls to action to WhatsApp, phone or a calendar (no form: lead forms are a later change, `add-lead-forms`, needed before selling to this niche). Directions, choice, build, one revision round, with SEO and the new reference sheets; costs and times go to `docs/customer-runs.md`.
-3. A `product-led-saas` archetype from the four reference sheets (lends `ui-frame-hero`, `two-tone-heading`, `logo-strip-under-hero`; signals technical, premium, conversion-first), a small change of its own.
-4. Prospect mode (`add-prospect-landings`): public facts with sources, no prospect brand assets, `noindex` until sold, a sales kit.
-5. tupathdigital to production in a private repository, last (owner).
+**Resume the casavela test here (2026-10-28):**
+- Brief: `sites/casavela/brief.json` (also in the session scratchpad as `casavela-brief.json`). Fictional business "Casavela Inmobiliaria", Valencia, `kind: service`, `legal.regulated: true` (mortgages; the calculator carries a notice that it is indicative), no `legal.markets`, `brand.aiImages` empty (no AI images). Every contact value is an example and listed in `assumed`: phone `+34 600 000 000`, WhatsApp `https://wa.me/34600000000` (primary call to action), `tel:` as secondary, `hola@example.com`, an example address and hours. SEO: primary keyword "valoración de vivienda gratis en Valencia", area Valencia, Burjassot, Paterna, Mislata, `schemaType: RealEstateAgent`. Liked references: `stripe-com` (stat strip), `framer-com` (sticky panel for the mortgage calculator). No form (lead forms are `add-lead-forms`, later).
+- Command: `scripts/new-landing.sh casavela --brief <brief> --directions --auto` with `QA_CHROME_PATH` set, started 2026-10-28T21:56:35Z in the background; log `sites/casavela/.run.log`. The "Ignoring 53 permissions.allow entries ... workspace has not been trusted" line is harmless: `new-landing.sh` passes `--allowedTools` explicitly.
+- When it ends: read `RUN.md` (`Result: directions` expected), `DIRECTIONS.md` and the `Usage:` line; run `node scripts/directions.mjs check --site casavela`; then `npm install` if the lockfile changed, commit the site and push `change/casavela-test`, open the pull request so CI deploys the Pages preview, and send the owner `https://change-casavela-test.casavela.pages.dev/directions/a/` (and `/b/`, `/c/`). Record duration and cost in `docs/customer-runs.md`.
+- Then: the owner picks a direction (`node scripts/directions.mjs choose --site casavela --direction <id> --notes "..."`), `scripts/new-landing.sh casavela --brief sites/casavela/brief.json --resume --auto` builds the landing, one revision round with feedback the owner writes as the customer (`npm run revise -- casavela --feedback <file>`), every cost and time into `docs/customer-runs.md`, and fix whatever the first real runs of directions and revisions show.
+
+Next after the test, in this order (owner, 2026-10-28):
+
+1. Finish the casavela test (above). Lead forms (`add-lead-forms`) are needed before selling to this niche.
+2. A `product-led-saas` archetype from the four reference sheets (lends `ui-frame-hero`, `two-tone-heading`, `logo-strip-under-hero`; signals technical, premium, conversion-first), a small change of its own.
+3. Prospect mode (`add-prospect-landings`): public facts with sources, no prospect brand assets, `noindex` until sold, a sales kit.
+4. tupathdigital to production in a private repository, last (owner).
 
 **Two tracks and the repository (owner, 2026-10-28, `docs/channels.md`):** track 1, the owner builds landings and then offers them; track 2 later, a self-serve web app driven by the Agent SDK with the same harness; Telegram serves both. The factory repository stays public (free CI) until the flow is polished and tupathdigital is in production, then goes private.
 
