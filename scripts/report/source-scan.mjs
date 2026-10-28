@@ -22,6 +22,8 @@ const SINKS = [
   ['eval', /(^|[^\w.$])eval\s*\(/],
   ['new Function', /\bnew\s+Function\s*\(/],
 ];
+/** The one sanctioned set:html: the escaped JSON-LD script of BaseLayout. */
+const JSON_LD_SINK = /<script type=\{jsonLdType\} set:html=\{jsonLdText\} \/>/;
 const SOURCE_EXT = /\.(astro|[cm]?[jt]sx?)$/;
 
 /**
@@ -37,6 +39,8 @@ export function findSinks(srcDir, labelRoot) {
     lines.forEach((text, index) => {
       const trimmed = text.trim();
       if (/^(\/\/|\/\*|\*|<!--)/.test(trimmed)) return;
+      // BaseLayout's JSON-LD block: JSON.stringify output with `<` escaped, never user input (see its comment).
+      if (JSON_LD_SINK.test(trimmed)) return;
       for (const [sink, re] of SINKS)
         if (re.test(text))
           hits.push({

@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-28 (add-landing-revise merged and archived; channels decision recorded in `docs/channels.md`, nothing built until 3 to 5 real customers).
+Read this first in a new or compacted session. Last updated: 2026-10-28 (channels decision merged, PR #35; add-seo implemented, PR open; four reference sheets, PR open; next: the real-estate end-to-end test).
 
 ## Working agreements
 
@@ -40,11 +40,23 @@ Read this first in a new or compacted session. Last updated: 2026-10-28 (add-lan
 | add-landing-handoff (handoff preflight and owner checklist, `/landing-handoff` skill, domain live report in exported repositories) | Merged (PR #32) and archived. personal-brand refreshed from a fresh export (williamsnieves/personal-brand#1, merged): its production run checked https://williansnieves.com, 0 fail, 1 warn (unknown path answers 308 before the 404) |
 | add-landing-preview (2 or 3 visual directions before the full build, recorded choice, `preview_landing` and `choose_direction`) | Merged (PR #33) and archived. First real directions run not done yet (owner: later) |
 | add-landing-revise (revision rounds, sync to the managed repository, transfer checklist and record, `revise_landing`) | Merged (PR #34) and archived. First real revision round not run yet |
-| Channels decision (product plan step 12) | Recorded in `docs/channels.md` on `change/channels-decision`, PR open; docs only |
+| Channels decision (product plan step 12) | Merged (PR #35); docs only |
+| Reference sheets linear-app, stripe-com, vercel-com, framer-com (owner references) | On `change/reference-sheets`, PR open (raycast.com skipped: recon screenshot timeout) |
+| add-seo (vendored `seo-audit` and `schema` skills, brief `seo` fields, Open Graph, JSON-LD, sitemap and robots.txt in new sites, `seo` report area) | Implemented on `change/add-seo`, PR open |
 
 ## Resume here (2026-10-26)
 
-`main` has everything up to PR #34 (add-landing-revise). Branch `change/channels-decision` archives it and records the channels decision (docs only, PR open). Next: real customers through the flow by hand (`docs/customer-runs.md`), the pending real runs below, or factory follow-ups; the channels and the remote engine wait for 3 to 5 recorded customers.
+`main` has everything up to PR #35 (channels decision). Open: `change/add-seo` (PR) and `change/reference-sheets` (PR). Next, in this order (owner, 2026-10-28):
+
+1. Merge both, archive add-seo.
+2. The first real end-to-end run of track 1 (owner builds, then offers): a fictional real-estate agency and mortgage adviser in Spain, in Spanish, with a client-side mortgage calculator and calls to action to WhatsApp, phone or a calendar (no form: lead forms are a later change, `add-lead-forms`, needed before selling to this niche). Directions, choice, build, one revision round, with SEO and the new reference sheets; costs and times go to `docs/customer-runs.md`.
+3. A `product-led-saas` archetype from the four reference sheets (lends `ui-frame-hero`, `two-tone-heading`, `logo-strip-under-hero`; signals technical, premium, conversion-first), a small change of its own.
+4. Prospect mode (`add-prospect-landings`): public facts with sources, no prospect brand assets, `noindex` until sold, a sales kit.
+5. tupathdigital to production in a private repository, last (owner).
+
+**Two tracks and the repository (owner, 2026-10-28, `docs/channels.md`):** track 1, the owner builds landings and then offers them; track 2 later, a self-serve web app driven by the Agent SDK with the same harness; Telegram serves both. The factory repository stays public (free CI) until the flow is polished and tupathdigital is in production, then goes private.
+
+**The session's network:** the owner added linear.app, stripe.com, vercel.com, framer.com, raycast.com and their CDNs to the environment's allowed domains (2026-10-28).
 
 **Channels (owner decision, 2026-10-28, `docs/channels.md`):** one engine and thin clients; the web app is the source of truth (directions, choice and comments, approval, structured data, rounds, later billing); chat is the way in and for notifications (interview, "preview ready", small changes), Telegram before WhatsApp; publishing, sync and transfer stay with the owner. Where the engine runs (VPS, GitHub Actions or cloud sessions) is open and is decided from the measured customer runs.
 

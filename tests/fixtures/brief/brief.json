@@ -93,6 +93,12 @@
     "privacyContact": "privacidad@example.com",
     "processing": { "analytics": "none", "forms": false, "embeds": [] }
   },
+  "seo": {
+    "primaryKeyword": "plantillas de Notion para freelances",
+    "keywords": ["plantilla notion facturas"],
+    "serviceArea": ["Valencia"],
+    "schemaType": "Organization"
+  },
   "deploy": {
     "target": "cloudflare-pages",
     "domain": "tallerplantilla.example.com"

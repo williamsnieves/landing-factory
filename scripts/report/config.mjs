@@ -18,6 +18,8 @@ export const REPORT_DEFAULTS = Object.freeze({
   externalLinks: { max: 50, gapMs: 250 },
   // Live checks (--url).
   live: { timeoutMs: 10000 },
+  // SEO text limits in characters (the seo area warns outside them).
+  seo: { titleMin: 30, titleMax: 60, descriptionMin: 70, descriptionMax: 160 },
 });
 
 const isObject = (v) =>
@@ -41,7 +43,7 @@ export function validateReportConfig(config) {
   const errors = [];
   const err = (path, message) => errors.push(`report.${path}: ${message}`);
   if (!isObject(config)) return ['report: must be an object'];
-  const allowed = [...NUMBER_KEYS, 'audit', 'externalLinks', 'live'];
+  const allowed = [...NUMBER_KEYS, 'audit', 'externalLinks', 'live', 'seo'];
   for (const key of Object.keys(config))
     if (!allowed.includes(key))
       err(key, `unknown key (allowed: ${allowed.join(', ')})`);
@@ -77,6 +79,21 @@ export function validateReportConfig(config) {
   if (!isObject(live)) err('live', 'must be an object');
   else if (!Number.isInteger(live.timeoutMs) || live.timeoutMs < 100)
     err('live.timeoutMs', 'must be an integer >= 100');
+  const seo = config.seo;
+  if (!isObject(seo)) err('seo', 'must be an object');
+  else {
+    const keys = ['titleMin', 'titleMax', 'descriptionMin', 'descriptionMax'];
+    for (const key of Object.keys(seo))
+      if (!keys.includes(key))
+        err(`seo.${key}`, `unknown key (allowed: ${keys.join(', ')})`);
+    for (const key of keys)
+      if (!Number.isInteger(seo[key]) || seo[key] < 1)
+        err(`seo.${key}`, 'must be an integer >= 1');
+    if (seo.titleMin > seo.titleMax)
+      err('seo.titleMin', 'must not be greater than seo.titleMax');
+    if (seo.descriptionMin > seo.descriptionMax)
+      err('seo.descriptionMin', 'must not be greater than seo.descriptionMax');
+  }
   return errors;
 }
 

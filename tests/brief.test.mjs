@@ -939,3 +939,94 @@ test('the brief-intake skill asks the owner-portrait question only for a persona
   ])
     assert.ok(skill.includes(needle), needle);
 });
+
+// --- SEO fields (add-seo, task 3.1) ---
+
+test('a valid seo object validates, and the skeleton carries the empty block', () => {
+  const brief = fixture();
+  brief.seo = {
+    primaryKeyword: 'valoración de vivienda en Valencia',
+    keywords: ['calculadora hipoteca', 'vender piso Valencia'],
+    serviceArea: ['Valencia', 'Paterna'],
+    schemaType: 'RealEstateAgent',
+  };
+  assert.deepEqual(errorsOf(brief), []);
+  assert.deepEqual(emptyBrief({ language: 'es' }).seo, {
+    primaryKeyword: '',
+    keywords: [],
+    serviceArea: [],
+    schemaType: '',
+  });
+  assert.deepEqual(errorsOf(emptyBrief({ language: 'es' })).length > 0, true);
+});
+
+test('an unknown seo key, an unknown schema type, too many keywords and a long keyword each fail with the field path', () => {
+  const brief = fixture();
+  brief.seo = { rank: 1 };
+  assert.deepEqual(paths(errorsOf(brief)), ['seo.rank']);
+  brief.seo = { schemaType: 'SpaceAgency' };
+  const [error] = errorsOf(brief);
+  assert.equal(error.path, 'seo.schemaType');
+  assert.match(error.message, /expected one of LocalBusiness, .*Event/);
+  brief.seo = {
+    keywords: Array.from({ length: 11 }, (_, i) => `k${i}`),
+    serviceArea: Array.from({ length: 11 }, (_, i) => `a${i}`),
+    primaryKeyword: 'x'.repeat(121),
+  };
+  assert.deepEqual(paths(errorsOf(brief)).sort(), [
+    'seo.keywords',
+    'seo.primaryKeyword',
+    'seo.serviceArea',
+  ]);
+});
+
+test('missing lists seo.primaryKeyword, and seo.serviceArea only for a business with an address or a city', () => {
+  const online = emptyBrief({ language: 'en', niche: 'x' });
+  const paths_ = (b) => missingFields(b).map((m) => m.path);
+  assert.ok(paths_(online).includes('seo.primaryKeyword'));
+  assert.ok(!paths_(online).includes('seo.serviceArea'), 'online only');
+  online.contact.address = 'Calle Ficticia 1, Valencia';
+  assert.ok(paths_(online).includes('seo.serviceArea'));
+  const local = fixture();
+  local.seo = {
+    primaryKeyword: 'plantillas notion',
+    serviceArea: ['Valencia'],
+  };
+  assert.ok(!paths_(local).includes('seo.primaryKeyword'));
+  assert.ok(!paths_(local).includes('seo.serviceArea'));
+  assert.match(summarizeBrief(local), /Primary keyword: plantillas notion/);
+  assert.match(summarizeBrief(local), /Service area: Valencia/);
+});
+
+test('a keyword chosen for the customer can be listed as assumed; a brief without seo stays valid', () => {
+  const brief = fixture();
+  delete brief.seo;
+  assert.deepEqual(errorsOf(brief), []);
+  brief.seo = { primaryKeyword: 'plantillas notion' };
+  brief.assumed.push({
+    field: 'seo.primaryKeyword',
+    reason: 'chosen by the agent, the customer confirms',
+  });
+  assert.deepEqual(errorsOf(brief), []);
+  assert.match(summarizeBrief(brief), /plantillas notion \(assumed\)/);
+});
+
+test('the brief-intake skill asks the search question without inventing keywords', () => {
+  const skill = readFileSync(
+    join(ROOT, '.claude/skills/brief-intake/SKILL.md'),
+    'utf8',
+  );
+  for (const needle of [
+    'What would a customer type into Google to find you?',
+    'seo.primaryKeyword',
+    'seo.serviceArea',
+    'seo.schemaType',
+    'Never invent keywords',
+    'list it in `assumed` (`seo.primaryKeyword`)',
+  ])
+    assert.ok(skill.includes(needle), needle);
+  assert.ok(
+    skill.indexOf('## The search question') >
+      skill.indexOf('## The legal step'),
+  );
+});

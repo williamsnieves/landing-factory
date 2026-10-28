@@ -26,6 +26,24 @@ export const ANALYTICS_MODES = ['none', 'cookieless', 'cookies'];
 export const AI_IMAGE_MODES = ['allowed', 'not-allowed'];
 /** May the page show an AI portrait of the brand owner (a personal brand)? Empty means not decided, which counts as not allowed. */
 export const OWNER_PORTRAIT_MODES = ['allowed', 'not-allowed'];
+/** schema.org types the SEO step can write JSON-LD for (seo.schemaType). Extend the list here. */
+export const SCHEMA_TYPES = [
+  'LocalBusiness',
+  'ProfessionalService',
+  'RealEstateAgent',
+  'FinancialService',
+  'Dentist',
+  'MedicalClinic',
+  'Restaurant',
+  'Bakery',
+  'Store',
+  'Organization',
+  'Person',
+  'SoftwareApplication',
+  'Event',
+];
+export const SEO_MAX_TEXT = 120;
+export const SEO_MAX_LIST = 10;
 export const DEPLOY_TARGETS = [
   'cloudflare-pages',
   'vercel',
@@ -36,7 +54,11 @@ export const DEPLOY_TARGETS = [
 ];
 
 const str = (extra = {}) => ({ type: 'string', ...extra });
-const list = (items) => ({ type: 'array', items });
+const list = (items, maxItems) => ({
+  type: 'array',
+  items,
+  ...(maxItems ? { maxItems } : {}),
+});
 const obj = (props) => ({ type: 'object', props });
 
 /** The shape of a brief. `required` strings must be non-empty; `format` names a check in FORMATS. */
@@ -136,6 +158,14 @@ export const SCHEMA = obj({
       forms: { type: 'boolean' },
       embeds: list(str()),
     }),
+  }),
+  // What a customer types into a search engine to find the business, the place it serves and the schema.org type
+  // of its JSON-LD. A value chosen for the customer goes in `assumed`.
+  seo: obj({
+    primaryKeyword: str({ maxLength: SEO_MAX_TEXT }),
+    keywords: list(str({ maxLength: SEO_MAX_TEXT }), SEO_MAX_LIST),
+    serviceArea: list(str({ maxLength: SEO_MAX_TEXT }), SEO_MAX_LIST),
+    schemaType: str({ enum: SCHEMA_TYPES }),
   }),
   deploy: obj({
     target: str({ enum: DEPLOY_TARGETS }),
@@ -341,6 +371,11 @@ export function validateBrief(
           if (node.required) fail(path, 'required, but empty; give it a value');
           return;
         }
+        if (node.maxLength && text.length > node.maxLength)
+          fail(
+            path,
+            `at most ${node.maxLength} characters, got ${text.length}`,
+          );
         if (node.enum && !node.enum.includes(text))
           fail(path, `expected one of ${node.enum.join(', ')}, got "${value}"`);
         const problem = node.format ? FORMATS[node.format](text, ctx) : null;
@@ -352,6 +387,8 @@ export function validateBrief(
           fail(path, `expected an array, got ${describe(value)}`);
           return;
         }
+        if (node.maxItems && value.length > node.maxItems)
+          fail(path, `at most ${node.maxItems} entries, got ${value.length}`);
         value.forEach((item, index) =>
           walk(node.items, item, `${path}[${index}]`),
         );
@@ -618,6 +655,12 @@ export const MISSING_FIELDS = [
     'markets',
   ],
   [
+    'seo.primaryKeyword',
+    false,
+    'What would a customer type into Google to find you? One phrase; it goes in the title and the main heading.',
+  ],
+  ['seo.serviceArea', false, 'Which cities or regions do you serve?', 'local'],
+  [
     'assets',
     false,
     'Which logo, photos, videos or documents of your own can be used, and who owns them?',
@@ -672,12 +715,17 @@ export function briefLocales(brief) {
 export const isPersonalBrand = (brief) =>
   brief?.business?.personalBrand === true;
 
+/** A local business names a street address or a city: only then is the service area asked. */
+export const isLocalBusiness = (brief) =>
+  isFilled(brief?.contact?.address) || isFilled(brief?.business?.city);
+
 /** Fields still empty: required first, then recommended in interview order. */
 export function missingFields(brief) {
   const empty = MISSING_FIELDS.filter(
     ({ path, when }) =>
       (when !== 'markets' || hasMarkets(brief)) &&
       (when !== 'personal-brand' || isPersonalBrand(brief)) &&
+      (when !== 'local' || isLocalBusiness(brief)) &&
       !isFilled(getPath(brief, path)),
   ).map(({ when, ...field }) => field);
   return [
@@ -767,6 +815,10 @@ export function summarizeBrief(brief) {
   if (brief.legal?.processing?.forms) lines.push('Forms collect data: yes');
   field('Legal notices', 'legal.notices');
   field('Legal constraints', 'legal.constraints');
+  field('Primary keyword', 'seo.primaryKeyword');
+  field('Keywords', 'seo.keywords');
+  field('Service area', 'seo.serviceArea');
+  field('Schema type', 'seo.schemaType');
   field('Deploy target', 'deploy.target');
   field('Domain', 'deploy.domain');
   (brief.assumed ?? []).forEach((a) =>

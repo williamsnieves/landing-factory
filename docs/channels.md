@@ -21,6 +21,14 @@ How customers will reach the factory. The decision was recorded on 2026-10-28 (p
 
   The engine can prepare them; a person approves them.
 
+## Two tracks (owner decision, 2026-10-28)
+
+- **Track 1, now: the owner builds landings and then offers them.** The owner chooses a niche or a prospect, builds the landing in the factory and shows it; a customer who buys goes through the flow in "Before building". SEO is part of what is sold (`docs/seo.md`).
+- **Track 2, later: a self-serve web app driven by the Agent SDK.** A customer runs the interview and the build without the owner. It starts only after the gate in "Before building" is met.
+- **Telegram serves both tracks.** The owner uses it to follow his own builds and to talk to buyers in track 1; customers use it in track 2. WhatsApp still waits for paying customers.
+- **The repository stays public** until the flow is polished and tupathdigital is in production.
+- **Prospect landings.** A landing built before the prospect has bought anything never uses the prospect's brand assets (logo, photos, copy, colors taken from them) and stays `noindex` until it is sold. Only then does it get the customer's assets, its own domain and an indexable build.
+
 ## What each channel does, mapped to the factory
 
 | Step                                 | Factory today (`docs/agent-interface.md`)                       | Chat                                                       | Web app                                                 |

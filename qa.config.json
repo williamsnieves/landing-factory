@@ -56,7 +56,13 @@
     "renderBlockingMs": 500,
     "audit": { "ignore": [] },
     "externalLinks": { "max": 50, "gapMs": 250 },
-    "live": { "timeoutMs": 10000 }
+    "live": { "timeoutMs": 10000 },
+    "seo": {
+      "titleMin": 30,
+      "titleMax": 60,
+      "descriptionMin": 70,
+      "descriptionMax": 160
+    }
   },
   "legal": {
     "essentialCookies": ["__cf_bm", "cf_clearance"],

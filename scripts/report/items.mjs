@@ -1,7 +1,7 @@
 // The report's item model: statuses, constructors, counts and the verdict.
 
 export const STATUSES = ['pass', 'warn', 'fail', 'na', 'not-run'];
-export const AREAS = ['security', 'performance', 'legal'];
+export const AREAS = ['security', 'performance', 'legal', 'seo'];
 
 /** Shortened to this many evidence lines in Markdown; report.json keeps them all. */
 export const MAX_EVIDENCE = 200;
@@ -10,7 +10,7 @@ export const MAX_EVIDENCE = 200;
  * One finding of the report.
  * @param {object} o
  * @param {string} o.id        stable id, for example `headers-baseline`
- * @param {'security'|'performance'|'legal'} o.area
+ * @param {'security'|'performance'|'legal'|'seo'} o.area
  * @param {string|null} o.owasp  `A01`..`A10` for security items, else null
  * @param {'pass'|'warn'|'fail'|'na'|'not-run'} o.status
  * @param {string} o.title     one line: what was checked and the outcome
