@@ -1,0 +1,122 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Explicit `<html lang>`. With i18n routing it defaults to the current locale, else to `en`. */
+  lang?: string;
+  /** Absolute or root-relative URL of the Open Graph image. */
+  ogImage?: string;
+  /** Open Graph type of the page (`website` by default; `article`, `profile`, ...). */
+  ogType?: string;
+  /**
+   * Structured data (schema.org) written as `<script type="application/ld+json">`. Customer facts only; no review
+   * or rating markup without real reviews. `<` is escaped so a value can never close the script element.
+   */
+  jsonLd?: object | object[];
+  /** Set to true on pages that should not be indexed (labs, tests). */
+  noindex?: boolean;
+  /** Text of the skip link (translate it on multi-locale sites; the site's UI dictionary has it). */
+  skipLabel?: string;
+  /**
+   * Multi-locale sites: the unprefixed slug of this page in each locale when it differs, for the hreflang
+   * alternates (`{ en: 'privacy', es: 'privacidad' }`). Default: the same path in every locale.
+   */
+  localeSlugs?: Record<string, string>;
+}
+
+/** What a multi-locale site's src/i18n/urls.ts exports (written by `npm run new-site -- <slug> --langs en,es`). */
+interface I18nBridge {
+  locales: readonly string[];
+  defaultLocale: string;
+  alternateLinks: (options: {
+    pathname: string;
+    locales: readonly string[];
+    defaultLocale: string;
+    slugs?: Record<string, string>;
+  }) => { hreflang: string; href: string }[];
+}
+
+const {
+  title,
+  description,
+  lang: langProp,
+  ogImage,
+  ogType = 'website',
+  jsonLd,
+  noindex = false,
+  skipLabel = 'Skip to content',
+  localeSlugs,
+} = Astro.props;
+// Only a site with i18n routing has src/i18n/urls.ts; a glob that matches nothing is empty, so single-language
+// sites never import `astro:i18n` (which fails to resolve without an `i18n` block in astro.config.mjs).
+const bridge = Object.values(
+  import.meta.glob('../i18n/urls.ts', { eager: true }),
+)[0] as I18nBridge | undefined;
+const lang = langProp ?? Astro.currentLocale ?? 'en';
+// hreflang alternates: one per locale plus x-default; not on noindex pages (404, placeholders).
+const alternates =
+  bridge && !noindex
+    ? bridge.alternateLinks({
+        pathname: Astro.url.pathname,
+        locales: bridge.locales,
+        defaultLocale: bridge.defaultLocale,
+        slugs: localeSlugs,
+      })
+    : [];
+const canonical = Astro.site
+  ? new URL(Astro.url.pathname, Astro.site).href
+  : undefined;
+// JSON.stringify never emits a raw `<`, so `</script>` inside a value cannot end the block.
+// The type is a variable so Prettier does not parse the block's text as JSON.
+const jsonLdType = 'application/ld+json';
+const jsonLdText = jsonLd
+  ? JSON.stringify(jsonLd).replace(/</g, '\\u003c')
+  : undefined;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {canonical && <link rel="canonical" href={canonical} />}
+    {alternates.map((alternate) => (
+      <link
+        rel="alternate"
+        hreflang={alternate.hreflang}
+        href={alternate.href}
+      />
+    ))}
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    <meta property="og:locale" content={lang} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta
+      name="twitter:card"
+      content={ogImage ? 'summary_large_image' : 'summary'}
+    />
+    {jsonLdText && <script type={jsonLdType} set:html={jsonLdText} />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <slot name="head" />
+  </head>
+  <body>
+    <a
+      href="#main"
+      class="bg-ink text-paper rounded-pill fixed top-3 left-3 z-50 -translate-y-20 px-5 py-3 text-sm font-medium focus:translate-y-0"
+    >
+      {skipLabel}
+    </a>
+    <slot name="header" />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <slot name="footer" />
+  </body>
+</html>

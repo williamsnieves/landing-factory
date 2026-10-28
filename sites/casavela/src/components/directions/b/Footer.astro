@@ -1,0 +1,65 @@
+---
+// Footer of direction "b": a dense block of mono columns under a thick rule (contact with the sample notice,
+// service area, draft notice and the link back to the index of directions).
+import { site } from '../../../content/site';
+import Label from './Label.astro';
+import { footer } from './copy';
+---
+
+<footer id="b-contacto" class="border-ink border-t-4 px-4 sm:px-6">
+  <div class="border-line mx-auto grid max-w-7xl border-x md:grid-cols-3">
+    <div class="border-line border-b px-4 py-6 sm:px-6 md:border-r md:border-b-0">
+      <Label class="text-ink-soft">{footer.index}</Label>
+      <h2 class="font-display mt-2 text-xl font-extrabold uppercase">
+        {footer.contactTitle}
+      </h2>
+      <ul class="mt-3 space-y-1 font-mono text-sm leading-relaxed">
+        <li>
+          {footer.phoneLabel}{' '}
+          <a
+            href={site.contact.phoneHref}
+            class="underline underline-offset-4 hover:no-underline"
+          >
+            {site.contact.phone}
+          </a>
+        </li>
+        <li>
+          {footer.emailLabel}{' '}
+          <a
+            href={`mailto:${site.contact.email}`}
+            class="underline underline-offset-4 hover:no-underline"
+          >
+            {site.contact.email}
+          </a>
+        </li>
+        <li>{site.contact.address}</li>
+        <li>{site.contact.hours}</li>
+      </ul>
+      <Label class="bg-accent text-ink mt-4 inline-block px-1.5 py-1">
+        {site.sampleNotice}
+      </Label>
+    </div>
+    <div class="border-line border-b px-4 py-6 sm:px-6 md:border-r md:border-b-0">
+      <h2 class="font-display text-xl font-extrabold uppercase">
+        {footer.areaTitle}
+      </h2>
+      <ul class="mt-3 font-mono text-sm leading-relaxed">
+        {site.serviceArea.map((place) => (
+          <li>{place}</li>
+        ))}
+      </ul>
+    </div>
+    <div class="px-4 py-6 sm:px-6">
+      <h2 class="font-display text-xl font-extrabold uppercase">
+        {footer.draftTitle}
+      </h2>
+      <p class="text-ink-soft mt-3 text-sm leading-snug">{site.draftNotice}</p>
+      <a
+        href="/"
+        class="decoration-primary mt-4 inline-block font-mono text-sm font-bold uppercase underline decoration-2 underline-offset-4 hover:no-underline"
+      >
+        {footer.back} <span aria-hidden="true">-&gt;</span>
+      </a>
+    </div>
+  </div>
+</footer>

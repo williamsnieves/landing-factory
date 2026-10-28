@@ -1,0 +1,47 @@
+/*
+ * Visual direction "c": "de barrio" (warm-local-service + data-and-proof's stat-strip). Palette and fonts from
+ * ui-ux-pro-max only: the "Nature Distilled" style (muted earth tones, olive, sand, terracotta, soft cream) for
+ * the palette, deepened to a huerta olive that passes 4.5:1 with its contrast text; Calistoga (warm display
+ * serif, from the "Calistoga + Inter" pairing) for headings and Nunito Sans (from the "Soft Rounded" pairing)
+ * for text. Imported only by src/pages/directions/c/index.astro; the tokens are redefined inside
+ * [data-direction="c"] so tokens.css stays the neutral default.
+ */
+@import '@fontsource/calistoga/400.css';
+@import '@fontsource-variable/nunito-sans/index.css';
+
+[data-direction='c'] {
+  --color-primary: #4f5d2f;
+  --color-primary-contrast: #fffdf7;
+  /* Terracotta: decorative only (rules, dots, bands); never text. */
+  --color-accent: #c4693f;
+  --color-ink: #2a2118;
+  --color-ink-soft: #5a4d3e;
+  --color-paper: #f6f0e3;
+  --color-surface: #eadfc8;
+  --color-line: #d6c8ac;
+
+  --font-display: 'Calistoga', Georgia, 'Times New Roman', serif;
+  --font-sans:
+    'Nunito Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    sans-serif;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 20px;
+}
+
+/*
+ * Hero photo crop. The source frame has a hanging banner with lettering in its left ~44%; the image box is
+ * 185% of the hero's width and anchored to the right, so only the right ~54% of the frame (balconies, plants,
+ * windows) can ever be visible, at any width or height. object-fit keeps the proportions.
+ */
+[data-direction='c'] .c-hero-photo {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 185%;
+  max-width: none;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+}

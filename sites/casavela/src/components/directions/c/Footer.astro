@@ -1,0 +1,107 @@
+---
+// Footer of direction "c": tidy columns (contact marked as sample data, service area, links with the way back to
+// the index of directions), the draft and sample notices and the photo credits read from src/data/credits.json
+// (written by scripts/credits.mjs; never hand-edited).
+import { site } from '../../../content/site';
+import credits from '../../../data/credits.json';
+import SampleTag from './SampleTag.astro';
+import { footer, header } from './copy';
+---
+
+<footer id="c-contacto" class="bg-ink text-paper px-4 pt-14 pb-10 sm:px-6">
+  <div class="mx-auto max-w-6xl">
+    <p class="font-display text-2xl">{site.name}</p>
+    <div class="mt-8 grid gap-10 md:grid-cols-3">
+      <div>
+        <h2 class="font-display text-lg">{footer.contactTitle}</h2>
+        <ul class="mt-3 space-y-1.5 text-base leading-relaxed">
+          <li>
+            {footer.phoneLabel}{' '}
+            <a
+              href={site.contact.phoneHref}
+              class="underline underline-offset-4 hover:no-underline"
+            >
+              {site.contact.phone}
+            </a>
+          </li>
+          <li>
+            {footer.emailLabel}{' '}
+            <a
+              href={`mailto:${site.contact.email}`}
+              class="break-all underline underline-offset-4 hover:no-underline"
+            >
+              {site.contact.email}
+            </a>
+          </li>
+          <li>{site.contact.address}</li>
+          <li>{site.contact.hours}</li>
+        </ul>
+        <p class="mt-3">
+          <SampleTag />
+        </p>
+      </div>
+      <div>
+        <h2 class="font-display text-lg">{footer.areaTitle}</h2>
+        <ul class="mt-3 space-y-1.5 text-base">
+          {site.serviceArea.map((place) => (
+            <li>{place}</li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <h2 class="font-display text-lg">{footer.linksTitle}</h2>
+        <ul class="mt-3 space-y-1.5 text-base">
+          {header.nav.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class="underline underline-offset-4 hover:no-underline"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+          <li>
+            <a
+              href={site.primary.href}
+              class="underline underline-offset-4 hover:no-underline"
+            >
+              {site.primary.label}
+            </a>
+          </li>
+          <li>
+            <a
+              href="/"
+              class="font-bold underline underline-offset-4 hover:no-underline"
+            >
+              {footer.back}
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="border-accent mt-10 space-y-2 border-t-2 pt-6 text-sm leading-relaxed">
+      <p>
+        <strong class="font-bold">{site.draftNotice}</strong>
+      </p>
+      <p>{site.sampleNotice}</p>
+      <p>
+        {footer.photoLine}{' '}
+        {credits.map((credit, index) => (
+          <>
+            {index > 0 && '; '}
+            <a
+              href={credit.url}
+              class="underline underline-offset-4 hover:no-underline"
+            >
+              {credit.author}
+            </a>
+            , {credit.license}
+          </>
+        ))}
+        .
+      </p>
+    </div>
+  </div>
+</footer>

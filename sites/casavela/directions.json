@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "directions": [
+    {
+      "id": "a",
+      "archetype": "custom",
+      "traits": ["ref:framer-com/split-sticky", "ref:stripe-com/stat-strip"],
+      "primary": "#6d28d9",
+      "displayFont": "DM Sans",
+      "bodyFont": "DM Sans",
+      "hero": "split",
+      "idea": "Claridad de producto: titular a dos tonos, tarjeta de valoración gratuita y una calculadora hipotecaria fija que te acompaña mientras lees, en violeta sobre blanco."
+    },
+    {
+      "id": "b",
+      "archetype": "brutalist-raw+data-and-proof",
+      "traits": ["stat-strip", "comparison-table"],
+      "primary": "#d02020",
+      "displayFont": "Barlow Condensed",
+      "bodyFont": "Barlow",
+      "hero": "typographic",
+      "idea": "Rejilla a la vista, etiquetas técnicas y una tabla que dice qué incluye cada servicio, qué cuesta y qué falta por confirmar. Sin adornos y sin letra pequeña."
+    },
+    {
+      "id": "c",
+      "archetype": "warm-local-service+data-and-proof",
+      "traits": ["stat-strip"],
+      "primary": "#4f5d2f",
+      "displayFont": "Calistoga",
+      "bodyFont": "Nunito Sans",
+      "hero": "full-bleed-photo",
+      "idea": "De barrio: cercana y práctica. Una calle de Valencia, qué hacemos, dónde estamos, el horario y cómo hablar con nosotros desde la primera pantalla, con WhatsApp siempre a mano."
+    }
+  ],
+  "choice": null
+}

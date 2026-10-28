@@ -1,0 +1,51 @@
+---
+// Directions run: the home page is a noindex index of the draft visual directions. The full build replaces it.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Motion from '../components/motion/Motion.astro';
+import { directions } from '../content/directions';
+import { site } from '../content/site';
+
+const title = 'Casavela: direcciones visuales en borrador';
+const description =
+  'Tres direcciones visuales en borrador para la página de Casavela Inmobiliaria en Valencia. Elige la que más se acerque a lo que buscas.';
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  lang="es"
+  skipLabel="Saltar al contenido"
+  noindex
+>
+  <Motion slot="head" />
+  <section class="mx-auto max-w-3xl px-6 py-20 md:py-32">
+    <h1 class="font-display text-3xl leading-tight tracking-tight text-balance">
+      {site.name}: tres direcciones visuales
+    </h1>
+    <p class="text-ink-soft mt-6 text-lg">
+      Son borradores para elegir el estilo antes de construir la página
+      completa. Cada uno muestra la cabecera y una sección con los datos del
+      encargo. Dinos cuál se acerca más y qué cambiarías.
+    </p>
+    <ul class="mt-12 grid gap-6">
+      {directions.map((d, i) => (
+        <li
+          class="border-line border-t pt-6"
+          data-reveal
+          data-reveal-delay={String(i * 0.1)}
+        >
+          <h2 class="text-xl font-semibold">
+            <a
+              href={`/directions/${d.id}/`}
+              class="underline underline-offset-4"
+            >
+              {d.name}
+            </a>
+          </h2>
+          <p class="text-ink-soft mt-2">{d.idea}</p>
+        </li>
+      ))}
+    </ul>
+    <p class="text-ink-soft mt-12 text-sm">{site.sampleNotice}</p>
+  </section>
+</BaseLayout>

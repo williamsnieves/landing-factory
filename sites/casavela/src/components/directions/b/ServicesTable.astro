@@ -1,0 +1,141 @@
+---
+// Comparison section of direction "b": a real table of the three services (who it is for, what it includes,
+// price, how to start). From the lg breakpoint it is a bordered table; below it every row stacks into one ruled
+// block with visible labels, so nothing scrolls sideways at 375 px. Prices that are not brief facts are marked.
+import ActionPair from './ActionPair.astro';
+import Label from './Label.astro';
+import { services } from './copy';
+
+const { columns } = services;
+const cell =
+  'border-line block px-4 py-3 align-top sm:px-6 lg:table-cell lg:border-l lg:px-5 lg:py-5 lg:first:border-l-0';
+---
+
+<section id="b-servicios" class="border-line border-b-2 px-4 sm:px-6">
+  <div class="border-line mx-auto max-w-7xl border-x">
+    <div class="grid lg:grid-cols-[14rem_1fr]">
+      <Label class="border-line border-b px-4 py-3 sm:px-6 lg:border-r lg:border-b-0 lg:py-6">
+        {services.index}
+      </Label>
+      <div class="px-4 py-8 sm:px-6 lg:py-10">
+        <h2 class="font-display text-3xl leading-none font-extrabold tracking-tight uppercase">
+          {services.title}
+        </h2>
+        <p class="text-ink-soft mt-4 max-w-2xl text-lg leading-snug">
+          {services.line}
+        </p>
+      </div>
+    </div>
+
+    <table
+      aria-label={services.tableLabel}
+      class="border-line block w-full border-t border-collapse text-left lg:table lg:table-fixed"
+    >
+      <thead class="hidden lg:table-header-group">
+        <tr class="bg-ink text-paper">
+          <th
+            scope="col"
+            class="w-[22%] px-5 py-3 font-mono text-xs font-normal tracking-wide uppercase"
+          >
+            {columns.name}
+          </th>
+          <th
+            scope="col"
+            class="w-[17%] border-l border-paper/40 px-5 py-3 font-mono text-xs font-normal tracking-wide uppercase"
+          >
+            {columns.forWhom}
+          </th>
+          <th
+            scope="col"
+            class="border-l border-paper/40 px-5 py-3 font-mono text-xs font-normal tracking-wide uppercase"
+          >
+            {columns.includes}
+          </th>
+          <th
+            scope="col"
+            class="w-[15%] border-l border-paper/40 px-5 py-3 font-mono text-xs font-normal tracking-wide uppercase"
+          >
+            {columns.price}
+          </th>
+          <th
+            scope="col"
+            class="w-[18%] border-l border-paper/40 px-5 py-3 font-mono text-xs font-normal tracking-wide uppercase"
+          >
+            {columns.action}
+          </th>
+        </tr>
+      </thead>
+      <tbody class="block lg:table-row-group">
+        {services.rows.map((row, index) => (
+          <tr class="border-line block border-b last:border-b-0 lg:table-row">
+            <th scope="row" class:list={[cell, 'bg-surface lg:bg-transparent']}>
+              <Label
+                as="span"
+                class="text-ink-soft block"
+              >{`[03.${index + 1}]`}</Label>
+              <span class="font-display mt-1 block text-xl leading-tight font-extrabold uppercase">
+                {row.name}
+              </span>
+            </th>
+            <td class={cell}>
+              <Label class="text-ink-soft mb-1 lg:hidden">
+                {columns.forWhom}
+              </Label>
+              <span class="text-base leading-snug">{row.forWhom}</span>
+            </td>
+            <td class={cell}>
+              <Label class="text-ink-soft mb-1 lg:hidden">
+                {columns.includes}
+              </Label>
+              <span class="text-base leading-snug">{row.includes}</span>
+            </td>
+            <td class={cell}>
+              <Label class="text-ink-soft mb-1 lg:hidden">
+                {columns.price}
+              </Label>
+              <span class="font-display block text-xl leading-none font-extrabold uppercase">
+                {row.price}
+              </span>
+              {row.pricePending && (
+                <Label
+                  as="span"
+                  class="bg-accent text-ink mt-2 inline-block px-1.5 py-0.5"
+                >
+                  {services.pendingTag}
+                </Label>
+              )}
+            </td>
+            <td class={cell}>
+              <Label class="text-ink-soft mb-1 lg:hidden">
+                {columns.action}
+              </Label>
+              <a
+                href={row.action.href}
+                class="decoration-primary text-base font-semibold underline decoration-2 underline-offset-4 hover:no-underline"
+              >
+                {row.action.label}
+                <span aria-hidden="true" class="font-mono whitespace-nowrap">
+                  {' '}
+                  -&gt;
+                </span>
+              </a>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    <div class="border-line grid border-t-2 lg:grid-cols-[14rem_1fr]">
+      <div class="border-line border-b px-4 py-4 sm:px-6 lg:border-r lg:border-b-0 lg:py-6">
+        <Label class="text-ink-soft">{services.feesLabel}</Label>
+        <p class="mt-1 text-base font-semibold">{services.fees}</p>
+      </div>
+      <div class="flex flex-col gap-6 px-4 py-8 sm:px-6 lg:py-10">
+        <p class="font-display max-w-3xl text-2xl leading-none font-extrabold uppercase">
+          {services.closingTitle}
+        </p>
+        <ActionPair />
+      </div>
+    </div>
+  </div>
+</section>

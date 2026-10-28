@@ -1,0 +1,12 @@
+---
+// Two-tone heading text of direction "a": the lead sentence in ink, the continuation in a muted tone at the same
+// size. The space between the sentences is part of this markup so no heading can run them together.
+interface Props {
+  lead: string;
+  rest: string;
+}
+
+const { lead, rest } = Astro.props;
+---
+
+{lead} <span class="text-ink-soft">{rest}</span>

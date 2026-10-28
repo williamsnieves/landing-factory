@@ -1,0 +1,22 @@
+---
+// Strip of figures under the hero: brief facts only, each with its source (sample values say so).
+import { stats } from './copy';
+---
+
+<section
+  id="a-cifras"
+  class="border-line border-y px-4 sm:px-6"
+  aria-label="Cifras del servicio"
+>
+  <dl class="border-line mx-auto grid max-w-6xl border-x md:grid-cols-3">
+    {stats.map((stat) => (
+      <div class="border-line flex flex-col gap-2 border-b px-5 py-8 last:border-b-0 sm:px-8 md:border-r md:border-b-0 md:last:border-r-0 lg:px-12">
+        <dt class="text-ink-soft order-2 text-sm leading-snug">{stat.label}</dt>
+        <dd class="font-display order-1 text-3xl font-light tracking-tight tabular-nums">
+          {stat.figure}
+        </dd>
+        <dd class="text-ink-soft order-3 text-xs">{stat.source}</dd>
+      </div>
+    ))}
+  </dl>
+</section>

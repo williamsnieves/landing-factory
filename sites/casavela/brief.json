@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "language": "es",
+  "languages": ["es"],
+  "business": {
+    "name": "Casavela Inmobiliaria",
+    "description": "Inmobiliaria y asesoría hipotecaria de barrio en Valencia: valoramos tu vivienda gratis, te ayudamos a venderla al mejor precio y acompañamos a compradores con su hipoteca de principio a fin.",
+    "city": "Valencia",
+    "country": "ES",
+    "kind": "service"
+  },
+  "offer": [
+    {
+      "name": "Valoración gratuita de tu vivienda",
+      "description": "Un asesor visita tu vivienda y te da un precio de venta realista basado en ventas recientes de tu zona.",
+      "price": "Gratis",
+      "currency": "EUR"
+    },
+    {
+      "name": "Venta de tu vivienda",
+      "description": "Fotografía, publicación, visitas filtradas y negociación hasta la firma en notaría."
+    },
+    {
+      "name": "Asesoría hipotecaria",
+      "description": "Comparamos ofertas de varios bancos y te acompañamos en la tasación y la firma."
+    }
+  ],
+  "audience": {
+    "who": "Propietarios de Valencia y área metropolitana que piensan vender, y compradores que necesitan hipoteca.",
+    "needs": "Saber cuánto vale su vivienda, venderla sin perder tiempo y entender cuánto pueden pedir de hipoteca.",
+    "objections": "Desconfianza de las inmobiliarias, comisiones poco claras y miedo a tasaciones a la baja."
+  },
+  "goal": {
+    "primary": {
+      "label": "Pide tu valoración gratuita por WhatsApp",
+      "url": "https://wa.me/34600000000"
+    },
+    "secondary": { "label": "Llámanos", "url": "tel:+34600000000" }
+  },
+  "tone": ["cercano", "claro", "confiable", "profesional"],
+  "contact": {
+    "email": "hola@example.com",
+    "phone": "+34 600 000 000",
+    "address": "Calle de Ejemplo 12, 46001 Valencia",
+    "hours": "Lunes a viernes de 9:30 a 14:00 y de 16:30 a 19:30"
+  },
+  "references": {
+    "liked": [
+      {
+        "url": "https://stripe.com/",
+        "sheet": "stripe-com",
+        "why": "Claridad y una franja de cifras que da confianza."
+      },
+      {
+        "url": "https://www.framer.com/",
+        "sheet": "framer-com",
+        "why": "Un panel fijo que acompaña mientras se lee: ideal para la calculadora hipotecaria."
+      }
+    ]
+  },
+  "legal": {
+    "regulated": true,
+    "notices": [
+      "La calculadora es orientativa: no es una oferta vinculante ni asesoramiento financiero personalizado."
+    ]
+  },
+  "seo": {
+    "primaryKeyword": "valoración de vivienda gratis en Valencia",
+    "keywords": [
+      "vender piso en Valencia",
+      "calculadora hipoteca",
+      "asesor hipotecario Valencia",
+      "inmobiliaria Valencia"
+    ],
+    "serviceArea": ["Valencia", "Burjassot", "Paterna", "Mislata"],
+    "schemaType": "RealEstateAgent"
+  },
+  "deploy": { "target": "cloudflare-pages" },
+  "assumed": [
+    {
+      "field": "business.name",
+      "reason": "Negocio ficticio para la prueba de punta a punta del enfoque 1."
+    },
+    {
+      "field": "contact.phone",
+      "reason": "Teléfono de ejemplo; se sustituye por el real al vender la landing."
+    },
+    {
+      "field": "contact.email",
+      "reason": "Dominio reservado example.com; se sustituye por el real."
+    },
+    { "field": "contact.address", "reason": "Dirección de ejemplo." },
+    {
+      "field": "contact.hours",
+      "reason": "Horario típico del sector, de ejemplo."
+    },
+    { "field": "goal.primary.url", "reason": "Número de WhatsApp de ejemplo." },
+    { "field": "goal.secondary.url", "reason": "Teléfono de ejemplo." },
+    {
+      "field": "offer",
+      "reason": "Servicios típicos de una inmobiliaria con asesoría hipotecaria, sin precios salvo la valoración gratuita."
+    },
+    {
+      "field": "seo.primaryKeyword",
+      "reason": "Elegida para la prueba según la búsqueda típica de propietarios que quieren vender."
+    }
+  ],
+  "notes": "Prueba real del flujo completo (direcciones, elección, construcción, ronda de cambios). Captación sin formulario: la calculadora hipotecaria es un componente del navegador sin servidor y las llamadas a la acción van a WhatsApp y teléfono; los formularios llegan con add-lead-forms."
+}

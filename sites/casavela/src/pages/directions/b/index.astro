@@ -1,0 +1,30 @@
+---
+// Visual direction "b" (noindex): "sin letra pequeña". Brutalist grammar with visible rules and mono labels,
+// a typographic hero with a stat strip and a comparison table of the three services.
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Footer from '../../../components/directions/b/Footer.astro';
+import Header from '../../../components/directions/b/Header.astro';
+import Hero from '../../../components/directions/b/Hero.astro';
+import ServicesTable from '../../../components/directions/b/ServicesTable.astro';
+import { meta } from '../../../components/directions/b/copy';
+import '../../../styles/directions/b.css';
+---
+
+<BaseLayout
+  title={meta.title}
+  description={meta.description}
+  lang="es"
+  skipLabel="Saltar al contenido"
+  noindex
+>
+  <div slot="header" data-direction="b" class="bg-paper text-ink font-sans">
+    <Header />
+  </div>
+  <div data-direction="b" class="bg-paper text-ink font-sans min-h-screen">
+    <Hero />
+    <ServicesTable />
+  </div>
+  <div slot="footer" data-direction="b" class="bg-paper text-ink font-sans">
+    <Footer />
+  </div>
+</BaseLayout>
