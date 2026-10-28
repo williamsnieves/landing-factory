@@ -23,6 +23,7 @@ import { staticHeaderItems } from './report/checks-headers.mjs';
 import { resolveReportConfig } from './report/config.mjs';
 import { distItems, loadDist } from './report/dist-scan.mjs';
 import { LEGAL_NOTE, legalItems } from './report/legal.mjs';
+import { seoItems } from './report/seo.mjs';
 import { countStatuses, summaryLine, verdictOf } from './report/items.mjs';
 import { checkLinks, linkItem, outboundLinks } from './report/links.mjs';
 import { runLiveChecks } from './report/live.mjs';
@@ -53,6 +54,7 @@ export const GROUPS = [
   'audit',
   'perf',
   'legal',
+  'seo',
   'live',
   'external-links',
 ];
@@ -64,6 +66,7 @@ const STATIC_GROUPS = [
   'audit',
   'perf',
   'legal',
+  'seo',
 ];
 
 class RunError extends Error {}
@@ -95,7 +98,7 @@ function readBrief(projectDir, site) {
 
 const HELP = `Usage: npm run report -- [options]
 
-Security (OWASP Top 10:${OWASP_EDITION}), performance and legal report of one landing. Writes report.json and
+Security (OWASP Top 10:${OWASP_EDITION}), performance, legal and SEO report of one landing. Writes report.json and
 report.md to qa/<slug>/report/<timestamp>/ (qa/report/<timestamp>/ for the starter) and a "latest" link.
 
   --site <slug>       report on sites/<slug> (default: the starter at the repo root)
@@ -243,7 +246,7 @@ export async function runReport(values, deps = {}) {
 
   const distDir = join(paths.projectDir, 'dist');
   const needsDist = [...groups].some((g) =>
-    ['headers', 'dist', 'perf', 'secrets', 'legal'].includes(g),
+    ['headers', 'dist', 'perf', 'secrets', 'legal', 'seo'].includes(g),
   );
   if (needsDist && !existsSync(join(distDir, 'index.html'))) {
     deps.log?.(
@@ -271,7 +274,7 @@ export async function runReport(values, deps = {}) {
   const model =
     distExists &&
     [...groups].some((g) =>
-      ['headers', 'dist', 'perf', 'legal', 'external-links'].includes(g),
+      ['headers', 'dist', 'perf', 'legal', 'seo', 'external-links'].includes(g),
     )
       ? loadDist(distDir)
       : null;
@@ -348,6 +351,11 @@ export async function runReport(values, deps = {}) {
           : 'node scripts/legal.mjs --site <slug> --write',
       }),
     );
+  }
+
+  if (groups.has('seo') && model) {
+    const { brief } = readBrief(paths.projectDir, values.site);
+    items.push(...seoItems({ model, brief, config: reportConfig.seo }));
   }
 
   let liveHtml = null;

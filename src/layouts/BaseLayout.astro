@@ -8,6 +8,13 @@ interface Props {
   lang?: string;
   /** Absolute or root-relative URL of the Open Graph image. */
   ogImage?: string;
+  /** Open Graph type of the page (`website` by default; `article`, `profile`, ...). */
+  ogType?: string;
+  /**
+   * Structured data (schema.org) written as `<script type="application/ld+json">`. Customer facts only; no review
+   * or rating markup without real reviews. `<` is escaped so a value can never close the script element.
+   */
+  jsonLd?: object | object[];
   /** Set to true on pages that should not be indexed (labs, tests). */
   noindex?: boolean;
   /** Text of the skip link (translate it on multi-locale sites; the site's UI dictionary has it). */
@@ -36,6 +43,8 @@ const {
   description,
   lang: langProp,
   ogImage,
+  ogType = 'website',
+  jsonLd,
   noindex = false,
   skipLabel = 'Skip to content',
   localeSlugs,
@@ -59,6 +68,12 @@ const alternates =
 const canonical = Astro.site
   ? new URL(Astro.url.pathname, Astro.site).href
   : undefined;
+// JSON.stringify never emits a raw `<`, so `</script>` inside a value cannot end the block.
+// The type is a variable so Prettier does not parse the block's text as JSON.
+const jsonLdType = 'application/ld+json';
+const jsonLdText = jsonLd
+  ? JSON.stringify(jsonLd).replace(/</g, '\\u003c')
+  : undefined;
 ---
 
 <!doctype html>
@@ -77,14 +92,17 @@ const canonical = Astro.site
         href={alternate.href}
       />
     ))}
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    <meta property="og:locale" content={lang} />
     {ogImage && <meta property="og:image" content={ogImage} />}
     <meta
       name="twitter:card"
       content={ogImage ? 'summary_large_image' : 'summary'}
     />
+    {jsonLdText && <script type={jsonLdType} set:html={jsonLdText} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <slot name="head" />
   </head>

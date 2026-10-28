@@ -60,6 +60,44 @@
         "third-party-licenses/impeccable.LICENSE",
         "third-party-licenses/impeccable.NOTICE.md"
       ]
+    },
+    {
+      "name": "seo-audit",
+      "role": "SEO criteria for planning and reviewing a page (titles, descriptions, headings, local SEO)",
+      "source": "https://github.com/coreyhaines31/marketingskills",
+      "version": null,
+      "commit": "0cd9b3a0ef4c411a1d690419ce843f2a1da32cce",
+      "license": "MIT",
+      "installMethod": "vendored",
+      "installedAt": "2026-10-28",
+      "path": ".claude/skills/seo-audit",
+      "skillFile": ".claude/skills/seo-audit/SKILL.md",
+      "installer": "git checkout of the pinned commit, copy of skills/seo-audit (skill name: seo-audit)",
+      "fetch": {
+        "repo": "https://github.com/coreyhaines31/marketingskills.git",
+        "subpath": "skills/seo-audit"
+      },
+      "notes": "Text skill with references, no runtime. Same repository and commit as the other marketingskills entry. It mentions .agents/product-marketing.md, which does not exist here: the brief is the context.",
+      "licenseFiles": ["third-party-licenses/marketingskills.LICENSE"]
+    },
+    {
+      "name": "schema",
+      "role": "JSON-LD structured data for the business type",
+      "source": "https://github.com/coreyhaines31/marketingskills",
+      "version": null,
+      "commit": "0cd9b3a0ef4c411a1d690419ce843f2a1da32cce",
+      "license": "MIT",
+      "installMethod": "vendored",
+      "installedAt": "2026-10-28",
+      "path": ".claude/skills/schema",
+      "skillFile": ".claude/skills/schema/SKILL.md",
+      "installer": "git checkout of the pinned commit, copy of skills/schema (skill name: schema)",
+      "fetch": {
+        "repo": "https://github.com/coreyhaines31/marketingskills.git",
+        "subpath": "skills/schema"
+      },
+      "notes": "Text skill with references, no runtime. Same repository and commit as the other marketingskills entry. It mentions .agents/product-marketing.md, which does not exist here: the brief is the context.",
+      "licenseFiles": ["third-party-licenses/marketingskills.LICENSE"]
     }
   ],
   "mcpServers": [

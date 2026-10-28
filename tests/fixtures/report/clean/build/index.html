@@ -3,16 +3,32 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Fixture landing</title>
+    <title>Fixture landing for the report tests</title>
     <meta
       name="description"
-      content="A fixture for the landing report tests."
+      content="A small fixture page that the landing report tests read: clean, static and complete."
     />
     <link rel="canonical" href="https://fixture.example/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Fixture landing for the report tests" />
+    <meta
+      property="og:description"
+      content="A small fixture page that the landing report tests read: clean, static and complete."
+    />
+    <meta property="og:url" content="https://fixture.example/" />
+    <meta property="og:image" content="https://fixture.example/img/hero.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta
       http-equiv="content-security-policy"
       content="script-src 'self' 'sha256-PLACEHOLDER'; style-src 'self' 'unsafe-inline'"
     />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Fixture"
+      }
+    </script>
     <link rel="stylesheet" href="/_astro/app.css" />
     <script>
       window.__fixture = 1;

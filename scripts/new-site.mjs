@@ -30,6 +30,7 @@ export const COPIED_PATHS = [
   'src/env.d.ts',
   'public/_headers',
   'public/favicon.svg',
+  'public/robots.txt',
 ];
 
 /** Dependencies a site shares with the root, with the root's exact version ranges. */
@@ -448,6 +449,13 @@ Reduced motion: no pin, no scrub, no parallax, no smooth scroll; all content vis
 - **Palette:**
 - **Hero type:** one of the types listed in the new-landing skill (full-bleed-photo, split, typographic, video, illustration, collage).
 - **Imagery:** openly licensed photos only; every one recorded in \`assets.json\` and \`CREDITS.md\`. No images from the references.
+
+## SEO
+
+- **Primary keyword:** from \`seo.primaryKeyword\` in the brief; if the brief has none, chosen here from the niche and marked assumed.
+- **Service area:** from \`seo.serviceArea\` (cities or regions), or none for an online business.
+- **Schema type:** from \`seo.schemaType\` (a schema.org type, JSON-LD in \`src/data/seo.ts\` with customer facts only; no review or rating markup without real reviews).
+- **Title and description per page (and per locale):** within the report limits (title 30 to 60 characters, description 70 to 160), one \`h1\`, the keyword written naturally.
 
 ## 3D
 

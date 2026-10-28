@@ -7,3 +7,4 @@ License texts for third-party code vendored into this repo. Keep them when updat
 | ui-ux-pro-max | `.claude/skills/ui-ux-pro-max/` | MIT | `ui-ux-pro-max.LICENSE` |
 | taste-skill | `.claude/skills/design-taste-frontend/` | MIT | `taste-skill.LICENSE` |
 | impeccable | `.claude/skills/impeccable/` | Apache-2.0 | `impeccable.LICENSE`, `impeccable.NOTICE.md` |
+| seo-audit, schema | `.claude/skills/seo-audit/`, `.claude/skills/schema/` | MIT | `marketingskills.LICENSE` |

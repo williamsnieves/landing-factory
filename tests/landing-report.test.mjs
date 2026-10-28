@@ -57,7 +57,7 @@ test('every item has an area, a status, a title, evidence and a fix', async () =
   const { report } = await runReport(site, ['--only', 'static']);
   for (const item of report.items) {
     assert.ok(
-      ['security', 'performance', 'legal'].includes(item.area),
+      ['security', 'performance', 'legal', 'seo'].includes(item.area),
       item.id,
     );
     assert.ok(
