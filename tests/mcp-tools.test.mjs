@@ -11,7 +11,11 @@ import {
 import { join } from 'node:path';
 import { after, test } from 'node:test';
 
-import { JOB_KINDS, buildCommand } from '../scripts/mcp/commands.mjs';
+import {
+  FEEDBACK_PLACEHOLDER,
+  JOB_KINDS,
+  buildCommand,
+} from '../scripts/mcp/commands.mjs';
 import { createServer } from '../scripts/mcp/server.mjs';
 import { makeFixtureRoot } from './mcp-helpers.mjs';
 
@@ -415,6 +419,162 @@ test('the preview job builds new-landing.sh --directions with a validated count'
     assert.throws(() => buildCommand('preview', input, root), pattern);
 });
 
+test('the revise job builds revise-landing.sh with the feedback file placeholder and validated options', () => {
+  const built = (input) => buildCommand('revise', input, root);
+  const ok = built({
+    slug: 'alpha',
+    feedback: 'Shorten the hero heading.',
+    model: 'opus',
+    maxAttempts: 2,
+  });
+  assert.deepEqual(ok.argv, [
+    'bash',
+    'scripts/revise-landing.sh',
+    'alpha',
+    '--feedback',
+    FEEDBACK_PLACEHOLDER,
+    '--model',
+    'opus',
+    '--max-attempts',
+    '2',
+  ]);
+  assert.equal(ok.feedback, 'Shorten the hero heading.');
+  // Free text stays one argument and the text is kept as given (a shell fragment is just text).
+  const text = '  $(touch /tmp/x); "quoted"\nsecond line ';
+  assert.equal(built({ slug: 'alpha', feedback: text }).feedback, text);
+  assert.equal(
+    built({ slug: 'alpha', feedback: 'x'.repeat(4000) }).feedback.length,
+    4000,
+  );
+  for (const [input, pattern] of [
+    [{ slug: 'alpha' }, /feedback must be a string/],
+    [{ slug: 'alpha', feedback: 5 }, /feedback must be a string/],
+    [{ slug: 'alpha', feedback: '   ' }, /feedback is empty/],
+    [
+      { slug: 'alpha', feedback: 'x'.repeat(4001) },
+      /longer than 4000 characters/,
+    ],
+    [{ slug: '../etc', feedback: 'x' }, /invalid slug/],
+    [{ slug: 'alpha', feedback: 'x', model: 'a; b' }, /invalid model/],
+    [{ slug: 'alpha', feedback: 'x', maxAttempts: 21 }, /maxAttempts/],
+    [{ slug: 'ghost', feedback: 'x' }, /no site "ghost"/],
+    [{ slug: 'beta', feedback: 'x' }, /no finished build/],
+  ])
+    assert.throws(() => built(input), pattern, JSON.stringify(input));
+});
+
+test('revise is refused for a transferred landing and for one with direction pages', () => {
+  const site = join(root, 'sites/zeta');
+  mkdirSync(site, { recursive: true });
+  try {
+    writeFileSync(join(site, 'package.json'), '{"name":"site-zeta"}\n');
+    writeFileSync(join(site, 'RUN.md'), '# Run\n\nResult: passed\n');
+    writeFileSync(
+      join(site, 'EXPORTED.json'),
+      JSON.stringify({
+        repository: 'https://github.com/customer/zeta',
+        transferredTo: 'customer',
+        transferredAt: '2026-10-27T10:00:00.000Z',
+      }),
+    );
+    assert.throws(
+      () => buildCommand('revise', { slug: 'zeta', feedback: 'x' }, root),
+      /was transferred to customer/,
+    );
+    rmSync(join(site, 'EXPORTED.json'));
+    mkdirSync(join(site, 'src/pages/directions'), { recursive: true });
+    assert.throws(
+      () => buildCommand('revise', { slug: 'zeta', feedback: 'x' }, root),
+      /direction pages/,
+    );
+  } finally {
+    rmSync(site, { recursive: true, force: true });
+  }
+});
+
+test('get_landing shows the revision rounds, the export and the transfer state', async () => {
+  const site = join(root, 'sites/eta');
+  mkdirSync(site, { recursive: true });
+  try {
+    writeFileSync(join(site, 'package.json'), '{"name":"site-eta"}\n');
+    const bare = await ok('get_landing', { slug: 'eta' });
+    assert.equal(bare.revisions, null);
+    assert.equal(bare.exported, null);
+    assert.equal(bare.transferred, null);
+
+    writeFileSync(
+      join(site, 'revisions.json'),
+      JSON.stringify({
+        version: 1,
+        rounds: [
+          {
+            n: 1,
+            date: '2026-10-27',
+            feedback: 'f',
+            items: [],
+            briefChanged: false,
+            files: [],
+            result: 'passed',
+            usage: { costUsd: 0.42 },
+          },
+          {
+            n: 2,
+            date: '2026-10-28',
+            feedback: 'g',
+            items: [{ kind: 'rebuild', summary: 'another look' }],
+            briefChanged: false,
+            files: [],
+            result: 'needs-rebuild',
+            usage: null,
+          },
+        ],
+      }),
+    );
+    writeFileSync(
+      join(site, 'EXPORTED.json'),
+      JSON.stringify({
+        repository: 'https://github.com/owner/eta',
+        exportedAt: '2026-10-27T00:00:00.000Z',
+        factoryCommit: 'abc',
+        target: 'vercel',
+        noBrief: true,
+      }),
+    );
+    const exported = await ok('get_landing', { slug: 'eta' });
+    assert.deepEqual(exported.revisions, {
+      count: 2,
+      last: {
+        n: 2,
+        date: '2026-10-28',
+        result: 'needs-rebuild',
+        costUsd: null,
+      },
+    });
+    assert.equal(exported.exported.repository, 'https://github.com/owner/eta');
+    assert.equal(exported.transferred, null);
+
+    writeFileSync(
+      join(site, 'EXPORTED.json'),
+      JSON.stringify({
+        repository: 'https://github.com/customer/eta',
+        transferredTo: 'customer',
+        transferredAt: '2026-11-02T09:30:00.000Z',
+      }),
+    );
+    const moved = await ok('get_landing', { slug: 'eta' });
+    assert.deepEqual(moved.transferred, {
+      to: 'customer',
+      at: '2026-11-02T09:30:00.000Z',
+    });
+    assert.match(
+      await refused('revise_landing', { slug: 'eta', feedback: 'x' }),
+      /was transferred to customer/,
+    );
+  } finally {
+    rmSync(site, { recursive: true, force: true });
+  }
+});
+
 test('bad input is refused before any job starts: slug, sheet, model, URL, shell text', async () => {
   const cases = [
     ['propose_landing', { slug: '../etc', niche: 'x' }, /invalid slug/],
@@ -513,6 +673,7 @@ test('no command in the fixed table can publish: no deploy, wrangler, git, gh or
     'propose',
     'qa',
     'report',
+    'revise',
   ]);
   // Every command the tools can build starts with one of the table's scripts.
   const scripts = new Set(Object.values(JOB_KINDS).map((s) => s.script));
@@ -522,6 +683,7 @@ test('no command in the fixed table can publish: no deploy, wrangler, git, gh or
     ['generate', { slug: 'alpha' }],
     ['qa', { slug: 'alpha' }],
     ['report', { slug: 'alpha' }],
+    ['revise', { slug: 'alpha', feedback: 'Shorten the hero heading.' }],
   ])
     assert.ok(scripts.has(buildCommand(kind, input, root).argv[1]), kind);
   // And the tool list has no tool that could publish.
@@ -572,6 +734,7 @@ test('the server is registered in .mcp.json; settings allow read and brief tools
     'propose_landing',
     'preview_landing',
     'generate_landing',
+    'revise_landing',
     'run_qa',
     'run_report',
     'cancel_job',

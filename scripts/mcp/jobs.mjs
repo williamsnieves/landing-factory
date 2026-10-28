@@ -19,7 +19,7 @@ import {
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { JOB_KINDS, buildCommand } from './commands.mjs';
+import { FEEDBACK_PLACEHOLDER, JOB_KINDS, buildCommand } from './commands.mjs';
 import { CODE_ROOT, ToolError, inside, jobsDir, siteDir } from './paths.mjs';
 import { redact } from './redact.mjs';
 
@@ -112,6 +112,22 @@ export function readRunLog(root, slug) {
     /^## Totals\s*\n([\s\S]*?)(?=\n## |\s*$)/m.exec(text)?.[1].trim() || null;
   return { result: result === 'pending' ? null : result, phase, totals };
 }
+
+/** The `Result:` line of a revision round's REVISION.md (null while there is none). */
+export function readRevisionResult(root, slug) {
+  try {
+    const text = readFileSync(join(siteDir(root, slug), 'REVISION.md'), 'utf8');
+    return /^Result: *(.*)$/m.exec(text)?.[1].trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+/** What a generation-class job reports: RUN.md for a build, REVISION.md for a revision round. */
+const generationLog = (root, job) =>
+  job.kind === 'revise'
+    ? { result: readRevisionResult(root, job.slug), phase: null }
+    : readRunLog(root, job.slug);
 
 function qaVerdict(root, slug, kind, startedAt) {
   const path =
@@ -206,7 +222,7 @@ export function createJobs({
   function outcomeOf(job) {
     const spec = JOB_KINDS[job.kind];
     if (spec.class === 'generation') {
-      const run = readRunLog(root, job.slug);
+      const run = generationLog(root, job);
       const usagePath = join(siteDir(root, job.slug), '.run-usage.json');
       let usage = { reported: false };
       try {
@@ -230,7 +246,7 @@ export function createJobs({
       const spec = JOB_KINDS[job.kind];
       const out = { ...job, elapsedMs: Date.now() - Date.parse(job.startedAt) };
       if (spec.class === 'generation') {
-        const run = readRunLog(root, job.slug);
+        const run = generationLog(root, job);
         out.phase = run.phase;
         out.result = run.result;
       } else {
@@ -306,7 +322,9 @@ export function createJobs({
 
   /** Start a job from tool input. Returns at once with the job record. */
   function start(kind, input) {
-    const { slug, argv } = buildCommand(kind, input, root);
+    const built = buildCommand(kind, input, root);
+    const { slug } = built;
+    let { argv } = built;
     const spec = JOB_KINDS[kind];
     checkLimits(spec, kind, slug);
     const startedAt = now();
@@ -318,6 +336,12 @@ export function createJobs({
     const id = `${stamp}-${kind}-${slug}-${Math.random().toString(16).slice(2, 6).padEnd(4, '0')}`;
     const dir = jobDir(id);
     mkdirSync(dir, { recursive: true });
+    if (built.feedback !== undefined) {
+      // The customer's text goes to the job folder as given; the script reads it from there.
+      const feedbackPath = join(dir, 'feedback.txt');
+      writeFileSync(feedbackPath, built.feedback);
+      argv = argv.map((a) => (a === FEEDBACK_PLACEHOLDER ? feedbackPath : a));
+    }
     const logPath = join(dir, 'log.txt');
     const command = stub ? [process.execPath, stub, kind, ...argv] : argv;
     const logFd = openSync(logPath, 'a');

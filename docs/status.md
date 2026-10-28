@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-27 (add-landing-handoff merged and archived; personal-brand repository refreshed with the domain report; add-landing-preview implemented on its branch, PR open).
+Read this first in a new or compacted session. Last updated: 2026-10-27 (add-landing-preview merged and archived; delivery model decided: managed, with transfer; add-landing-revise implemented on its branch, PR open).
 
 ## Working agreements
 
@@ -38,11 +38,16 @@ Read this first in a new or compacted session. Last updated: 2026-10-27 (add-lan
 | add-code-quality (ESLint, knip, optional site layers, architecture contract) | Merged (PR #30) and archived |
 | personal-brand handoff (Vercel target, export, `EXPORTED.json`) | Merged (PR #31; a site change, nothing to archive). Live at https://williansnieves.com from https://github.com/williamsnieves/personal-brand |
 | add-landing-handoff (handoff preflight and owner checklist, `/landing-handoff` skill, domain live report in exported repositories) | Merged (PR #32) and archived. personal-brand refreshed from a fresh export (williamsnieves/personal-brand#1, merged): its production run checked https://williansnieves.com, 0 fail, 1 warn (unknown path answers 308 before the 404) |
-| add-landing-preview (2 or 3 visual directions before the full build, recorded choice, `preview_landing` and `choose_direction`) | Implemented on `change/add-landing-preview`, PR open; waiting for CI and the owner's merge |
+| add-landing-preview (2 or 3 visual directions before the full build, recorded choice, `preview_landing` and `choose_direction`) | Merged (PR #33) and archived. First real directions run not done yet (owner: later) |
+| add-landing-revise (revision rounds, sync to the managed repository, transfer checklist and record, `revise_landing`) | Implemented on `change/add-landing-revise`, PR open; waiting for CI and the owner's merge |
 
 ## Resume here (2026-10-26)
 
-`main` has everything up to PR #32 (add-landing-handoff). Branch `change/add-landing-preview` holds the implemented change (PR open). Next step: the owner's merge, then archive it as the first commit of the next branch. Follow-up: the first real directions run (`scripts/new-landing.sh <slug> --directions`) on its own branch, to measure the cost per direction (estimate $1 to $1.50) and the time.
+`main` has everything up to PR #33 (add-landing-preview). Branch `change/add-landing-revise` holds the implemented change (PR open). Next step: the owner's merge, then archive it as the first commit of the next branch.
+
+**Delivery model (owner decision, 2026-10-27): managed, with transfer.** The owner shows a preview (`--directions`, optional), builds in the factory, creates a private or public repository in his own account and exports to it (`/landing-handoff`), hosted on his own Vercel or Cloudflare account. Customer changes are revision rounds in the factory (`npm run revise`), carried into the repository with `sync-export.mjs` as a pull request. If the customer wants the project, the repository and responsibility are transferred (`handoff.mjs transfer-plan`, then `transfer.mjs record`); the factory then leaves it alone.
+
+**Pending real runs (owner: later):** the first `--directions` run (cost per direction, estimate $1 to $1.50) and the first real revision round. A sync of `personal-brand` (2026-10-27, `--no-brief`) changed nothing, as expected right after its refresh.
 
 **add-landing-handoff in short** (see its `proposal.md`, `design.md`, `tasks.md`):
 - `scripts/handoff.mjs check --site <slug> [--visibility public|private]`: read-only preflight (not exported, no unused layer, valid `site.config.json`, `site` set in `astro.config.mjs`, brief `deploy.domain` and `deploy.target` agree; warns when a public repository would carry `brief.json`).
@@ -61,7 +66,7 @@ Read this first in a new or compacted session. Last updated: 2026-10-27 (add-lan
 
 **Next (product plan steps 11 and 12, `docs/product-plan.md`):**
 1. `add-landing-handoff` (merged and archived, see above). Lessons it encodes: the app cannot create repositories or dispatch workflows; the Vercel apex/www choice must match `site`; Namecheap only shows host records after switching to BasicDNS; preview and deployment URLs need the domain in this session's allowed list to be checked from here. For customers, the managed model (a factory GitHub organization and Vercel team, transfer on request) needs a GitHub App that can create repositories.
-2. `add-landing-preview` (implemented, PR open): 2 or 3 short visual directions for the customer to choose from before the full build; the owner relays the choice (`directions.mjs choose`). Then `add-landing-revise` (`revise_landing`, a separate change by owner decision 2026-10-27).
+2. `add-landing-preview` (merged and archived): 2 or 3 short visual directions before the full build; the owner relays the choice (`directions.mjs choose`). `add-landing-revise` (implemented, PR open): revision rounds, sync and transfer.
 3. Channels decision (web app as the source of truth, chat for the interview and notifications).
 
 Other items the owner can pick: tupathdigital coupons (reminder below), hardening for the other six sites, the factory follow-ups listed below, `add-3d-models`, the first real `generate_landing` through the MCP server.

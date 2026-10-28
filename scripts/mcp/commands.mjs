@@ -3,7 +3,12 @@
 // Nothing here publishes: no deploy, wrangler, git, gh or push (tests/mcp-jobs.test.mjs asserts it).
 import { existsSync } from 'node:fs';
 
+import { Refused, checkCanRevise } from '../revisions.mjs';
+import { MAX_FEEDBACK } from '../lib/revisions-schema.mjs';
 import { ToolError, assertSlug, inside, siteDir } from './paths.mjs';
+
+/** Stands for the feedback file's path in a revise command until the job folder exists (jobs.start fills it in). */
+export const FEEDBACK_PLACEHOLDER = '@job-folder/feedback.txt';
 
 export const QA_SKIPS = [
   'layout',
@@ -35,6 +40,11 @@ export const JOB_KINDS = {
     class: 'generation',
     runner: 'bash',
     script: 'scripts/new-landing.sh',
+  },
+  revise: {
+    class: 'generation',
+    runner: 'bash',
+    script: 'scripts/revise-landing.sh',
   },
   qa: { class: 'check', runner: 'node', script: 'scripts/qa.mjs' },
   report: {
@@ -102,15 +112,52 @@ function requireNicheOrBrief(root, slug, niche) {
     );
 }
 
+/** The customer's feedback text: a non-empty string of at most MAX_FEEDBACK characters, kept as given. */
+function cleanFeedback(feedback) {
+  if (typeof feedback !== 'string')
+    throw new ToolError('feedback must be a string');
+  if (!feedback.trim()) throw new ToolError('feedback is empty');
+  const length = [...feedback].length;
+  if (length > MAX_FEEDBACK)
+    throw new ToolError(
+      `feedback is longer than ${MAX_FEEDBACK} characters (${length})`,
+    );
+  return feedback;
+}
+
 /**
  * Build the command of a job. Returns { kind, slug, argv } with argv relative to the checkout
- * (run with the checkout as cwd). Throws ToolError for any argument that fails its check.
+ * (run with the checkout as cwd); a revise command also returns `feedback`, the text jobs.start writes to the
+ * job folder in place of FEEDBACK_PLACEHOLDER. Throws ToolError for any argument that fails its check.
  */
 export function buildCommand(kind, input, root) {
   const spec = JOB_KINDS[kind];
   if (!spec) throw new ToolError(`unknown job kind ${JSON.stringify(kind)}`);
   const slug = assertSlug(input.slug);
   const argv = [spec.runner, spec.script, slug];
+  if (kind === 'revise') {
+    const feedback = cleanFeedback(input.feedback);
+    const model = checkModel(input.model);
+    // The script refuses the same cases; refusing here starts no job at all.
+    try {
+      checkCanRevise(root, slug);
+    } catch (error) {
+      if (error instanceof Refused) throw new ToolError(error.message);
+      throw error;
+    }
+    argv.push('--feedback', FEEDBACK_PLACEHOLDER);
+    if (model) argv.push('--model', model);
+    if (input.maxAttempts !== undefined) {
+      if (
+        !Number.isInteger(input.maxAttempts) ||
+        input.maxAttempts < 0 ||
+        input.maxAttempts > 20
+      )
+        throw new ToolError('maxAttempts must be an integer from 0 to 20');
+      argv.push('--max-attempts', String(input.maxAttempts));
+    }
+    return { kind, slug, argv, feedback };
+  }
   if (kind === 'propose' || kind === 'generate' || kind === 'preview') {
     const niche = cleanNiche(input.niche);
     const refs = checkRefs(root, input.refs);

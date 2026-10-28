@@ -83,7 +83,7 @@ and it stops when a provider secret pattern matches a file of the site.
                       requirements are unknown)
   --no-lockfile       skip \`npm install --package-lock-only\` (offline); package-lock.json is not written
   --record <https-url> after a successful export write sites/<slug>/EXPORTED.json (repository, date, factory
-                      commit, target); the factory's CI then skips the site
+                      commit, target, whether brief.json was left out); the factory's CI then skips the site
   --dry-run           print the files, the dependencies and the workflow; write nothing
   --help              show this help
 
@@ -306,7 +306,7 @@ function describeDependencies(pkg) {
   return lines;
 }
 
-function writeEntries(out, entries) {
+export function writeEntries(out, entries) {
   for (const entry of entries) {
     const target = join(out, entry.to);
     mkdirSync(dirname(target), { recursive: true });
@@ -316,7 +316,7 @@ function writeEntries(out, entries) {
 }
 
 /** Format the output with the factory's Prettier and the copied config (design Decision 9). */
-function formatOutput(out) {
+export function formatOutput(out) {
   const bin = join(ROOT, 'node_modules', 'prettier', 'bin', 'prettier.cjs');
   execFileSync(
     process.execPath,
@@ -468,6 +468,7 @@ export function main(argv, io = console, env = process.env) {
         exportedAt: plan.date,
         factoryCommit: plan.commit,
         target: plan.config.target,
+        noBrief: Boolean(args['no-brief']),
       };
       writeFileSync(
         join(root, 'sites', slug, 'EXPORTED.json'),

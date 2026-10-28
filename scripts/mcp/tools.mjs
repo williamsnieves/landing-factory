@@ -68,7 +68,7 @@ export function createTools({ root, jobs }) {
     {
       name: 'get_landing',
       description:
-        'Describe one landing: target, brief summary, last run result and phase, run totals and usage, latest QA and report verdicts, preview URL if known, and the visual directions with the recorded choice when there are any.',
+        'Describe one landing: target, brief summary, last run result and phase, run totals and usage, latest QA and report verdicts, preview URL if known, the visual directions with the recorded choice when there are any, the revision rounds (count and last result), the repository it was exported to and whether it was transferred to its customer.',
       inputSchema: obj({ slug }, ['slug']),
       annotations: READ,
       handler: ({ slug: s }) => getLanding(root, s),
@@ -235,6 +235,30 @@ export function createTools({ root, jobs }) {
       ),
       annotations: JOB,
       handler: startJob('generate'),
+    },
+    {
+      name: 'revise_landing',
+      description:
+        "Start a background job that applies a customer's feedback to a built landing as targeted edits (one revision round: brief first for facts, then the edits, QA, the static report and check-landing), recorded in sites/<slug>/revisions.json. A request for a different look or structure ends with Result: needs-rebuild and edits nothing. Refuses a transferred landing, one with direction pages and no build, and one without a finished build. Costs tokens. Returns a job id at once; follow it with get_job. It never commits, pushes, deploys or syncs.",
+      inputSchema: obj(
+        {
+          slug,
+          feedback: str(
+            "The customer's feedback, as they gave it (at most 4000 characters).",
+            { maxLength: 4000 },
+          ),
+          model,
+          maxAttempts: {
+            type: 'integer',
+            minimum: 0,
+            maximum: 20,
+            description: 'QA fix attempts before the round fails (default 5).',
+          },
+        },
+        ['slug', 'feedback'],
+      ),
+      annotations: JOB,
+      handler: startJob('revise'),
     },
     {
       name: 'run_qa',
