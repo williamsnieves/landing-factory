@@ -93,6 +93,17 @@ test('a reveal that ends shifted fails reveal-end-state, a settled one passes', 
   assert.equal(skipped.status, 0, skipped.stderr);
 });
 
+test('reveals triggered by a late motion init still settle (reveal-late passes)', () => {
+  const late = runQa('reveal-late', FAST);
+  assert.equal(
+    late.status,
+    0,
+    late.stderr + JSON.stringify(late.report?.failures),
+  );
+  assert.equal(late.report.pages[0].revealEndState.pass, true);
+  assert.equal(late.report.pages[0].revealEndState.revealCount, 4);
+});
+
 test('clipped text fails unless data-qa-allow-clip is set', () => {
   const r = runQa('clipped-text', FAST);
   assert.equal(r.status, 1, r.stderr);
