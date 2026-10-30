@@ -218,6 +218,11 @@ async function main() {
                 });
                 break;
               }
+              // Let late scripts (the dynamically imported motion layer) finish before scrolling;
+              // bounded so a page that never goes idle does not stall QA.
+              await page
+                .waitForLoadState('networkidle', { timeout: 5000 })
+                .catch(() => {});
               // Scroll through the page so one-shot reveals have played, then return to the top.
               await page.evaluate(async () => {
                 const step = Math.max(
@@ -244,7 +249,7 @@ async function main() {
                   viewport: vp.width,
                 });
               if (!skip.has('reveal-end-state') && vp.width === privacyWidth) {
-                const re = await page.evaluate(measureRevealEndState, 4000);
+                const re = await page.evaluate(measureRevealEndState, 8000);
                 report.revealEndState = {
                   viewportWidth: vp.width,
                   pass: re.offenders.length === 0,

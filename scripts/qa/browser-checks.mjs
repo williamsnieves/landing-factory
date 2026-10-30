@@ -218,7 +218,8 @@ export function measureReducedMotion() {
  * opaque (>= 0.99) and with no transform offset beyond 1px. A leftover stylesheet
  * offset (for example the `.js-motion [data-reveal]` start transform coming back when
  * a tween clears its inline transform) is caught here. Polls up to `timeoutMs` for
- * running reveals to finish, then reports what is still off.
+ * running reveals to finish (scrolling through the page again each round, in case the
+ * motion layer initialised late), then reports what is still off.
  * @param {number} timeoutMs
  * @returns {Promise<{ revealCount: number, offenders: Array<object> }>}
  */
@@ -276,8 +277,24 @@ export async function measureRevealEndState(timeoutMs) {
   };
   const deadline = Date.now() + timeoutMs;
   let result = scan();
+  // The motion layer may initialise after the harness's first scroll-through (slow
+  // runner); its one-shot triggers then never played. A real visitor scrolls after init,
+  // so scroll through again while something is off. A shifted end state survives this.
+  const scrollThrough = async () => {
+    const step = Math.max(200, Math.floor(window.innerHeight * 0.8));
+    for (
+      let y = 0, n = 0;
+      y < document.documentElement.scrollHeight && n < 80;
+      y += step, n++
+    ) {
+      window.scrollTo(0, y);
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    window.scrollTo(0, 0);
+  };
   while (result.offenders.length && Date.now() < deadline) {
-    await new Promise((r) => setTimeout(r, 150));
+    await scrollThrough();
+    await new Promise((r) => setTimeout(r, 200));
     result = scan();
   }
   return result;
