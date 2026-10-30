@@ -42,6 +42,21 @@ export const SCHEMA_TYPES = [
   'SoftwareApplication',
   'Event',
 ];
+/** Lead forms (design: openspec/changes/add-lead-forms/design.md). Closed vocabularies; extend the lists here. */
+export const FORM_PURPOSES = ['valuation', 'contact', 'callback', 'quote'];
+export const FORM_FIELDS = [
+  'name',
+  'email',
+  'phone',
+  'address',
+  'postcode',
+  'propertyType',
+  'size',
+  'message',
+  'preferredTime',
+];
+export const FORM_PROVIDERS = ['web3forms', 'whatsapp'];
+export const FORM_MAX = 3;
 export const SEO_MAX_TEXT = 120;
 export const SEO_MAX_LIST = 10;
 export const DEPLOY_TARGETS = [
@@ -167,6 +182,18 @@ export const SCHEMA = obj({
     serviceArea: list(str({ maxLength: SEO_MAX_TEXT }), SEO_MAX_LIST),
     schemaType: str({ enum: SCHEMA_TYPES }),
   }),
+  // Lead forms: a hosted form service (web3forms) or a prefilled WhatsApp message. The access key is public by design
+  // but is the customer's own, so it can never be listed in `assumed`.
+  forms: list(
+    obj({
+      id: str({ required: true, format: 'form-id' }),
+      purpose: str({ required: true, enum: FORM_PURPOSES }),
+      fields: list(str({ enum: FORM_FIELDS })),
+      provider: str({ required: true, enum: FORM_PROVIDERS }),
+      accessKey: str({ format: 'uuid' }),
+    }),
+    FORM_MAX,
+  ),
   deploy: obj({
     target: str({ enum: DEPLOY_TARGETS }),
     domain: str({ format: 'domain' }),
@@ -252,6 +279,8 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DOMAIN = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/i;
 const SHEET = /^[a-z0-9_]+(-[a-z0-9]+)*$/;
 const MARKET = /^(EU|[A-Z]{2})$/;
+const FORM_ID = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function isUrl(value, protocols) {
   let url;
@@ -272,6 +301,8 @@ const HOLDER_IDENTITY = /^legal(\.(holder|privacyContact)([.[].*)?)?$/;
 const AI_CONSENT = /^brand\.aiImages$/;
 /** The owner's consent to an AI portrait of themselves is theirs alone, never assumed. */
 const PORTRAIT_CONSENT = /^brand\.ownerPortrait$/;
+/** A form's access key is the customer's own account key: never a value chosen for them (also covers `forms` and `forms[i]`). */
+const FORM_KEY = /^forms(\[\d+\](\.accessKey)?)?$/;
 
 /** Each check returns an error text (what was expected) or null. `ctx` carries baseDir and patternsDir. */
 const FORMATS = {
@@ -301,6 +332,14 @@ const FORMATS = {
     /^[a-z]{2,3}(-[a-z0-9]+)*$/.test(v)
       ? null
       : 'expected a lowercase language tag such as "en" or "pt-br" (it names the folder src/pages/<locale>/)',
+  'form-id': (v) =>
+    FORM_ID.test(v)
+      ? null
+      : 'expected a lowercase slug such as "valuation" (letters, digits and hyphens)',
+  uuid: (v) =>
+    UUID.test(v)
+      ? null
+      : 'expected an access key in UUID form (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)',
   market: (v) =>
     MARKET.test(v)
       ? null
@@ -455,6 +494,37 @@ export function validateBrief(
     }
     if (text('goal.secondary.url') && !text('goal.secondary.label'))
       fail('goal.secondary.label', 'required when goal.secondary.url is set');
+    if (Array.isArray(brief.forms) && brief.forms.length) {
+      const ids = new Set();
+      brief.forms.forEach((form, index) => {
+        if (!form || typeof form !== 'object') return;
+        const id = String(form.id ?? '').trim();
+        if (id && ids.has(id))
+          fail(`forms[${index}].id`, `duplicate form id "${id}"`);
+        ids.add(id);
+        if (Array.isArray(form.fields)) {
+          const seen = new Set();
+          form.fields.forEach((f, i) => {
+            if (seen.has(f))
+              fail(`forms[${index}].fields[${i}]`, `duplicate field "${f}"`);
+            seen.add(f);
+          });
+        }
+        if (
+          String(form.provider ?? '').trim() === 'whatsapp' &&
+          String(form.accessKey ?? '').trim()
+        )
+          fail(
+            `forms[${index}].accessKey`,
+            'only a web3forms form has an access key; remove it or change the provider',
+          );
+      });
+      if (!hasMarkets(brief) || brief.legal?.processing?.forms !== true)
+        fail(
+          'forms',
+          'a form requires a legal market (legal.markets) and legal.processing.forms: true, so a privacy policy exists and names the form provider',
+        );
+    }
     if (Array.isArray(brief?.assets))
       brief.assets.forEach((asset, index) => {
         if (
@@ -484,6 +554,11 @@ export function validateBrief(
           return fail(
             path,
             `owner-portrait consent cannot be assumed ("${field}"): the owner must decide it, or leave it empty (empty counts as not allowed)`,
+          );
+        if (FORM_KEY.test(field))
+          return fail(
+            path,
+            `a form access key cannot be assumed ("${field}"): it is the customer's own Web3Forms key; leave accessKey empty until they have one (the form falls back to WhatsApp)`,
           );
         if (!parsePath(field))
           return fail(
@@ -655,6 +730,12 @@ export const MISSING_FIELDS = [
     'markets',
   ],
   [
+    'forms[0].accessKey',
+    false,
+    'What is your Web3Forms access key (public; create one at web3forms.com with the email that should receive the leads)? Never guessed. Without it the form opens a prefilled WhatsApp message.',
+    'forms-key',
+  ],
+  [
     'seo.primaryKeyword',
     false,
     'What would a customer type into Google to find you? One phrase; it goes in the title and the main heading.',
@@ -711,6 +792,10 @@ export function briefLocales(brief) {
   return { defaultLocale, locales, multilingual: locales.length > 1 };
 }
 
+/** Does the brief ask for at least one lead form? */
+export const hasForms = (brief) =>
+  Array.isArray(brief?.forms) && brief.forms.some(isFilled);
+
 /** Is the business a person (business.personalBrand)? Only then is the owner-portrait question asked. */
 export const isPersonalBrand = (brief) =>
   brief?.business?.personalBrand === true;
@@ -724,13 +809,28 @@ export function missingFields(brief) {
   const empty = MISSING_FIELDS.filter(
     ({ path, when }) =>
       (when !== 'markets' || hasMarkets(brief)) &&
+      when !== 'forms-key' &&
       (when !== 'personal-brand' || isPersonalBrand(brief)) &&
       (when !== 'local' || isLocalBusiness(brief)) &&
       !isFilled(getPath(brief, path)),
   ).map(({ when, ...field }) => field);
+  // One question per web3forms form that still has no access key (the path names the form).
+  const keys = (Array.isArray(brief?.forms) ? brief.forms : []).flatMap(
+    (form, index) =>
+      form?.provider === 'web3forms' && !isFilled(form.accessKey)
+        ? [
+            {
+              ...MISSING_FIELDS.find((f) => f.when === 'forms-key'),
+              path: `forms[${index}].accessKey`,
+            },
+          ]
+        : [],
+  );
+  for (const k of keys) delete k.when;
   return [
     ...empty.filter((f) => f.required),
     ...empty.filter((f) => !f.required),
+    ...keys,
   ];
 }
 
@@ -813,6 +913,16 @@ export function summarizeBrief(brief) {
   field('Analytics', 'legal.processing.analytics');
   field('Embeds', 'legal.processing.embeds');
   if (brief.legal?.processing?.forms) lines.push('Forms collect data: yes');
+  (brief.forms ?? []).forEach((form, index) => {
+    const key = form.accessKey
+      ? 'access key set'
+      : form.provider === 'web3forms'
+        ? 'no access key (falls back to WhatsApp)'
+        : '';
+    lines.push(
+      `Form ${index + 1}: ${form.id} (${form.purpose}), ${form.provider}, fields ${(form.fields ?? []).join(', ') || 'none'}${key ? `, ${key}` : ''}`,
+    );
+  });
   field('Legal notices', 'legal.notices');
   field('Legal constraints', 'legal.constraints');
   field('Primary keyword', 'seo.primaryKeyword');

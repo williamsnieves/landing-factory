@@ -56,7 +56,12 @@ after(async () => {
 });
 
 test('every built page carries a CSP meta tag whose script-src has hashes and no unsafe-inline', () => {
-  for (const file of ['index.html', '3d/index.html', 'islands/index.html']) {
+  for (const file of [
+    'index.html',
+    '3d/index.html',
+    'islands/index.html',
+    'forms/index.html',
+  ]) {
     const html = readFileSync(join(outDir, file), 'utf8');
     const meta =
       /<meta http-equiv="content-security-policy" content="([^"]+)"/.exec(html);
@@ -72,10 +77,10 @@ test('every built page carries a CSP meta tag whose script-src has hashes and no
 });
 
 test(
-  'no securitypolicyviolation fires while loading and scrolling /, /3d/ and /islands/',
+  'no securitypolicyviolation fires while loading and scrolling /, /3d/, /islands/ and /forms/',
   { skip },
   async () => {
-    for (const path of ['/', '/3d/', '/islands/']) {
+    for (const path of ['/', '/3d/', '/islands/', '/forms/']) {
       const context = await browser.newContext({
         viewport: { width: 1440, height: 900 },
       });
@@ -116,6 +121,11 @@ test(
           canvases >= 1,
           'the 3D scene created no canvas under the CSP',
         );
+      }
+      if (path === '/forms/') {
+        // The lead form script ran under the policy: the WhatsApp form is shown and its plain link is gone.
+        assert.equal(await page.isVisible('#form-callback'), true);
+        assert.equal(await page.locator('[data-form-wa-link]').count(), 0);
       }
       if (path === '/') {
         const lenis = await page.evaluate(() =>

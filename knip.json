@@ -2,7 +2,12 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
-      "entry": ["src/scenes/*.ts", "scripts/**/*.mjs", "tests/**/*.mjs"],
+      "entry": [
+        "src/scenes/*.ts",
+        "src/components/forms/client.ts",
+        "scripts/**/*.mjs",
+        "tests/**/*.mjs"
+      ],
       "project": [
         "src/**/*.{astro,ts,tsx,css}",
         "scripts/**/*.mjs",
@@ -12,9 +17,17 @@
       "ignoreDependencies": ["eslint-plugin-jsx-a11y"]
     },
     "sites/*": {
-      "entry": ["src/i18n/urls.ts", "src/scenes/*.ts"],
+      "entry": [
+        "src/i18n/urls.ts",
+        "src/scenes/*.ts",
+        "src/components/forms/client.ts"
+      ],
       "project": ["src/**/*.{astro,ts,tsx,css}"],
-      "ignore": ["src/components/three/**", "src/components/legal/**"]
+      "ignore": [
+        "src/components/three/**",
+        "src/components/legal/**",
+        "src/components/forms/**"
+      ]
     }
   }
 }

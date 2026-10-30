@@ -441,6 +441,7 @@ test('--skip legal removes the legal items; the Markdown has a Legal section wit
     'legal-third-party',
     'legal-pages',
     'legal-price-claims',
+    'legal-forms',
   ]);
   const md = readFileSync(join(full.outDir, 'report.md'), 'utf8');
   assert.match(md, /## Legal/);

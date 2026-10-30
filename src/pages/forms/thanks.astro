@@ -1,0 +1,13 @@
+---
+// Thank-you page of the demo: where a web3forms form lands without JavaScript when the site URL is known.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ThankYou from '../../components/forms/ThankYou.astro';
+---
+
+<BaseLayout
+  title="Thank you"
+  description="Thank-you page of the lead forms demo."
+  noindex
+>
+  <ThankYou homeHref="/forms/" locale="en" />
+</BaseLayout>

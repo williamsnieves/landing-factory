@@ -1,0 +1,25 @@
+---
+/**
+ * Content of the thank-you page a web3forms form redirects to when JavaScript is off (`redirect`). The page that
+ * renders it is `noindex` (BaseLayout `noindex`) and stays out of the sitemap: src/pages/gracias.astro, thanks.astro.
+ */
+import { formTexts } from './fields';
+
+interface Props {
+  /** Where "back" leads (default `/`). */
+  homeHref?: string;
+  locale?: string;
+}
+const { homeHref = '/', locale = Astro.currentLocale } = Astro.props;
+const t = formTexts(locale).thanks;
+---
+
+<section class="mx-auto max-w-2xl px-6 py-24 md:py-32">
+  <h1 class="font-display text-3xl">{t.title}</h1>
+  <p class="text-ink-soft mt-4 text-lg">{t.text}</p>
+  <p class="mt-8">
+    <a href={homeHref} class="underline underline-offset-4">
+      {t.back}
+    </a>
+  </p>
+</section>

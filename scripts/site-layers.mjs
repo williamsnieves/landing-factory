@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-// Optional layers of a site: the 3D layer (src/components/three/, src/scenes/, `three` and `@types/three`) and
-// the legal components (src/components/legal/). `new-site` copies both into every site; the build prunes the
+// Optional layers of a site: the 3D layer (src/components/three/, src/scenes/, `three` and `@types/three`), the
+// legal components (src/components/legal/) and the lead forms (src/components/forms/). `new-site` copies all into every site; the build prunes the
 // ones the finished landing does not use, and `add` copies one back from the starter.
 //   node scripts/site-layers.mjs prune --site <slug> [--dry-run]
-//   node scripts/site-layers.mjs add <3d|legal> --site <slug> [--dry-run]
+//   node scripts/site-layers.mjs add <3d|legal|forms> --site <slug> [--dry-run]
 //   node scripts/site-layers.mjs check [--site <slug>]
 // Exit codes: 0 ok, 1 check failed or refused, 2 bad usage. Run `--help` for more.
 import {
@@ -75,6 +75,17 @@ export const LAYERS = {
     devDependencies: [],
     packages: [],
   },
+  // Lead forms (<LeadForm />, docs/forms.md). The consent box links the privacy page, so a site that uses forms also
+  // keeps the legal components (`requires`).
+  forms: {
+    label: 'the lead forms components',
+    paths: [fromNewSite(COPIED_PATHS, 'src/components/forms', 'COPIED_PATHS')],
+    owned: [],
+    dependencies: [],
+    devDependencies: [],
+    packages: [],
+    requires: ['legal'],
+  },
 };
 
 const SOURCE_FILE = /\.(astro|[cm]?[jt]sx?)$/;
@@ -129,12 +140,17 @@ export function scanSite(siteDir) {
       for (const arg of findImports(source).dynamic)
         dynamic.push({ file: rel, argument: arg });
     }
+    // A layer's own files do not make another layer "used": a site that imports nothing from the forms layer would
+    // otherwise keep the legal components only because the unused forms layer imports them (see `requires`).
+    const inLayer = Object.keys(LAYERS).some((layer) =>
+      layerDirs(siteDir, layer).some((dir) => inside(file, dir)),
+    );
     for (const specifier of specifiersOf(source)) {
       const target = specifier.startsWith('.')
         ? resolve(dirname(file), specifier)
         : null;
       for (const [layer, def] of Object.entries(LAYERS)) {
-        if (own.includes(layer)) continue;
+        if (own.includes(layer) || (inLayer && target)) continue;
         const hit = target
           ? layerDirs(siteDir, layer).some((dir) => inside(target, dir))
           : def.packages.some(
@@ -144,6 +160,15 @@ export function scanSite(siteDir) {
       }
     }
   }
+  // A used layer keeps the layers it needs (forms link the privacy page the legal components render).
+  for (const [layer, def] of Object.entries(LAYERS))
+    if (used[layer].length)
+      for (const needed of def.requires ?? [])
+        if (used[needed].length === 0)
+          used[needed].push({
+            file: `(needed by the ${layer} layer)`,
+            specifier: needed,
+          });
   return { used, dynamic };
 }
 
@@ -260,13 +285,13 @@ export function addLayer(siteDir, layer, { dryRun = false } = {}) {
 
 const HELP = `Usage: node scripts/site-layers.mjs <command> [options]
 
-Optional layers of a site: 3d (src/components/three/, src/scenes/, three, @types/three) and legal
-(src/components/legal/). A layer is in use when a file of the site's src/ outside the layer imports it.
+Optional layers of a site: 3d (src/components/three/, src/scenes/, three, @types/three), legal
+(src/components/legal/) and forms (src/components/forms/). A layer is in use when a file of the site's src/ outside the layer imports it.
 
 Commands:
   prune --site <slug> [--dry-run]       Remove each layer the site does not use, and its dependencies.
                                         Refuses when src/ has a dynamic import() with a non-literal argument.
-  add <3d|legal> --site <slug> [--dry-run]
+  add <3d|legal|forms> --site <slug> [--dry-run]
                                         Copy a layer back from the starter (what new-site copies) and restore its
                                         dependency ranges. Refuses when the layer already exists.
   check [--site <slug>]                 Exit 1 listing every site that holds a layer it does not use

@@ -1,0 +1,16 @@
+---
+// Privacy policy of the demo (fixture data in _demo.ts). The forms' consent boxes link here: `legal-forms` reads this
+// page to check that it names the provider. Not legal advice; a real landing renders its own src/data/legal.json.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PrivacyPolicy from '../../components/legal/PrivacyPolicy.astro';
+import { DEMO_LEGAL } from './_demo';
+---
+
+<BaseLayout
+  title="Privacy policy (demo)"
+  description="Privacy policy of the lead forms demo, with fixture data."
+  lang="en"
+  noindex
+>
+  <PrivacyPolicy data={DEMO_LEGAL} locale="en" />
+</BaseLayout>

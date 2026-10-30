@@ -20,6 +20,8 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
 import {
+  FORM_FIELDS,
+  FORM_PURPOSES,
   briefLocales,
   formatErrors,
   validateBrief,
@@ -83,6 +85,36 @@ export function localePages(locales, defaultLocale, pages) {
   });
 }
 
+/**
+ * What the brief's `forms` say about the data the page collects, for the privacy policy:
+ * `{ provider, providers, purposes, fields }`, or `null` when the brief has no form (older files keep `forms: true`).
+ * A web3forms form without an access key falls back to WhatsApp, so it counts as a WhatsApp form here too.
+ */
+export function formsProcessing(brief) {
+  const forms = (Array.isArray(brief.forms) ? brief.forms : []).filter(
+    (form) => form && typeof form === 'object',
+  );
+  if (!forms.length) return null;
+  const providerOf = (form) =>
+    form.provider === 'web3forms' && blank(form.accessKey)
+      ? 'whatsapp'
+      : text(form.provider);
+  const providers = [...new Set(forms.map(providerOf))].sort();
+  const pick = (order, values) => order.filter((v) => values.includes(v));
+  return {
+    provider: providers.includes('web3forms') ? 'web3forms' : 'whatsapp',
+    providers,
+    purposes: pick(
+      FORM_PURPOSES,
+      forms.map((f) => f.purpose),
+    ),
+    fields: pick(
+      FORM_FIELDS,
+      forms.flatMap((f) => f.fields ?? []),
+    ),
+  };
+}
+
 /** External hosts the built pages load without waiting for consent, sorted. Empty when there is no build. */
 export function builtHosts(distDir) {
   if (!existsSync(join(distDir, 'index.html'))) return null;
@@ -110,7 +142,8 @@ export function legalData(brief, { thirdPartyHosts = [] } = {}) {
   const privacyContact = text(legal.privacyContact);
   const processing = {
     analytics: text(legal.processing?.analytics),
-    forms: legal.processing?.forms === true,
+    // `true` for a brief that only says forms collect data; the details once the brief has `forms`.
+    forms: formsProcessing(brief) ?? legal.processing?.forms === true,
     embeds: (legal.processing?.embeds ?? []).map(text).filter(Boolean),
   };
   const pending = [];

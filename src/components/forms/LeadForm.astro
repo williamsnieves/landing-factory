@@ -1,0 +1,207 @@
+---
+/**
+ * A lead form from the brief's `forms` section (docs/forms.md). Real HTML that works without JavaScript:
+ * - `web3forms`: a plain POST to https://api.web3forms.com/submit with the public access key; with JavaScript
+ *   client.ts submits by fetch and answers in place.
+ * - `whatsapp` (or a web3forms form without an access key): nothing is sent to any server; client.ts opens a
+ *   prefilled wa.me message, and without JavaScript a plain link to wa.me is shown instead of the form.
+ * The consent checkbox is required and links the privacy policy, which names the provider (scripts/legal.mjs).
+ * Not legal advice: a person reviews the privacy policy before production.
+ */
+import {
+  FIELD_SPECS,
+  WEB3FORMS_ENDPOINT,
+  effectiveProvider,
+  formTexts,
+  type LeadFormConfig,
+} from './fields';
+import { whatsappDigits, whatsappUrl } from './whatsapp';
+import { privacyPath, type LegalData } from '../legal/texts';
+
+interface Props {
+  form: LeadFormConfig;
+  /** src/data/legal.json: the privacy page the consent links to and the language. */
+  legal: LegalData;
+  /** The business name, for the email subject and sender name. */
+  businessName: string;
+  /** WhatsApp number or wa.me link of the brief. Required for the whatsapp provider and for the fallback. */
+  whatsapp?: string;
+  /** Path of this locale's thank-you page; used as `redirect` when the site URL is known (no-JavaScript path). */
+  thanksHref?: string;
+  /** Multi-locale sites: the locale of the page (default: Astro.currentLocale, else the data's language). */
+  locale?: string;
+  /** Another endpoint (tests only); the report fails a host outside `report.forms.providers`. */
+  endpoint?: string;
+  class?: string;
+}
+
+const {
+  form,
+  legal,
+  businessName,
+  whatsapp = '',
+  thanksHref,
+  locale = Astro.currentLocale ?? legal.language,
+  endpoint = WEB3FORMS_ENDPOINT,
+  class: className,
+} = Astro.props;
+
+const t = formTexts(locale);
+const provider = effectiveProvider(form);
+const fallback = provider !== form.provider;
+const privacyHref = privacyPath(legal, locale);
+const id = `form-${form.id}`;
+const waNumber = whatsappDigits(whatsapp);
+if (provider === 'whatsapp' && !waNumber)
+  throw new Error(
+    `<LeadForm id="${form.id}">: the ${fallback ? 'web3forms form has no accessKey, so it falls back to WhatsApp, and' : 'whatsapp form'} needs a WhatsApp number (the whatsapp prop).`,
+  );
+const fields = form.fields.map((name) => ({
+  name,
+  spec: FIELD_SPECS[name],
+  label: t.labels[name],
+}));
+// The redirect is for the no-JavaScript path; client.ts removes it before the fetch. It needs an absolute URL.
+const redirect =
+  thanksHref && Astro.site ? new URL(thanksHref, Astro.site).href : undefined;
+const subject = t.subject[form.purpose](businessName);
+const greeting = t.greeting[form.purpose];
+const noJsLink = waNumber ? whatsappUrl(waNumber, greeting) : '';
+const control =
+  'border-line bg-paper text-ink focus-visible:border-primary w-full rounded-md border px-4 py-3';
+---
+
+<div class:list={['lead-form', className]} data-lead-form-root={form.id}>
+  {provider === 'whatsapp' && (
+    <p data-form-wa-link>
+      <a
+        href={noJsLink}
+        rel="noopener"
+        class="bg-primary text-primary-contrast rounded-pill inline-block px-8 py-4 font-medium"
+      >
+        {t.whatsappLink}
+      </a>
+    </p>
+  )}
+  <form
+    id={id}
+    data-lead-form
+    data-form-id={form.id}
+    data-form-purpose={form.purpose}
+    data-form-provider={provider}
+    data-form-fallback={fallback ? form.provider : undefined}
+    data-wa-number={provider === 'whatsapp' ? waNumber : undefined}
+    data-wa-greeting={provider === 'whatsapp' ? greeting : undefined}
+    data-msg-sending={t.sending}
+    data-msg-success={provider === 'whatsapp' ? t.whatsappOpened : t.success}
+    data-msg-error={t.error}
+    data-msg-rate={t.rateLimit}
+    method={provider === 'web3forms' ? 'post' : 'get'}
+    action={provider === 'web3forms' ? endpoint : undefined}
+    hidden={provider === 'whatsapp'}
+    class="grid gap-5"
+  >
+    {provider === 'web3forms' && (
+      <>
+        <input type="hidden" name="access_key" value={form.accessKey} />
+        <input type="hidden" name="subject" value={subject} />
+        <input type="hidden" name="from_name" value={businessName} />
+        {redirect && <input type="hidden" name="redirect" value={redirect} />}
+        <div hidden aria-hidden="true">
+          <input
+            type="checkbox"
+            name="botcheck"
+            tabindex="-1"
+            autocomplete="off"
+          />
+        </div>
+      </>
+    )}
+    {fields.map(({ name, spec, label }) => {
+      const fieldId = `${id}-${name}`;
+      return (
+        <div>
+          <label for={fieldId} class="mb-2 block text-sm font-medium">
+            {label}
+            {!spec.required && (
+              <span class="text-ink-soft font-normal"> ({t.optional})</span>
+            )}
+          </label>
+          {spec.control === 'textarea' ? (
+            <textarea
+              id={fieldId}
+              name={name}
+              rows="4"
+              required={spec.required}
+              class={control}
+              data-wa-label={label}
+            />
+          ) : spec.control === 'select' ? (
+            <select
+              id={fieldId}
+              name={name}
+              required={spec.required}
+              class={control}
+              data-wa-label={label}
+            >
+              <option value="">{t.choose}</option>
+              {spec.options?.map((option) => (
+                <option value={t.options[option]}>{t.options[option]}</option>
+              ))}
+            </select>
+          ) : (
+            <input
+              id={fieldId}
+              name={name}
+              type={spec.type}
+              autocomplete={spec.autocomplete}
+              inputmode={spec.inputmode}
+              required={spec.required}
+              class={control}
+              data-wa-label={label}
+            />
+          )}
+        </div>
+      );
+    })}
+    <label class="flex min-h-11 items-start gap-3 text-sm">
+      <input
+        type="checkbox"
+        name="consent"
+        value="accepted"
+        required
+        class="accent-primary mt-0.5 size-5 shrink-0"
+      />
+      <span>
+        {t.consent.before}
+        <a
+          href={privacyHref}
+          target="_blank"
+          rel="noopener"
+          class="underline underline-offset-4"
+        >
+          {t.consent.link}
+        </a>
+        {t.consent.after}
+      </span>
+    </label>
+    <div>
+      <button
+        type="submit"
+        class="bg-primary text-primary-contrast rounded-pill px-8 py-4 font-medium disabled:opacity-60"
+      >
+        {provider === 'whatsapp' ? t.whatsappSubmit : t.submit[form.purpose]}
+      </button>
+    </div>
+    <p
+      role="status"
+      aria-live="polite"
+      data-form-status
+      class="min-h-6 text-sm"
+    ></p>
+  </form>
+</div>
+
+<script>
+  import './client.ts';
+</script>

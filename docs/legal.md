@@ -6,13 +6,14 @@ This guide explains the `legal` area of the landing report and the legal pages t
 
 ## What each check means
 
-Run `npm run qa -- --site <slug>` and then `npm run report -- --site <slug>`. The Markdown report has a Legal section with four items.
+Run `npm run qa -- --site <slug>` and then `npm run report -- --site <slug>`. The Markdown report has a Legal section with five items.
 
 | Item                 | What it looks at                                                                                | Fail                                                                           | Warn                                                                                                | Pass                                                      |
 | -------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
 | `legal-cookies`      | Trackers in the build, and the cookies, storage keys and hosts QA saw on a real load            | A known tracker loads unconditionally, or a non-essential cookie or key is set | A consent-gated tracker (check the mechanism), or a cookie or key nobody classified                 | No cookie, no storage key, no tracker: no banner needed   |
 | `legal-third-party`  | Fonts, styles, scripts, images and frames from other hosts                                      | never                                                                          | A third-party host receives the visitor's IP address                                                | Nothing is loaded from another host                       |
 | `legal-pages`        | The legal notice and privacy policy the brief's market requires                                 | A page, a footer link, holder data or a pending marker is missing              | No brief, no market, or a market without a rule set: the requirements are unknown                   | Everything the market requires is present and linked      |
+| `legal-forms`        | Forms that collect personal data (lead forms, see `docs/forms.md`) | No consent checkbox linking the privacy page, a host outside `report.forms.providers`, plain HTTP, a policy that does not name the provider, a Web3Forms form without a key | A WhatsApp fallback replaced a Web3Forms form | Every such form has consent, an allowed provider and a policy that names it |
 | `legal-price-claims` | Discount percentages, struck-through prices, "was / now" prices (English and Spanish)           | never                                                                          | Each claim, with the page and the text; for an EU market the fix names the 30-day lowest-price rule | No claim found                                            |
 
 A check that cannot run is `not run`, never a pass. The runtime part of `legal-cookies` needs a QA run newer than the build.

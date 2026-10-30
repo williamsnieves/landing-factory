@@ -569,7 +569,7 @@ export function formItems(model) {
         status: 'warn',
         title: `${thirdParty.length} form(s) post to a third party`,
         evidence: thirdParty,
-        fix: 'Check what the third party does with the data, state it in the privacy text, and prefer a provider you trust over a bare form.',
+        fix: 'Check what the third party does with the data, state it in the privacy text, and prefer a provider you trust over a bare form. The legal-forms item judges consent, the provider list and the privacy text of each form.',
       })
     : forms.length
       ? makeItem({
