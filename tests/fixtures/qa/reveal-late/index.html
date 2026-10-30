@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fixture late reveal</title>
+    <meta name="description" content="QA fixture page: Fixture late reveal." />
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        color: #111;
+        background: #fff;
+      }
+      .js-motion [data-reveal] {
+        opacity: 0;
+        transform: translate3d(0, 2rem, 0);
+      }
+      main > section {
+        min-height: 90vh;
+      }
+    </style>
+    <script>
+      // Like the motion layer, only hide reveals when motion is allowed.
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches)
+        document.documentElement.classList.add('js-motion');
+    </script>
+  </head>
+  <body>
+    <main id="main">
+      <h1>Fixture late reveal</h1>
+      <section>
+        <p data-reveal>First reveal, below the fold on small screens.</p>
+      </section>
+      <section><p data-reveal>Second reveal.</p></section>
+      <section><p data-reveal>Third reveal.</p></section>
+      <section><p data-reveal>Fourth reveal.</p></section>
+    </main>
+    <script>
+      // Stands in for the motion layer (no GSAP in fixtures): it initialises late, after
+      // the harness's first scroll-through, and reveals only elements that scroll into
+      // view afterwards, once, like a ScrollTrigger with once: true.
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          const io = new IntersectionObserver((entries) => {
+            for (const e of entries) {
+              if (!e.isIntersecting) continue;
+              e.target.style.opacity = '1';
+              e.target.style.transform = 'none';
+              io.unobserve(e.target);
+            }
+          });
+          // Armed at init: elements already in view reveal now, the rest when scrolled to.
+          document
+            .querySelectorAll('[data-reveal]')
+            .forEach((el) => io.observe(el));
+        }, 2000);
+      });
+    </script>
+  </body>
+</html>
