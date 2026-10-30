@@ -30,4 +30,4 @@
 ## 7. Proof
 
 - [x] 7.1 Proof on the starter's `/forms/` demo page and the e2e fixture (a real site needs the holder's real data for its privacy policy, which can never be assumed, so casavela keeps WhatsApp until a real customer exists). Verify: starter QA and static report with `legal-forms` passing.
-- [ ] 7.2 Full checks in a clean clone and `openspec validate add-lead-forms --strict`.
+- [x] 7.2 Full checks in a clean clone and `openspec validate add-lead-forms --strict`.
