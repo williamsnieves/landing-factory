@@ -2,67 +2,76 @@
 
 ## 1. Skill queries run
 
-All from the repo root with `python3 .claude/skills/ui-ux-pro-max/scripts/search.py` (ui-ux-pro-max only; no other design skill was used for palette or fonts). Inputs: `sites/casavela/PROPOSAL.md` (approved), `brief.json`, `directions.json` (direction a chosen, the owner's notes are fixed input) and `DIRECTIONS.md`.
+All from the repo root with `python3 .claude/skills/ui-ux-pro-max/scripts/search.py` (ui-ux-pro-max only; no other design skill was used for palette or fonts). Inputs: `sites/casavela/PROPOSAL.md` (approved), `brief.json`, `directions.json` (direction a chosen, the owner's notes are fixed input), `DIRECTIONS.md` and the owner's palette revision of 2026-10-30 (quoted in section 2). The first build's queries (warm terracotta and home-decoration families) led to a deep brick primary, `#A3402A`, which the owner retired; the queries below are the ones of the revised palette.
 
-| #   | Query                                                                                                                             | Result in short                                                                                                                                                                                                                                         |
-| --- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | `"real estate agency mortgage advice warm trust local Valencia clean product clarity" --design-system -p "Casavela Inmobiliaria"` | Pattern "Hero-Centric Design" (full-bleed hero), style "Glassmorphism", Real Estate palette "trust teal + professional blue" (#0F766E / #0369A1 on #F0FDFA, foreground #134E4A), fonts Cinzel + Josefin Sans (luxury real estate), avoid "poor photos". |
-| 2   | `"real estate warm trust terracotta clay" --domain color`                                                                         | Real Estate/Property (the same teal + blue), then "Warm terracotta + fresh green" (primary #9A3412, secondary #C2410C, background #FFFBEB, muted #F8F2F0, border #F2E6E2).                                                                              |
-| 3   | `"real estate mortgage finance trustworthy" --domain color`                                                                       | Real Estate teal again, "Trust blue + profit green" (dark), Banking "Trust navy + premium gold".                                                                                                                                                        |
-| 4   | `"warm earthy terracotta brick home local service trust" --domain color -n 5`                                                     | Warm terracotta + fresh green (#9A3412), Home Decoration "interior warm grey + gold accent" (#78716C, background #FAF5F2), restaurant red, local-events orange.                                                                                         |
-| 5   | `"clean modern sans professional trustworthy finance tabular" --domain typography -n 5`                                           | Corporate Trust (Lexend + Source Sans 3), **Financial Trust (IBM Plex Sans + IBM Plex Sans: "trustworthy, professional, banking, serious; excellent for data")**, Modern Professional (Poppins + Open Sans), Medical Clean (Figtree).                   |
-| 6   | `"minimal clean product clarity light hairline professional" --domain style -n 3`                                                 | Minimalism & Swiss Style: white space, grid, sans-serif, essential elements only, no shadows or gradients, single primary, `--border-radius: 0px`.                                                                                                      |
-| 7   | `"IBM Plex Sans variable sans serif" --domain google-fonts -n 6`                                                                  | IBM Plex Sans: sans serif, variable axes `wdth` 75-100 and `wght` 100-700, designers Mike Abbink and Bold Monday.                                                                                                                                       |
+| #   | Query                                                                                                   | Result in short                                                                                                                                                                                                                                                                                      |
+| --- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `"real estate navy trust warm sand cream terracotta accent" --design-system -p "Casavela Inmobiliaria"` | Pattern "Hero-Centric Design" (full-bleed hero), style "Glassmorphism", Real Estate palette "trust teal + professional blue" (#0F766E / #0369A1 on #F0FDFA, foreground #134E4A), fonts Cinzel + Josefin Sans (luxury real estate), avoid "poor photos".                                              |
+| 2   | `"navy sand taupe cream warm" --domain color -n 4`                                                      | Notes app "warm ink + amber accent on cream" (warm grey #78716C, cream background #FFFBEB), Bakery "warm brown + cream", B2B Service "professional navy + blue CTA" (#0F172A, secondary #334155, background #F8FAFC), Podcast "dark audio + warm accent" (deep indigo navy #1E1B4B with an orange).  |
+| 3   | `"banking trust navy premium gold" --domain color -n 3`                                                 | **Banking/Traditional Finance "Trust navy + premium gold"** (primary #0F172A, secondary #1E3A8A, accent #A16207), Legal Services "authority navy + trust gold" (#1E3A8A, accent #B45309), Luxury "premium black + gold" (warm stone neutrals #1C1917 / #44403C / border #D6D3D1).                    |
+| 4   | `"real estate property trust" --domain color -n 3`                                                      | Real Estate/Property is still the cold teal + blue; then Fintech gold + purple (dark) and Legal Services navy + gold again.                                                                                                                                                                          |
+| 5   | `"warm terracotta clay accent" --domain color -n 3`                                                     | "Warm terracotta + fresh green" (primary #9A3412, muted #F8F2F0, border #F2E6E2, background #FFFBEB), Podcast's navy with a warm orange accent, Notes app warm ink on cream.                                                                                                                         |
+| 6   | `"trustworthy professional banking serious navy warm" --domain typography -n 4`                         | **Financial Trust (IBM Plex Sans + IBM Plex Sans: "trustworthy, professional, banking, serious; excellent for data")** first, then Legal Professional (EB Garamond + Lato), Corporate Trust (Lexend + Source Sans 3), Medical Clean (Figtree + Noto Sans). IBM Plex Sans is confirmed for navy/sand. |
 
-Package checked with `npm view @fontsource-variable/ibm-plex-sans version`: 5.3.0 (installed with `npm install -w site-casavela @fontsource-variable/ibm-plex-sans`).
+Fonts are unchanged from the first build (`@fontsource-variable/ibm-plex-sans` 5.3.0, already installed): no package change and no credits change.
 
 ## 2. Conflicts between the skill and the proposal (reported, not hidden)
 
-1. **Palette family.** The skill's Real Estate palette (queries 1-3) is a cold teal with a professional blue. The owner's notes ask for a warm palette, neither a's violet nor c's olive, and the teal/navy/blue families are already used by clinica-dental, estudio-arquitectura and tupathdigital. Resolution: the owner wins. The palette is built from the skill's warm entries: the "warm terracotta" family of query 2/4 (#9A3412 primary on a warm cream background with warm muted and border tints) and the warm-grey neutrals of "Home Decoration" (query 4). Every value was retuned and measured; none is copied.
-2. **Second color.** The skill pairs terracotta with a "fresh green" accent and Home Decoration with gold. Green would bring back c's olive feel, which the owner declined, and gold reads as luxury. Resolution: no second hue; the accent is a pale clay tint of the primary, used as a quiet fill for frames, chips and the calculator bar track.
-3. **Primary hue against other sites.** A terracotta sits near samurai (#e5543a) and personal-brand (#ff6f3c) in hue and near panaderia (#92400e) in tone. Resolution: a deep brick (#A3402A, hue about 11°, much darker and less saturated than the two oranges, redder and less brown than panaderia's amber); display font and hero type differ from all three, so no trio is shared.
-4. **Fonts.** The `--design-system` run proposes Cinzel + Josefin Sans (luxury real estate). Cinzel is a decorative all-caps serif: it contradicts the owner's note ("a clean sans like a's") and the proposal's product-like clarity, and "luxury" is the wrong promise for a neighbourhood agency in a regulated niche. Resolution: the skill's own "Financial Trust" pairing (query 5), IBM Plex Sans for headings and text: a clean, neutral grotesque with tabular figures, made for data, not rounded. It differs from every other site's display font, and Figtree, Schibsted Grotesk and Space Grotesk (the other split heroes) are avoided.
-5. **Style.** The skill's top style is Glassmorphism (backdrop blur, translucent layers). The proposal asks for a light, flat, product-like page with hairline rails. Resolution: structure from "Minimalism & Swiss Style" (query 6): white space, grid, essential elements, single primary, no gradients; at most one very soft shadow on the calculator panel. No blur.
-6. **Radius.** Minimalism & Swiss Style uses 0 px. The proposal's custom + warm-local blend and a's frames call for moderate rounding. Resolution: a's radii kept (6 / 10 / 16 px); buttons are rounded rectangles, not pills.
-7. **Landing pattern.** "Hero-Centric Design" wants a full-bleed hero. The proposal fixes a `split` hero (a's grammar) and puts the full-bleed Valencia photograph in its own band after the hero. Resolution: the proposal's page map stands.
-8. **Archetype sheets vs. skill and proposal.** `data-and-proof` wants figures that count up; the proposal keeps them static (few figures, two are sample data). `warm-local-service` allows no pinned sections; the proposal's sticky calculator is CSS `position: sticky`, not a pin, and is the customer's request. `data-and-proof` allows image radii 0-12 px and `warm-local-service` 6-40 px: images use 10 px (`--radius-md`) or 0 px when full-bleed, inside both ranges. `framer-com`'s 24-32 px card radii and dark shell are not used (light page, 16 px maximum).
+Fixed input, the owner's revision (2026-10-30), wins over the skill: "the brick primary is not right. Use a real-estate palette inspired by the owner's Pinterest board: deep navy as the primary (trust), warm sand/taupe as the secondary, cream paper and a near-black ink; terracotta only as a small accent (a Valencia nod). Keep it warm, not cold corporate blue. Palette and tokens from ui-ux-pro-max only; keep IBM Plex Sans unless the new palette clearly asks otherwise; keep the structure, sections and copy of the first build."
+
+1. **Palette family.** The skill's Real Estate palette (queries 1 and 4) is a cold teal with a professional blue on a mint background. The owner asks for navy, sand, cream and near-black. Resolution: the owner wins; the palette is built from the skill's navy entries (query 3 "Trust navy + premium gold", query 2 "professional navy") for the primary and from its warm cream and warm-stone neutrals (query 2 "warm ink on cream", query 3 "premium black" stone borders) for paper, surface, line and ink. Every value was retuned and measured; none is copied.
+2. **Cold versus warm navy.** The skill's navies (#0F172A, #1E3A8A) are cold slate or saturated corporate blue, which the owner rejects ("not cold corporate blue"). Resolution: a desaturated navy pulled slightly toward violet-red, `#232D47` (hue about 223°, saturation about 34 %, lightness about 21 %), sitting on cream and sand so the whole page reads warm.
+3. **Second color.** The skill pairs navy with gold (queries 3) and terracotta with green (query 5). Gold reads as luxury, the wrong promise for a neighbourhood agency, and green is not in the owner's board. Resolution: the owner's warm sand/taupe is the secondary, as the `surface` panels and `line` hairlines, not a second saturated hue.
+4. **Terracotta.** The skill's terracotta (#9A3412) is a primary in its palette; the owner wants it only as a small Valencia accent. Resolution: a new `--color-terracotta` (`#9E4527`) for small markers, rules, dots and small text only, plus the existing pale `accent` tint behind the "Dato de ejemplo" tag; never buttons, links or large areas. It sits close to the retired brick, which is intended: the Valencia nod survives at small scale.
+5. **Navy family against estudio-arquitectura.** estudio-arquitectura's primary is `#17356B` (navy, Schibsted Grotesk, split hero). The owner accepts the family overlap. Resolution: `#232D47` is visibly apart from it: much less saturated (about 34 % against 65 %), darker (about 21 % against 25 % lightness) and shifted about 5° toward violet-red; the display font differs (IBM Plex Sans), so the `diversity` trio (primary, display font, hero) is not shared. It is also far from tupathdigital `#1881D4` (bright blue), clinica-dental `#0F6B68` (teal) and app-finanzas `#4A35D4` (saturated indigo).
+6. **The first build's "no navy" rule.** Section 8 of the first build forbade teal, navy or blue as an action color. The owner's revision supersedes it for navy; the rule now forbids teal, bright or saturated blue and olive only.
+7. **Fonts.** The `--design-system` run proposes Cinzel + Josefin Sans (luxury real estate). Cinzel is a decorative all-caps serif that contradicts the owner's clean-sans note and the product-like clarity. Resolution: the skill's own "Financial Trust" pairing (query 6), IBM Plex Sans for headings and text, kept from the first build; navy and sand do not ask for another face.
+8. **Style.** The skill's top style is Glassmorphism (backdrop blur, translucent layers). The page stays light, flat and product-like with hairline rails (Minimalism & Swiss Style structure from the first build). No blur.
+9. **Radius.** Minimalism & Swiss Style uses 0 px. The first build's radii stay (6 / 10 / 16 px) with the section 6 amendment (pill buttons). The palette change does not touch them.
+10. **Landing pattern.** "Hero-Centric Design" wants a full-bleed hero. The proposal fixes a `split` hero and puts the full-bleed Valencia photograph in its own band; the owner asks to keep structure, sections and copy. The page map stands.
+11. **Archetype sheets vs. skill and proposal** (unchanged from the first build). `data-and-proof` wants figures that count up; they stay static. `warm-local-service` allows no pinned sections; the sticky calculator is CSS `position: sticky`, not a pin. Image radii 10 px or 0 px when full-bleed sit inside both sheets' ranges.
 
 ## 3. Chosen style
 
-**Warm product clarity.** A light, flat, document-like page framed by two 1 px hairline rails (a's grammar): warm off-white paper, warm sand panels for the product areas (valuation card, calculator, hours card), deep warm-brown ink and one deep brick color reserved for actions, links and focus. The two-tone headline uses ink for the first sentence and `ink-soft` for the continuation. Warmth comes from the color temperature of every neutral, the brick action color and the real Valencia street photograph, never from gradients, blur or decoration. Constraints respected: moderate radius family (6 / 10 / 16 px, no pills on buttons), low type contrast (one family, medium heading scale, weight and tone carry hierarchy), medium density with generous section padding, hairlines instead of shadows.
+**Warm navy clarity.** A light, flat, document-like page framed by two 1 px hairline rails: cream paper, warm sand panels for the product areas (valuation card, calculator, practical strip, hours card), taupe hairlines, a near-black warm ink and one deep warm navy reserved for actions, links, focus and the two data bars. A small terracotta mark (step markers, a short rule or dot) is the Valencia nod, never a fill. The two-tone headline uses ink for the first sentence and `ink-soft` for the continuation. Warmth comes from the cream and sand neutrals, the desaturated navy and the real Valencia street photograph, never from gradients, blur or decoration. Constraints respected: moderate radius family (6 / 10 / 16 px, pills for buttons, chips and the hours bar after the section 6 amendment), low type contrast (one family, medium heading scale, weight and tone carry hierarchy), medium density with generous section padding, hairlines instead of shadows.
 
 ## 4. Palette
 
-| Role             | Token                      | Hex       | Use                                                                                                                                             |
-| ---------------- | -------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| primary          | `--color-primary`          | `#A3402A` | Deep brick: the one action color (filled buttons, text links, focus ring, the working-hours bar in the hours card, the calculator's result bar) |
-| primary-hover    | `--color-primary-hover`    | `#85321F` | Hover and active state of buttons and links                                                                                                     |
-| primary-contrast | `--color-primary-contrast` | `#FFFFFF` | Text and icons on `primary` and `primary-hover`                                                                                                 |
-| accent           | `--color-accent`           | `#EBD3C4` | Pale clay tint: chip and tag backgrounds ("dato de ejemplo"), the calculator bar track, selected-row tint. Background only, with ink text       |
-| ink              | `--color-ink`              | `#231A15` | Headings, body text, the first sentence of two-tone headlines                                                                                   |
-| ink-soft         | `--color-ink-soft`         | `#5C4F45` | Secondary text, the muted continuation of two-tone headlines, captions, labels, input borders                                                   |
-| paper            | `--color-paper`            | `#FBF8F4` | Page background                                                                                                                                 |
-| surface          | `--color-surface`          | `#F3ECE3` | Warm sand panels: valuation card, calculator panel, practical strip, hours card                                                                 |
-| line             | `--color-line`             | `#E2D7C9` | Hairline rails, frame borders and dividers; decorative only                                                                                     |
+| Role             | Token                      | Hex       | Use                                                                                                                                                                         |
+| ---------------- | -------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| primary          | `--color-primary`          | `#232D47` | Deep warm navy: the one action color (filled pill buttons, text links, 3 px focus ring, the "Gratis" chip, the hours bar segments, the calculator result bar, step numbers) |
+| primary-hover    | `--color-primary-hover`    | `#182036` | Hover and active state of buttons and links                                                                                                                                 |
+| primary-contrast | `--color-primary-contrast` | `#FBF7F0` | Text and icons on `primary` and `primary-hover` (the cream paper)                                                                                                           |
+| accent           | `--color-accent`           | `#F1D9CB` | Pale terracotta tint: background of the "Dato de ejemplo" tag, with ink text. Background only                                                                               |
+| terracotta       | `--color-terracotta`       | `#9E4527` | Small Valencia accent: step-number markers, a short rule or dot, small text. Never buttons, links or large areas                                                            |
+| ink              | `--color-ink`              | `#1C1A17` | Near-black warm ink: headings, body text, the first sentence of two-tone headlines                                                                                          |
+| ink-soft         | `--color-ink-soft`         | `#57504A` | Secondary text, the muted continuation of two-tone headlines, captions, labels, input borders                                                                               |
+| paper            | `--color-paper`            | `#FBF7F0` | Cream page background                                                                                                                                                       |
+| surface          | `--color-surface`          | `#EBE2D3` | Warm sand secondary: valuation card frame, calculator panel, practical strip, hours card, chips                                                                             |
+| line             | `--color-line`             | `#D6C8B4` | Taupe hairline rails, frame borders and dividers; decorative only                                                                                                           |
 
-Measured WCAG 2.x contrast (relative luminance, sRGB linearization):
+Measured WCAG 2.x contrast (relative luminance with the sRGB linearization; luminances: paper 0.933, surface 0.768, accent 0.726, line 0.589, terracotta 0.117, ink-soft 0.083, primary 0.027, primary-hover 0.015, ink 0.010):
 
-| Pair used                                          | Ratio | Requirement  | Result                     |
-| -------------------------------------------------- | ----- | ------------ | -------------------------- |
-| `ink` on `paper` (body, headings)                  | 16.1  | 4.5          | pass (AAA)                 |
-| `ink` on `surface` (text in panels)                | 14.6  | 4.5          | pass (AAA)                 |
-| `ink-soft` on `paper` (secondary, headline tail)   | 7.5   | 4.5          | pass (AAA)                 |
-| `ink-soft` on `surface`                            | 6.7   | 4.5          | pass                       |
-| `primary-contrast` on `primary` (button label)     | 6.3   | 4.5          | pass                       |
-| `primary-contrast` on `primary-hover` (hover)      | 8.5   | 4.5          | pass (AAA)                 |
-| `primary` on `paper` (text links, focus ring)      | 6.0   | 4.5          | pass                       |
-| `primary` on `surface` (links in panels)           | 5.4   | 4.5          | pass                       |
-| `paper` on `ink` (any inverted block)              | 16.1  | 4.5          | pass (AAA)                 |
-| `ink` on `accent` (chip and tag text)              | 11.9  | 4.5          | pass (AAA)                 |
-| `ink-soft` on `accent`                             | 5.5   | 4.5          | pass                       |
-| `primary` on `accent` (bar on its track, non-text) | 4.4   | 3 (non-text) | pass for non-text; no text |
-| `ink-soft` on `paper` as an input border           | 7.5   | 3 (non-text) | pass                       |
-| `line` on `paper` / `surface`                      | 1.3   | n/a          | decorative hairlines only  |
+| Pair used                                                     | Ratio     | Requirement  | Result                    |
+| ------------------------------------------------------------- | --------- | ------------ | ------------------------- |
+| `ink` on `paper` (body, headings)                             | 16.3      | 4.5          | pass (AAA)                |
+| `ink` on `surface` (text in panels)                           | 13.5      | 4.5          | pass (AAA)                |
+| `ink-soft` on `paper` (secondary, headline tail)              | 7.4       | 4.5          | pass (AAA)                |
+| `ink-soft` on `surface`                                       | 6.2       | 4.5          | pass                      |
+| `primary-contrast` on `primary` (button label, "Gratis" chip) | 12.8      | 4.5          | pass (AAA)                |
+| `primary-contrast` on `primary-hover` (hover)                 | 15.1      | 4.5          | pass (AAA)                |
+| `primary` on `paper` (text links, step numbers, focus ring)   | 12.8      | 4.5          | pass (AAA)                |
+| `primary` on `surface` (links and bars in panels)             | 10.6      | 4.5          | pass (AAA)                |
+| `paper` on `ink` (any inverted block)                         | 16.3      | 4.5          | pass (AAA)                |
+| `ink` on `accent` ("Dato de ejemplo" tag)                     | 12.8      | 4.5          | pass (AAA)                |
+| `ink-soft` on `accent`                                        | 5.9       | 4.5          | pass                      |
+| `terracotta` on `paper` (small text, markers)                 | 5.9       | 4.5          | pass                      |
+| `terracotta` on `surface` (small text, markers in panels)     | 4.9       | 4.5          | pass                      |
+| `terracotta` on `accent`                                      | 4.7       | 4.5          | pass                      |
+| `primary` on `accent` (non-text)                              | 10.1      | 3 (non-text) | pass                      |
+| `primary` on `line` (bar on a hairline track, non-text)       | 8.3       | 3 (non-text) | pass                      |
+| `ink-soft` on `paper` as an input border                      | 7.4       | 3 (non-text) | pass                      |
+| `line` on `paper` / `surface`                                 | 1.5 / 1.3 | n/a          | decorative hairlines only |
 
 ## 5. Typography
 
@@ -92,7 +101,7 @@ Type scale (tokens; one family, low contrast, medium heading scale):
 - Content frame max 1200 px between the two hairline rails (1 px `line`), 16 px side gutter on phones, 32 px from 768 px.
 - Section padding: 96-128 px vertical on desktop, 64-80 px on phones; section openers are heading left, short paragraph right from 1024 px.
 - Radii: `--radius-sm` 0.375rem (6 px: chips, tags, inputs, buttons), `--radius-md` 0.625rem (10 px: cards, photos that are not full-bleed, the practical strip), `--radius-lg` 1rem (16 px: the valuation card and the calculator panel). `--radius-pill` stays for the hours bar ends and area chips only. Buttons are rounded rectangles (6 px), never pills. The full-bleed photo band has no radius.
-- **Amended by the full build (2026-10-30):** buttons, the header icon links, the "Gratis" chip and the hours bar use `--radius-pill`. With 6 px rectangles the built page failed `layout-diversity` against `app-finanzas` (distance 0.05) and `estudio-arquitectura` (0.16); the button shape is one of the levers the skill names, and both archetype sheets allow pills. Palette, fonts and the other radii are unchanged. Reasons in `sites/casavela/RUN.md` "Design decisions".
+- **Amended by the full build (2026-10-30):** buttons, the header icon links, the "Gratis" chip and the hours bar use `--radius-pill`. With 6 px rectangles the built page failed `layout-diversity` against `app-finanzas` (distance 0.05) and `estudio-arquitectura` (0.16); the button shape is one of the levers the skill names, and both archetype sheets allow pills. Palette, fonts and the other radii are unchanged. Reasons in `sites/casavela/RUN.md` "Design decisions". (The palette was later revised by the owner, sections 2 and 4; radii unchanged.)
 
 ## 7. Motion tokens
 
@@ -106,27 +115,30 @@ Type scale (tokens; one family, low contrast, medium heading scale):
 
 Do:
 
-- Use the tokens only (`bg-paper`, `text-ink`, `bg-primary`, ...); no raw hex in components.
-- Keep `primary` for actions, links, focus and the two data bars; one filled primary button plus an outlined secondary (ink border, ink text) per group.
+- Use the tokens only (`bg-paper`, `text-ink`, `bg-primary`, `text-terracotta`, ...); no raw hex in components.
+- Keep `primary` (navy) for actions, links, focus, the "Gratis" chip, step-number text and the two data bars; one filled primary pill button plus an outlined secondary (ink border, ink text) per group.
+- Use `surface` (sand) for the product panels and chips; `ink`, `ink-soft` and `primary` text all stay readable on it.
 - Use `ink-soft` for the muted half of two-tone headlines and for input borders (`line` is too light for a control border).
+- Use `terracotta` only at small scale: a step-number marker, a short rule or dot, a small label. At most a few touches per section.
 - Set `tabular-nums` on every figure, price and calculator value.
-- Put tags ("dato de ejemplo") on `accent` with `ink` text.
+- Put tags ("Dato de ejemplo") on `accent` with `ink` text.
 - Keep hairline rails and frame borders in `line`, 1 px.
 
 Don't:
 
 - No gradients, glass, blur, glow or decorative shadows (at most one soft shadow on the calculator panel).
 - No `accent` or `line` as text color; no text on `primary` other than `primary-contrast`.
+- No `terracotta` on buttons, links, focus rings, bars or any large area (section backgrounds, panels, the photo band); it is a small accent, not a second action color.
 - No radius above 16 px except `--radius-pill` (buttons, chips and the hours bar, after the full-build amendment in section 6).
 - No second typeface, no rounded display face, no all-caps decorative serif.
 - No count-up figures, no invented statistics, ratings or awards (regulated niche).
 - From `data-and-proof`: no chart or figure without its source line. From `warm-local-service`: no experimental motion, no giant outlined words, no stock image passed off as the agency or a property.
-- No teal, navy or blue as an action color (other sites' families) and no olive (declined by the owner).
+- No teal, no bright or saturated corporate blue, no gold and no olive (other sites' families or declined by the owner); the navy stays the warm, desaturated `primary`.
 
 ## 9. Landing meta
 
 ```landing-meta
-primary: #a3402a
+primary: #232d47
 display-font: IBM Plex Sans
 body-font: IBM Plex Sans
 hero: split

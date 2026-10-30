@@ -4,19 +4,22 @@
  * --radius-* variable below into utilities (bg-primary, font-display, ...).
  * To retheme a site, edit only this file. `@theme static` emits every variable
  * (not only the used ones) so 3D scenes can read colors from the page.
- * Values: design-system/casavela/MASTER.md (ui-ux-pro-max, warm product clarity).
+ * Values: design-system/casavela/MASTER.md (ui-ux-pro-max, warm navy clarity:
+ * the owner's revised palette, deep warm navy on cream with sand panels and a
+ * small terracotta accent).
  */
 @theme static {
   /* Colors */
-  --color-primary: #a3402a;
-  --color-primary-hover: #85321f;
-  --color-primary-contrast: #ffffff;
-  --color-accent: #ebd3c4;
-  --color-ink: #231a15;
-  --color-ink-soft: #5c4f45;
-  --color-paper: #fbf8f4;
-  --color-surface: #f3ece3;
-  --color-line: #e2d7c9;
+  --color-primary: #232d47;
+  --color-primary-hover: #182036;
+  --color-primary-contrast: #fbf7f0;
+  --color-accent: #f1d9cb;
+  --color-terracotta: #9e4527;
+  --color-ink: #1c1a17;
+  --color-ink-soft: #57504a;
+  --color-paper: #fbf7f0;
+  --color-surface: #ebe2d3;
+  --color-line: #d6c8b4;
 
   /* Fonts (self-hosted from @fontsource-variable/ibm-plex-sans, imported in global.css) */
   --font-display:

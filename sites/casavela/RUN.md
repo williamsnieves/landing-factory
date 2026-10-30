@@ -6,33 +6,33 @@ Written by the /new-landing skill. `Result:` ends as one of `checkpoint` (waitin
 
 ## Inputs
 
-| Field           | Value                                                                                                                                                      |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Niche           | Inmobiliaria y asesoría hipotecaria de barrio en Valencia (`business.description` of the brief)                                                            |
-| Brief           | `sites/casavela/brief.json` (valid)                                                                                                                        |
-| Language        | es (single locale)                                                                                                                                         |
-| References      | `patterns/stripe-com.md`, `patterns/framer-com.md` (from `references.liked`)                                                                               |
-| Mode            | full build from the chosen direction a (`--resume --auto`, 2026-10-30); earlier run `--directions` (count 3), `--auto`                                     |
-| Max QA attempts | 5                                                                                                                                                          |
-| Started         | 2026-10-28T21:56:39Z                                                                                                                                       |
-| Assumed fields  | business.name, contact.phone, contact.email, contact.address, contact.hours, goal.primary.url, goal.secondary.url, offer, seo.primaryKeyword               |
-| Empty fields    | brand (colors, fonts, keep, avoid, aiImages, ownerPortrait), assets, references.disliked, legal.markets, legal.holder, legal.privacyContact, deploy.domain |
-| Customer assets | none                                                                                                                                                       |
+| Field           | Value                                                                                                                                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Niche           | Inmobiliaria y asesoría hipotecaria de barrio en Valencia (`business.description` of the brief)                                                                                                   |
+| Brief           | `sites/casavela/brief.json` (valid)                                                                                                                                                               |
+| Language        | es (single locale)                                                                                                                                                                                |
+| References      | `patterns/stripe-com.md`, `patterns/framer-com.md` (from `references.liked`)                                                                                                                      |
+| Mode            | palette revision of the full build (`--resume --auto`, 2026-10-30T18:26Z); full build from the chosen direction a (`--resume --auto`, 2026-10-30); earlier run `--directions` (count 3), `--auto` |
+| Max QA attempts | 5                                                                                                                                                                                                 |
+| Started         | 2026-10-28T21:56:39Z                                                                                                                                                                              |
+| Assumed fields  | business.name, contact.phone, contact.email, contact.address, contact.hours, goal.primary.url, goal.secondary.url, offer, seo.primaryKeyword                                                      |
+| Empty fields    | brand (colors, fonts, keep, avoid, aiImages, ownerPortrait), assets, references.disliked, legal.markets, legal.holder, legal.privacyContact, deploy.domain                                        |
+| Customer assets | none                                                                                                                                                                                              |
 
 ## Phases
 
-| Phase           | Status | Started              | Finished             | Notes                                                                                                                                             |
-| --------------- | ------ | -------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| brief           | done   | 2026-10-28T21:56:39Z | 2026-10-28T21:58:00Z | brief valid; 9 assumed fields, no customer assets, no legal market                                                                                |
-| directions      | done   | 2026-10-28T21:58:00Z | 2026-10-28T22:26:30Z | 3 directions (a custom, b brutalist-raw+data-and-proof, c warm-local-service+data-and-proof); unused 3D and legal layers pruned                   |
-| qa (directions) | done   | 2026-10-28T22:26:30Z | 2026-10-28T22:29:04Z | passed on attempt 1; `directions.mjs check` ok; static report 0 fail                                                                              |
-| synthesis       | done   | 2026-10-30T12:33:56Z | 2026-10-30T12:35:30Z | PROPOSAL.md from chosen direction a and the owner's notes; blend custom (stripe-com, framer-com), data-and-proof and warm-local-service fill gaps |
-| checkpoint      | done   | 2026-10-30T12:35:30Z | 2026-10-30T12:35:30Z | `--auto`                                                                                                                                          |
-| design-system   | done   | 2026-10-30T12:35:30Z | 2026-10-30T12:38:54Z | brick `#a3402a` on warm paper, IBM Plex Sans; tokens, contrast, landing-meta and diversity ok                                                     |
-| build           | done   | 2026-10-30T12:38:54Z | 2026-10-30T13:04:50Z | 11 sections, 2 Commons photos, directions removed; credits, astro check, build and lint pass                                                      |
-| qa              | done   | 2026-10-30T13:04:50Z | 2026-10-30T13:06:36Z | passed on attempt 1 (Lighthouse 100/100/100); reviewer pass on section shots                                                                      |
-| polish          | done   | 2026-10-30T13:06:36Z | 2026-10-30T13:08:41Z | fixed the reveal end state (elements stayed 2rem low); impeccable findings reviewed, the rest kept on purpose; QA re-run passed                   |
-| final-check     | done   | 2026-10-30T13:08:41Z | 2026-10-30T13:11:35Z | lint, prettier, credits, layout signature, check-landing (all ok, with `--refs`), static report 0 fail, check:sites 0 errors                      |
+| Phase           | Status | Started              | Finished             | Notes                                                                                                                                                                                                                              |
+| --------------- | ------ | -------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| brief           | done   | 2026-10-28T21:56:39Z | 2026-10-28T21:58:00Z | brief valid; 9 assumed fields, no customer assets, no legal market                                                                                                                                                                 |
+| directions      | done   | 2026-10-28T21:58:00Z | 2026-10-28T22:26:30Z | 3 directions (a custom, b brutalist-raw+data-and-proof, c warm-local-service+data-and-proof); unused 3D and legal layers pruned                                                                                                    |
+| qa (directions) | done   | 2026-10-28T22:26:30Z | 2026-10-28T22:29:04Z | passed on attempt 1; `directions.mjs check` ok; static report 0 fail                                                                                                                                                               |
+| synthesis       | done   | 2026-10-30T12:33:56Z | 2026-10-30T12:35:30Z | PROPOSAL.md from chosen direction a and the owner's notes; blend custom (stripe-com, framer-com), data-and-proof and warm-local-service fill gaps                                                                                  |
+| checkpoint      | done   | 2026-10-30T12:35:30Z | 2026-10-30T12:35:30Z | `--auto`                                                                                                                                                                                                                           |
+| design-system   | done   | 2026-10-30T18:27:02Z | 2026-10-30T18:31:40Z | palette revision (owner): warm navy `#232d47` on cream `#fbf7f0`, sand `#ebe2d3` panels, terracotta `#9e4527` accent; IBM Plex Sans kept; tokens, contrast, landing-meta, diversity ok (first build: brick `#a3402a`, 12:35-12:38) |
+| build           | done   | 2026-10-30T18:31:40Z | 2026-10-30T18:31:40Z | retheme only: tokens from MASTER.md, numbered markers in terracotta, calculator bar track on `line`; astro check 0 errors, build ok (first build 12:38-13:04)                                                                      |
+| qa              | done   | 2026-10-30T18:31:40Z | 2026-10-30T18:33:20Z | palette revision: passed on attempt 1 (Lighthouse worst 99/100/100); reviewer pass on section shots and the 404 (first build: passed on attempt 1, 100/100/100)                                                                    |
+| polish          | done   | 2026-10-30T18:33:20Z | 2026-10-30T18:33:40Z | impeccable detect: 0 findings in `src/`, the same 39 on the built page as the first polish (cramped-padding, nested-cards, cream-palette), kept on purpose; nothing applied (first build fixed the reveal end state)               |
+| final-check     | done   | 2026-10-30T18:33:40Z | 2026-10-30T18:34:54Z | prune (no unused layer), lint, prettier, credits, layout signature, check-landing with `--refs` (all ok), static report 0 fail, check:sites 9 of 9 with 0 errors                                                                   |
 
 ## Design decisions
 
@@ -80,7 +80,17 @@ Archetype and proposal deviations:
 - **Structured data** (`src/data/seo.ts`, corrected by the orchestrator after the build): RealEstateAgent with the description, city, country and service area only. The brief lists the name, telephone, email, address and hours as `assumed`, and the skill leaves assumed fields out of JSON-LD, so they are omitted until the customer confirms them (no `url`, no ratings).
 - **Deploy target:** `node scripts/deploy/config.mjs --site casavela --from-brief --write` was refused twice in this session (the command needs approval). `site.config.json` already has `target: "cloudflare"`, which is what the brief's `cloudflare-pages` maps to, so the run would have been a no-op.
 
+### Palette revision (2026-10-30, resumed run)
+
+The owner revised the palette after the first full build (`directions.json` `choice.notes`, PROPOSAL.md Decision 11): deep navy primary, warm sand/taupe secondary, cream paper, near-black ink, terracotta only as a small accent; structure, sections and copy unchanged.
+
+- **Design system** redone with ui-ux-pro-max only (queries and conflicts in MASTER.md sections 1-2): primary `#232d47` (desaturated, slightly warm navy; the skill's navies were cold or saturated), hover `#182036`, cream `#fbf7f0` for paper and for text on navy, sand `#ebe2d3` panels, taupe `#d6c8b4` hairlines, ink `#1c1a17`, ink-soft `#57504a`, pale terracotta tint `#f1d9cb` behind the "Dato de ejemplo" tags, and a new `--color-terracotta` `#9e4527`. The skill's navy+gold and terracotta+green pairings were not used. IBM Plex Sans kept (the skill's "Financial Trust" pairing came first again). Contrast ratios in MASTER.md were computed by hand by the subagent (inline scripts needed approval); `check-landing` `contrast` confirms the standard text pairs and Lighthouse accessibility is 100.
+- **Diversity:** navy shares its hue family with estudio-arquitectura (`#17356b`, also a split hero); the display font differs, so no trio repeats (`diversity` ok), and `layout-diversity` still passes. The owner's explicit request wins over the "prefer differing in all three" guidance. MASTER.md's old "no navy" rule became "no teal, no bright or saturated blue, no gold, no olive".
+- **Build:** a retheme, not a rebuild. design-taste-frontend was not run again (CLAUDE.md: once per landing, never for small tweaks). Terracotta appears only on the numbered markers (the valuation card's three steps and the sale timeline's six); every action, link, focus ring, the "Gratis" chip and the two data bars are navy. The calculator's share bar track moved from the pale terracotta tint to the taupe `line`, so terracotta stays a small accent.
+
 ## Images
+
+Palette revision: no image changed (same two Commons photos, same crops, same credits; AI images: none, `brand.aiImages` is empty).
 
 1 image, from Wikimedia Commons; no AI images (`brand.aiImages` is empty in the brief, so not allowed).
 
@@ -104,6 +114,8 @@ Archetype and proposal deviations:
 | 1   | passed  | none              | none  | 4 pages; Lighthouse worst: a 100/100/100, b 96/100/100, c 97/100/100, index 100/100/100 (performance/accessibility/SEO); impeccable no major |
 | 2   | passed  | none              | none  | re-run after Prettier reformatted three direction c files; `directions.mjs check` ok again                                                   |
 
+Palette revision (2026-10-30T18:31Z): attempt 1 passed, 0 failures; 1 page; Lighthouse worst 99/100/100 (performance/accessibility/SEO), best-practices 100; impeccable 0 findings. Reviewer pass on `node scripts/section-shots.mjs --site casavela --include-404`: navy actions, sand panels and terracotta numerals read as intended at 375, 768 and 1440 px; no overflow, clipped type or contrast problem; photos unchanged; the 404 takes the new palette.
+
 Full build (2026-10-30):
 
 | #   | Verdict | Failures by check | Fixed | Notes                                                                                                                                                    |
@@ -122,6 +134,8 @@ Directions run: reviewer pass on `node scripts/section-shots.mjs --site casavela
 `npx impeccable@4.6.0 detect sites/casavela/src`: 0 findings (regex rules only). On the built `dist/index.html`: 39, of three kinds. `cramped-padding` (37): wrappers whose children carry their own padding, hairline rails and list rows; the screenshots show proper insets, so nothing changed. `cream-palette` (1): the warm paper ground is MASTER.md's fixed palette. `nested-cards` (1): the hero valuation card sits in a tinted frame, the proposal's "product card on a tinted panel" from stripe-com; kept. The interactive impeccable critique (two sub-assessments ending in questions to the user) was not run in this automatic run; the reviewer pass above stood in for it. Applied fix: the reveal end state (see QA attempts).
 
 ## Final check
+
+Palette revision (2026-10-30T18:34Z), all passed: `site-layers prune` (no unused layer), `npm run lint`, `npx prettier --check .`, `credits.mjs --check`, `layout-signature.mjs --write`, `check-landing.mjs --site casavela --refs https://stripe.com/,https://www.framer.com/` (all 11 rules ok), `npm run report -- --site casavela --only static --skip audit` (0 fail, 6 warn, 2 n/a; the same warnings as below), `npm run check:sites` (0 errors in all 9 sites). The "to confirm before launch" list below is unchanged.
 
 Full build (2026-10-30), all passed:
 
@@ -158,6 +172,8 @@ To confirm before the full build:
 
 ## Totals
 
+Palette revision: wall clock 2026-10-30T18:26:08Z to 2026-10-30T18:34:54Z, about 9 minutes (design-system subagent about 115k tokens, plus the orchestration). `scripts/new-landing.sh` appends its `Usage:` line below.
+
 Full build: wall clock 2026-10-30T12:33:56Z to 2026-10-30T13:11:35Z, about 38 minutes (design-system subagent about 125k tokens, build subagent about 362k tokens, plus the orchestration). If `scripts/new-landing.sh` started this run, it appends its `Usage:` line below.
 
 Directions run: wall clock 2026-10-28T21:56:39Z to 2026-10-28T22:29:04Z, about 32 minutes. Three direction subagents used about 146k, 146k and 156k tokens; the measured total and cost are in the `Usage:` line below.
@@ -165,3 +181,5 @@ Directions run: wall clock 2026-10-28T21:56:39Z to 2026-10-28T22:29:04Z, about 3
 Usage: input 334 tokens, output 61,495, cache write 256,103, cache read 34,770,351, cost $16.7523 USD, 204 turns (reported by Claude Code).
 
 Usage: input 74 tokens, output 18,528, cache write 65,891, cache read 7,149,611, cost $16.5275 USD, 61 turns (reported by Claude Code).
+
+Usage: input 70 tokens, output 20,437, cache write 147,338, cache read 4,785,592, cost $3.9257 USD, 68 turns (reported by Claude Code).
