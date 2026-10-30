@@ -1,0 +1,28 @@
+---
+// Split hero inside the hairline rails (stripe-com): the two-tone headline with the keyword, one line, the
+// WhatsApp and phone pair and the sample tag on the left; the framed free-valuation card on the right.
+import { hero } from '../../content/page';
+import ActionPair from '../ui/ActionPair.astro';
+import SampleTag from '../ui/SampleTag.astro';
+import TwoTone from '../ui/TwoTone.astro';
+import ValuationCard from '../ui/ValuationCard.astro';
+---
+
+<section id="inicio" class="px-4 sm:px-6" aria-labelledby="inicio-titulo">
+  <div class="border-line mx-auto grid max-w-6xl gap-12 border-x px-4 pt-12 pb-20 sm:px-8 md:pt-16 lg:grid-cols-[3fr_2fr] lg:items-center lg:gap-14 lg:px-12 lg:pt-20 lg:pb-56">
+    <div>
+      <h1
+        id="inicio-titulo"
+        class="font-display text-4xl leading-[1.05] font-semibold tracking-tight text-balance"
+      >
+        <TwoTone text={hero.title} />
+      </h1>
+      <p class="text-ink mt-7 max-w-xl text-lg leading-relaxed">{hero.line}</p>
+      <div class="mt-9">
+        <ActionPair />
+      </div>
+      <SampleTag note={hero.contactNote} class="mt-5" />
+    </div>
+    <ValuationCard />
+  </div>
+</section>

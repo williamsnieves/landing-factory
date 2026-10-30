@@ -4,39 +4,44 @@
  * --radius-* variable below into utilities (bg-primary, font-display, ...).
  * To retheme a site, edit only this file. `@theme static` emits every variable
  * (not only the used ones) so 3D scenes can read colors from the page.
+ * Values: design-system/casavela/MASTER.md (ui-ux-pro-max, warm product clarity).
  */
 @theme static {
   /* Colors */
-  --color-primary: #c2410c;
+  --color-primary: #a3402a;
+  --color-primary-hover: #85321f;
   --color-primary-contrast: #ffffff;
-  --color-accent: #f2b84b;
-  --color-ink: #14120f;
-  --color-ink-soft: #4a463f;
-  --color-paper: #faf7f2;
-  --color-surface: #f0ebe2;
-  --color-line: #d9d2c5;
+  --color-accent: #ebd3c4;
+  --color-ink: #231a15;
+  --color-ink-soft: #5c4f45;
+  --color-paper: #fbf8f4;
+  --color-surface: #f3ece3;
+  --color-line: #e2d7c9;
 
-  /* Fonts (system stacks keep the starter free of font downloads) */
-  --font-display: ui-serif, Georgia, 'Times New Roman', serif;
+  /* Fonts (self-hosted from @fontsource-variable/ibm-plex-sans, imported in global.css) */
+  --font-display:
+    'IBM Plex Sans Variable', ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', Roboto, sans-serif;
   --font-sans:
-    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    'IBM Plex Sans Variable', ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', Roboto, sans-serif;
 
   /* Type scale */
   --text-xs: 0.8125rem;
   --text-sm: 0.9375rem;
   --text-base: 1.0625rem;
   --text-lg: 1.25rem;
-  --text-xl: 1.625rem;
-  --text-2xl: 2.25rem;
-  --text-3xl: clamp(2.5rem, 5vw, 3.75rem);
-  --text-4xl: clamp(3rem, 9vw, 7rem);
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --text-3xl: clamp(2rem, 4vw, 3rem);
+  --text-4xl: clamp(2.375rem, 5.5vw, 4.25rem);
 
   /* Spacing base unit: p-4 = 1rem, p-24 = 6rem, ... */
   --spacing: 0.25rem;
 
   /* Radii */
   --radius-sm: 0.375rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1.5rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
   --radius-pill: 999px;
 }

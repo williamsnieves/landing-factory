@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/ibm-plex-sans';
 @import './tokens.css';
 
 @layer base {
@@ -18,6 +19,23 @@
     outline: 3px solid var(--color-primary);
     outline-offset: 3px;
   }
+}
+
+/*
+ * Crop of the Valencia street photograph in the photo band. The source frame has a hanging banner with lettering
+ * in its left ~44%; the image box is 185% of the band's width and anchored to the right, so only the right ~54% of
+ * the frame (balconies, plants, azulejos) can ever be visible, at any width or height. object-fit keeps the
+ * proportions.
+ */
+.photo-crop {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 185%;
+  max-width: none;
+  height: 100%;
+  object-fit: cover;
+  object-position: right 55%;
 }
 
 /* Motion layer -----------------------------------------------------------

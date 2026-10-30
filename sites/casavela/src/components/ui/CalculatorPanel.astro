@@ -1,0 +1,191 @@
+---
+// Mortgage calculator panel. The result is rendered here from the default values, so the panel reads correctly
+// without JavaScript; the bundled script below recalculates it as the visitor types. The brief's notice sits right
+// under the result.
+import { calculator } from '../../content/page';
+import { site } from '../../content/site';
+import {
+  computeMortgage,
+  defaults,
+  formatEuro,
+  formatShare,
+} from '../../lib/mortgage';
+
+const example = computeMortgage(defaults);
+const sharePercent = Math.round((example.share ?? 0) * 100);
+const fields = [
+  {
+    id: 'calc-price',
+    name: 'price',
+    label: calculator.fields.price,
+    value: defaults.price,
+    step: 1000,
+    min: 0,
+  },
+  {
+    id: 'calc-savings',
+    name: 'savings',
+    label: calculator.fields.savings,
+    value: defaults.savings,
+    step: 1000,
+    min: 0,
+  },
+  {
+    id: 'calc-years',
+    name: 'years',
+    label: calculator.fields.years,
+    value: defaults.years,
+    step: 1,
+    min: 1,
+  },
+  {
+    id: 'calc-rate',
+    name: 'annualRate',
+    label: calculator.fields.rate,
+    value: defaults.annualRate,
+    step: 0.05,
+    min: 0,
+    hint: calculator.fields.rateHint,
+  },
+];
+---
+
+<div class="bg-surface border-line rounded-lg border shadow-sm" data-calculator>
+  <h3 class="border-line border-b px-5 py-4 text-lg font-semibold tracking-tight sm:px-6">
+    {calculator.panelTitle}
+  </h3>
+  <form class="grid gap-4 p-5 sm:grid-cols-2 sm:p-6" data-calculator-form>
+    {fields.map((field) => (
+      <div class="flex flex-col gap-1.5">
+        <label for={field.id} class="text-ink text-sm font-medium">
+          {field.label}
+        </label>
+        <input
+          id={field.id}
+          name={field.name}
+          type="number"
+          inputmode="decimal"
+          min={field.min}
+          step={field.step}
+          value={field.value}
+          aria-describedby={field.hint ? `${field.id}-hint` : undefined}
+          class="border-ink-soft bg-paper text-ink focus-visible:border-primary w-full rounded-sm border px-3 py-2.5 text-base tabular-nums"
+        />
+        {field.hint && (
+          <p id={`${field.id}-hint`} class="text-ink-soft text-xs">
+            {field.hint}
+          </p>
+        )}
+      </div>
+    ))}
+  </form>
+  <div class="bg-paper border-line rounded-b-lg border-t p-5 sm:p-6">
+    <dl class="grid grid-cols-2 gap-4">
+      <div>
+        <dt class="text-ink-soft text-sm">{calculator.monthlyLabel}</dt>
+        <dd class="mt-1">
+          <output
+            for="calc-price calc-savings calc-years calc-rate"
+            aria-live="polite"
+            class="text-primary font-display text-2xl font-semibold tracking-tight tabular-nums"
+            data-calculator-monthly
+          >
+            {formatEuro(example.monthly)}
+          </output>
+        </dd>
+      </div>
+      <div>
+        <dt class="text-ink-soft text-sm">{calculator.loanLabel}</dt>
+        <dd class="mt-1">
+          <output
+            for="calc-price calc-savings"
+            aria-live="polite"
+            class="text-xl font-semibold tabular-nums"
+            data-calculator-loan
+          >
+            {formatEuro(example.loan)}
+          </output>
+        </dd>
+      </div>
+      <div class="col-span-2">
+        <dt class="text-ink-soft flex justify-between gap-4 text-sm">
+          <span>{calculator.shareLabel}</span>
+          <output
+            for="calc-price calc-savings"
+            class="text-ink font-semibold tabular-nums"
+            data-calculator-share
+          >
+            {formatShare(example.share)}
+          </output>
+        </dt>
+        <dd class="bg-accent rounded-pill mt-2 h-2 overflow-hidden">
+          <span
+            aria-hidden="true"
+            class="bg-primary rounded-pill block h-full"
+            style={`width: ${sharePercent}%`}
+            data-calculator-bar
+          ></span>
+        </dd>
+      </div>
+    </dl>
+    <p
+      class="text-ink border-line mt-5 border-t pt-4 text-sm leading-relaxed"
+      data-calculator-notice
+    >
+      {site.calculatorNotice}
+    </p>
+    <noscript>
+      <p class="text-ink-soft mt-2 text-xs leading-relaxed">
+        {calculator.noScript}
+      </p>
+    </noscript>
+  </div>
+</div>
+
+<script>
+  import { computeMortgage, formatEuro, formatShare } from '../../lib/mortgage';
+
+  /** Reads a number input; NaN when it is empty or invalid (the result then shows a dash). */
+  function readNumber(form: HTMLFormElement, name: string): number {
+    const input = form.elements.namedItem(name);
+    return input instanceof HTMLInputElement ? input.valueAsNumber : Number.NaN;
+  }
+
+  for (const panel of document.querySelectorAll<HTMLElement>(
+    '[data-calculator]',
+  )) {
+    const form = panel.querySelector<HTMLFormElement>('[data-calculator-form]');
+    const loanOut = panel.querySelector<HTMLOutputElement>(
+      '[data-calculator-loan]',
+    );
+    const monthlyOut = panel.querySelector<HTMLOutputElement>(
+      '[data-calculator-monthly]',
+    );
+    const shareOut = panel.querySelector<HTMLOutputElement>(
+      '[data-calculator-share]',
+    );
+    const bar = panel.querySelector<HTMLElement>('[data-calculator-bar]');
+    if (!form || !loanOut || !monthlyOut || !shareOut || !bar) continue;
+
+    const update = () => {
+      const result = computeMortgage({
+        price: readNumber(form, 'price'),
+        savings: readNumber(form, 'savings'),
+        years: readNumber(form, 'years'),
+        annualRate: readNumber(form, 'annualRate'),
+      });
+      const invalid = result.monthly === null;
+      loanOut.value = invalid ? '—' : formatEuro(result.loan);
+      monthlyOut.value = formatEuro(result.monthly);
+      shareOut.value = formatShare(result.share);
+      bar.style.width = `${Math.round((result.share ?? 0) * 100)}%`;
+    };
+
+    form.addEventListener('input', update);
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      update();
+    });
+    update();
+  }
+</script>

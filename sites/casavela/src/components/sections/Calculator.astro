@@ -1,0 +1,49 @@
+---
+// Calculator (framer-com's sticky split): four short explanation blocks scroll on the left while the calculator
+// panel stays beside them (CSS position: sticky from 1024 px, not a GSAP pin; stacked and static below). Ends
+// with the mortgage-advice service and the button pair.
+import { calculator } from '../../content/page';
+import ActionPair from '../ui/ActionPair.astro';
+import CalculatorPanel from '../ui/CalculatorPanel.astro';
+import SectionOpener from '../ui/SectionOpener.astro';
+---
+
+<section
+  id="calculadora"
+  class="px-4 sm:px-6"
+  aria-labelledby="calculadora-titulo"
+>
+  <div class="border-line mx-auto max-w-6xl border-x px-4 py-20 sm:px-8 lg:px-12 lg:py-28">
+    <SectionOpener
+      id="calculadora-titulo"
+      title={calculator.title}
+      intro={calculator.intro}
+    />
+
+    <div class="mt-14 grid gap-10 lg:grid-cols-[1fr_minmax(0,28rem)] lg:items-start lg:gap-16">
+      <ol class="border-line order-2 border-t lg:order-1">
+        {calculator.blocks.map((block) => (
+          <li class="border-line border-b py-10 lg:py-16" data-reveal>
+            <h3 class="text-xl font-semibold tracking-tight">{block.title}</h3>
+            <p class="text-ink mt-3 max-w-prose leading-relaxed">
+              {block.body}
+            </p>
+          </li>
+        ))}
+      </ol>
+      <div class="order-1 lg:sticky lg:top-8 lg:order-2">
+        <CalculatorPanel />
+      </div>
+    </div>
+
+    <div class="bg-surface border-line mt-16 flex flex-col gap-6 rounded-md border p-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between">
+      <div class="max-w-xl">
+        <h3 class="text-xl font-semibold tracking-tight">
+          {calculator.closingTitle}
+        </h3>
+        <p class="text-ink mt-2 leading-relaxed">{calculator.closingBody}</p>
+      </div>
+      <ActionPair />
+    </div>
+  </div>
+</section>

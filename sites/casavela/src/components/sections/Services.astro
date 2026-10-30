@@ -1,0 +1,74 @@
+---
+// Services: the section opener, then three framed columns (name, what it includes, the price row and a WhatsApp
+// link). The valuation shows "Gratis"; the other two say their fees are pending. The sample tag sits under the
+// columns, never inside a column.
+import { services } from '../../content/page';
+import { site } from '../../content/site';
+import SampleTag from '../ui/SampleTag.astro';
+import SectionOpener from '../ui/SectionOpener.astro';
+---
+
+<section id="servicios" class="px-4 sm:px-6" aria-labelledby="servicios-titulo">
+  <div class="border-line mx-auto max-w-6xl border-x px-4 py-20 sm:px-8 lg:px-12 lg:py-28">
+    <SectionOpener
+      id="servicios-titulo"
+      title={services.title}
+      intro={services.intro}
+    />
+    <ul class="mt-14 grid gap-4 lg:grid-cols-3">
+      {services.cards.map((card, index) => (
+        <li
+          class:list={[
+            'border-line flex flex-col rounded-md border',
+            index === 0 ? 'bg-surface' : 'bg-paper',
+          ]}
+          data-reveal
+          data-reveal-delay={String(index * 0.08)}
+          data-reveal-y="24"
+        >
+          <article class="flex h-full flex-col p-5 sm:p-6">
+            <h3 class="text-xl leading-snug font-semibold tracking-tight">
+              {card.name}
+            </h3>
+            <p class="text-ink mt-3 leading-relaxed">{card.description}</p>
+            <h4 class="text-ink-soft mt-6 text-sm font-medium">
+              {services.includesLabel}
+            </h4>
+            <ul class="mt-2 mb-6 space-y-1.5">
+              {card.includes.map((item) => (
+                <li class="flex gap-2.5">
+                  <span
+                    aria-hidden="true"
+                    class="bg-primary mt-2.5 size-1.5 shrink-0 rounded-pill"
+                  />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+            <div class="border-line mt-auto border-t pt-5">
+              <p class="text-ink-soft text-sm">{services.priceLabel}</p>
+              <p
+                class:list={[
+                  'mt-1 font-semibold',
+                  card.pricePending
+                    ? 'text-ink text-base'
+                    : 'text-primary text-2xl tracking-tight',
+                ]}
+              >
+                {card.price}
+              </p>
+              <a
+                href={site.primary.href}
+                class="text-primary mt-4 inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline"
+              >
+                {services.ask}
+                <span aria-hidden="true">→</span>
+              </a>
+            </div>
+          </article>
+        </li>
+      ))}
+    </ul>
+    <SampleTag note={services.note} class="mt-6" />
+  </div>
+</section>

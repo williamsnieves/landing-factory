@@ -1,0 +1,50 @@
+---
+// Full-bleed Valencia street photograph (the owner's request from direction c). The photo layer moves a little
+// slower than the page (data-parallax, off under reduced motion). Crop: the image box is 185% of the band's width
+// and anchored right, so only the right ~54% of the frame (balconies, plants, azulejos) can show; the lettered
+// banner on the left never does. A framed Valencia facade, set like a postcard, overlaps the band's top edge on
+// the right; the practical strip (next section) overlaps its lower edge.
+import { Image } from 'astro:assets';
+import photo from '../../assets/images/c-balcons-valldigna.jpg';
+import facade from '../../assets/images/fachada-valencia.jpg';
+import { photoBand } from '../../content/page';
+---
+
+<section id="valencia" class="relative" aria-label={photoBand.label}>
+  <div class="relative h-96 overflow-hidden sm:h-112 lg:h-136">
+    <div data-parallax="0.08" class="absolute inset-x-0 -top-[12%] h-[124%]">
+      <Image
+        src={photo}
+        alt={photoBand.alt}
+        widths={[720, 1080, 1440, 1680]}
+        sizes="185vw"
+        format="webp"
+        quality={52}
+        loading="lazy"
+        class="photo-crop"
+      />
+    </div>
+    <p class="bg-paper text-ink absolute bottom-24 left-4 rounded-sm px-2.5 py-1 text-xs sm:bottom-28 sm:left-6">
+      {photoBand.caption}
+    </p>
+  </div>
+  <div class="absolute inset-x-0 top-0 px-4 sm:px-6">
+    <div class="relative mx-auto max-w-6xl">
+      <figure class="bg-paper border-line absolute -top-16 right-2 w-36 rounded-lg border p-1.5 sm:right-6 sm:w-44 lg:-top-48 lg:right-12 lg:w-60">
+        <Image
+          src={facade}
+          alt={photoBand.facadeAlt}
+          widths={[240, 480, 720]}
+          sizes="(min-width: 1024px) 15rem, (min-width: 640px) 11rem, 9rem"
+          format="webp"
+          quality={60}
+          loading="lazy"
+          class="aspect-[4/5] w-full rounded-md object-cover object-top"
+        />
+        <figcaption class="text-ink-soft px-1 pt-1.5 pb-0.5 text-xs">
+          {photoBand.facadeCaption}
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>

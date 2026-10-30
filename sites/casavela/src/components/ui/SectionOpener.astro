@@ -1,0 +1,33 @@
+---
+// Section opener (stripe-com's module): the two-tone heading on the left and a short paragraph on the right from
+// 1024 px; stacked below. Revealed once on scroll.
+import type { TwoToneText } from '../../content/page';
+import TwoTone from './TwoTone.astro';
+
+interface Props {
+  id: string;
+  title: TwoToneText;
+  intro?: string;
+}
+
+const { id, title, intro } = Astro.props;
+---
+
+<div class="grid gap-6 lg:grid-cols-[7fr_5fr] lg:items-end lg:gap-16">
+  <h2
+    id={id}
+    class="font-display text-3xl leading-tight font-semibold tracking-tight text-balance"
+    data-reveal
+  >
+    <TwoTone text={title} />
+  </h2>
+  {intro && (
+    <p
+      class="text-ink max-w-prose text-lg leading-relaxed"
+      data-reveal
+      data-reveal-delay="0.08"
+    >
+      {intro}
+    </p>
+  )}
+</div>
