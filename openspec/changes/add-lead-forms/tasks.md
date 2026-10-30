@@ -1,6 +1,6 @@
 ## 1. Facts
 
-- [ ] 1.1 Confirm the Web3Forms facts in `design.md` (endpoint, formats, `access_key`, `botcheck`, `redirect` tier, storage, response, CORS) from its documentation once the domains are allowed; update `design.md` and `docs/forms.md`. Verify: each fact cites its documentation page.
+- [x] 1.1 Confirm the Web3Forms facts in `design.md` (endpoint, formats, `access_key`, `botcheck`, `redirect` tier, storage, response, CORS) from its documentation once the domains are allowed; update `design.md` and `docs/forms.md`. Verify: each fact cites its documentation page.
 
 ## 2. Brief
 

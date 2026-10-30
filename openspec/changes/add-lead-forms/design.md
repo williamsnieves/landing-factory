@@ -2,13 +2,25 @@
 
 Landings are static (Astro, `output: 'static'`) and deploy to Cloudflare Pages or Vercel without a server of our own. CLAUDE.md lists backend forms as out of scope. The real-estate test (casavela) showed that lead capture, such as a free valuation request, is what this niche buys. The owner chose a hosted form service, Web3Forms first, with a prefilled WhatsApp message as the fallback (2026-10-30).
 
-Web3Forms facts used here come from memory; the session cannot reach `web3forms.com` yet. Each is checked against the documentation before implementation (task 1):
-- **Endpoint:** `POST https://api.web3forms.com/submit`.
-- **Formats:** it accepts a plain HTML form POST and JSON by `fetch`, and answers `{ success, message }`.
-- **Key:** the `access_key` field holds a key that is public by design: it only sends mail to the address it was created for.
-- **Spam:** a `botcheck` honeypot.
-- **Optional fields:** `subject`, `from_name`, `replyto`, and `redirect` for submissions without JavaScript (its plan tier is to be confirmed).
-- **Storage:** submissions are forwarded by email, not stored, on the free plan.
+Web3Forms facts, from docs.web3forms.com (read 2026-10-30; web3forms.com itself answers a Cloudflare bot challenge to this session and was not bypassed):
+- **API reference.** The endpoint is `POST https://api.web3forms.com/submit`. Reserved fields:
+  - `access_key` (required);
+  - `email` (sets reply-to);
+  - `subject`;
+  - `replyto`;
+  - `redirect` (free; "only recommended when using without JavaScript"; default success page `https://api.web3forms.com/submit/success`);
+  - `botcheck` (a hidden checkbox, honeypot);
+  - `from_name`, under Customizations.
+  
+  Responses: 200, 303 redirect, 400, 429 rate limit.
+- **FAQ.** The access key is public by design: it can only send email to its owner. Web3Forms does not store submissions; it forwards them. Server logs with personal data are deleted every two months. The servers are in the United States (US-East), and the company is Web3Creative (Kerala, India). Captcha: hCaptcha is free; reCAPTCHA, Turnstile and domain restriction are paid.
+- **Troubleshooting.**
+  - The API must be called from the browser; server-side calls get 403 unless on a paid plan with an allowlisted IP.
+  - With JavaScript, send `FormData` or JSON (never url-encoded by `fetch`, which returns a 301 and a CORS error), and do not use `redirect`.
+  - CORS is open to any origin.
+  - Some free platform subdomains are blocked by default, so a `*.pages.dev` preview may not deliver. A custom domain works (or contact support), and production forms need the customer's domain.
+  - 429 after many submissions from one IP.
+- **Not confirmed:** the free plan's monthly limit (the pricing page is behind the challenge).
 
 ## Goals / Non-Goals
 
@@ -49,7 +61,7 @@ Web3Forms facts used here come from memory; the session cannot reach `web3forms.
 5. **CSP.** A site with a `web3forms` form adds `https://api.web3forms.com` to `form-action` and `connect-src` in `security.csp` of its `astro.config.mjs`, and to `public/_headers` where those directives live. The starter keeps no `form-action` opening.
    
    A test asserts that a site without a form gains nothing, and the CSP Chromium test covers a fixture with a form posting to a local fake.
-6. **Legal texts.** `legal.mjs` writes `processing.forms` as `{ provider, purposes, fields }` in place of a boolean. Older `legal.json` files with `forms: true` keep rendering the old sentence. `texts.ts` gains a provider paragraph in `en` and `es`. It names Web3Forms and its country, what is sent (the field labels), the purpose, that it is forwarded to the holder's email, and the retention ("as long as needed to answer the request"). Not legal advice; the existing review line stays.
+6. **Legal texts.** `legal.mjs` writes `processing.forms` as `{ provider, purposes, fields }` in place of a boolean. Older `legal.json` files with `forms: true` keep rendering the old sentence. `texts.ts` gains a provider paragraph in `en` and `es`. It names Web3Forms (Web3Creative, India) as the processor and its US servers (an international transfer), what is sent (the field labels), the purpose, that submissions are forwarded to the holder's email and not stored by the provider, the provider's log retention (about two months), and the holder's retention ("as long as needed to answer the request"). Not legal advice; the existing review line stays.
 7. **Report item `legal-forms`** (area `legal`, stable id). For every `<form>` in `dist/` with a personal-data field (`email`, `tel`, a `name` input, address):
    - **Fail:**
      - there is no required consent checkbox linking a privacy page;
@@ -84,5 +96,6 @@ Additive. Existing briefs, sites and `legal.json` files stay valid. To roll back
 
 ## Open Questions
 
-- Web3Forms facts (task 1) need `web3forms.com` and `docs.web3forms.com` in the session's allowed domains.
+- The free plan's monthly limit (pricing page unreachable from this session): the owner reads it when creating the first key.
+- Whether `*.pages.dev` previews deliver: checked with the owner's first real key; the docs say free subdomains may be blocked.
 - casavela does not get a form here: a form needs a privacy policy with the holder's real identity, which can never be assumed. The starter's `noindex` `/forms/` demo page is the proof; the first real customer in the niche gets the first real form.
