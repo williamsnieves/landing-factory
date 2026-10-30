@@ -66,6 +66,7 @@ Moves a layer by `±speed × its own height` while its parent crosses the viewpo
 ## Accessibility and fallbacks
 
 - Under `prefers-reduced-motion: reduce`: no Lenis, no pin, no parallax; reveal elements are shown in their final state.
+- A finished reveal leaves `transform: none` inline (not `clearProps`, which would bring back the stylesheet's `.js-motion [data-reveal]` start offset); QA `reveal-end-state` checks it.
 - Without JavaScript: the hidden initial state of `[data-reveal]` only exists under the `.js-motion` class on `<html>`, which an inline script adds when JS runs and reduced motion is not requested. Content is visible otherwise.
 
 ## Programmatic use and cleanup

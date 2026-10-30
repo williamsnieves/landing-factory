@@ -8,7 +8,11 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { chromium } from 'playwright';
-import { measureLayout, measureReducedMotion } from './qa/browser-checks.mjs';
+import {
+  measureLayout,
+  measureReducedMotion,
+  measureRevealEndState,
+} from './qa/browser-checks.mjs';
 import { loadConfig } from './qa/config.mjs';
 import { collectPrivacy, recordRequestHosts } from './qa/privacy.mjs';
 import { runImpeccable } from './qa/impeccable.mjs';
@@ -32,6 +36,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const CHECKS = [
   'layout',
   'reduced-motion',
+  'reveal-end-state',
   'scenes',
   'lighthouse',
   'impeccable',
@@ -164,6 +169,7 @@ async function main() {
       url: `${server.baseUrl}${p.path}`,
       viewports: {},
       reducedMotion: null,
+      revealEndState: null,
       scenes: null,
       privacy: null,
       lighthouse: null,
@@ -237,6 +243,29 @@ async function main() {
                   recorder,
                   viewport: vp.width,
                 });
+              if (!skip.has('reveal-end-state') && vp.width === privacyWidth) {
+                const re = await page.evaluate(measureRevealEndState, 4000);
+                report.revealEndState = {
+                  viewportWidth: vp.width,
+                  pass: re.offenders.length === 0,
+                  ...re,
+                };
+                for (const o of re.offenders) {
+                  failures.push({
+                    check: 'reveal-end-state',
+                    page: p.path,
+                    viewport: vp.width,
+                    metric: o.metric,
+                    measured: o.measured,
+                    threshold:
+                      o.metric === 'opacity'
+                        ? '>= 0.99'
+                        : 'none or translation <= 1px',
+                    selector: o.selector,
+                    message: `[data-reveal] ${o.selector} ends with ${o.metric} ${o.measured} after its reveal (expected opacity 1 at its layout position)`,
+                  });
+                }
+              }
               const m = await page.evaluate(measureLayout);
               const screenshot = `screens/${p.slug}-${vp.width}.png`;
               await page.screenshot({

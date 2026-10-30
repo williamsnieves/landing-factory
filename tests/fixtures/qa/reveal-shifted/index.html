@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fixture shifted reveal</title>
+    <meta
+      name="description"
+      content="QA fixture page: Fixture shifted reveal."
+    />
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        color: #111;
+        background: #fff;
+      }
+      .js-motion [data-reveal] {
+        opacity: 0;
+        transform: translate3d(0, 2rem, 0);
+      }
+    </style>
+    <script>
+      document.documentElement.classList.add('js-motion');
+    </script>
+  </head>
+  <body>
+    <main id="main">
+      <h1>Fixture shifted reveal</h1>
+      <p data-reveal>
+        This reveal ends 2rem low because its inline transform was cleared.
+      </p>
+    </main>
+    <script>
+      // Stands in for the motion layer's reveal tween (no GSAP in fixtures).
+      setTimeout(() => {
+        const el = document.querySelector('[data-reveal]');
+        el.style.opacity = '1';
+        el.style.transform = '';
+      }, 200);
+    </script>
+  </body>
+</html>

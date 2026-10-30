@@ -211,3 +211,74 @@ export function measureReducedMotion() {
     jsMotionClass: root.classList.contains('js-motion'),
   };
 }
+
+/**
+ * Reveal end state on a motion-enabled load, after the page was scrolled through:
+ * every visible `[data-reveal]` must have settled at its layout position, that is
+ * opaque (>= 0.99) and with no transform offset beyond 1px. A leftover stylesheet
+ * offset (for example the `.js-motion [data-reveal]` start transform coming back when
+ * a tween clears its inline transform) is caught here. Polls up to `timeoutMs` for
+ * running reveals to finish, then reports what is still off.
+ * @param {number} timeoutMs
+ * @returns {Promise<{ revealCount: number, offenders: Array<object> }>}
+ */
+export async function measureRevealEndState(timeoutMs) {
+  const root = document.documentElement;
+  const selectorOf = (el) => {
+    const parts = [];
+    for (let n = el; n && n.nodeType === 1 && n !== root; n = n.parentElement) {
+      if (
+        n.id &&
+        document.querySelectorAll(`#${CSS.escape(n.id)}`).length === 1
+      ) {
+        parts.unshift(`#${CSS.escape(n.id)}`);
+        break;
+      }
+      let nth = 1;
+      for (let s = n.previousElementSibling; s; s = s.previousElementSibling)
+        if (s.localName === n.localName) nth++;
+      parts.unshift(`${n.localName}:nth-of-type(${nth})`);
+    }
+    return parts.join(' > ');
+  };
+  const scan = () => {
+    // Elements that are not rendered never get their trigger, so they are not judged.
+    const reveals = [...document.querySelectorAll('[data-reveal]')].filter(
+      (el) => el.checkVisibility(),
+    );
+    const offenders = [];
+    for (const el of reveals) {
+      const cs = getComputedStyle(el);
+      const opacity = parseFloat(cs.opacity);
+      const text = (el.textContent || '').trim().replace(/\s+/g, ' ');
+      if (!(opacity >= 0.99)) {
+        offenders.push({
+          selector: selectorOf(el),
+          metric: 'opacity',
+          measured: Number(opacity.toFixed(3)),
+          text: text.slice(0, 60),
+        });
+        continue;
+      }
+      const m = new DOMMatrix(
+        cs.transform === 'none' ? undefined : cs.transform,
+      );
+      if (Math.abs(m.m41) > 1 || Math.abs(m.m42) > 1) {
+        offenders.push({
+          selector: selectorOf(el),
+          metric: 'transform',
+          measured: cs.transform,
+          text: text.slice(0, 60),
+        });
+      }
+    }
+    return { revealCount: reveals.length, offenders };
+  };
+  const deadline = Date.now() + timeoutMs;
+  let result = scan();
+  while (result.offenders.length && Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, 150));
+    result = scan();
+  }
+  return result;
+}
