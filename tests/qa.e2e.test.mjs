@@ -66,6 +66,33 @@ test('invisible [data-reveal] fails the reduced-motion check', () => {
   assert.match(failure.selector, /p:nth-of-type\(1\)/);
 });
 
+test('a reveal that ends shifted fails reveal-end-state, a settled one passes', () => {
+  const bad = runQa('reveal-shifted', FAST);
+  assert.equal(bad.status, 1, bad.stderr);
+  const failure = bad.report.failures.find(
+    (f) => f.check === 'reveal-end-state',
+  );
+  assert.ok(failure, 'expected a reveal-end-state failure');
+  assert.equal(failure.viewport, 1440);
+  assert.equal(failure.metric, 'transform');
+  assert.match(failure.measured, /matrix\(1, 0, 0, 1, 0, 32\)/);
+  assert.match(failure.selector, /p:nth-of-type\(1\)/);
+
+  const good = runQa('reveal-settled', FAST);
+  assert.equal(
+    good.status,
+    0,
+    good.stderr + JSON.stringify(good.report?.failures),
+  );
+  assert.equal(good.report.pages[0].revealEndState.pass, true);
+
+  const skipped = runQa('reveal-shifted', [
+    '--skip',
+    'lighthouse,impeccable,reveal-end-state',
+  ]);
+  assert.equal(skipped.status, 0, skipped.stderr);
+});
+
 test('clipped text fails unless data-qa-allow-clip is set', () => {
   const r = runQa('clipped-text', FAST);
   assert.equal(r.status, 1, r.stderr);

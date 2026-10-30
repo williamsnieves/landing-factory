@@ -84,7 +84,12 @@ export async function initMotion(
           duration: 0.9,
           ease: 'power3.out',
           delay: num(el.dataset.revealDelay, 0),
-          clearProps: 'transform',
+          // Not clearProps: removing the inline transform would hand the element back to the stylesheet's
+          // `.js-motion [data-reveal]` start offset (2rem down) and leave it shifted for good. An inline
+          // `none` overrides that rule and still leaves no transform (no containing block) behind.
+          onComplete: () => {
+            el.style.transform = 'none';
+          },
           scrollTrigger: { trigger: el, start: 'top 88%', once: true },
         },
       );
