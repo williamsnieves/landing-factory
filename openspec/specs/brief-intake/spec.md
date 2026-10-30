@@ -93,3 +93,10 @@ The brief SHALL hold an optional list of the page languages as lowercase languag
 #### Scenario: Older brief
 - **WHEN** a brief written before this field existed is validated
 - **THEN** it is valid and `brief missing` lists `languages` among the recommended fields until it is answered
+
+### Requirement: SEO fields in the brief
+The brief SHALL accept an optional `seo` object with `primaryKeyword`, `keywords`, `serviceArea` and `schemaType` (a closed list of schema.org types), reject unknown keys and types, and `brief missing` SHALL list `seo.primaryKeyword` and, for local businesses, `seo.serviceArea` as recommended. Briefs without `seo` SHALL stay valid.
+
+#### Scenario: Unknown schema type
+- **WHEN** a brief sets `seo.schemaType` to `SpaceAgency`
+- **THEN** validation fails naming the field and the allowed types

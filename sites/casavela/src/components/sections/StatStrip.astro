@@ -1,0 +1,29 @@
+---
+// Strip of figures between hairlines (stripe-com/stat-strip, data-and-proof's source line): brief facts only,
+// each with where it comes from. Static figures, no count-up. One list item per figure, read in order:
+// figure, what it counts, source.
+import { stats, statsLabel } from '../../content/page';
+---
+
+<section
+  id="cifras"
+  class="border-line mt-20 border-y px-4 sm:px-6 lg:mt-28"
+  aria-label={statsLabel}
+>
+  <ul class="border-line mx-auto grid max-w-6xl border-x md:grid-cols-3">
+    {stats.map((stat, index) => (
+      <li
+        class="border-line flex flex-col gap-2 border-b px-4 py-8 last:border-b-0 sm:px-8 md:border-r md:border-b-0 md:py-10 md:last:border-r-0 lg:px-12"
+        data-reveal
+        data-reveal-delay={String(index * 0.08)}
+        data-reveal-y="16"
+      >
+        <p class="font-display text-3xl font-semibold tracking-tight tabular-nums">
+          {stat.figure}
+        </p>
+        <p class="text-ink text-base leading-snug">{stat.label}</p>
+        <p class="text-ink-soft text-xs">{stat.source}</p>
+      </li>
+    ))}
+  </ul>
+</section>

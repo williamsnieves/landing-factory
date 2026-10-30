@@ -1,0 +1,91 @@
+---
+// Contact and area, in three columns from 1024 px: the closing heading with the WhatsApp action, the phone and the
+// email; the hours card (the split-day bar); the address with a plain map link and the four municipalities.
+// Sample tags sit beside the values, in their own elements.
+import { contact, practical } from '../../content/page';
+import { site } from '../../content/site';
+import HoursCard from '../ui/HoursCard.astro';
+import SampleTag from '../ui/SampleTag.astro';
+import TwoTone from '../ui/TwoTone.astro';
+---
+
+<section
+  id="contacto"
+  class="border-line border-t px-4 sm:px-6"
+  aria-labelledby="contacto-titulo"
+>
+  <div class="border-line mx-auto grid max-w-6xl gap-12 border-x px-4 py-20 sm:px-8 md:grid-cols-2 lg:grid-cols-[5fr_4fr_3fr] lg:gap-10 lg:px-12 lg:py-28">
+    <div class="md:col-span-2 lg:col-span-1">
+      <h2
+        id="contacto-titulo"
+        class="font-display text-3xl leading-tight font-semibold tracking-tight text-balance"
+        data-reveal
+      >
+        <TwoTone text={contact.title} />
+      </h2>
+      <a
+        href={site.primary.href}
+        class="bg-primary text-primary-contrast hover:bg-primary-hover rounded-pill mt-8 inline-flex min-h-12 items-center gap-2 px-6 py-3 text-base font-medium transition-colors"
+      >
+        {site.primary.label}
+        <span aria-hidden="true">→</span>
+      </a>
+      <p class="mt-5 text-lg">
+        {contact.callPrefix}{' '}
+        <a
+          href={site.contact.phoneHref}
+          class="font-semibold whitespace-nowrap tabular-nums underline underline-offset-4 hover:no-underline"
+        >
+          {site.contact.phone}
+        </a>
+      </p>
+      <p class="mt-1 text-base">
+        {contact.emailPrefix}{' '}
+        <a
+          href={`mailto:${site.contact.email}`}
+          class="underline underline-offset-4 hover:no-underline"
+        >
+          {site.contact.email}
+        </a>
+      </p>
+      <SampleTag note={contact.note} class="mt-4" />
+    </div>
+
+    <div data-reveal data-reveal-y="24">
+      <HoursCard />
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <div
+        class="border-line flex flex-col gap-6 rounded-lg border p-5 sm:p-6"
+        data-reveal
+        data-reveal-delay="0.08"
+        data-reveal-y="24"
+      >
+        <div>
+          <h3 class="text-ink-soft text-sm font-medium">
+            {contact.addressTitle}
+          </h3>
+          <p class="mt-2 text-lg leading-snug font-semibold">
+            {site.contact.address}
+          </p>
+          <a
+            href={site.contact.mapHref}
+            class="text-primary mt-3 inline-block text-sm font-medium underline underline-offset-4 hover:no-underline"
+          >
+            {practical.where.mapLabel}
+          </a>
+        </div>
+        <div class="border-line border-t pt-5">
+          <h3 class="text-ink-soft text-sm font-medium">{contact.areaTitle}</h3>
+          <ul class="mt-3 flex flex-wrap gap-2">
+            {site.serviceArea.map((place) => (
+              <li class="bg-surface rounded-pill px-3 py-1 text-sm">{place}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      <SampleTag note={contact.sampleNote} />
+    </div>
+  </div>
+</section>

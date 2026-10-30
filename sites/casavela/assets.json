@@ -1,0 +1,26 @@
+{
+  "images": [
+    {
+      "file": "c-balcons-valldigna.jpg",
+      "title": "File:Balcons. Corpus de València. 01.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Balcons._Corpus_de_Val%C3%A8ncia._01.jpg",
+      "author": "Ponscor",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": true,
+      "retrievedAt": "2026-10-28T22:17:09.428Z",
+      "note": "Full-bleed photo band after the hero (section 2), with a subtle parallax. Cropped in CSS to the right ~54% of the frame (balconies, plants, azulejos); the hanging banner with lettering on the left is never shown. Captioned as a street in central Valencia, never as the agency or a property."
+    },
+    {
+      "file": "fachada-valencia.jpg",
+      "title": "File:Valencia - Calle Clero nº 18.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Valencia_-_Calle_Clero_n%C2%BA_18.jpg",
+      "author": "Zarateman",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "credit": false,
+      "retrievedAt": "2026-10-30T12:42:08.589Z",
+      "note": "Contact section (section 8), framed. Cropped in CSS to the upper floors (object-position top) so the small house-number plate at the bottom never shows. Captioned as a Valencia facade, never as the agency or a property."
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+---
+// How we sell: the six steps of the brief's own sale service on a vertical hairline timeline (left), and a short
+// note with the primary action (right, level with the last steps from 1024 px). Answers the distrust objection with
+// a visible process, without promising any result.
+import { process } from '../../content/page';
+import { site } from '../../content/site';
+import TwoTone from '../ui/TwoTone.astro';
+---
+
+<section
+  id="vender"
+  class="bg-surface border-line border-y px-4 sm:px-6"
+  aria-labelledby="vender-titulo"
+>
+  <div class="border-line mx-auto grid max-w-6xl gap-14 border-x px-4 py-20 sm:px-8 lg:grid-cols-[7fr_5fr] lg:gap-16 lg:px-12 lg:py-28">
+    <div>
+      <h2
+        id="vender-titulo"
+        class="font-display text-3xl leading-tight font-semibold tracking-tight text-balance"
+        data-reveal
+      >
+        <TwoTone text={process.title} />
+      </h2>
+      <ol class="mt-12">
+        {process.steps.map((step, index) => (
+          <li
+            class="relative grid grid-cols-[2.25rem_1fr] gap-x-5 pb-9 last:pb-0"
+            data-reveal
+            data-reveal-delay={String(index * 0.06)}
+            data-reveal-y="16"
+          >
+            {index < process.steps.length - 1 && (
+              <span
+                aria-hidden="true"
+                class="bg-line absolute top-9 bottom-0 left-4.5 w-px"
+              />
+            )}
+            <span
+              aria-hidden="true"
+              class="bg-paper border-line text-terracotta relative flex size-9 items-center justify-center rounded-pill border text-sm font-semibold tabular-nums"
+            >
+              {index + 1}
+            </span>
+            <div class="pt-1">
+              <h3 class="text-xl font-semibold tracking-tight">{step.title}</h3>
+              <p class="text-ink mt-2 max-w-prose leading-relaxed">
+                {step.body}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+    <aside class="lg:self-end" aria-labelledby="vender-nota">
+      <div
+        class="bg-paper border-line rounded-md border p-6 sm:p-8"
+        data-reveal
+      >
+        <h3 id="vender-nota" class="text-2xl font-semibold tracking-tight">
+          {process.asideTitle}
+        </h3>
+        <p class="text-ink mt-3 text-lg leading-relaxed">{process.asideBody}</p>
+        <a
+          href={site.primary.href}
+          class="bg-primary text-primary-contrast hover:bg-primary-hover mt-7 inline-flex min-h-12 items-center gap-2 rounded-pill px-6 py-3 text-base font-medium transition-colors"
+        >
+          {site.primary.label}
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
+    </aside>
+  </div>
+</section>

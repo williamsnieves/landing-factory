@@ -43,3 +43,10 @@ The project rules SHALL assign each design skill a single role: design tokens (u
 #### Scenario: Agent picks a tool
 - **WHEN** an agent needs to define a niche's palette and fonts
 - **THEN** the rules tell it to use ui-ux-pro-max and not the other two skills for that task
+
+### Requirement: Several skills from one repository
+`scripts/setup-agent.sh` SHALL install more than one vendored skill from the same repository and commit, each from its own subpath into its own folder.
+
+#### Scenario: Two skills, one commit
+- **WHEN** the lock lists `seo-audit` and `schema` with the same repository and commit
+- **THEN** setup installs both folders and `setup:verify` reports both present

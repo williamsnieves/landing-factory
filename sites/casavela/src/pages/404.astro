@@ -1,0 +1,51 @@
+---
+// Not-found page in the landing's design (noindex): the same header and footer, a two-tone heading inside the
+// rails, and links home and to the WhatsApp valuation. The build emits dist/404.html, which static hosts serve
+// with status 404.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Footer from '../components/sections/Footer.astro';
+import Header from '../components/sections/Header.astro';
+import TwoTone from '../components/ui/TwoTone.astro';
+import { notFound } from '../content/page';
+import { site } from '../content/site';
+---
+
+<BaseLayout
+  title={notFound.title}
+  description={notFound.description}
+  lang="es"
+  skipLabel="Saltar al contenido"
+  noindex
+>
+  <Header slot="header" />
+  <section class="px-4 sm:px-6" aria-labelledby="no-encontrada">
+    <div class="border-line mx-auto max-w-6xl border-x px-4 py-24 sm:px-8 md:py-36 lg:px-12">
+      <p class="text-primary text-2xl font-semibold tabular-nums">404</p>
+      <h1
+        id="no-encontrada"
+        class="font-display mt-4 max-w-3xl text-3xl leading-tight font-semibold tracking-tight text-balance"
+      >
+        <TwoTone text={notFound.heading} />
+      </h1>
+      <p class="text-ink mt-6 max-w-xl text-lg leading-relaxed">
+        {notFound.body}
+      </p>
+      <div class="mt-9 flex flex-wrap items-center gap-3">
+        <a
+          href="/"
+          class="border-ink text-ink hover:border-primary hover:text-primary inline-flex min-h-12 items-center rounded-pill border px-6 py-3 text-base font-medium transition-colors"
+        >
+          {notFound.home}
+        </a>
+        <a
+          href={site.primary.href}
+          class="bg-primary text-primary-contrast hover:bg-primary-hover inline-flex min-h-12 items-center gap-2 rounded-pill px-6 py-3 text-base font-medium transition-colors"
+        >
+          {site.primary.label}
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+  </section>
+  <Footer slot="footer" />
+</BaseLayout>

@@ -1,0 +1,25 @@
+---
+// Small "Dato de ejemplo" tag with its note. It always sits in its own element beside a sample value, never inside
+// the element that holds the value, so a customer fact is never read as labeled sample data.
+import { site } from '../../content/site';
+
+interface Props {
+  /** Optional short note after the tag ("Teléfono y WhatsApp pendientes de confirmar."). */
+  note?: string;
+  class?: string;
+}
+
+const { note, class: className } = Astro.props;
+---
+
+<p
+  class:list={[
+    'text-ink-soft flex flex-wrap items-center gap-2 text-xs',
+    className,
+  ]}
+>
+  <span class="bg-accent text-ink rounded-sm px-2 py-0.5 font-medium whitespace-nowrap">
+    {site.sampleTag}
+  </span>
+  {note && <span>{note}</span>}
+</p>

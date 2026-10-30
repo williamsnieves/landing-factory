@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-28 (channels decision merged, PR #35; add-seo implemented, PR open; four reference sheets, PR open; next: the real-estate end-to-end test).
+Read this first in a new or compacted session. Last updated: 2026-10-30 (the real-estate end-to-end test `casavela` is closed, PR #38 ready to merge; fix-motion-reveal, PR #39, and fix-reveal-check-timing, PR #40, merged and archived on `change/casavela-test`; personal-brand synced, williamsnieves/personal-brand#2 merged).
 
 ## Working agreements
 
@@ -41,28 +41,50 @@ Read this first in a new or compacted session. Last updated: 2026-10-28 (channel
 | add-landing-preview (2 or 3 visual directions before the full build, recorded choice, `preview_landing` and `choose_direction`) | Merged (PR #33) and archived. First real directions run not done yet (owner: later) |
 | add-landing-revise (revision rounds, sync to the managed repository, transfer checklist and record, `revise_landing`) | Merged (PR #34) and archived. First real revision round not run yet |
 | Channels decision (product plan step 12) | Merged (PR #35); docs only |
-| Reference sheets linear-app, stripe-com, vercel-com, framer-com (owner references) | On `change/reference-sheets`, PR open (raycast.com skipped: recon screenshot timeout) |
-| add-seo (vendored `seo-audit` and `schema` skills, brief `seo` fields, Open Graph, JSON-LD, sitemap and robots.txt in new sites, `seo` report area) | Implemented on `change/add-seo`, PR open |
+| Reference sheets linear-app, stripe-com, vercel-com, framer-com (owner references) | Merged (PR #36). raycast.com skipped (recon screenshot timeout; retry later) |
+| add-seo (vendored `seo-audit` and `schema` skills, brief `seo` fields, Open Graph, JSON-LD, sitemap and robots.txt in new sites, `seo` report area) | Merged (PR #37) and archived |
+| End-to-end test of track 1: `sites/casavela` (fictional real-estate agency and mortgage adviser, Valencia, Spanish) | Closed 2026-10-30 (PR #38, the add-seo, fix-motion-reveal and fix-reveal-check-timing archives ride on it). Preview https://change-casavela-test.casavela-4bm.pages.dev/ ; cost and findings below and in `docs/customer-runs.md` |
+| fix-motion-reveal (revealed blocks ended 32 px low in every landing; QA check `reveal-end-state`) | Merged (PR #39), archived on `change/casavela-test` |
+| fix-reveal-check-timing (the check waits for the motion layer: network idle, re-scroll) | Merged (PR #40), archived on `change/casavela-test` |
+| personal-brand sync (both fixes and the SEO report area) | Merged (williamsnieves/personal-brand#2); production on https://williansnieves.com |
 
-## Resume here (2026-10-26)
+## Resume here (2026-10-30)
 
-`main` has everything up to PR #35 (channels decision). Open: `change/add-seo` (PR) and `change/reference-sheets` (PR). Next, in this order (owner, 2026-10-28):
+`main` has everything up to PR #40. Branch `change/casavela-test` (PR #38, CI green) holds the archives of add-seo, fix-motion-reveal and fix-reveal-check-timing, `sites/casavela`, `design-system/casavela`, the test row in `docs/customer-runs.md` and this status. **The owner merges PR #38 next**; then start the next change from `main`.
 
-1. Merge both, archive add-seo.
-2. The first real end-to-end run of track 1 (owner builds, then offers): a fictional real-estate agency and mortgage adviser in Spain, in Spanish, with a client-side mortgage calculator and calls to action to WhatsApp, phone or a calendar (no form: lead forms are a later change, `add-lead-forms`, needed before selling to this niche). Directions, choice, build, one revision round, with SEO and the new reference sheets; costs and times go to `docs/customer-runs.md`.
+**casavela test: what was done (2026-10-28 to 2026-10-30).**
+- Brief: fictional "Casavela Inmobiliaria", Valencia; every contact value is an example listed in `assumed` and tagged "Dato de ejemplo" on the page; WhatsApp as the primary call to action, no form; no legal market; SEO keyword "valoración de vivienda gratis en Valencia", `schemaType: RealEstateAgent`; references `stripe-com` and `framer-com`.
+- Directions: 3 (a Claridad custom, b brutalist-raw+data-and-proof, c warm-local-service+data-and-proof), 35 min, $16.75; all passed QA and `directions.mjs check`.
+- Choice (owner): a as the base (split hero, valuation card, sticky mortgage calculator) plus c's Valencia photo and local strip; then a palette change after the first build.
+- Build: 40 min, $16.53, Lighthouse 100/100/100, check-landing and the static report passed.
+- Palette: the owner's Pinterest board (real-estate palettes) read in this session (the owner added `es.pinterest.com`, `pinterest.com`, `*.pinterest.com`, `i.pinimg.com`, `*.pinimg.com`; thumbnails were only viewed in the scratchpad and deleted). Recurring family: deep navy, sand, cream, near-black. ui-ux-pro-max gave primary `#232d47`, surface `#ebe2d3`, paper `#fbf7f0`, ink `#1c1a17`, terracotta accent. Applied by resuming the build from the design system: 10 min, $3.93. Owner: approved.
+- Total: $37.21, about 85 minutes of machine time.
+
+**casavela test: findings.**
+1. A palette change has no command. The revise skill classifies a different palette family as `rebuild`; the workaround was to add the palette to `directions.json` `choice.notes` (by hand, since `directions.mjs choose` refuses once the direction pages are gone), reset the design-system to final-check rows of `RUN.md` to `pending` and run `new-landing.sh --resume --auto`. It worked and cost a quarter of a build. Candidate change `add-landing-restyle`: `new-landing.sh <slug> --restyle --notes "..."` (or a `restyle` kind in revisions) that records the request, re-runs the design system and recolors without regenerating sections, and records the round in `revisions.json`.
+2. Every landing's reveals ended 32 px low (`clearProps: 'transform'` handed the element back to the stylesheet's start offset). Fixed in the starter and every site (PR #39) with a new QA check; the check then gave a false failure on a slow runner (motion initialized after QA's scroll) and was fixed (PR #40). Found by the build's screenshot review, not by QA: keep the reviewer pass.
+3. A new Pages project's TLS certificate is not ready when the live report runs (casavela's first deploy); the owner re-ran the job. Still open as a factory follow-up (below).
+4. Pages project names get a suffix (`casavela-4bm`); read the URL from the sticky comment, never guess it.
+5. CI Lighthouse variance again (PR #39: clinica-dental 89, samurai 86 on mobile; both passed on re-run).
+6. The first real revision round (`npm run revise`) is still not run: the only change the owner asked for was rebuild-class.
+
+**Next, in this order (owner, 2026-10-28, updated 2026-10-30):**
+
+1. `add-lead-forms`: needed before selling to the real-estate niche (valuation request; GDPR consent, no backend in the factory).
+2. `add-landing-restyle` (finding 1), small.
 3. A `product-led-saas` archetype from the four reference sheets (lends `ui-frame-hero`, `two-tone-heading`, `logo-strip-under-hero`; signals technical, premium, conversion-first), a small change of its own.
 4. Prospect mode (`add-prospect-landings`): public facts with sources, no prospect brand assets, `noindex` until sold, a sales kit.
 5. tupathdigital to production in a private repository, last (owner).
 
 **Two tracks and the repository (owner, 2026-10-28, `docs/channels.md`):** track 1, the owner builds landings and then offers them; track 2 later, a self-serve web app driven by the Agent SDK with the same harness; Telegram serves both. The factory repository stays public (free CI) until the flow is polished and tupathdigital is in production, then goes private.
 
-**The session's network:** the owner added linear.app, stripe.com, vercel.com, framer.com, raycast.com and their CDNs to the environment's allowed domains (2026-10-28).
+**The session's network:** the owner added linear.app, stripe.com, vercel.com, framer.com, raycast.com and their CDNs (2026-10-28) and Pinterest (`es.pinterest.com`, `pinterest.com`, `*.pinterest.com`, `i.pinimg.com`, `*.pinimg.com`, 2026-10-30) to the environment's allowed domains.
 
 **Channels (owner decision, 2026-10-28, `docs/channels.md`):** one engine and thin clients; the web app is the source of truth (directions, choice and comments, approval, structured data, rounds, later billing); chat is the way in and for notifications (interview, "preview ready", small changes), Telegram before WhatsApp; publishing, sync and transfer stay with the owner. Where the engine runs (VPS, GitHub Actions or cloud sessions) is open and is decided from the measured customer runs.
 
 **Delivery model (owner decision, 2026-10-27): managed, with transfer.** The owner shows a preview (`--directions`, optional), builds in the factory, creates a private or public repository in his own account and exports to it (`/landing-handoff`), hosted on his own Vercel or Cloudflare account. Customer changes are revision rounds in the factory (`npm run revise`), carried into the repository with `sync-export.mjs` as a pull request. If the customer wants the project, the repository and responsibility are transferred (`handoff.mjs transfer-plan`, then `transfer.mjs record`); the factory then leaves it alone.
 
-**Pending real runs (owner: later):** the first `--directions` run (cost per direction, estimate $1 to $1.50) and the first real revision round. A sync of `personal-brand` (2026-10-27, `--no-brief`) changed nothing, as expected right after its refresh.
+**Pending real runs:** the first real revision round (`npm run revise`). The first `--directions` run is done (casavela: $16.75 for 3 directions, about $5.60 each, well above the $1 to $1.50 estimate). A sync of `personal-brand` (2026-10-27, `--no-brief`) changed nothing, as expected right after its refresh.
 
 **add-landing-handoff in short** (see its `proposal.md`, `design.md`, `tasks.md`):
 - `scripts/handoff.mjs check --site <slug> [--visibility public|private]`: read-only preflight (not exported, no unused layer, valid `site.config.json`, `site` set in `astro.config.mjs`, brief `deploy.domain` and `deploy.target` agree; warns when a public repository would carry `brief.json`).
@@ -150,7 +172,7 @@ Without `--auto` it stops after `sites/<slug>/PROPOSAL.md` (review it with the o
 
 ## Environment facts
 
-- Cloudflare Pages projects: starter `landing-factory-71t`, `panaderia-a3o`, `clinica-dental-9pd`, `samurai-1v4`, `tupathdigital`, `personal-brand-8i7` (and the archetype pilot sites). A new project's TLS certificate takes about two minutes after its first deploy. CI creates a new site's project on its first deploy. Preview aliases: `https://<branch-alias>.<project>.pages.dev`.
+- Cloudflare Pages projects: starter `landing-factory-71t`, `panaderia-a3o`, `clinica-dental-9pd`, `samurai-1v4`, `tupathdigital`, `personal-brand-8i7`, `casavela-4bm` (and the archetype pilot sites). A new project's TLS certificate takes about two minutes after its first deploy. CI creates a new site's project on its first deploy. Preview aliases: `https://<branch-alias>.<project>.pages.dev`.
 - GitHub secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are repository secrets.
 - Cloud session network: `williansnieves.com`, `www.williansnieves.com` and `*.vercel.app` are blocked by the proxy (403 on CONNECT) unless the owner adds them. The Claude GitHub App answers 403 to `create_repository` and to `workflow_dispatch`/re-runs; `add_repo` with push access works for repositories in the app's installation (the owner's covers all repositories). Allowed domains include the bakery and pilot reference sites and CDNs, `*.pages.dev`, Met and Commons hosts, `api.openai.com`, and (added 2026-10-25 for the personal-brand references) `www.product.inc`, `product.inc`, `sankar.work`, `www.sankar.work`, `www.sebg.ch`, `sebg.ch`; a newly added domain worked without a new session. `api.vercel.com` is not allowed. New reference sites need their domains added by the user.
 - `OPENAI_API_KEY` is set in the environment and works in this session (only the `claude -p` allow list blocked it during a build). Sessions lack `rsync` and `ssh` by default (`apt-get install -y rsync openssh-client`). The `claude` CLI is at `/opt/node22/bin/claude`.

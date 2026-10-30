@@ -1,0 +1,13 @@
+---
+// Two-tone heading text: the lead sentence in the full ink, the continuation in the soft ink at the same size
+// (stripe-com's hierarchy without a size change). The space between the sentences is part of this markup.
+import type { TwoToneText } from '../../content/page';
+
+interface Props {
+  text: TwoToneText;
+}
+
+const { text } = Astro.props;
+---
+
+{text.lead} <span class="text-ink-soft">{text.rest}</span>

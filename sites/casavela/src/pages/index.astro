@@ -1,0 +1,40 @@
+---
+// Home page: composes the layout and the sections (PROPOSAL.md page map, sections 0-9).
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Motion from '../components/motion/Motion.astro';
+import Calculator from '../components/sections/Calculator.astro';
+import Contact from '../components/sections/Contact.astro';
+import Faq from '../components/sections/Faq.astro';
+import Footer from '../components/sections/Footer.astro';
+import Header from '../components/sections/Header.astro';
+import Hero from '../components/sections/Hero.astro';
+import PhotoBand from '../components/sections/PhotoBand.astro';
+import Practical from '../components/sections/Practical.astro';
+import Process from '../components/sections/Process.astro';
+import Services from '../components/sections/Services.astro';
+import StatStrip from '../components/sections/StatStrip.astro';
+import { meta } from '../content/page';
+import { jsonLd, ogImage } from '../data/seo';
+---
+
+<BaseLayout
+  title={meta.title}
+  description={meta.description}
+  lang="es"
+  skipLabel="Saltar al contenido"
+  ogImage={ogImage}
+  jsonLd={jsonLd}
+>
+  <Motion slot="head" />
+  <Header slot="header" />
+  <Hero />
+  <PhotoBand />
+  <Practical />
+  <StatStrip />
+  <Services />
+  <Process />
+  <Calculator />
+  <Faq />
+  <Contact />
+  <Footer slot="footer" />
+</BaseLayout>

@@ -1,0 +1,102 @@
+{
+  "site": "casavela",
+  "version": 1,
+  "page": "/",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "features": {
+    "sectionCount": 9,
+    "cols1Share": 0.22,
+    "cols2Share": 0.33,
+    "cols3Share": 0.44,
+    "splitRatio": 0.57,
+    "fullBleedShare": 0.11,
+    "imageRadius": 5,
+    "buttonRadius": 22.7,
+    "buttonShape": "pill",
+    "headingScale": 4,
+    "headingAlign": "left",
+    "headingCase": 0,
+    "eyebrowShare": 0,
+    "wordsPerScreen": 119,
+    "footerType": "columns",
+    "mediaPerScreen": 0.2,
+    "rotatedShare": 0,
+    "overlapShare": 1,
+    "stickyCount": 1
+  },
+  "sections": [
+    {
+      "id": "inicio",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "valencia",
+      "cols": 1,
+      "fullBleed": true,
+      "eyebrow": false
+    },
+    {
+      "id": "practico",
+      "cols": 3,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "cifras",
+      "cols": 3,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "servicios",
+      "cols": 3,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "vender",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "calculadora",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "preguntas",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "contacto",
+      "cols": 3,
+      "fullBleed": false,
+      "eyebrow": false
+    }
+  ],
+  "mobile": {
+    "screens": 16.72,
+    "wordsPerScreen": 62,
+    "sectionCount": 9
+  },
+  "hashes": [
+    "49333333133336c9",
+    "f152da3abad24bb0",
+    "5b5b2433332b333b",
+    "3b7b643138383838",
+    "293a3e3333cc3133",
+    "3327336333635978",
+    "733323272d926f27",
+    "272fcd906d2f2f37",
+    "273332cc356b6c26"
+  ]
+}

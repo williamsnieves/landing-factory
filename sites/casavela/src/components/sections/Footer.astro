@@ -1,0 +1,89 @@
+---
+// Footer inside the rails (warm-local-service, data-and-proof): name and line, contact, area, links on this page
+// and photo credits from src/data/credits.json (written by scripts/credits.mjs); then the sample-data notice and
+// the calculator notice.
+import credits from '../../data/credits.json';
+import { footer, header } from '../../content/page';
+import { site } from '../../content/site';
+---
+
+<footer class="border-line border-t px-4 sm:px-6">
+  <div class="border-line mx-auto max-w-6xl border-x px-4 pt-16 pb-10 text-sm sm:px-8 lg:px-12">
+    <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-[5fr_4fr_3fr_3fr]">
+      <div>
+        <p class="font-display text-xl font-semibold tracking-tight">
+          {site.name}
+        </p>
+        <p class="text-ink mt-3 max-w-xs leading-relaxed">{footer.line}</p>
+        <a
+          href={site.primary.href}
+          class="bg-primary text-primary-contrast hover:bg-primary-hover mt-6 inline-flex min-h-11 items-center rounded-pill px-5 text-sm font-medium transition-colors"
+        >
+          {header.cta}
+        </a>
+      </div>
+      <div>
+        <h2 class="text-ink-soft text-sm font-medium">{footer.contactTitle}</h2>
+        <ul class="mt-3 space-y-1.5">
+          <li>
+            <a
+              class="hover:text-primary tabular-nums"
+              href={site.contact.phoneHref}
+            >
+              {site.contact.phone}
+            </a>
+          </li>
+          <li>
+            <a class="hover:text-primary" href={`mailto:${site.contact.email}`}>
+              {site.contact.email}
+            </a>
+          </li>
+          <li>{site.contact.address}</li>
+          <li>{site.contact.hours}</li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="text-ink-soft text-sm font-medium">{footer.areaTitle}</h2>
+        <ul class="mt-3 space-y-1.5">
+          {site.serviceArea.map((place) => (
+            <li>{place}</li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <h2 class="text-ink-soft text-sm font-medium">{footer.linksTitle}</h2>
+        <ul class="mt-3 space-y-1.5">
+          {header.nav.map((link) => (
+            <li>
+              <a class="hover:text-primary" href={link.href}>
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <div class="border-line mt-14 grid gap-6 border-t pt-6 text-xs leading-relaxed lg:grid-cols-2">
+      <div class="text-ink space-y-2">
+        <p>{site.sampleNotice}</p>
+        <p>{site.calculatorNotice}</p>
+      </div>
+      <div class="text-ink-soft space-y-1">
+        <p class="text-ink font-medium">{footer.creditsTitle}</p>
+        {credits.map((credit) => (
+          <p>
+            {footer.creditPrefix}{' '}
+            <a
+              class="hover:text-primary underline underline-offset-2"
+              href={credit.url}
+            >
+              {credit.author}, {credit.license}
+            </a>
+          </p>
+        ))}
+        <p>{footer.facadeCredit}</p>
+      </div>
+    </div>
+  </div>
+</footer>
