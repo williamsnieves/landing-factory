@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-31 (add-prospect-landings merged, PR #44, and archived on `change/tupathdigital-handoff`, which prepares tupathdigital for production; add-product-led-saas-archetype merged, PR #43).
+Read this first in a new or compacted session. Last updated: 2026-10-31 (tupathdigital handed off: private repository https://github.com/williamsnieves/tupathdigital, live on https://tupathdigital.com through Cloudflare Pages; production prep merged in PR #45; this branch records the export and the brand favicon).
 
 ## Working agreements
 
@@ -55,7 +55,14 @@ Read this first in a new or compacted session. Last updated: 2026-10-31 (add-pro
 
 ## Resume here (2026-10-31)
 
-`main` has everything up to PR #44 (add-prospect-landings). Branch `change/tupathdigital-handoff` holds the add-prospect-landings archive and prepares `sites/tupathdigital/` for production on the owner's domain (owner decisions 2026-10-31):
+**tupathdigital handoff (2026-10-31), done.** `main` has everything up to PR #45 (tupathdigital production prep, details below). The landing now lives in the owner's **private** repository https://github.com/williamsnieves/tupathdigital (exported with `brief.json`), deploys to the Cloudflare Pages project `tupathdigital` from its own CI (the owner added a new `CLOUDFLARE_API_TOKEN` scoped to Pages and `CLOUDFLARE_ACCOUNT_ID`) and is live on https://tupathdigital.com:
+- Vercel was ruled out: its fair-use guidelines restrict Hobby to non-commercial personal use and count advertising the sale of a product as commercial (Pro needed). Hostinger was weighed (shared target, no Cloudflare IPs, paid); the owner stays on Cloudflare Pages for now. Known risk: in Spain, LaLiga's court-ordered blocking of Cloudflare IPs makes `*.pages.dev` and Cloudflare-proxied sites unreachable on some ISPs during football matches (the owner saw it on the preview).
+- Domain: Namecheap name servers moved to Cloudflare (zone `tupathdigital.com`, Free plan); the Namecheap parking records were deleted, mail records kept; Pages custom domains `tupathdigital.com` and `www.tupathdigital.com`; a Single Redirect rule sends `https://www.*` to `https://${1}` (301, query string preserved). The owner confirmed the redirect.
+- The first push missed `scripts/qa/` (a copy that excluded every `qa` folder); fixed in the second commit there, CI run 3 green with the production deploy. Lesson: copy an export with `sync-export.mjs`-style exact mirroring or exclude only the top-level `/qa/`.
+- After the handoff the owner asked for a brand favicon: the circle mark of `logo.webp` (`public/favicon-48.png`, `public/apple-touch-icon.png`), made in the factory, synced with `sync-export.mjs` into the private repository (its PR #1). This branch also records `sites/tupathdigital/EXPORTED.json`, so the factory CI no longer builds the site; changes now go factory first, then `sync-export.mjs` and a pull request in that repository.
+- Open: the owner enables Web Analytics in the Pages project (if not done yet); legal holder data (tax id, address; an ES market and LSSI legal notice if selling from Spain); new coupons and products from the owner (a revision round, then a sync); the domain live report runs in that repository's CI on each production deploy (this session's proxy cannot reach the domain).
+
+**Production prep (PR #45, merged).** `sites/tupathdigital/` was prepared for the owner's domain (owner decisions 2026-10-31):
 - Coupons removed (FALL2026 and 92xsh57 expired on 31 October 2026): no code, discount badge, end date or coupon FAQ left, and the Coupons section is gone. The hero fragment and the figure tile now state facts from the brief (17 products, 4 shelves). New coupons and products will come from the owner.
 - Domain `tupathdigital.com` (apex canonical, `www` redirects at Cloudflare), host Cloudflare Pages, `site` set in `astro.config.mjs`, brief `deploy` filled.
 - SEO opted in: `seoFiles()` (sitemap, `Sitemap:` line), `robots.txt`, canonical, `og:*`, `twitter:card`, JSON-LD (`src/data/seo.ts`: Organization, WebSite and an ItemList of Products with the brief prices and store URLs, no reviews). Primary keyword "AI products" is assumed in the brief.
