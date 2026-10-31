@@ -57,7 +57,8 @@ const jsonLdText = jsonLd
       name="twitter:card"
       content={ogImage ? 'summary_large_image' : 'summary'}
     />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     {jsonLdText && <script type={jsonLdType} set:html={jsonLdText} />}
     <slot name="head" />
   </head>

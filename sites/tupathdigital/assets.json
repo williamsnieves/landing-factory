@@ -167,6 +167,22 @@
       "permission": "Owner's own product image from their store listing",
       "credit": false,
       "note": "Product image: Guía de IA Generativa + 450 Prompts: Midjourney, DALL-E 3 (Tutorial en PDF, edición en español)"
+    },
+    {
+      "file": "favicon-48.png",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Own brand logo, provided by the owner for the landing; icon cropped from it",
+      "credit": false,
+      "note": "Favicon: the circle mark of logo.webp on white, 48 px, no wordmark"
+    },
+    {
+      "file": "apple-touch-icon.png",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Own brand logo, provided by the owner for the landing; icon cropped from it",
+      "credit": false,
+      "note": "Apple touch icon: the circle mark of logo.webp on white, 180 px, no wordmark"
     }
   ]
 }
