@@ -439,6 +439,22 @@ test('the revise job builds revise-landing.sh with the feedback file placeholder
     '2',
   ]);
   assert.equal(ok.feedback, 'Shorten the hero heading.');
+  assert.deepEqual(
+    built({ slug: 'alpha', feedback: 'Use navy.', restyle: true }).argv,
+    [
+      'bash',
+      'scripts/revise-landing.sh',
+      'alpha',
+      '--restyle',
+      '--feedback',
+      FEEDBACK_PLACEHOLDER,
+    ],
+  );
+  assert.ok(
+    !built({ slug: 'alpha', feedback: 'x', restyle: false }).argv.includes(
+      '--restyle',
+    ),
+  );
   // Free text stays one argument and the text is kept as given (a shell fragment is just text).
   const text = '  $(touch /tmp/x); "quoted"\nsecond line ';
   assert.equal(built({ slug: 'alpha', feedback: text }).feedback, text);
@@ -457,6 +473,8 @@ test('the revise job builds revise-landing.sh with the feedback file placeholder
     [{ slug: '../etc', feedback: 'x' }, /invalid slug/],
     [{ slug: 'alpha', feedback: 'x', model: 'a; b' }, /invalid model/],
     [{ slug: 'alpha', feedback: 'x', maxAttempts: 21 }, /maxAttempts/],
+    [{ slug: 'alpha', feedback: 'x', restyle: 'yes' }, /restyle must be/],
+    [{ slug: 'alpha', feedback: 'x', restyle: 1 }, /restyle must be/],
     [{ slug: 'ghost', feedback: 'x' }, /no site "ghost"/],
     [{ slug: 'beta', feedback: 'x' }, /no finished build/],
   ])

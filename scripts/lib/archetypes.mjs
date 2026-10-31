@@ -418,3 +418,23 @@ export function archetypeMetaProblems(meta, names) {
   }
   return problems;
 }
+
+/** The `landing-meta` block of a MASTER.md (primary, fonts, hero, blend), or null when it has none. */
+export function parseLandingMeta(markdown) {
+  const match = /^```landing-meta[ \t]*\r?\n([\s\S]*?)^```/m.exec(markdown);
+  if (!match) return null;
+  const values = {};
+  for (const line of match[1].split(/\r?\n/)) {
+    const pair = /^\s*([a-z-]+)\s*:\s*(.+?)\s*$/i.exec(line);
+    if (pair) values[pair[1].toLowerCase()] = pair[2];
+  }
+  const { archetype, traits } = readArchetypeMeta(markdown);
+  return {
+    primary: values.primary ?? '',
+    displayFont: values['display-font'] ?? '',
+    bodyFont: values['body-font'] ?? '',
+    hero: values.hero ?? '',
+    archetype,
+    traits,
+  };
+}

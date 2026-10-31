@@ -14,7 +14,7 @@ test('the skill is user-invocable and takes the round and the feedback file', ()
   assert.match(skill, /\nuser-invocable: true\n/);
   assert.match(
     skill,
-    /argument-hint: '<slug> --round N --feedback-file <file> \[--max-attempts N\]'/,
+    /argument-hint: '<slug> --round N --feedback-file <file> \[--restyle\] \[--max-attempts N\]'/,
   );
 });
 
@@ -83,4 +83,25 @@ test('the package script and the git ignore cover the revision files', () => {
   );
   assert.ok(existsSync(join(ROOT, 'scripts/revise-landing.sh')));
   assert.match(read('.gitignore'), /^sites\/\*\/\.revise\.log$/m);
+});
+
+test('the skill covers the restyle kind, both stops, --restyle and its limits', () => {
+  const skill = read('.claude/skills/revise-landing/SKILL.md');
+  for (const needle of [
+    '`restyle`',
+    '`Result: needs-restyle`',
+    '`Result: needs-rebuild`',
+    'Rebuild first: it wins over restyle',
+    '`--restyle`',
+    'scripts/revise-landing.sh <slug> --restyle --feedback <file>',
+    'Query ui-ux-pro-max (only',
+    'node scripts/revisions.mjs meta --site <slug>',
+    '`src/styles/tokens.css`',
+    '`landing-meta` keys `primary`, `display-font` and `body-font`',
+    'Never section structure, copy, images, motion, the page map',
+    'node scripts/render-poster.mjs',
+    '"restyle": { "from": ..., "to": ... }',
+    '[--restyle]',
+  ])
+    assert.ok(skill.includes(needle), needle);
 });

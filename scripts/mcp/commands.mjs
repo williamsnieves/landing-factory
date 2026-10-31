@@ -145,6 +145,9 @@ export function buildCommand(kind, input, root) {
       if (error instanceof Refused) throw new ToolError(error.message);
       throw error;
     }
+    if (input.restyle !== undefined && typeof input.restyle !== 'boolean')
+      throw new ToolError('restyle must be true or false');
+    if (input.restyle === true) argv.push('--restyle');
     argv.push('--feedback', FEEDBACK_PLACEHOLDER);
     if (model) argv.push('--model', model);
     if (input.maxAttempts !== undefined) {

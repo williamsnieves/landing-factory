@@ -7,6 +7,7 @@
 //   node scripts/revisions.mjs validate    --site <slug>
 //   node scripts/revisions.mjs attach-usage --site <slug> --round <n> --usage <.run-usage.json>
 //   node scripts/revisions.mjs show        --site <slug> [--json]
+//   node scripts/revisions.mjs meta        --site <slug>
 //
 // preflight exits 1 naming why a round cannot start (site missing, transferred, direction pages without a build,
 // no finished build). attach-usage adds the run's usage to round <n> after validating the file. Exit codes:
@@ -16,6 +17,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
+import { parseLandingMeta } from './lib/archetypes.mjs';
 import { isTransferred, readExportRecord } from './lib/export-record.mjs';
 import {
   emptyRevisions,
@@ -40,6 +42,7 @@ const HELP = `Usage:
   node scripts/revisions.mjs validate     --site <slug>
   node scripts/revisions.mjs attach-usage --site <slug> --round <n> --usage <file>
   node scripts/revisions.mjs show         --site <slug> [--json]
+  node scripts/revisions.mjs meta         --site <slug>
 
 Revision rounds of a landing, sites/<slug>/revisions.json.
   preflight     refuse (exit 1) a missing site, a transferred site, a site with direction pages, a site without
@@ -48,6 +51,7 @@ Revision rounds of a landing, sites/<slug>/revisions.json.
   validate      check revisions.json (a missing file is valid: no rounds yet)
   attach-usage  add the usage of a run (.run-usage.json) to round <n>; null when the run reported none
   show          print the rounds
+  meta          print { primary, displayFont, bodyFont } from the landing-meta block of design-system/<slug>/MASTER.md
 
 Exit codes: 0 ok, 1 refused or invalid, 2 bad usage.`;
 
@@ -129,7 +133,7 @@ function parse(argv) {
   if (values.help) return { help: true };
   const [command, ...extra] = positionals;
   if (
-    !['preflight', 'next', 'validate', 'attach-usage', 'show'].includes(
+    !['preflight', 'next', 'validate', 'attach-usage', 'show', 'meta'].includes(
       command ?? '',
     )
   )
@@ -170,6 +174,28 @@ export function main(argv, io = console, root = defaultRoot()) {
     if (command === 'preflight') {
       checkCanRevise(root, slug);
       io.log(`revisions: sites/${slug} can take a revision round.`);
+      return 0;
+    }
+    if (command === 'meta') {
+      const master = join(root, 'design-system', slug, 'MASTER.md');
+      if (!existsSync(master))
+        throw new Refused(`design-system/${slug}/MASTER.md does not exist`);
+      const meta = parseLandingMeta(readFileSync(master, 'utf8'));
+      if (!meta)
+        throw new Refused(
+          `design-system/${slug}/MASTER.md has no landing-meta block`,
+        );
+      if (!meta.primary)
+        throw new Refused(`landing-meta of ${slug} has no primary`);
+      if (!meta.displayFont)
+        throw new Refused(`landing-meta of ${slug} has no display-font`);
+      io.log(
+        JSON.stringify({
+          primary: meta.primary,
+          displayFont: meta.displayFont,
+          bodyFont: meta.bodyFont || null,
+        }),
+      );
       return 0;
     }
     if (command !== 'preflight' && !existsSync(join(root, 'sites', slug)))

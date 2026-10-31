@@ -56,8 +56,11 @@ import {
 import {
   archetypeMetaProblems,
   loadCatalog,
+  parseLandingMeta,
   readArchetypeMeta,
 } from './lib/archetypes.mjs';
+
+export { parseLandingMeta };
 import { checkPrompt, formatViolations } from './lib/ai-prompt-policy.mjs';
 import {
   alternatesOf,
@@ -331,25 +334,6 @@ export function checkPhotoUses(siteDir, manifest, max = MAX_USES_PER_PHOTO) {
 // Rules: MASTER.md palette and fonts in tokens.css, landing-meta, diversity
 
 /** The fenced ```landing-meta block as { primary, displayFont, bodyFont, hero }, or null when absent. */
-export function parseLandingMeta(markdown) {
-  const match = /^```landing-meta[ \t]*\r?\n([\s\S]*?)^```/m.exec(markdown);
-  if (!match) return null;
-  const values = {};
-  for (const line of match[1].split(/\r?\n/)) {
-    const pair = /^\s*([a-z-]+)\s*:\s*(.+?)\s*$/i.exec(line);
-    if (pair) values[pair[1].toLowerCase()] = pair[2];
-  }
-  const { archetype, traits } = readArchetypeMeta(markdown);
-  return {
-    primary: values.primary ?? '',
-    displayFont: values['display-font'] ?? '',
-    bodyFont: values['body-font'] ?? '',
-    hero: values.hero ?? '',
-    archetype,
-    traits,
-  };
-}
-
 export function normalizeHex(hex) {
   const h = hex.replace(/^#/, '').toLowerCase();
   return h.length === 3 || h.length === 4

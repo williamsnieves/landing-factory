@@ -532,6 +532,18 @@ test('a revise job writes the feedback to its folder, runs revise-landing.sh on 
     const done = await settled(jobs, job.id);
     assert.equal(done.state, 'passed');
     assert.equal(done.result, 'needs-rebuild');
+    // restyle: true reaches the job's argv, before --feedback.
+    const styled = jobs.start('revise', {
+      slug: 'theta',
+      feedback: 'Use navy.',
+      restyle: true,
+    });
+    assert.deepEqual(styled.argv.slice(2, 5), [
+      'theta',
+      '--restyle',
+      '--feedback',
+    ]);
+    await settled(jobs, styled.id);
     assert.match(
       readFileSync(join(dir, 'log.txt'), 'utf8'),
       /stub revise started/,

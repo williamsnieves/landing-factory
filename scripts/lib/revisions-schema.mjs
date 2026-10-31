@@ -2,8 +2,15 @@
 // (design: openspec/changes/add-landing-revise/design.md, Decision 4). Used by scripts/revisions.mjs,
 // scripts/revise-landing.sh, the MCP tools and the revise-landing skill. Pure functions, no I/O.
 
-export const RESULTS = ['passed', 'failed', 'needs-rebuild'];
-export const ITEM_KINDS = ['fact', 'copy', 'content', 'style', 'rebuild'];
+export const RESULTS = ['passed', 'failed', 'needs-rebuild', 'needs-restyle'];
+export const ITEM_KINDS = [
+  'fact',
+  'copy',
+  'content',
+  'style',
+  'restyle',
+  'rebuild',
+];
 export const MAX_FEEDBACK = 4000;
 export const MAX_SUMMARY = 300;
 
@@ -17,7 +24,10 @@ const ROUND_KEYS = [
   'files',
   'result',
   'usage',
+  'restyle',
 ];
+const LOOK_KEYS = ['primary', 'displayFont', 'bodyFont'];
+const HEX = /^#[0-9a-fA-F]{6}$/;
 const USAGE_KEYS = [
   'costUsd',
   'inputTokens',
@@ -50,6 +60,24 @@ export function usageForRound(runUsage) {
 /** The number the next round gets (rounds are numbered 1, 2, 3 ... in order). */
 export const nextRound = (data) =>
   (Array.isArray(data?.rounds) ? data.rounds.length : 0) + 1;
+
+/** Problems of one side (`from` or `to`) of a round's `restyle`. */
+function lookProblems(look, at) {
+  if (!isPlain(look)) return [`${at}: must be an object`];
+  const errors = [];
+  for (const key of Object.keys(look))
+    if (!LOOK_KEYS.includes(key)) errors.push(`${at}.${key}: unknown key`);
+  if (typeof look.primary !== 'string' || !HEX.test(look.primary))
+    errors.push(`${at}.primary: must be #rrggbb`);
+  if (typeof look.displayFont !== 'string' || !look.displayFont.trim())
+    errors.push(`${at}.displayFont: must be a non-empty string`);
+  if (
+    look.bodyFont !== null &&
+    (typeof look.bodyFont !== 'string' || !look.bodyFont.trim())
+  )
+    errors.push(`${at}.bodyFont: must be a non-empty string or null`);
+  return errors;
+}
 
 /** Structural problems of a parsed revisions.json, each naming the field path. */
 export function validateRevisions(data) {
@@ -104,6 +132,19 @@ export function validateRevisions(data) {
       errors.push(`${at}.files: must be an array of paths`);
     if (!RESULTS.includes(round.result))
       errors.push(`${at}.result: must be one of ${RESULTS.join(', ')}`);
+    if (round.restyle !== undefined) {
+      if (!isPlain(round.restyle))
+        errors.push(`${at}.restyle: must be an object`);
+      else {
+        for (const key of Object.keys(round.restyle))
+          if (!['from', 'to'].includes(key))
+            errors.push(`${at}.restyle.${key}: unknown key`);
+        for (const side of ['from', 'to'])
+          errors.push(
+            ...lookProblems(round.restyle[side], `${at}.restyle.${side}`),
+          );
+      }
+    }
     if (round.usage !== undefined && round.usage !== null) {
       if (!isPlain(round.usage))
         errors.push(`${at}.usage: must be an object or null`);
