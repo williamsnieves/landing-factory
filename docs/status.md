@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-31 (add-lead-forms merged, PR #41, and archived as the first commit of `change/add-landing-restyle`; the casavela test is closed and merged, PR #38; next: `add-landing-restyle`).
+Read this first in a new or compacted session. Last updated: 2026-10-31 (add-landing-restyle merged, PR #42, and archived on `change/add-product-led-saas-archetype`, which now implements `add-product-led-saas-archetype`; add-lead-forms merged, PR #41).
 
 ## Working agreements
 
@@ -49,10 +49,11 @@ Read this first in a new or compacted session. Last updated: 2026-10-31 (add-lea
 | personal-brand sync (both fixes and the SEO report area) | Merged (williamsnieves/personal-brand#2); production on https://williansnieves.com |
 | casavela test (site, palette, test record, archives of add-seo, fix-motion-reveal, fix-reveal-check-timing) | Merged (PR #38) |
 | add-lead-forms (brief `forms`, `<LeadForm />` and `forms` layer, Web3Forms with a WhatsApp fallback, CSP only where used, privacy text naming the provider, `legal-forms` report item, starter demo `/forms/`) | Merged (PR #41) and archived on `change/add-landing-restyle`. First real submission pending (owner's key) |
+| add-landing-restyle (`revise-landing --restyle`, palette and font changes on the same layout) | Merged (PR #42), archived on `change/add-product-led-saas-archetype` |
 
 ## Resume here (2026-10-31)
 
-`main` has everything up to PR #41 (add-lead-forms). Branch `change/add-landing-restyle` was created from `main` and holds the add-lead-forms archive (spec `lead-forms` Purpose filled) and this status update, both pushed. No pull request yet: it opens with the restyle change. **Next: propose and implement `add-landing-restyle`** (finding 1 of the casavela test, below) on that branch. Write the OpenSpec proposal, show it to the owner, then implement with a Sonnet subagent.
+`main` has everything up to PR #42 (add-landing-restyle). Branch `change/add-product-led-saas-archetype` holds the add-landing-restyle archive and the in-progress change `add-product-led-saas-archetype` (new `product-led-saas` archetype sheet, three traits, reference rules). Open its pull request when the checks pass.
 
 **add-lead-forms in short (merged 2026-10-31, `docs/forms.md`, CLAUDE.md "Lead forms").**
 - **Owner decisions (2026-10-30):** a hosted form service, Web3Forms first, and no backend of our own; a prefilled WhatsApp message as the fallback when there is no access key.
@@ -85,8 +86,8 @@ Read this first in a new or compacted session. Last updated: 2026-10-31 (add-lea
 
 **Next, in this order (owner, 2026-10-28, updated 2026-10-31):**
 
-1. `add-landing-restyle` (finding 1 of the casavela test), small. Branch `change/add-landing-restyle` exists with the add-lead-forms archive.
-2. A `product-led-saas` archetype from the four reference sheets (lends `ui-frame-hero`, `two-tone-heading`, `logo-strip-under-hero`; signals technical, premium, conversion-first), a small change of its own.
+1. ~~`add-landing-restyle`~~: merged (PR #42). The first real restyle round is optional (owner).
+2. `add-product-led-saas-archetype` (in progress on `change/add-product-led-saas-archetype`): the `product-led-saas` sheet from the four reference sheets, lending `ui-frame-hero`, `two-tone-heading`, `logo-strip-under-hero`, with rules against invented product proof.
 3. Prospect mode (`add-prospect-landings`): public facts with sources, no prospect brand assets, `noindex` until sold, a sales kit.
 4. tupathdigital to production in a private repository, last (owner).
 

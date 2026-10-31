@@ -186,6 +186,19 @@ export const REF_RULES = [
   { re: /numbered (chapter|index)|chapter index/, traits: ['chapter-index'] },
   { re: /spec chips?|spec tags?|feature chips/, traits: ['spec-chips'] },
   { re: /flush-left|single left axis/, traits: ['flush-left-axis'] },
+  {
+    re: /interface shot|product (screen|ui|mock|video|window)|ui (frame|mock)|framed product/,
+    traits: ['ui-frame-hero'],
+  },
+  { re: /two-tone/, traits: ['two-tone-heading'] },
+  {
+    re: /logo strip|customer marks|logo row|customer logos/,
+    traits: ['logo-strip-under-hero'],
+  },
+  {
+    re: /conversion|primary action|call to action/,
+    signals: ['conversion-first'],
+  },
 ];
 
 const HERO_WORDS = [

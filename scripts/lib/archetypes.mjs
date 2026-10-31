@@ -63,6 +63,9 @@ export const TRAITS = [
   'practical-strip',
   'stat-strip',
   'comparison-table',
+  'ui-frame-hero',
+  'two-tone-heading',
+  'logo-strip-under-hero',
 ];
 
 export const REQUIRED_SECTIONS = [
