@@ -239,7 +239,7 @@ export function createTools({ root, jobs }) {
     {
       name: 'revise_landing',
       description:
-        "Start a background job that applies a customer's feedback to a built landing as targeted edits (one revision round: brief first for facts, then the edits, QA, the static report and check-landing), recorded in sites/<slug>/revisions.json. A request for a different look or structure ends with Result: needs-rebuild and edits nothing. Refuses a transferred landing, one with direction pages and no build, and one without a finished build. Costs tokens. Returns a job id at once; follow it with get_job. It never commits, pushes, deploys or syncs.",
+        "Start a background job that applies a customer's feedback to a built landing as targeted edits (one revision round: brief first for facts, then the edits, QA, the static report and check-landing), recorded in sites/<slug>/revisions.json. A request for a different look or structure ends with Result: needs-rebuild and edits nothing; another palette or font family ends with Result: needs-restyle unless restyle is true (the caller's approval of the new look, which changes tokens, MASTER.md and fonts only). Refuses a transferred landing, one with direction pages and no build, and one without a finished build. Costs tokens. Returns a job id at once; follow it with get_job. It never commits, pushes, deploys or syncs.",
       inputSchema: obj(
         {
           slug,
@@ -248,6 +248,11 @@ export function createTools({ root, jobs }) {
             { maxLength: 4000 },
           ),
           model,
+          restyle: {
+            type: 'boolean',
+            description:
+              'Approve a new palette and font pairing on the same layout (default false).',
+          },
           maxAttempts: {
             type: 'integer',
             minimum: 0,

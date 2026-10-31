@@ -7,7 +7,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 usage() {
   cat <<'EOF'
-Usage: scripts/revise-landing.sh <slug> --feedback <file> [options]
+Usage: scripts/revise-landing.sh <slug> --feedback <file> [--restyle] [options]
 
 Applies the customer's feedback (a text file, at most 4000 characters) to sites/<slug>/ as targeted edits, without
 regenerating anything: `claude -p "/revise-landing <slug> --round N --feedback-file <file> ..."`. The skill updates
@@ -17,17 +17,21 @@ sites/<slug>/REVISION.md; output also goes to sites/<slug>/.revise.log.
 
   <slug>                  the site under sites/
   --feedback <file>       the customer's feedback, as given (required; not empty, at most 4000 characters)
+  --restyle               approve a new look: another palette and/or font pairing on the same layout (ui-ux-pro-max only;
+                          tokens, MASTER.md and fonts change; sections, copy, images and motion stay)
   --max-attempts N        QA fix attempts before the round fails (default 5; 0 fails at the first red QA)
   --model <id>            model for claude -p (default: the CLI's default)
   --help                  show this help
 
 Refused (exit 1): a missing site, a site transferred to its customer, a site with direction pages and no build, a site
-without a finished build (RUN.md "Result: passed"). A round that asks for a different look or structure stops with
-"Result: needs-rebuild" (exit 0): use scripts/new-landing.sh --directions or a new build. It never commits, pushes,
-deploys or syncs; to carry a passed round into the landing's repository see node scripts/sync-export.mjs.
+without a finished build (RUN.md "Result: passed"). A round that asks for a different archetype or structure stops with
+"Result: needs-rebuild" (exit 0): use scripts/new-landing.sh --directions or a new build. Without --restyle, feedback
+that asks for another palette or font family stops with "Result: needs-restyle" (exit 0) and the command to run
+again with --restyle. It never commits, pushes, deploys or syncs; to carry a passed round into the landing's
+repository see node scripts/sync-export.mjs.
 
-Exit codes: 0 passed or needs-rebuild, 1 failed or refused, 2 bad usage (including an empty, too long or missing
-feedback file).
+Exit codes: 0 passed, needs-rebuild or needs-restyle, 1 failed or refused, 2 bad usage (including an empty, too long
+or missing feedback file).
 
 Testing: LANDING_FACTORY_ROOT=<dir> reads sites/<slug> in <dir>; REVISE_LANDING_SKIP=final-check skips the final
 check-landing run. Run from a terminal or a Claude session, not from GitHub Actions (it needs Claude Code credentials).
@@ -44,12 +48,14 @@ SLUG=""
 FEEDBACK=""
 MAX_ATTEMPTS=5
 MODEL=""
+RESTYLE=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --help | -h) usage; exit 0 ;;
     --feedback) [ $# -ge 2 ] || die_usage "--feedback needs a value"; FEEDBACK="$2"; shift 2 ;;
     --max-attempts) [ $# -ge 2 ] || die_usage "--max-attempts needs a value"; MAX_ATTEMPTS="$2"; shift 2 ;;
+    --restyle) RESTYLE=1; shift ;;
     --model) [ $# -ge 2 ] || die_usage "--model needs a value"; MODEL="$2"; shift 2 ;;
     -*) die_usage "unknown option $1" ;;
     *)
@@ -85,6 +91,7 @@ ROUND="$(node scripts/revisions.mjs next --site "$SLUG")" || { echo "revise-land
 
 # 2. Run the skill. The prompt carries the round number and the feedback path; the skill reads them from its arguments.
 PROMPT="/revise-landing $SLUG --round $ROUND --feedback-file $FEEDBACK --max-attempts $MAX_ATTEMPTS"
+[ "$RESTYLE" -eq 0 ] || PROMPT="$PROMPT --restyle"
 CLAUDE_ARGS=(-p "$PROMPT" --permission-mode acceptEdits)
 [ -z "$MODEL" ] || CLAUDE_ARGS+=(--model "$MODEL")
 CLAUDE_ARGS+=(--output-format stream-json --verbose)
@@ -126,7 +133,7 @@ case "$RESULT" in
     # A failed round is recorded too when the skill got that far; its absence is not an error here.
     node scripts/revisions.mjs attach-usage --site "$SLUG" --round "$ROUND" --usage "$USAGE_FILE" > /dev/null 2>&1 || true
     ;;
-  passed | needs-rebuild)
+  passed | needs-rebuild | needs-restyle)
     node scripts/revisions.mjs attach-usage --site "$SLUG" --round "$ROUND" --usage "$USAGE_FILE" \
       || { echo "revise-landing: round $ROUND was not recorded correctly in $SITE_DIR/revisions.json" >&2; exit 1; }
     ;;
@@ -142,6 +149,11 @@ case "$RESULT" in
   needs-rebuild)
     echo "revise-landing: round $ROUND of $SLUG needs a rebuild, not a revision: see $SITE_DIR/REVISION.md."
     echo "A person decides: scripts/new-landing.sh $SLUG --directions (a new look to choose from) or a new build."
+    ;;
+  needs-restyle)
+    echo "revise-landing: round $ROUND of $SLUG needs a restyle (another palette or font family on the same layout): see $SITE_DIR/REVISION.md."
+    echo "A person approves the new look by running again with --restyle:"
+    echo "  scripts/revise-landing.sh $SLUG --restyle --feedback $FEEDBACK"
     ;;
   failed)
     echo "revise-landing: round $ROUND failed; see $SITE_DIR/REVISION.md" >&2

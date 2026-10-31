@@ -385,3 +385,83 @@ test('revisions.mjs: preflight, next, validate, show and attach-usage', () => {
     assert.equal(revisionsMain(argv, c.io, root), 2, argv.join(' '));
   }
 });
+
+test('--restyle adds --restyle to the prompt only with the flag', () => {
+  const plain = makeRoot();
+  assert.equal(
+    run(plain.root, ['acme', '--feedback', feedbackFile()], {
+      STUB_RESULT: 'passed',
+    }).status,
+    0,
+  );
+  assert.doesNotMatch(recorded()[1], /--restyle/);
+  const styled = makeRoot();
+  const r = run(
+    styled.root,
+    ['acme', '--restyle', '--feedback', feedbackFile()],
+    {
+      STUB_RESULT: 'passed',
+    },
+  );
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.match(recorded()[1], / --max-attempts 5 --restyle$/);
+  assert.match(run(styled.root, ['--help']).stdout, /--restyle/);
+});
+
+test('Result: needs-restyle exits 0, prints the --restyle command and attaches usage', () => {
+  const { root, site } = makeRoot();
+  const feedback = feedbackFile('Use navy and sand.');
+  const r = run(root, ['acme', '--feedback', feedback], {
+    STUB_RESULT: 'needs-restyle',
+    STUB_STREAM: join(ROOT, 'tests/fixtures/claude-stream/run.jsonl'),
+  });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.match(r.stdout, /needs a restyle/);
+  assert.ok(
+    r.stdout.includes(
+      `scripts/revise-landing.sh acme --restyle --feedback ${feedback}`,
+    ),
+  );
+  const data = JSON.parse(readFileSync(join(site, 'revisions.json'), 'utf8'));
+  assert.deepEqual(validateRevisions(data), []);
+  assert.equal(data.rounds[0].result, 'needs-restyle');
+  assert.equal(data.rounds[0].usage.costUsd, 0.42);
+});
+
+test('revisions.mjs meta reads landing-meta from MASTER.md', () => {
+  const { root } = makeRoot();
+  const master = (meta) =>
+    put(root, 'design-system/acme/MASTER.md', `# Master\n\n${meta}\n`);
+  const run1 = () => {
+    const out = [];
+    const err = [];
+    const code = revisionsMain(
+      ['meta', '--site', 'acme'],
+      { log: (m) => out.push(m), error: (m) => err.push(m) },
+      root,
+    );
+    return { code, out: out.join(''), err: err.join('') };
+  };
+  master(
+    '```landing-meta\nprimary: #1f3a5f\ndisplay-font: Fraunces\nbody-font: Inter\nhero: split\n```',
+  );
+  let r = run1();
+  assert.equal(r.code, 0);
+  assert.deepEqual(JSON.parse(r.out), {
+    primary: '#1f3a5f',
+    displayFont: 'Fraunces',
+    bodyFont: 'Inter',
+  });
+  master('```landing-meta\nprimary: #1f3a5f\ndisplay-font: Fraunces\n```');
+  assert.equal(JSON.parse(run1().out).bodyFont, null);
+  master('```landing-meta\ndisplay-font: Fraunces\n```');
+  r = run1();
+  assert.equal(r.code, 1);
+  assert.match(r.err, /no primary/);
+  master('```landing-meta\nprimary: #1f3a5f\n```');
+  assert.match(run1().err, /no display-font/);
+  master('no block here');
+  r = run1();
+  assert.equal(r.code, 1);
+  assert.match(r.err, /no landing-meta block/);
+});

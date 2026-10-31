@@ -168,3 +168,51 @@ test('export record: URL normalization equates https, ssh and .git forms and dro
   assert.equal(normalizeRepoUrl('https://github.com/acme'), null);
   assert.equal(normalizeRepoUrl(undefined), null);
 });
+
+const look = (over = {}) => ({
+  primary: '#1f3a5f',
+  displayFont: 'Fraunces',
+  bodyFont: 'Inter',
+  ...over,
+});
+
+test('revisions: restyle kind, needs-restyle result and the restyle record', () => {
+  const ok = round({
+    items: [{ kind: 'restyle', summary: 'Navy and sand palette' }],
+    result: 'needs-restyle',
+    restyle: { from: look(), to: look({ primary: '#232d47', bodyFont: null }) },
+  });
+  assert.deepEqual(validateRevisions(doc(ok)), []);
+  assert.deepEqual(validateRevisions(doc(round())), []);
+});
+
+test('revisions: a bad restyle record names the field path', () => {
+  const errors = (restyle) =>
+    validateRevisions(doc(round({ restyle }))).join('\n');
+  assert.match(
+    errors({ from: look(), to: look(), extra: 1 }),
+    /rounds\[0\]\.restyle\.extra: unknown key/,
+  );
+  assert.match(
+    errors({ from: look({ x: 1 }), to: look() }),
+    /restyle\.from\.x: unknown key/,
+  );
+  assert.match(
+    errors({ from: look(), to: look({ extra: 1 }) }),
+    /restyle\.to\.extra: unknown key/,
+  );
+  assert.match(
+    errors({ from: look(), to: look({ primary: 'navy' }) }),
+    /restyle\.to\.primary: must be #rrggbb/,
+  );
+  assert.match(errors({ from: look() }), /restyle\.to: must be an object/);
+  assert.match(
+    errors({ from: look({ displayFont: '' }), to: look() }),
+    /restyle\.from\.displayFont/,
+  );
+  assert.match(
+    errors({ from: look({ bodyFont: 5 }), to: look() }),
+    /restyle\.from\.bodyFont/,
+  );
+  assert.match(errors('x'), /restyle: must be an object/);
+});

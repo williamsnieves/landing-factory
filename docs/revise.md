@@ -13,7 +13,7 @@ While a landing is managed, **the factory is the source of truth**. Every change
 ## A revision round
 
 ```bash
-scripts/revise-landing.sh <slug> --feedback <file> [--model M] [--max-attempts N]
+scripts/revise-landing.sh <slug> --feedback <file> [--restyle] [--model M] [--max-attempts N]
 # or: npm run revise -- <slug> --feedback <file>
 ```
 
@@ -27,18 +27,32 @@ The skill classifies every feedback item and then edits only `sites/<slug>/` and
 | `copy`    | Wording of existing text, in every locale                               | Targeted edit in the content modules                       |
 | `content` | An image, or a section added or removed from the existing page map      | Targeted edit, image sources and credits as in the build   |
 | `style`   | A token or spacing change inside the design system                      | `tokens.css` and `MASTER.md` change together               |
-| `rebuild` | A different look, archetype, palette family or page structure           | The round stops: nothing is edited                         |
+| `restyle` | Another palette family or font family on the same layout                | Stops with `needs-restyle`; applied with `--restyle`       |
+| `rebuild` | A different archetype, hero, layout or page structure                   | The round stops: nothing is edited                         |
 
 Then it runs, in order: QA (`npm run qa -- --site <slug>`, up to `--max-attempts` fix rounds), the static report, `layout-signature --write`, `check-landing`, the layer check and lint. It never commits, pushes, deploys or syncs.
 
 ### The record
 
-- `sites/<slug>/revisions.json` (schema `scripts/lib/revisions-schema.mjs`, unknown keys fail) has one entry per round: number, date, the feedback as given, the items with their kind, whether the brief changed, the files, the result (`passed`, `failed`, `needs-rebuild`) and the usage. The skill writes the round; the script adds the usage from `.run-usage.json` (`null` when not reported). This is where the rounds per landing and the cost per round are read.
-- `sites/<slug>/REVISION.md` is overwritten each round with the latest round's notes. Its `Result:` line decides the exit code: `passed` and `needs-rebuild` exit 0, `failed` exits 1.
+- `sites/<slug>/revisions.json` (schema `scripts/lib/revisions-schema.mjs`, unknown keys fail) has one entry per round: number, date, the feedback as given, the items with their kind, whether the brief changed, the files, the result (`passed`, `failed`, `needs-rebuild`, `needs-restyle`), `restyle` for a restyle round and the usage. The skill writes the round; the script adds the usage from `.run-usage.json` (`null` when not reported). This is where the rounds per landing and the cost per round are read.
+- `sites/<slug>/REVISION.md` is overwritten each round with the latest round's notes. Its `Result:` line decides the exit code: `passed`, `needs-rebuild` and `needs-restyle` exit 0, `failed` exits 1.
 
 ### Needs rebuild
 
-A round that asks for a different look or structure ("completely different style, darker and more editorial") ends with `Result: needs-rebuild`. Nothing but `revisions.json` and `REVISION.md` changes. A person decides: `scripts/new-landing.sh <slug> --directions` to show new looks and let the customer choose, or a new build. The factory never rebuilds silently.
+A round that asks for a different archetype, hero or structure ("completely different style, darker and more editorial, form first") ends with `Result: needs-rebuild`. Nothing but `revisions.json` and `REVISION.md` changes. A person decides: `scripts/new-landing.sh <slug> --directions` to show new looks and let the customer choose, or a new build. The factory never rebuilds silently.
+
+### Restyle
+
+"I like it, but in our colors." Another palette or font family on the same layout is a `restyle` item. A normal round stops with `Result: needs-restyle` (exit 0) and prints the command; running it with `--restyle` is your approval that the look changes:
+
+```bash
+echo "Keep everything, but use our navy and sand colors." > feedback.txt
+scripts/revise-landing.sh casavela --feedback feedback.txt
+# revise-landing: round 1 of casavela needs a restyle ...
+scripts/revise-landing.sh casavela --restyle --feedback feedback.txt
+```
+
+The restyle round chooses a palette and font pairing with ui-ux-pro-max only (a color the customer names is used as given) and changes only the palette, typography and `landing-meta` (`primary`, `display-font`, `body-font`) of `MASTER.md`, `src/styles/tokens.css`, the self-hosted font import and package, colors in `src/` that bypassed tokens, and a 3D scene's poster. Sections, copy, images, motion, the archetype and the page map stay. Other items in the feedback are applied in the same round; a `rebuild` item still stops it. The round records `restyle: { from, to }` (`primary`, `displayFont`, `bodyFont`, read with `node scripts/revisions.mjs meta --site <slug>` before and after); `directions.json` is not changed. Photos that clash with the new palette are not recolored: REVISION.md lists them under "To confirm with the customer". The checks are the same as in any round, including `check-landing` contrast and diversity.
 
 ### Refusals
 
@@ -78,4 +92,4 @@ node scripts/transfer.mjs record --site <slug> --to <github-owner> [--repository
 
 ## Agent interface
 
-The `revise_landing` job (`slug`, `feedback`, `model?`, `maxAttempts?`) writes the feedback to `.cache/jobs/<id>/feedback.txt` and runs `revise-landing.sh <slug> --feedback <that file>`. It refuses a transferred site and is not allowed without a person's approval. `get_landing` shows the rounds (count, last result and cost), the repository the landing was exported to and the transfer state. Sync and transfer are not in the interface: it never publishes. See `docs/agent-interface.md`.
+The `revise_landing` job (`slug`, `feedback`, `restyle?`, `model?`, `maxAttempts?`) writes the feedback to `.cache/jobs/<id>/feedback.txt` and runs `revise-landing.sh <slug> [--restyle] --feedback <that file>`. It refuses a transferred site and is not allowed without a person's approval. `get_landing` shows the rounds (count, last result and cost), the repository the landing was exported to and the transfer state. Sync and transfer are not in the interface: it never publishes. See `docs/agent-interface.md`.

@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-30 (the real-estate end-to-end test `casavela` is closed, PR #38 ready to merge; fix-motion-reveal, PR #39, and fix-reveal-check-timing, PR #40, merged and archived on `change/casavela-test`; personal-brand synced, williamsnieves/personal-brand#2 merged).
+Read this first in a new or compacted session. Last updated: 2026-10-31 (add-lead-forms merged, PR #41, and archived as the first commit of `change/add-landing-restyle`; the casavela test is closed and merged, PR #38; next: `add-landing-restyle`).
 
 ## Working agreements
 
@@ -47,10 +47,25 @@ Read this first in a new or compacted session. Last updated: 2026-10-30 (the rea
 | fix-motion-reveal (revealed blocks ended 32 px low in every landing; QA check `reveal-end-state`) | Merged (PR #39), archived on `change/casavela-test` |
 | fix-reveal-check-timing (the check waits for the motion layer: network idle, re-scroll) | Merged (PR #40), archived on `change/casavela-test` |
 | personal-brand sync (both fixes and the SEO report area) | Merged (williamsnieves/personal-brand#2); production on https://williansnieves.com |
+| casavela test (site, palette, test record, archives of add-seo, fix-motion-reveal, fix-reveal-check-timing) | Merged (PR #38) |
+| add-lead-forms (brief `forms`, `<LeadForm />` and `forms` layer, Web3Forms with a WhatsApp fallback, CSP only where used, privacy text naming the provider, `legal-forms` report item, starter demo `/forms/`) | Merged (PR #41) and archived on `change/add-landing-restyle`. First real submission pending (owner's key) |
 
-## Resume here (2026-10-30)
+## Resume here (2026-10-31)
 
-`main` has everything up to PR #40. Branch `change/casavela-test` (PR #38, CI green) holds the archives of add-seo, fix-motion-reveal and fix-reveal-check-timing, `sites/casavela`, `design-system/casavela`, the test row in `docs/customer-runs.md` and this status. **The owner merges PR #38 next**; then start the next change from `main`.
+`main` has everything up to PR #41 (add-lead-forms). Branch `change/add-landing-restyle` was created from `main` and holds the add-lead-forms archive (spec `lead-forms` Purpose filled) and this status update, both pushed. No pull request yet: it opens with the restyle change. **Next: propose and implement `add-landing-restyle`** (finding 1 of the casavela test, below) on that branch. Write the OpenSpec proposal, show it to the owner, then implement with a Sonnet subagent.
+
+**add-lead-forms in short (merged 2026-10-31, `docs/forms.md`, CLAUDE.md "Lead forms").**
+- **Owner decisions (2026-10-30):** a hosted form service, Web3Forms first, and no backend of our own; a prefilled WhatsApp message as the fallback when there is no access key.
+- **Web3Forms facts** (docs.web3forms.com, now in the allowed domains with `web3forms.com` and `api.web3forms.com`):
+  - The endpoint is `POST https://api.web3forms.com/submit`.
+  - The access key is public by design. API calls must come from the browser; server side needs a paid plan.
+  - JavaScript submits use `FormData` or JSON and never `redirect`. `redirect` is free for no-JS submits.
+  - The `botcheck` honeypot is free, and so is hCaptcha; reCAPTCHA, Turnstile and domain restriction are paid.
+  - Submissions are not stored, and logs are kept about two months. Servers are in the US; the company is Web3Creative, India.
+  - Some free subdomains are blocked, so `*.pages.dev` previews may not deliver.
+  - `web3forms.com` itself shows a Cloudflare challenge to this session (not bypassed), so the free plan's monthly limit is unconfirmed.
+- **A form needs a privacy policy.** It requires `legal.markets` and `legal.processing.forms: true`, and holder identity is never assumed. So casavela (sample data) keeps WhatsApp; the starter's `noindex` `/forms/` page is the proof.
+- **Result:** 946 tests passed; the starter's QA and report passed (`legal-forms` passes on the demo). PR #41 CI was green.
 
 **casavela test: what was done (2026-10-28 to 2026-10-30).**
 - Brief: fictional "Casavela Inmobiliaria", Valencia; every contact value is an example listed in `assumed` and tagged "Dato de ejemplo" on the page; WhatsApp as the primary call to action, no form; no legal market; SEO keyword "valoración de vivienda gratis en Valencia", `schemaType: RealEstateAgent`; references `stripe-com` and `framer-com`.
@@ -68,17 +83,16 @@ Read this first in a new or compacted session. Last updated: 2026-10-30 (the rea
 5. CI Lighthouse variance again (PR #39: clinica-dental 89, samurai 86 on mobile; both passed on re-run).
 6. The first real revision round (`npm run revise`) is still not run: the only change the owner asked for was rebuild-class.
 
-**Next, in this order (owner, 2026-10-28, updated 2026-10-30):**
+**Next, in this order (owner, 2026-10-28, updated 2026-10-31):**
 
-1. `add-lead-forms`: needed before selling to the real-estate niche (valuation request; GDPR consent, no backend in the factory).
-2. `add-landing-restyle` (finding 1), small.
-3. A `product-led-saas` archetype from the four reference sheets (lends `ui-frame-hero`, `two-tone-heading`, `logo-strip-under-hero`; signals technical, premium, conversion-first), a small change of its own.
-4. Prospect mode (`add-prospect-landings`): public facts with sources, no prospect brand assets, `noindex` until sold, a sales kit.
-5. tupathdigital to production in a private repository, last (owner).
+1. `add-landing-restyle` (finding 1 of the casavela test), small. Branch `change/add-landing-restyle` exists with the add-lead-forms archive.
+2. A `product-led-saas` archetype from the four reference sheets (lends `ui-frame-hero`, `two-tone-heading`, `logo-strip-under-hero`; signals technical, premium, conversion-first), a small change of its own.
+3. Prospect mode (`add-prospect-landings`): public facts with sources, no prospect brand assets, `noindex` until sold, a sales kit.
+4. tupathdigital to production in a private repository, last (owner).
 
 **Two tracks and the repository (owner, 2026-10-28, `docs/channels.md`):** track 1, the owner builds landings and then offers them; track 2 later, a self-serve web app driven by the Agent SDK with the same harness; Telegram serves both. The factory repository stays public (free CI) until the flow is polished and tupathdigital is in production, then goes private.
 
-**The session's network:** the owner added linear.app, stripe.com, vercel.com, framer.com, raycast.com and their CDNs (2026-10-28) and Pinterest (`es.pinterest.com`, `pinterest.com`, `*.pinterest.com`, `i.pinimg.com`, `*.pinimg.com`, 2026-10-30) to the environment's allowed domains.
+**The session's network:** the owner added linear.app, stripe.com, vercel.com, framer.com, raycast.com and their CDNs (2026-10-28) Pinterest (`es.pinterest.com`, `pinterest.com`, `*.pinterest.com`, `i.pinimg.com`, `*.pinimg.com`, 2026-10-30) and Web3Forms (`web3forms.com`, `docs.web3forms.com`, `api.web3forms.com`, 2026-10-30) to the environment's allowed domains.
 
 **Channels (owner decision, 2026-10-28, `docs/channels.md`):** one engine and thin clients; the web app is the source of truth (directions, choice and comments, approval, structured data, rounds, later billing); chat is the way in and for notifications (interview, "preview ready", small changes), Telegram before WhatsApp; publishing, sync and transfer stay with the owner. Where the engine runs (VPS, GitHub Actions or cloud sessions) is open and is decided from the measured customer runs.
 
