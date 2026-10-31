@@ -307,3 +307,33 @@ test('bad input is reported with exit code 2 and the CLI prints reasons or JSON'
   assert.equal(r.status, 0);
   assert.match(r.stdout, /--refs/);
 });
+
+test('the four real product-site reference sheets yield the product-led traits', () => {
+  const NEW = ['ui-frame-hero', 'two-tone-heading', 'logo-strip-under-hero'];
+  const all = new Set();
+  for (const slug of ['linear-app', 'vercel-com', 'stripe-com', 'framer-com']) {
+    const sheet = readRefSheet(ROOT, slug);
+    const got = sheet.traits.filter((t) => NEW.includes(t));
+    assert.ok(got.length >= 1, `${slug} yields none of ${NEW.join(', ')}`);
+    for (const t of got) all.add(t);
+  }
+  assert.deepEqual([...all].sort(), [...NEW].sort());
+});
+
+// A software brief usually has no photographs (few-assets), which separates product-led-saas from the photo-led
+// bento-product-showcase: on technical, premium and conversion-first alone the two tie.
+test('a technical, premium, conversion-first, few-assets brief ranks product-led-saas first', () => {
+  const root = freshRoot();
+  addSite(root, 'x', {
+    signals: 'technical, premium, conversion-first, few-assets',
+  });
+  const result = pickBlends({ root, slug: 'x', refs: [] });
+  assert.equal(result.blends[0].primary, 'product-led-saas');
+});
+
+test('a local-service, craft brief does not rank product-led-saas first', () => {
+  const root = freshRoot();
+  addSite(root, 'x', { signals: 'local-service, craft' });
+  const result = pickBlends({ root, slug: 'x', refs: [] });
+  assert.notEqual(result.blends[0].primary, 'product-led-saas');
+});

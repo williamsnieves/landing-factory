@@ -4,7 +4,7 @@
 The catalog SHALL include a `product-led-saas` archetype for software product pages that owns the lendable traits `ui-frame-hero`, `two-tone-heading` and `logo-strip-under-hero`, fits the signals `technical`, `premium`, `conversion-first`, `product-showcase`, `calm` and `few-assets`, and uses the existing hero types only.
 
 #### Scenario: Software brief
-- **WHEN** a brief's signals are `technical`, `premium` and `conversion-first` and no other site uses the archetype
+- **WHEN** a brief's signals are `technical`, `premium`, `conversion-first` and `few-assets` and no other site uses the archetype
 - **THEN** `pick-archetypes` ranks a blend with `product-led-saas` as primary first
 
 #### Scenario: Reference traits

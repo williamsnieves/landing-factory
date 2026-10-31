@@ -68,4 +68,4 @@ The tests check that the four sheets yield the new traits, so the rules are tune
 
 ## Verification
 
-`npm run validate:archetypes` (11 sheets), `npm test` (catalog count, unique signatures, README lists the new traits, pick-archetypes ranks `product-led-saas` first for `technical, premium, conversion-first` and yields the three traits from the four reference sheets), lint, Prettier, `openspec validate --strict`, the clean-clone run.
+`npm run validate:archetypes` (11 sheets), `npm test` (catalog count, unique signatures, README lists the new traits, pick-archetypes ranks `product-led-saas` first for `technical, premium, conversion-first, few-assets` (without `few-assets` it ties with `bento-product-showcase`, which is fine: both fit) and yields the three traits from the four reference sheets), lint, Prettier, `openspec validate --strict`, the clean-clone run.

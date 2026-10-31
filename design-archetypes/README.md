@@ -61,28 +61,31 @@ The synthesis writes a `Signals: a, b, c` line in the Brief of `PROPOSAL.md` (or
 
 A trait has one owner sheet (which defines it). A secondary archetype lends one or two of its traits to the primary, unless the primary lists the trait in `rejects`. A reference sheet can also supply a trait: it is written `ref:<sheet>/<trait>`.
 
-| Trait                | Owner                    |
-| -------------------- | ------------------------ |
-| `visible-grid`       | brutalist-raw            |
-| `mono-labels`        | brutalist-raw            |
-| `flush-left-axis`    | swiss-grid-minimal       |
-| `split-sticky`       | swiss-grid-minimal       |
-| `marquee-type`       | typographic-poster       |
-| `giant-numerals`     | typographic-poster       |
-| `horizontal-chapter` | horizontal-chapter-story |
-| `chapter-index`      | horizontal-chapter-story |
-| `bento-grid`         | bento-product-showcase   |
-| `spec-chips`         | bento-product-showcase   |
-| `overlap-collage`    | collage-scrapbook        |
-| `handwritten-accent` | collage-scrapbook        |
-| `drop-cap`           | editorial-magazine       |
-| `pull-quote`         | editorial-magazine       |
-| `scene-backdrop`     | immersive-scene          |
-| `chaptered-overlay`  | immersive-scene          |
-| `hours-card`         | warm-local-service       |
-| `practical-strip`    | warm-local-service       |
-| `stat-strip`         | data-and-proof           |
-| `comparison-table`   | data-and-proof           |
+| Trait                   | Owner                    |
+| ----------------------- | ------------------------ |
+| `visible-grid`          | brutalist-raw            |
+| `mono-labels`           | brutalist-raw            |
+| `flush-left-axis`       | swiss-grid-minimal       |
+| `split-sticky`          | swiss-grid-minimal       |
+| `marquee-type`          | typographic-poster       |
+| `giant-numerals`        | typographic-poster       |
+| `horizontal-chapter`    | horizontal-chapter-story |
+| `chapter-index`         | horizontal-chapter-story |
+| `bento-grid`            | bento-product-showcase   |
+| `spec-chips`            | bento-product-showcase   |
+| `overlap-collage`       | collage-scrapbook        |
+| `handwritten-accent`    | collage-scrapbook        |
+| `drop-cap`              | editorial-magazine       |
+| `pull-quote`            | editorial-magazine       |
+| `scene-backdrop`        | immersive-scene          |
+| `chaptered-overlay`     | immersive-scene          |
+| `hours-card`            | warm-local-service       |
+| `practical-strip`       | warm-local-service       |
+| `stat-strip`            | data-and-proof           |
+| `comparison-table`      | data-and-proof           |
+| `ui-frame-hero`         | product-led-saas         |
+| `two-tone-heading`      | product-led-saas         |
+| `logo-strip-under-hero` | product-led-saas         |
 
 ## Blends
 
@@ -139,6 +142,7 @@ The header of `scripts/layout-signature.mjs` documents how each one is measured.
 | [editorial-magazine](editorial-magazine.md)             | Reads like a magazine feature: multi-column text, drop caps, pull quotes, captions and a strong masthead, with photographs set among the words.               |
 | [horizontal-chapter-story](horizontal-chapter-story.md) | A story told in chapters. One pinned section scrolls a horizontal track of panels, with a chapter index and full-screen moments between them.                 |
 | [immersive-scene](immersive-scene.md)                   | Full-bleed media or a 3D scene fills the screen with minimal chrome; short chaptered overlays carry the story over it.                                        |
+| [product-led-saas](product-led-saas.md)                 | A software product page: a short two-tone headline over a framed interface, quiet customer marks, then alternating feature modules with one visual each.      |
 | [swiss-grid-minimal](swiss-grid-minimal.md)             | A strict twelve-column grid, flush-left text, small type contrast, no rounded corners and a lot of white. Order and restraint carry the page.                 |
 | [typographic-poster](typographic-poster.md)             | Type is the image. Huge display lettering, tight cropping and bold color fields carry the page, with few or no photographs.                                   |
 | [warm-local-service](warm-local-service.md)             | Friendly and practical: what, where, when and how to reach us come first; warm photos, hours, a map and one obvious action.                                   |

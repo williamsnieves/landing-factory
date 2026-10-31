@@ -28,14 +28,14 @@ const sheet = (name) =>
   readFileSync(join(ROOT, 'design-archetypes', `${name}.md`), 'utf8');
 const quiet = { log() {}, error() {} };
 
-test('the catalog has 10 valid sheets and the validator exits 0', () => {
-  assert.equal(loadCatalog(ROOT).length, 10);
+test('the catalog has 11 valid sheets and the validator exits 0', () => {
+  assert.equal(loadCatalog(ROOT).length, 11);
   const r = spawnSync(process.execPath, ['scripts/validate-archetypes.mjs'], {
     cwd: ROOT,
     encoding: 'utf8',
   });
   assert.equal(r.status, 0, r.stderr);
-  assert.match(r.stdout, /10 sheet\(s\) valid/);
+  assert.match(r.stdout, /11 sheet\(s\) valid/);
 });
 
 test('every trait has exactly one owner sheet and every signal is used', () => {
@@ -186,6 +186,6 @@ test('CLI help and unknown options', () => {
     });
   assert.equal(run('--help').status, 0);
   assert.equal(run('--nope').status, 2);
-  assert.equal(readdirSync(join(ROOT, 'design-archetypes')).length, 11);
+  assert.equal(readdirSync(join(ROOT, 'design-archetypes')).length, 12);
   void quiet;
 });
