@@ -114,3 +114,7 @@ Preparation for production on the owner's domain (decisions of 2026-10-31). Resu
 - Code: the brand mark is imported once in `catalog.ts` (`brandMark`) so `photo-uses` counts one use for the header, footer and structured data.
 
 Checks (2026-10-31): `brief validate` valid; `npm run qa -- --site tupathdigital` passed (Lighthouse mobile 99/100/100, desktop 100/100/100); section shots reviewed; static report 0 fail, 2 warn (`lh-assets` image savings, `legal-pages` no rule set for US; every `seo-*` item passes); `layout-signature --write`; `check-landing` passed (the same `archetype-target` warning as before); `credits` up to date; `handoff check --visibility private` ready; `npm run lint`, `npm run check -w site-tupathdigital` and Prettier clean.
+
+## Owner change 2026-10-31: favicon
+
+The starter's generic favicon (`public/favicon.svg`) is replaced by the brand mark cropped from the owner's logo (`src/assets/images/logo.webp`, recorded in `assets.json`): `public/favicon-48.png` and `public/apple-touch-icon.png` (180 px), the circle mark on white, without the wordmark, which is unreadable at icon size. `BaseLayout.astro` links both.
