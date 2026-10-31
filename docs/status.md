@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-31 (add-landing-restyle merged, PR #42, and archived on `change/add-product-led-saas-archetype`, which now implements `add-product-led-saas-archetype`; add-lead-forms merged, PR #41).
+Read this first in a new or compacted session. Last updated: 2026-10-31 (add-product-led-saas-archetype merged, PR #43, and archived on `change/add-prospect-landings`, which now implements `add-prospect-landings`; add-landing-restyle merged, PR #42).
 
 ## Working agreements
 
@@ -50,10 +50,11 @@ Read this first in a new or compacted session. Last updated: 2026-10-31 (add-lan
 | casavela test (site, palette, test record, archives of add-seo, fix-motion-reveal, fix-reveal-check-timing) | Merged (PR #38) |
 | add-lead-forms (brief `forms`, `<LeadForm />` and `forms` layer, Web3Forms with a WhatsApp fallback, CSP only where used, privacy text naming the provider, `legal-forms` report item, starter demo `/forms/`) | Merged (PR #41) and archived on `change/add-landing-restyle`. First real submission pending (owner's key) |
 | add-landing-restyle (`revise-landing --restyle`, palette and font changes on the same layout) | Merged (PR #42), archived on `change/add-product-led-saas-archetype` |
+| add-product-led-saas-archetype (the `product-led-saas` archetype sheet, three traits, reference rules) | Merged (PR #43), archived on `change/add-prospect-landings` |
 
 ## Resume here (2026-10-31)
 
-`main` has everything up to PR #42 (add-landing-restyle). Branch `change/add-product-led-saas-archetype` holds the add-landing-restyle archive and the in-progress change `add-product-led-saas-archetype` (new `product-led-saas` archetype sheet, three traits, reference rules). Open its pull request when the checks pass.
+`main` has everything up to PR #43 (add-product-led-saas-archetype). Branch `change/add-prospect-landings` holds the add-product-led-saas-archetype archive and the in-progress change `add-prospect-landings` (brief `prospect` section with a source per fact, `scripts/prospect.mjs` `write|kit|sold`, `noindex` and a visible notice on every page, an empty sitemap and `X-Robots-Tag`, the `prospect` rule of `check-landing`, the sales kit `SALES.md`; guide `docs/prospect.md`). Open its pull request when the checks pass.
 
 **add-lead-forms in short (merged 2026-10-31, `docs/forms.md`, CLAUDE.md "Lead forms").**
 - **Owner decisions (2026-10-30):** a hosted form service, Web3Forms first, and no backend of our own; a prefilled WhatsApp message as the fallback when there is no access key.
@@ -87,8 +88,8 @@ Read this first in a new or compacted session. Last updated: 2026-10-31 (add-lan
 **Next, in this order (owner, 2026-10-28, updated 2026-10-31):**
 
 1. ~~`add-landing-restyle`~~: merged (PR #42). The first real restyle round is optional (owner).
-2. `add-product-led-saas-archetype` (in progress on `change/add-product-led-saas-archetype`): the `product-led-saas` sheet from the four reference sheets, lending `ui-frame-hero`, `two-tone-heading`, `logo-strip-under-hero`, with rules against invented product proof.
-3. Prospect mode (`add-prospect-landings`): public facts with sources, no prospect brand assets, `noindex` until sold, a sales kit.
+2. ~~`add-product-led-saas-archetype`~~: merged (PR #43). The `product-led-saas` sheet from the four reference sheets, lending `ui-frame-hero`, `two-tone-heading`, `logo-strip-under-hero`, with rules against invented product proof.
+3. Prospect mode (`add-prospect-landings`, in progress on `change/add-prospect-landings`): public facts with sources, no prospect brand assets, `noindex` until sold, a sales kit.
 4. tupathdigital to production in a private repository, last (owner).
 
 **Two tracks and the repository (owner, 2026-10-28, `docs/channels.md`):** track 1, the owner builds landings and then offers them; track 2 later, a self-serve web app driven by the Agent SDK with the same harness; Telegram serves both. The factory repository stays public (free CI) until the flow is polished and tupathdigital is in production, then goes private.

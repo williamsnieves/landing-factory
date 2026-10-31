@@ -510,6 +510,28 @@ test('revise is refused for a transferred landing and for one with direction pag
   }
 });
 
+test('get_landing shows the prospect status of the brief, or null', async () => {
+  const site = join(root, 'sites/theta');
+  mkdirSync(site, { recursive: true });
+  try {
+    writeFileSync(join(site, 'package.json'), '{"name":"site-theta"}\n');
+    assert.equal((await ok('get_landing', { slug: 'theta' })).prospect, null);
+    const brief = { version: 1, prospect: { status: 'prospect', sources: [] } };
+    writeFileSync(join(site, 'brief.json'), JSON.stringify(brief));
+    assert.equal(
+      (await ok('get_landing', { slug: 'theta' })).prospect,
+      'prospect',
+    );
+    brief.prospect.status = 'sold';
+    writeFileSync(join(site, 'brief.json'), JSON.stringify(brief));
+    assert.equal((await ok('get_landing', { slug: 'theta' })).prospect, 'sold');
+    writeFileSync(join(site, 'brief.json'), JSON.stringify({ version: 1 }));
+    assert.equal((await ok('get_landing', { slug: 'theta' })).prospect, null);
+  } finally {
+    rmSync(site, { recursive: true, force: true });
+  }
+});
+
 test('get_landing shows the revision rounds, the export and the transfer state', async () => {
   const site = join(root, 'sites/eta');
   mkdirSync(site, { recursive: true });

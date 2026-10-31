@@ -1043,3 +1043,237 @@ test('ai-provenance: the people exemption needs the owner subject, the disclosur
     ),
   );
 });
+
+// --- prospect (design: add-prospect-landings, Decision 4) ---------------------------------------------------
+
+const NOTICE =
+  '<p role="note" data-prospect-notice>Propuesta de diseño preparada para Clínica Dental Alameda. No es su web oficial.</p>';
+const prospectPage = (notice = NOTICE, robots = true) =>
+  `<!doctype html><html lang="es"><head>${robots ? '<meta name="robots" content="noindex">' : ''}</head><body><main>${notice}<h1>Clínica Dental Alameda</h1></main></body></html>`;
+const EMPTY_SITEMAP =
+  '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n</urlset>\n';
+const HEADERS =
+  '/*\n  X-Content-Type-Options: nosniff\n\n# Prospect landing\n/*\n  X-Robots-Tag: noindex\n';
+
+async function prospectRoot(change = () => {}) {
+  const root = freshRoot();
+  const brief = JSON.parse(
+    readFileSync(join(ROOT, 'tests/fixtures/prospect/brief.json'), 'utf8'),
+  );
+  writeFileSync(site(root, 'brief.json'), JSON.stringify(brief, null, 2));
+  const { prospectContent } = await import('../scripts/prospect.mjs');
+  mkdirSync(site(root, 'src/data'), { recursive: true });
+  writeFileSync(site(root, 'src/data/prospect.json'), prospectContent(brief));
+  const dist = site(root, 'dist');
+  mkdirSync(join(dist, 'servicios'), { recursive: true });
+  writeFileSync(join(dist, 'index.html'), prospectPage());
+  writeFileSync(join(dist, 'servicios/index.html'), prospectPage());
+  writeFileSync(join(dist, '404.html'), '<html><body>404</body></html>');
+  writeFileSync(join(dist, 'sitemap.xml'), EMPTY_SITEMAP);
+  writeFileSync(join(dist, '_headers'), HEADERS);
+  await change(root, brief);
+  return root;
+}
+const prospectFailures = async (root) => failuresOf(root, 'prospect');
+
+test('prospect: a site without a prospect section does not run the rule; a passing prospect dist passes it', async () => {
+  const plain = await runChecks({ slug: 'good', root: briefRoot() });
+  assert.ok(!plain.checks.some((c) => c.name === 'prospect'));
+  const root = await prospectRoot();
+  assert.deepEqual(await prospectFailures(root), []);
+  const result = await runChecks({ slug: 'good', root });
+  assert.ok(result.checks.some((c) => c.name === 'prospect' && c.ok));
+});
+
+test('prospect: a page without the notice, or with a hidden or wrong one, fails naming the page', async () => {
+  for (const [notice, pattern] of [
+    ['', /shows no visible notice/],
+    [
+      NOTICE.replace('data-prospect-notice', 'hidden data-prospect-notice'),
+      /shows no visible notice/,
+    ],
+    [
+      NOTICE.replace('Clínica Dental Alameda', 'Otra clínica'),
+      /does not name the business/,
+    ],
+  ]) {
+    const root = await prospectRoot((r) =>
+      writeFileSync(
+        join(site(r, 'dist'), 'servicios/index.html'),
+        prospectPage(notice),
+      ),
+    );
+    const failures = await prospectFailures(root);
+    assert.equal(failures.length, 1, JSON.stringify(failures));
+    assert.equal(failures[0].item, '/servicios/index.html');
+    assert.match(failures[0].message, pattern);
+  }
+});
+
+test('prospect: a page without noindex fails; 404.html is not required to carry the notice', async () => {
+  const root = await prospectRoot((r) =>
+    writeFileSync(
+      join(site(r, 'dist'), 'index.html'),
+      prospectPage(NOTICE, false),
+    ),
+  );
+  const failures = await prospectFailures(root);
+  assert.deepEqual(
+    failures.map((f) => f.item),
+    ['/index.html'],
+  );
+  assert.match(failures[0].message, /noindex/);
+});
+
+test('prospect: a sitemap URL fails; so does a missing sitemap', async () => {
+  const withUrl = await prospectRoot((r) =>
+    writeFileSync(
+      join(site(r, 'dist'), 'sitemap.xml'),
+      EMPTY_SITEMAP.replace(
+        '\n\n',
+        '\n  <url><loc>https://x.com/</loc></url>\n',
+      ),
+    ),
+  );
+  assert.deepEqual(
+    (await prospectFailures(withUrl)).map((f) => f.item),
+    ['dist/sitemap.xml'],
+  );
+  const missing = await prospectRoot((r) =>
+    rmSync(join(site(r, 'dist'), 'sitemap.xml')),
+  );
+  assert.deepEqual(
+    (await prospectFailures(missing)).map((f) => f.item),
+    ['dist/sitemap.xml'],
+  );
+});
+
+test('prospect: the X-Robots-Tag header must be set for /*', async () => {
+  for (const headers of [
+    '/*\n  X-Content-Type-Options: nosniff\n',
+    '/other/*\n  X-Robots-Tag: noindex\n',
+    '# /*\n#  X-Robots-Tag: noindex\n',
+  ]) {
+    const root = await prospectRoot((r) =>
+      writeFileSync(join(site(r, 'dist'), '_headers'), headers),
+    );
+    assert.deepEqual(
+      (await prospectFailures(root)).map((f) => f.item),
+      ['dist/_headers'],
+      headers,
+    );
+  }
+  const none = await prospectRoot((r) =>
+    rmSync(join(site(r, 'dist'), '_headers')),
+  );
+  assert.deepEqual(
+    (await prospectFailures(none)).map((f) => f.item),
+    ['dist/_headers'],
+  );
+});
+
+test('prospect: a customer asset or an AI image in assets.json fails', async () => {
+  for (const [source, word] of [
+    ['customer', 'customer file'],
+    ['ai', 'AI image'],
+  ]) {
+    const root = await prospectRoot((r) => {
+      const path = site(r, 'assets.json');
+      const manifest = JSON.parse(readFileSync(path, 'utf8'));
+      manifest.images.push({ file: 'logo.svg', source });
+      writeFileSync(path, JSON.stringify(manifest));
+    });
+    const failures = await prospectFailures(root);
+    assert.equal(failures.length, 1);
+    assert.equal(failures[0].item, 'assets.json');
+    assert.ok(failures[0].message.includes(word), failures[0].message);
+  }
+});
+
+test('prospect: a fact without a source or an assumed entry fails naming the field', async () => {
+  const root = await prospectRoot((r, brief) => {
+    brief.prospect.sources = brief.prospect.sources.filter(
+      (s) => s.field !== 'contact.phone',
+    );
+    writeFileSync(site(r, 'brief.json'), JSON.stringify(brief));
+  });
+  const failures = await prospectFailures(root);
+  assert.deepEqual(
+    failures.map((f) => f.item),
+    ['contact.phone'],
+  );
+  assert.match(failures[0].message, /neither a source/);
+});
+
+test('prospect: a stale or missing prospect.json fails', async () => {
+  const stale = await prospectRoot((r) =>
+    writeFileSync(
+      site(r, 'src/data/prospect.json'),
+      '{\n  "status": "prospect",\n  "business": "Otra",\n  "language": "es"\n}\n',
+    ),
+  );
+  const failures = await prospectFailures(stale);
+  assert.deepEqual(
+    failures.map((f) => f.item),
+    ['src/data/prospect.json'],
+  );
+  assert.match(failures[0].message, /out of date/);
+  const missing = await prospectRoot((r) =>
+    rmSync(site(r, 'src/data/prospect.json')),
+  );
+  assert.match((await prospectFailures(missing))[0].message, /does not exist/);
+});
+
+test('prospect: a prospect without a build asks for one', async () => {
+  const root = await prospectRoot((r) =>
+    rmSync(site(r, 'dist'), { recursive: true }),
+  );
+  const failures = await prospectFailures(root);
+  assert.deepEqual(
+    failures.map((f) => f.item),
+    ['dist'],
+  );
+});
+
+test('prospect: a sold site passes without the notice and fails while a page still shows it', async () => {
+  const sold = await prospectRoot(async (r, brief) => {
+    brief.prospect.status = 'sold';
+    writeFileSync(site(r, 'brief.json'), JSON.stringify(brief));
+    const { prospectContent } = await import('../scripts/prospect.mjs');
+    writeFileSync(site(r, 'src/data/prospect.json'), prospectContent(brief));
+    for (const page of ['index.html', 'servicios/index.html'])
+      writeFileSync(
+        join(site(r, 'dist'), page),
+        '<html><body><main><h1>Clínica Dental Alameda</h1></main></body></html>',
+      );
+    writeFileSync(
+      join(site(r, 'dist'), 'sitemap.xml'),
+      '<urlset><url><loc>https://x.com/</loc></url></urlset>',
+    );
+    rmSync(join(site(r, 'dist'), '_headers'));
+  });
+  assert.deepEqual(await prospectFailures(sold), []);
+  // the notice is still in a page: the build is stale
+  writeFileSync(
+    join(site(sold, 'dist'), 'servicios/index.html'),
+    prospectPage(),
+  );
+  const failures = await prospectFailures(sold);
+  assert.deepEqual(
+    failures.map((f) => f.item),
+    ['/servicios/index.html'],
+  );
+  // prospect.json that still says prospect
+  const { prospectContent } = await import('../scripts/prospect.mjs');
+  const brief = JSON.parse(readFileSync(site(sold, 'brief.json'), 'utf8'));
+  brief.prospect.status = 'prospect';
+  writeFileSync(site(sold, 'src/data/prospect.json'), prospectContent(brief));
+  writeFileSync(
+    join(site(sold, 'dist'), 'servicios/index.html'),
+    '<html><body></body></html>',
+  );
+  assert.deepEqual(
+    (await prospectFailures(sold)).map((f) => f.item),
+    ['src/data/prospect.json'],
+  );
+});

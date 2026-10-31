@@ -73,6 +73,16 @@ A cheap way to show the customer what the landing could look like before the ful
 - before the build, remove `src/pages/directions/`, `src/styles/directions/`, `src/components/directions/`, the `@fontsource` packages only the rejected directions used (and their CREDITS.md font rows), and replace the index page with the real home page. Drop from `assets.json` the images of the rejected directions that the build does not reuse, then run `node scripts/credits.mjs --site <slug>`;
 - keep `directions.json` and `DIRECTIONS.md` as the record. A site without `directions.json` builds exactly as before.
 
+## Prospect landings (`prospect.status` is `prospect`)
+
+A brief with `prospect.status: "prospect"` describes a business that has not bought anything: the page is a design proposal the owner shows it. Design: `openspec/changes/add-prospect-landings/design.md`; guide: `docs/prospect.md`. A brief without the section, or with `status: "sold"`, builds as usual.
+
+- **Facts and sources.** The brief's facts are public data read by hand, each backed by a `prospect.sources` entry (https URL, retrieval date) or listed in `assumed`. The proposal gets a section "Prospect: facts and sources" with every fact, its source URL and date, and every assumed value with its reason. Never read the prospect's own site here (`analyze-reference` is for design references only) and never add a fact the brief does not have.
+- **No brand, no consent.** Use no logo, photo, color or font of the business (the brief cannot list any). Images come from Commons and The Met only (`find-images.mjs`, `--sources commons,met` when the niche fits); no AI images, no owner portrait, no lead forms and no legal holder: nobody has agreed to them. Palette and fonts are picked from the niche with ui-ux-pro-max only, never from the prospect's look, and Decisions in the proposal and RUN.md say so.
+- **Before the build** run `node scripts/prospect.mjs write --site <slug>`: it writes `src/data/prospect.json`, which makes `BaseLayout` add `noindex` and the visible `data-prospect-notice` to every page, and `astro.config.mjs` write an empty sitemap and the `X-Robots-Tag: noindex` header. Do not remove, hide or restyle the notice away (it is a `role="note"` strip at the top of `<main>`), and do not add `noindex`, a sitemap or a header by hand.
+- **Final check.** `check-landing` runs the `prospect` rule (every page `noindex` with the notice naming the business, no sitemap URL, the header, no customer or AI image in `assets.json`, every fact sourced or assumed, `prospect.json` current). Fix the site, never the brief or the rule.
+- **At the end**, after RUN.md says `Result: passed`, run `node scripts/prospect.mjs kit --site <slug>`: it writes `sites/<slug>/SALES.md` (what was built, facts and sources, assumed values, what going live needs, talking points). It holds no message to the prospect; do not write one. Mention `SALES.md` in RUN.md.
+
 ## Phases
 
 ### 1. Brief

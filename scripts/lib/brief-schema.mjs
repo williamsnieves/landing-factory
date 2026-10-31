@@ -57,6 +57,26 @@ export const FORM_FIELDS = [
 ];
 export const FORM_PROVIDERS = ['web3forms', 'whatsapp'];
 export const FORM_MAX = 3;
+/** Prospect landings (design: openspec/changes/add-prospect-landings/design.md): a page built for a business that has not bought yet. */
+export const PROSPECT_STATUSES = ['prospect', 'sold'];
+/**
+ * The customer facts a prospect brief must back with a source (or list in `assumed`). `[]` stands for every index.
+ * Descriptive text (business.description, audience, tone) is the owner's own framing and needs no source.
+ */
+export const PROSPECT_FACT_FIELDS = [
+  'business.name',
+  'business.city',
+  'business.country',
+  'contact.email',
+  'contact.phone',
+  'contact.address',
+  'contact.hours',
+  'contact.social[]',
+  'offer[].name',
+  'offer[].price',
+  'offer[].url',
+  'goal.primary.url',
+];
 export const SEO_MAX_TEXT = 120;
 export const SEO_MAX_LIST = 10;
 export const DEPLOY_TARGETS = [
@@ -194,6 +214,18 @@ export const SCHEMA = obj({
     }),
     FORM_MAX,
   ),
+  // A page built for a business that has not bought anything yet: where each public fact comes from. While the
+  // status is `prospect` the brief cannot carry the prospect's brand or any consent (see validateBrief).
+  prospect: obj({
+    status: str({ enum: PROSPECT_STATUSES }),
+    sources: list(
+      obj({
+        field: str({ required: true }),
+        url: str({ required: true, format: 'https-url' }),
+        retrieved: str({ required: true, format: 'date' }),
+      }),
+    ),
+  }),
   deploy: obj({
     target: str({ enum: DEPLOY_TARGETS }),
     domain: str({ format: 'domain' }),
@@ -217,6 +249,7 @@ export function emptyBrief({ language = '', niche = '' } = {}) {
   const brief = build(SCHEMA);
   brief.language = language;
   brief.business.description = niche;
+  delete brief.prospect; // opt-in: only a brief for a business that has not bought yet carries it
   return brief;
 }
 
@@ -310,6 +343,17 @@ const FORMATS = {
     /^[a-z]{2,3}(-[A-Za-z0-9]+)*$/.test(v)
       ? null
       : 'expected a language tag such as "es" or "en-GB"',
+  'https-url': (v) =>
+    isUrl(v, ['https:']) ? null : 'expected a URL starting with https://',
+  date: (v) => {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+    const date = match && new Date(`${v}T00:00:00Z`);
+    return match &&
+      !Number.isNaN(date.getTime()) &&
+      date.toISOString().slice(0, 10) === v
+      ? null
+      : 'expected a date as YYYY-MM-DD';
+  },
   'http-url': (v) =>
     isUrl(v, ['http:', 'https:'])
       ? null
@@ -525,6 +569,7 @@ export function validateBrief(
           'a form requires a legal market (legal.markets) and legal.processing.forms: true, so a privacy policy exists and names the form provider',
         );
     }
+    errors.push(...prospectErrors(brief));
     if (Array.isArray(brief?.assets))
       brief.assets.forEach((asset, index) => {
         if (
@@ -585,6 +630,125 @@ export function validateBrief(
           );
       });
   }
+  return errors;
+}
+
+// --------------------------------------------------------------------------------------------------
+// Prospect landings
+
+/** Is this a brief for a business that has not bought yet (prospect.status is "prospect")? */
+export const isProspect = (brief) => brief?.prospect?.status === 'prospect';
+
+/** Concrete paths of the filled fact fields of a brief (`PROSPECT_FACT_FIELDS` with the indexes filled in). */
+export function prospectFactPaths(brief) {
+  const paths = [];
+  const count = (path) => {
+    const value = getPath(brief, path);
+    return Array.isArray(value) ? value.length : 0;
+  };
+  for (const pattern of PROSPECT_FACT_FIELDS) {
+    const list = /^(.+?)\[\](?:\.(.+))?$/.exec(pattern);
+    if (!list) paths.push(pattern);
+    else
+      for (let i = 0; i < count(list[1]); i++)
+        paths.push(`${list[1]}[${i}]${list[2] ? `.${list[2]}` : ''}`);
+  }
+  return paths.filter((path) => isFilled(getPath(brief, path)));
+}
+
+const sourceFields = (brief) =>
+  (Array.isArray(brief?.prospect?.sources) ? brief.prospect.sources : [])
+    .map((entry) => entry?.field)
+    .filter((field) => typeof field === 'string' && field !== '');
+
+/** Is the field backed by a `prospect.sources` entry, directly or through a parent (`offer[0]` covers `offer[0].price`)? */
+export function isSourced(brief, path) {
+  return sourceFields(brief).some(
+    (field) =>
+      field === path ||
+      path.startsWith(`${field}.`) ||
+      path.startsWith(`${field}[`),
+  );
+}
+
+/** Filled fact fields of a prospect brief that have neither a source nor an `assumed` entry. */
+export function uncoveredProspectFacts(brief) {
+  return prospectFactPaths(brief).filter(
+    (path) => !isSourced(brief, path) && !isAssumed(brief, path),
+  );
+}
+
+/** Cross-field rules of the `prospect` section (design Decisions 1 and 2). Returns [{ path, message }]. */
+function prospectErrors(brief) {
+  const errors = [];
+  const fail = (path, message) => errors.push({ path, message });
+  const sources = Array.isArray(brief.prospect?.sources)
+    ? brief.prospect.sources
+    : [];
+  const status = brief.prospect?.status;
+  if (sources.length && (status === undefined || status === ''))
+    fail('prospect.status', 'required when prospect.sources has entries');
+  const seen = new Set();
+  sources.forEach((entry, index) => {
+    const field = entry?.field;
+    if (typeof field !== 'string' || field.trim() === '') return; // reported above
+    const path = `prospect.sources[${index}].field`;
+    if (!parsePath(field))
+      return fail(
+        path,
+        `expected a dotted field path such as "contact.phone" or "offer[0].price", got "${field}"`,
+      );
+    if (seen.has(field))
+      return fail(path, `"${field}" appears twice in prospect.sources`);
+    seen.add(field);
+    if (!isFilled(getPath(brief, field)))
+      return fail(
+        path,
+        `"${field}" is empty or does not exist in the brief; a source backs a fact the page shows`,
+      );
+    if ((brief.assumed ?? []).some((a) => a?.field === field))
+      fail(
+        path,
+        `"${field}" is both sourced and assumed; it is either a public fact with a source or a value chosen for the business, never both`,
+      );
+  });
+  if (status !== 'prospect') return errors;
+
+  for (const path of uncoveredProspectFacts(brief))
+    fail(
+      path,
+      'a prospect fact needs a source in prospect.sources (https URL and retrieval date) or an entry in assumed',
+    );
+  const brand = "a prospect landing cannot use the prospect's brand";
+  const consent = 'a prospect cannot consent';
+  if (isFilled(brief.assets))
+    fail(
+      'assets',
+      `${brand}: no logo, photos or other files of its own; use archive images`,
+    );
+  if (isFilled(brief.brand?.colors))
+    fail('brand.colors', `${brand}: choose the palette from the niche`);
+  if (isFilled(brief.brand?.fonts))
+    fail('brand.fonts', `${brand}: choose the fonts from the niche`);
+  if (isFilled(brief.brand?.aiImages))
+    fail(
+      'brand.aiImages',
+      `${consent}: nobody has agreed to AI images; leave it empty`,
+    );
+  if (isFilled(brief.brand?.ownerPortrait))
+    fail('brand.ownerPortrait', `${consent}: leave it empty`);
+  if (isFilled(brief.legal?.holder))
+    fail(
+      'legal.holder',
+      `${consent}: nobody holds the page yet; leave the holder empty`,
+    );
+  if (isFilled(brief.legal?.privacyContact))
+    fail(
+      'legal.privacyContact',
+      `${consent}: nobody holds the page yet; leave it empty`,
+    );
+  if (isFilled(brief.forms))
+    fail('forms', `${consent}: a prospect page has no lead forms`);
   return errors;
 }
 
@@ -804,6 +968,17 @@ export const isPersonalBrand = (brief) =>
 export const isLocalBusiness = (brief) =>
   isFilled(brief?.contact?.address) || isFilled(brief?.business?.city);
 
+/** Questions that make no sense for a prospect: its brand, assets and consent are not ours to ask for. */
+const PROSPECT_SKIPPED = [
+  'assets',
+  'brand.colors',
+  'brand.fonts',
+  'brand.aiImages',
+  'brand.ownerPortrait',
+  'legal.holder',
+  'legal.privacyContact',
+];
+
 /** Fields still empty: required first, then recommended in interview order. */
 export function missingFields(brief) {
   const empty = MISSING_FIELDS.filter(
@@ -827,6 +1002,20 @@ export function missingFields(brief) {
         : [],
   );
   for (const k of keys) delete k.when;
+  if (isProspect(brief)) {
+    // A prospect has no brand to keep and nobody to consent: those questions are not asked; each fact needs its source.
+    const skip = (path) =>
+      PROSPECT_SKIPPED.some((p) => path === p || path.startsWith(`${p}.`));
+    return [
+      ...empty.filter((f) => f.required && !skip(f.path)),
+      ...empty.filter((f) => !f.required && !skip(f.path)),
+      ...uncoveredProspectFacts(brief).map((path) => ({
+        path: `prospect.sources(${path})`,
+        required: false,
+        hint: `Where is "${path}" published (https URL) and on what date did you read it? Record it in prospect.sources, or list the field in assumed.`,
+      })),
+    ];
+  }
   return [
     ...empty.filter((f) => f.required),
     ...empty.filter((f) => !f.required),
@@ -931,6 +1120,10 @@ export function summarizeBrief(brief) {
   field('Schema type', 'seo.schemaType');
   field('Deploy target', 'deploy.target');
   field('Domain', 'deploy.domain');
+  if (brief.prospect?.status) lines.push(`Prospect: ${brief.prospect.status}`);
+  (brief.prospect?.sources ?? []).forEach((s) =>
+    lines.push(`Source ${s.field}: ${s.url} (retrieved ${s.retrieved})`),
+  );
   (brief.assumed ?? []).forEach((a) =>
     lines.push(`Assumed ${a.field}: ${a.reason}`),
   );

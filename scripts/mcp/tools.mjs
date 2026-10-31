@@ -68,7 +68,7 @@ export function createTools({ root, jobs }) {
     {
       name: 'get_landing',
       description:
-        'Describe one landing: target, brief summary, last run result and phase, run totals and usage, latest QA and report verdicts, preview URL if known, the visual directions with the recorded choice when there are any, the revision rounds (count and last result), the repository it was exported to and whether it was transferred to its customer.',
+        'Describe one landing: target, brief summary, last run result and phase, run totals and usage, latest QA and report verdicts, preview URL if known, the visual directions with the recorded choice when there are any, the revision rounds (count and last result), the repository it was exported to whether it was transferred to its customer and its prospect status (prospect, sold or null).',
       inputSchema: obj({ slug }, ['slug']),
       annotations: READ,
       handler: ({ slug: s }) => getLanding(root, s),

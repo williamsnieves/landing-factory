@@ -29,6 +29,10 @@
 //                      language switcher, config/dictionary/brief locales that disagree, or a page that shows the UI
 //                      strings of another locale (src/i18n/ui.ts). With i18n, ai-provenance checks the disclosure on every
 //                      locale's home page and brief-facts checks the business name on each of them
+//   prospect           (only when brief.json has prospect.status "prospect" or "sold") prospect: a page without noindex or without the
+//                      visible notice naming the business, a sitemap URL, no X-Robots-Tag: noindex for /* in dist/_headers, a customer
+//                      or AI image in assets.json, a fact without a source or an assumed entry, a stale src/data/prospect.json;
+//                      sold: prospect.json not "sold" or a page still showing the notice (see docs/prospect.md)
 //   copy-match         (--refs) 8 words in a row of the built page text also appear in a reference page
 //
 // Warnings (never failures): archetype-target, the built layout signature is outside the ranges of the primary
@@ -51,6 +55,7 @@ import {
   getPath,
   isAssumed,
   isFilled,
+  uncoveredProspectFacts,
   validateBrief,
 } from './lib/brief-schema.mjs';
 import {
@@ -73,6 +78,7 @@ import {
   switcherOf,
 } from './lib/i18n-site.mjs';
 import { compareSignatures, targetWarnings } from './lib/layout-core.mjs';
+import { prospectContent } from './prospect.mjs';
 import { loadConfig } from './qa/config.mjs';
 import { SLUG_PATTERN, listSites } from './lib/sites.mjs';
 
@@ -1420,8 +1426,18 @@ export function i18nWarnings(siteDir) {
 // Rule: AI images have provenance, consent and a visible disclosure
 
 /** The first element carrying data-ai-disclosure: { text, hidden }, or null when the page has none. */
-export function aiDisclosureIn(html) {
-  const open = /<([a-zA-Z][\w:-]*)\b([^>]*\bdata-ai-disclosure\b[^>]*)>/g;
+export const aiDisclosureIn = (html) =>
+  markedElementIn(html, 'data-ai-disclosure');
+
+/**
+ * The first visible element carrying the attribute `attribute`, as { text, hidden }, else the first hidden one, else null.
+ * Hidden: the `hidden` attribute, aria-hidden="true", or an inline display:none / visibility:hidden.
+ */
+export function markedElementIn(html, attribute) {
+  const open = new RegExp(
+    `<([a-zA-Z][\\w:-]*)\\b([^>]*\\b${attribute}\\b[^>]*)>`,
+    'g',
+  );
   let found = null;
   for (const match of html.matchAll(open)) {
     const [whole, tag, attributes] = match;
@@ -1600,6 +1616,153 @@ export function checkAiProvenance(siteDir, manifest) {
 }
 
 // --------------------------------------------------------------------------------------------------
+// Rule: a prospect landing is marked and not indexed (design: add-prospect-landings, Decision 4)
+
+const NOINDEX_META = /<meta\b[^>]*\bname=["']robots["'][^>]*noindex/i;
+
+/** Does a `_headers` file (Cloudflare Pages syntax) send `X-Robots-Tag: noindex` for every path (`/*`)? */
+export function headersSendNoindex(headers) {
+  let current = null;
+  for (const line of String(headers).split('\n')) {
+    if (/^\s*#/.test(line) || line.trim() === '') continue;
+    if (!/^\s/.test(line)) {
+      current = line.trim();
+      continue;
+    }
+    if (current === '/*' && /^\s*x-robots-tag\s*:.*\bnoindex\b/i.test(line))
+      return true;
+  }
+  return false;
+}
+
+/**
+ * The `prospect` rule. Active only for a brief with a prospect section (status `prospect` or `sold`).
+ * Prospect: every page but 404.html is noindex and shows the visible notice naming the business, the sitemap has no URL,
+ * dist/_headers sends X-Robots-Tag: noindex for /*, assets.json holds no customer or AI image, every fact has a source
+ * or an `assumed` entry and src/data/prospect.json is current. Sold: prospect.json says sold and no page shows the notice.
+ */
+function hasProspectSection(siteDir) {
+  try {
+    const status = JSON.parse(readFileSync(join(siteDir, 'brief.json'), 'utf8'))
+      .prospect?.status;
+    return status === 'prospect' || status === 'sold';
+  } catch {
+    return false;
+  }
+}
+
+export function checkProspect(siteDir, manifest = readManifest(siteDir)) {
+  const briefPath = join(siteDir, 'brief.json');
+  if (!existsSync(briefPath)) return [];
+  const slug = basename(siteDir);
+  let brief;
+  try {
+    brief = JSON.parse(readFileSync(briefPath, 'utf8'));
+  } catch {
+    return []; // brief-facts reports an unreadable brief
+  }
+  const status = brief?.prospect?.status;
+  if (status !== 'prospect' && status !== 'sold') return [];
+  const failures = [];
+  const fail = (item, message) =>
+    failures.push(failure('prospect', item, message));
+
+  const dataFile = join(siteDir, 'src/data/prospect.json');
+  if (!existsSync(dataFile))
+    fail(
+      'src/data/prospect.json',
+      `src/data/prospect.json does not exist; run: node scripts/prospect.mjs write --site ${slug}`,
+    );
+  else if (readFileSync(dataFile, 'utf8') !== prospectContent(brief))
+    fail(
+      'src/data/prospect.json',
+      `src/data/prospect.json is out of date with brief.json; run: node scripts/prospect.mjs write --site ${slug}`,
+    );
+
+  const dist = join(siteDir, 'dist');
+  const pages = existsSync(dist)
+    ? walk(dist, (path) => path.endsWith('.html')).sort()
+    : null;
+  if (!pages) {
+    fail(
+      'dist',
+      `sites/${slug}/dist does not exist; build first (npm run build -w site-${slug}), the prospect check reads the built pages`,
+    );
+    return failures;
+  }
+  const business = squash(brief.business?.name ?? '');
+
+  if (status === 'sold') {
+    for (const path of pages) {
+      const html = readFileSync(path, 'utf8');
+      if (/\bdata-prospect-notice\b/.test(html))
+        fail(
+          `/${posix(relative(dist, path))}`,
+          `/${posix(relative(dist, path))} still shows the prospect notice although the site is sold; rebuild after: node scripts/prospect.mjs sold --site ${slug}`,
+        );
+    }
+    return failures;
+  }
+
+  for (const path of pages) {
+    const page = `/${posix(relative(dist, path))}`;
+    if (basename(path) === '404.html') continue;
+    const html = readFileSync(path, 'utf8');
+    if (!NOINDEX_META.test(html))
+      fail(page, `${page} has no <meta name="robots" content="noindex">`);
+    const notice = markedElementIn(html, 'data-prospect-notice');
+    if (!notice || notice.hidden || !notice.text)
+      fail(
+        page,
+        `${page} shows no visible notice (an element marked data-prospect-notice with text) saying the page is not the official website`,
+      );
+    else if (!squash(notice.text).includes(business))
+      fail(
+        page,
+        `${page}: the prospect notice does not name the business "${brief.business.name}": "${notice.text.slice(0, 120)}"`,
+      );
+  }
+  const sitemap = join(dist, 'sitemap.xml');
+  if (!existsSync(sitemap))
+    fail(
+      'dist/sitemap.xml',
+      'dist/sitemap.xml does not exist; the build must write an empty sitemap for a prospect',
+    );
+  else if (/<url\b/i.test(readFileSync(sitemap, 'utf8')))
+    fail(
+      'dist/sitemap.xml',
+      'dist/sitemap.xml lists a URL; a prospect landing is not submitted to search engines',
+    );
+  const headers = join(dist, '_headers');
+  if (
+    !existsSync(headers) ||
+    !headersSendNoindex(readFileSync(headers, 'utf8'))
+  )
+    fail(
+      'dist/_headers',
+      'dist/_headers does not send "X-Robots-Tag: noindex" for /*',
+    );
+  for (const entry of manifest.images)
+    if (entry?.source === 'customer' || entry?.source === 'ai')
+      fail(
+        'assets.json',
+        `assets.json has ${entry.source === 'ai' ? 'an AI image' : 'a customer file'} (${entry.file ?? entry.name ?? '?'}); a prospect landing uses archive images only: nobody has agreed to anything else`,
+      );
+  let uncovered = [];
+  try {
+    uncovered = uncoveredProspectFacts(brief);
+  } catch {
+    uncovered = [];
+  }
+  for (const field of uncovered)
+    fail(
+      field,
+      `${field} has neither a source in prospect.sources nor an entry in assumed`,
+    );
+  return failures;
+}
+
+// --------------------------------------------------------------------------------------------------
 // Orchestration
 
 export async function runChecks({
@@ -1636,6 +1799,9 @@ export async function runChecks({
     ...(readI18nConfig(siteDir) ? [['i18n', () => checkI18n(siteDir)]] : []),
     ...(manifest.images.some(isAi)
       ? [['ai-provenance', () => checkAiProvenance(siteDir, manifest)]]
+      : []),
+    ...(hasProspectSection(siteDir)
+      ? [['prospect', () => checkProspect(siteDir, manifest)]]
       : []),
     ...(existsSync(join(siteDir, 'brief.json'))
       ? [
@@ -1711,6 +1877,9 @@ Final check of sites/<slug>/ after site QA passes. Fails, naming the item, when:
                     a prompt that breaks the AI image prompt policy; a subject other than "owner"; an owner portrait without
                     brand.aiImages and brand.ownerPortrait both "allowed" in a brief. With i18n the disclosure must be on
                     every locale's home page, in that locale's language
+  prospect          (only with prospect.status in brief.json) a prospect page without noindex or the visible notice, a sitemap URL,
+                    no X-Robots-Tag: noindex in dist/_headers, a customer or AI image, an unsourced fact or a stale
+                    src/data/prospect.json; a sold site that still shows the notice (docs/prospect.md)
   copy-match        (--refs) ${SHINGLE_WORDS} words in a row of the built page also occur in a reference
 
   --site <slug>     the site (required)

@@ -1,0 +1,118 @@
+{
+  "version": 1,
+  "language": "es",
+  "business": {
+    "name": "Clínica Dental Alameda",
+    "description": "Clínica dental de barrio con revisiones, limpiezas y ortodoncia invisible.",
+    "city": "Sevilla",
+    "country": "España",
+    "kind": "service"
+  },
+  "offer": [
+    {
+      "name": "Revisión y limpieza",
+      "description": "Una primera visita para saber en qué punto está tu salud dental.",
+      "price": "45",
+      "currency": "EUR",
+      "url": "https://example.com/alameda/revision"
+    },
+    {
+      "name": "Ortodoncia invisible",
+      "description": "Alineadores transparentes con seguimiento mensual.",
+      "price": "",
+      "currency": "",
+      "url": ""
+    }
+  ],
+  "audience": {
+    "who": "Familias y adultos del barrio que llevan tiempo sin ir al dentista.",
+    "needs": "Una cita rápida, un precio claro y un trato sin prisas.",
+    "objections": "Miedo al dentista y dudas sobre el coste final del tratamiento."
+  },
+  "goal": {
+    "primary": {
+      "label": "Pedir cita",
+      "url": "https://example.com/alameda/cita"
+    },
+    "secondary": { "label": "", "url": "" }
+  },
+  "tone": ["tranquilo", "claro"],
+  "contact": {
+    "email": "citas@example.com",
+    "phone": "+34 954 000 111",
+    "address": "Calle Alameda 12, Sevilla",
+    "hours": "Lunes a viernes, de 9:00 a 20:00",
+    "social": []
+  },
+  "assets": [],
+  "brand": { "colors": [], "fonts": [], "keep": "", "avoid": "" },
+  "references": { "liked": [], "disliked": [] },
+  "legal": { "markets": ["ES"] },
+  "prospect": {
+    "status": "prospect",
+    "sources": [
+      {
+        "field": "business.name",
+        "url": "https://example.com/alameda",
+        "retrieved": "2026-10-30"
+      },
+      {
+        "field": "business.city",
+        "url": "https://example.com/alameda",
+        "retrieved": "2026-10-30"
+      },
+      {
+        "field": "business.country",
+        "url": "https://example.com/alameda",
+        "retrieved": "2026-10-30"
+      },
+      {
+        "field": "contact.email",
+        "url": "https://example.com/alameda/contacto",
+        "retrieved": "2026-10-30"
+      },
+      {
+        "field": "contact.phone",
+        "url": "https://example.com/alameda/contacto",
+        "retrieved": "2026-10-30"
+      },
+      {
+        "field": "contact.address",
+        "url": "https://example.com/alameda/contacto",
+        "retrieved": "2026-10-30"
+      },
+      {
+        "field": "offer[0].name",
+        "url": "https://example.com/alameda/revision",
+        "retrieved": "2026-10-30"
+      },
+      {
+        "field": "offer[0].price",
+        "url": "https://example.com/alameda/revision",
+        "retrieved": "2026-10-30"
+      },
+      {
+        "field": "offer[0].url",
+        "url": "https://example.com/alameda/revision",
+        "retrieved": "2026-10-30"
+      },
+      {
+        "field": "offer[1].name",
+        "url": "https://example.com/alameda/ortodoncia",
+        "retrieved": "2026-10-30"
+      },
+      {
+        "field": "goal.primary.url",
+        "url": "https://example.com/alameda/cita",
+        "retrieved": "2026-10-30"
+      }
+    ]
+  },
+  "assumed": [
+    {
+      "field": "contact.hours",
+      "reason": "The site does not list hours; typical clinic hours chosen for the draft."
+    }
+  ],
+  "notes": ""
+}
