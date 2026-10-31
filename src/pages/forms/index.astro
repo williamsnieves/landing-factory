@@ -1,0 +1,50 @@
+---
+// Demo of the lead forms layer (docs/forms.md): one web3forms form and one WhatsApp form. `noindex`, out of the
+// sitemap. The access key and the holder are fixtures (see _demo.ts); delete this folder in a real landing.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import LeadForm from '../../components/forms/LeadForm.astro';
+import { DEMO_BUSINESS, DEMO_FORMS, DEMO_LEGAL, DEMO_WHATSAPP } from './_demo';
+
+const [valuation, callback] = DEMO_FORMS;
+---
+
+<BaseLayout
+  title="Lead forms demo"
+  description="Demo page of the lead forms layer: a Web3Forms valuation form and a WhatsApp call back form."
+  noindex
+>
+  <section class="mx-auto max-w-2xl px-6 pt-24 pb-12">
+    <p class="text-ink-soft mb-4 text-sm tracking-widest uppercase">
+      Lead forms
+    </p>
+    <h1 class="font-display text-3xl leading-tight text-balance">
+      Ask for a valuation, or write on WhatsApp.
+    </h1>
+    <p class="text-ink-soft mt-6 text-lg">
+      The first form is a real HTML form that posts to Web3Forms and answers in
+      place when JavaScript runs. The second one sends nothing anywhere: it
+      opens a prefilled WhatsApp message.
+    </p>
+  </section>
+
+  <section class="mx-auto max-w-2xl px-6 pb-12">
+    <h2 class="font-display mb-6 text-2xl">Free valuation</h2>
+    <LeadForm
+      form={valuation}
+      legal={DEMO_LEGAL}
+      businessName={DEMO_BUSINESS}
+      whatsapp={DEMO_WHATSAPP}
+      thanksHref="/forms/thanks/"
+    />
+  </section>
+
+  <section class="mx-auto max-w-2xl px-6 pb-24">
+    <h2 class="font-display mb-6 text-2xl">Call me back</h2>
+    <LeadForm
+      form={callback}
+      legal={DEMO_LEGAL}
+      businessName={DEMO_BUSINESS}
+      whatsapp={DEMO_WHATSAPP}
+    />
+  </section>
+</BaseLayout>

@@ -23,6 +23,7 @@ import { staticHeaderItems } from './report/checks-headers.mjs';
 import { resolveReportConfig } from './report/config.mjs';
 import { distItems, loadDist } from './report/dist-scan.mjs';
 import { LEGAL_NOTE, legalItems } from './report/legal.mjs';
+import { formsLegalItem } from './report/legal-forms.mjs';
 import { seoItems } from './report/seo.mjs';
 import { countStatuses, summaryLine, verdictOf } from './report/items.mjs';
 import { checkLinks, linkItem, outboundLinks } from './report/links.mjs';
@@ -346,6 +347,13 @@ export async function runReport(values, deps = {}) {
         briefProblem: problem,
         qa,
         config: config.legal,
+        siteCommand: values.site
+          ? `node scripts/legal.mjs --site ${values.site} --write`
+          : 'node scripts/legal.mjs --site <slug> --write',
+      }),
+      formsLegalItem({
+        model,
+        providers: reportConfig.forms.providers,
         siteCommand: values.site
           ? `node scripts/legal.mjs --site ${values.site} --write`
           : 'node scripts/legal.mjs --site <slug> --write',

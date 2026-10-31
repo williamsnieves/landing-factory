@@ -69,6 +69,28 @@ function seoFiles() {
   };
 }
 
+// Lead forms (docs/forms.md): a site whose legal data (src/data/legal.json, written from the brief by
+// scripts/legal.mjs) says a form posts to Web3Forms opens that origin, and only that one, in form-action and
+// connect-src. These directives also restrict forms to 'self' and the provider. A site without such a form (and
+// the starter, which has no legal.json) gains nothing: no directive is added. public/_headers carries no CSP
+// beyond frame-ancestors, so it does not change.
+function formDirectives() {
+  try {
+    const file = fileURLToPath(
+      new URL('./src/data/legal.json', import.meta.url),
+    );
+    const forms = JSON.parse(readFileSync(file, 'utf8')).processing?.forms;
+    if (forms?.providers?.includes('web3forms'))
+      return [
+        "form-action 'self' https://api.web3forms.com",
+        "connect-src 'self' https://api.web3forms.com",
+      ];
+  } catch {
+    // no legal data: the site has no form
+  }
+  return [];
+}
+
 // Static output: deployable to Cloudflare Pages without an adapter.
 export default defineConfig({
   output: 'static',
@@ -80,7 +102,7 @@ export default defineConfig({
     // to scriptDirective.resources instead. frame-ancestors cannot be set in a meta tag, so public/_headers
     // keeps it as a response header.
     csp: {
-      directives: ["base-uri 'self'", "object-src 'none'"],
+      directives: ["base-uri 'self'", "object-src 'none'", ...formDirectives()],
       styleDirective: {
         // Style attributes (style="--x: 1" for custom properties, set by components and by the motion layer)
         // cannot be hashed, so style-src-attr keeps 'unsafe-inline'. Injected style is far less dangerous than

@@ -21,7 +21,12 @@ export interface LegalData {
     register: string;
   };
   privacyContact: string;
-  processing: { analytics: string; forms: boolean; embeds: string[] };
+  processing: {
+    analytics: string;
+    /** `true` in older files; `{ provider, providers, purposes, fields }` once the brief has forms (lead forms). */
+    forms: boolean | FormsProcessing;
+    embeds: string[];
+  };
   hosting: { target: string; name: string };
   thirdPartyHosts: string[];
   pending: string[];
@@ -32,6 +37,16 @@ export interface LegalData {
     language: string;
     paths: Partial<Record<'privacy' | 'notice', string>>;
   }[];
+}
+
+/** What the brief's `forms` section records for the privacy policy (written by scripts/legal.mjs). */
+export interface FormsProcessing {
+  /** The provider that really carries the data: `web3forms` when any form posts to it, else `whatsapp`. */
+  provider: 'web3forms' | 'whatsapp';
+  /** Every provider the forms use, sorted. */
+  providers: ('web3forms' | 'whatsapp')[];
+  purposes: string[];
+  fields: string[];
 }
 
 export interface Texts {
@@ -60,6 +75,8 @@ export interface Texts {
     analyticsLabel: string;
     analytics: Record<'none' | 'cookieless' | 'cookies', string>;
     forms: string;
+    /** Paragraphs about the providers of the lead forms (empty for `forms: true`). */
+    formsProviders: (forms: FormsProcessing) => string[];
     embeds: (list: string) => string;
     hostsHeading: string;
     hosts: (list: string) => string;
@@ -70,6 +87,90 @@ export interface Texts {
     contact: string;
     noticeLink: string;
   };
+}
+
+/** Words the form paragraphs use (the form component has the on-screen labels; these are the policy's own wording). */
+interface FormsWords {
+  fields: Record<string, string>;
+  purposes: Record<string, string>;
+  and: string;
+  web3forms: (fields: string, purposes: string) => string;
+  whatsapp: (fields: string) => string;
+}
+
+const list = (items: string[], and: string): string =>
+  items.length < 2
+    ? items.join('')
+    : `${items.slice(0, -1).join(', ')} ${and} ${items[items.length - 1]}`;
+
+const EN_FORMS: FormsWords = {
+  fields: {
+    name: 'name',
+    email: 'email address',
+    phone: 'phone number',
+    address: 'property address',
+    postcode: 'postcode',
+    propertyType: 'property type',
+    size: 'size',
+    message: 'message',
+    preferredTime: 'preferred time to call',
+  },
+  purposes: {
+    valuation: 'prepare and answer your valuation request',
+    contact: 'answer your message',
+    callback: 'call you back',
+    quote: 'prepare your quote',
+  },
+  and: 'and',
+  web3forms: (fields, purposes) =>
+    `The forms on this website are sent through Web3Forms, a service of Web3Creative (Kerala, India), which acts as a processor on behalf of the holder. When you submit a form, your browser sends what you entered (${fields}) and your IP address to Web3Forms servers in the United States, which is an international transfer of personal data. Web3Forms forwards the message by email to the holder and does not store submissions; its server logs with personal data are deleted about every two months. We use these data to ${purposes}, and we keep your request as long as needed to answer it.`,
+  whatsapp: (fields) =>
+    `If you choose to write to us on WhatsApp, the form prepares a message with what you entered (${fields}) and opens WhatsApp. Nothing is sent until you send the message there, and WhatsApp (Meta) processes it under its own terms and privacy policy.`,
+};
+
+const ES_FORMS: FormsWords = {
+  fields: {
+    name: 'nombre',
+    email: 'correo electrónico',
+    phone: 'teléfono',
+    address: 'dirección del inmueble',
+    postcode: 'código postal',
+    propertyType: 'tipo de inmueble',
+    size: 'superficie',
+    message: 'mensaje',
+    preferredTime: 'hora preferida para llamar',
+  },
+  purposes: {
+    valuation: 'preparar y responder tu solicitud de valoración',
+    contact: 'responder a tu mensaje',
+    callback: 'devolverte la llamada',
+    quote: 'preparar tu presupuesto',
+  },
+  and: 'y',
+  web3forms: (fields, purposes) =>
+    `Los formularios de este sitio web se envían a través de Web3Forms, un servicio de Web3Creative (Kerala, India), que actúa como encargado del tratamiento por cuenta del titular. Al enviar un formulario, tu navegador envía lo que has escrito (${fields}) y tu dirección IP a los servidores de Web3Forms en Estados Unidos, lo que supone una transferencia internacional de datos personales. Web3Forms reenvía el mensaje por correo electrónico al titular y no almacena los envíos; sus registros de servidor con datos personales se eliminan aproximadamente cada dos meses. Usamos estos datos para ${purposes}, y conservamos tu solicitud el tiempo necesario para responderla.`,
+  whatsapp: (fields) =>
+    `Si eliges escribirnos por WhatsApp, el formulario prepara un mensaje con lo que has escrito (${fields}) y abre WhatsApp. No se envía nada hasta que envías el mensaje allí, y WhatsApp (Meta) lo trata según sus propios términos y política de privacidad.`,
+};
+
+/** Paragraphs for each provider the lead forms use; a field or purpose outside the closed lists is left out. */
+function formsParagraphs(words: FormsWords, forms: FormsProcessing): string[] {
+  const fields = list(
+    forms.fields.flatMap((f) => (words.fields[f] ? [words.fields[f]] : [])),
+    words.and,
+  );
+  const purposes = list(
+    forms.purposes.flatMap((p) =>
+      words.purposes[p] ? [words.purposes[p]] : [],
+    ),
+    words.and,
+  );
+  return [
+    ...(forms.providers.includes('web3forms')
+      ? [words.web3forms(fields, purposes)]
+      : []),
+    ...(forms.providers.includes('whatsapp') ? [words.whatsapp(fields)] : []),
+  ];
 }
 
 const EN: Texts = {
@@ -120,6 +221,7 @@ const EN: Texts = {
     },
     forms:
       'If you contact us through a form or by email, we use the data you send to answer your request.',
+    formsProviders: (forms) => formsParagraphs(EN_FORMS, forms),
     embeds: (list) =>
       `This website embeds content from third parties: ${list}. These services may receive your IP address and may set cookies.`,
     hostsHeading: 'Third-party servers',
@@ -186,6 +288,7 @@ const ES: Texts = {
     },
     forms:
       'Si nos contactas mediante un formulario o por correo electrónico, usamos los datos que envías para responder a tu solicitud.',
+    formsProviders: (forms) => formsParagraphs(ES_FORMS, forms),
     embeds: (list) =>
       `Este sitio web incorpora contenido de terceros: ${list}. Estos servicios pueden recibir tu dirección IP y pueden instalar cookies.`,
     hostsHeading: 'Servidores de terceros',
@@ -221,6 +324,24 @@ export const legalPath = (
   locale: string,
 ): string | undefined =>
   data.locales?.find((entry) => entry.locale === locale)?.paths[kind];
+
+/**
+ * Where the privacy policy lives for a locale: the path in `legal.json` of a multi-locale site, else the page
+ * `legal.mjs` assumes for the data's language (`/privacy/`, `/privacidad/`). Forms link their consent to it.
+ */
+export const privacyPath = (data: LegalData, locale?: string): string => {
+  const slug = data.language === 'es' ? 'privacidad' : 'privacy';
+  return (
+    legalPath(data, 'privacy', locale ?? data.defaultLocale ?? data.language) ??
+    `/${slug}/`
+  );
+};
+
+/** The lead-forms record of the data, or `null` for older files (`forms: true`) and pages without forms. */
+export const formsProcessing = (data: LegalData): FormsProcessing | null =>
+  data.processing.forms && typeof data.processing.forms === 'object'
+    ? data.processing.forms
+    : null;
 
 /** The email for privacy requests: the privacy contact, else the holder's email, else empty. */
 export const privacyEmail = (data: LegalData): string =>

@@ -20,6 +20,8 @@ export const REPORT_DEFAULTS = Object.freeze({
   live: { timeoutMs: 10000 },
   // SEO text limits in characters (the seo area warns outside them).
   seo: { titleMin: 30, titleMax: 60, descriptionMin: 70, descriptionMax: 160 },
+  // Lead forms: the hosts a form that collects personal data may post to (the legal-forms item).
+  forms: { providers: ['api.web3forms.com'] },
 });
 
 const isObject = (v) =>
@@ -43,7 +45,14 @@ export function validateReportConfig(config) {
   const errors = [];
   const err = (path, message) => errors.push(`report.${path}: ${message}`);
   if (!isObject(config)) return ['report: must be an object'];
-  const allowed = [...NUMBER_KEYS, 'audit', 'externalLinks', 'live', 'seo'];
+  const allowed = [
+    ...NUMBER_KEYS,
+    'audit',
+    'externalLinks',
+    'live',
+    'seo',
+    'forms',
+  ];
   for (const key of Object.keys(config))
     if (!allowed.includes(key))
       err(key, `unknown key (allowed: ${allowed.join(', ')})`);
@@ -93,6 +102,28 @@ export function validateReportConfig(config) {
       err('seo.titleMin', 'must not be greater than seo.titleMax');
     if (seo.descriptionMin > seo.descriptionMax)
       err('seo.descriptionMin', 'must not be greater than seo.descriptionMax');
+  }
+  const forms = config.forms;
+  if (!isObject(forms)) err('forms', 'must be an object');
+  else {
+    for (const key of Object.keys(forms))
+      if (key !== 'providers')
+        err(`forms.${key}`, 'unknown key (allowed: providers)');
+    if (!Array.isArray(forms.providers))
+      err('forms.providers', 'must be an array of host names');
+    else
+      forms.providers.forEach((host, index) => {
+        if (
+          typeof host !== 'string' ||
+          !/^(?=.{1,253}$)([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/i.test(
+            host,
+          )
+        )
+          err(
+            `forms.providers[${index}]`,
+            'must be a host name such as "api.web3forms.com" (no protocol, no path)',
+          );
+      });
   }
   return errors;
 }

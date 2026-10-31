@@ -63,6 +63,7 @@ test('closure: the real entry points reach QA, report, deploy and lib modules an
     'scripts/qa/site.mjs',
     'scripts/landing-report.mjs',
     'scripts/report/legal.mjs',
+    'scripts/report/legal-forms.mjs',
     'scripts/report/source-scan.mjs',
     'scripts/report/mask.mjs',
     'scripts/deploy.mjs',
@@ -917,7 +918,9 @@ test('the exported lint configuration is for one site: eslint config copied, kni
   assert.equal(knip.workspaces, undefined);
   assert.ok(knip.entry.includes('src/i18n/urls.ts'));
   assert.ok(knip.entry.includes('src/scenes/*.ts'));
+  assert.ok(knip.entry.includes('src/components/forms/client.ts'));
   assert.ok(knip.ignore.includes('src/components/three/**'));
+  assert.ok(knip.ignore.includes('src/components/forms/**'));
   const pkg = JSON.parse(readFileSync(join(out, 'package.json'), 'utf8'));
   assert.equal(pkg.scripts.lint, 'npm run lint:code && npm run lint:unused');
   assert.equal(pkg.devDependencies['typescript-eslint'], '8.72.1');

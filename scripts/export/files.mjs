@@ -82,9 +82,18 @@ export const textOf = (entry) =>
 export function exportedKnipConfig() {
   return {
     $schema: 'https://unpkg.com/knip@6/schema.json',
-    entry: ['scripts/**/*.mjs', 'src/i18n/urls.ts', 'src/scenes/*.ts'],
+    entry: [
+      'scripts/**/*.mjs',
+      'src/i18n/urls.ts',
+      'src/scenes/*.ts',
+      'src/components/forms/client.ts',
+    ],
     project: ['src/**/*.{astro,ts,tsx,css}', 'scripts/**/*.mjs'],
-    ignore: ['src/components/three/**', 'src/components/legal/**'],
+    ignore: [
+      'src/components/three/**',
+      'src/components/legal/**',
+      'src/components/forms/**',
+    ],
     ignoreDependencies: ['eslint-plugin-jsx-a11y'],
   };
 }

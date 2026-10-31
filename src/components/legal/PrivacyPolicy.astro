@@ -2,7 +2,12 @@
 // These templates support compliance and are not legal advice. See texts.ts.
 // Privacy policy, rendered from src/data/legal.json (node scripts/legal.mjs --site <slug> --write).
 import LegalValue from './LegalValue.astro';
-import { privacyEmail, textsFor, type LegalData } from './texts';
+import {
+  formsProcessing,
+  privacyEmail,
+  textsFor,
+  type LegalData,
+} from './texts';
 
 interface Props {
   data: LegalData;
@@ -26,6 +31,7 @@ const analytics = data.processing.analytics as
   'none' | 'cookieless' | 'cookies';
 const host = data.hosting.name || p.hostFallback;
 const contact = privacyEmail(data);
+const forms = formsProcessing(data);
 const contactField = data.pending.includes('privacyContact')
   ? 'privacyContact'
   : 'holder.email';
@@ -72,6 +78,7 @@ const contactField = data.pending.includes('privacyContact')
       )}
     </li>
     {data.processing.forms && <li>{p.forms}</li>}
+    {forms && p.formsProviders(forms).map((text) => <li>{text}</li>)}
     {data.processing.embeds.length > 0 && (
       <li>{p.embeds(data.processing.embeds.join(', '))}</li>
     )}
