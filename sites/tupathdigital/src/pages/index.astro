@@ -1,5 +1,4 @@
 ---
-import { getImage } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Motion from '../components/motion/Motion.astro';
 import Header from '../components/sections/Header.astro';
@@ -8,19 +7,27 @@ import StoreStrip from '../components/sections/StoreStrip.astro';
 import Figures from '../components/sections/Figures.astro';
 import Catalog from '../components/sections/Catalog.astro';
 import HowItWorks from '../components/sections/HowItWorks.astro';
-import Coupons from '../components/sections/Coupons.astro';
 import Faq from '../components/sections/Faq.astro';
 import Closing from '../components/sections/Closing.astro';
 import Footer from '../components/sections/Footer.astro';
-import share from '../assets/images/gumroad-heoolh.png';
+import {
+  homeDescription,
+  homeJsonLd,
+  homeTitle,
+  shareImageUrl,
+} from '../data/seo';
 
-const title = 'tupathdigital: AI prompts, 3D assets and wallpapers';
-const description =
-  'Ready-to-use AI products: prompt guides, 3D game assets, wallpapers and practical guides on Etsy and Gumroad. 50% off with a code until Oct 31, 2026.';
-const og = await getImage({ src: share, format: 'jpg', width: 1000 });
+const og = await shareImageUrl(Astro.site!);
+const jsonLd = await homeJsonLd(Astro.site!);
 ---
 
-<BaseLayout title={title} description={description} lang="en" ogImage={og.src}>
+<BaseLayout
+  title={homeTitle}
+  description={homeDescription}
+  lang="en"
+  ogImage={og}
+  jsonLd={jsonLd}
+>
   <Motion slot="head" />
   <Header slot="header" />
   <Hero />
@@ -28,7 +35,6 @@ const og = await getImage({ src: share, format: 'jpg', width: 1000 });
   <Figures />
   <Catalog />
   <HowItWorks />
-  <Coupons />
   <Faq />
   <Closing />
   <Footer slot="footer" />

@@ -7,6 +7,13 @@ interface Props {
   lang?: string;
   /** Absolute or root-relative URL of the Open Graph image. */
   ogImage?: string;
+  /** Open Graph type of the page (`website` by default). */
+  ogType?: string;
+  /**
+   * Structured data (schema.org) written as `<script type="application/ld+json">`. Brief facts only; no review
+   * or rating markup without real reviews. `<` is escaped so a value can never close the script element.
+   */
+  jsonLd?: object | object[];
   /** Set to true on pages that should not be indexed (labs, tests). */
   noindex?: boolean;
 }
@@ -16,10 +23,18 @@ const {
   description,
   lang = 'en',
   ogImage,
+  ogType = 'website',
+  jsonLd,
   noindex = false,
 } = Astro.props;
 const canonical = Astro.site
   ? new URL(Astro.url.pathname, Astro.site).href
+  : undefined;
+// JSON.stringify never emits a raw `<`, so `</script>` inside a value cannot end the block.
+// The type is a variable so Prettier does not parse the block's text as JSON.
+const jsonLdType = 'application/ld+json';
+const jsonLdText = jsonLd
+  ? JSON.stringify(jsonLd).replace(/</g, '\\u003c')
   : undefined;
 ---
 
@@ -32,15 +47,18 @@ const canonical = Astro.site
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex" />}
     {canonical && <link rel="canonical" href={canonical} />}
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    <meta property="og:locale" content={lang} />
     {ogImage && <meta property="og:image" content={ogImage} />}
     <meta
       name="twitter:card"
       content={ogImage ? 'summary_large_image' : 'summary'}
     />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {jsonLdText && <script type={jsonLdType} set:html={jsonLdText} />}
     <slot name="head" />
   </head>
   <body>

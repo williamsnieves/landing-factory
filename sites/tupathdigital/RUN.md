@@ -101,3 +101,16 @@ To fetch by the owner: nothing.
 ## Totals
 
 Wall clock about 42 minutes in total (2026-10-23T18:39Z to 19:21Z, including the earlier synthesis run). Token count not reported. No remaining failures.
+
+## Owner changes 2026-10-31
+
+Preparation for production on the owner's domain (decisions of 2026-10-31). Result stays `passed`: every check below passed.
+
+- Coupons removed: the codes FALL2026 and 92xsh57 expired on 31 October 2026. No code, "50% off", discount badge, end date or coupon FAQ remains in the page, `catalog.ts` or the offer descriptions of `brief.json`; the Coupons section and its copy script are deleted and the header link is now "Stores". The hero coupon fragment became a "Catalog, 17 products" fragment, the third hero chip says "Prompts, 3D & wallpapers", the figure tile shows 4 shelves, and the "How it works" step 2 is "Buy in the store". Copy states no price claim and no invented fact.
+- Domain and deploy: `site: 'https://tupathdigital.com'` (apex canonical, `www` redirects at Cloudflare); brief `deploy` is `cloudflare-pages` on `tupathdigital.com`; `site.config.json` unchanged (Cloudflare Pages project `tupathdigital`, branch `main`).
+- SEO opt-in: `seoFiles()` in `astro.config.mjs` (no prospect parts), `public/robots.txt`, `BaseLayout` writes `og:url`, `og:locale`, `ogType` and the `jsonLd` prop, `src/data/seo.ts` holds the title, description, the absolute OG image (the owner's 450-prompts cover) and the JSON-LD graph (Organization, WebSite, ItemList of Products with offers from the brief prices and store URLs; no reviews or ratings). `seo.primaryKeyword` "AI products" is listed in `assumed`.
+- Analytics: Cloudflare Web Analytics, cookieless, enabled by the owner in the Pages project (no script tag in the HTML). The CSP allows `https://static.cloudflareinsights.com` in `script-src` and `https://cloudflareinsights.com` in `connect-src`. `legal.processing.analytics` is `cookieless`, `legal.json` was rewritten and the privacy policy (site's own `texts.ts`, `en` and `es`) names Cloudflare Web Analytics (Cloudflare, Inc.).
+- UTM: every store link of the page (header and hero buttons, store strip, product buttons, closing, 404, privacy) carries `utm_source=tupathdigital.com&utm_medium=referral&utm_campaign=landing` through `storeLink()` in `catalog.ts`; `brief.json` URLs are unchanged. The footer "Etsy shop" link stays without UTM because `check-landing` `brief-facts` compares the primary call-to-action URL with an `href` exactly.
+- Code: the brand mark is imported once in `catalog.ts` (`brandMark`) so `photo-uses` counts one use for the header, footer and structured data.
+
+Checks (2026-10-31): `brief validate` valid; `npm run qa -- --site tupathdigital` passed (Lighthouse mobile 99/100/100, desktop 100/100/100); section shots reviewed; static report 0 fail, 2 warn (`lh-assets` image savings, `legal-pages` no rule set for US; every `seo-*` item passes); `layout-signature --write`; `check-landing` passed (the same `archetype-target` warning as before); `credits` up to date; `handoff check --visibility private` ready; `npm run lint`, `npm run check -w site-tupathdigital` and Prettier clean.

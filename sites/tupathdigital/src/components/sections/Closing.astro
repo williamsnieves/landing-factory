@@ -1,8 +1,9 @@
 ---
 import {
-  COUPON_END,
   PRIMARY,
+  PRIMARY_HREF,
   SECONDARY,
+  SECONDARY_HREF,
   productCount,
 } from '../../data/catalog';
 ---
@@ -15,13 +16,13 @@ import {
         Pick a product. <em class="hl">Start</em> making.
       </h2>
       <p class="sub">
-        {productCount} products in two stores, half price with a code until{' '}
-        {COUPON_END}.
+        {productCount} products in two stores, ready to download as soon as you
+        buy.
       </p>
       <div class="actions">
         <a
           class="btn btn-lg"
-          href={PRIMARY.url}
+          href={PRIMARY_HREF}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -29,7 +30,7 @@ import {
         </a>
         <a
           class="btn btn-lg btn-ghost"
-          href={SECONDARY.url}
+          href={SECONDARY_HREF}
           target="_blank"
           rel="noopener noreferrer"
         >

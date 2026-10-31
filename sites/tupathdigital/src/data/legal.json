@@ -3,7 +3,7 @@
   "language": "en",
   "business": {
     "name": "tupathdigital",
-    "domain": ""
+    "domain": "tupathdigital.com"
   },
   "markets": ["US", "EU"],
   "pages": ["privacy"],
@@ -17,12 +17,12 @@
   },
   "privacyContact": "tupathdigital@gmail.com",
   "processing": {
-    "analytics": "none",
+    "analytics": "cookieless",
     "forms": false,
     "embeds": []
   },
   "hosting": {
-    "target": "undecided",
+    "target": "cloudflare-pages",
     "name": "Cloudflare Pages"
   },
   "thirdPartyHosts": [],

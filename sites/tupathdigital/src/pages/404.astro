@@ -2,7 +2,13 @@
 // Not-found page. Cloudflare Pages serves dist/404.html with status 404 for unknown paths.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Footer from '../components/sections/Footer.astro';
-import { BUSINESS, PRIMARY, SECONDARY } from '../data/catalog';
+import {
+  BUSINESS,
+  PRIMARY,
+  PRIMARY_HREF,
+  SECONDARY,
+  SECONDARY_HREF,
+} from '../data/catalog';
 ---
 
 <BaseLayout
@@ -39,7 +45,7 @@ import { BUSINESS, PRIMARY, SECONDARY } from '../data/catalog';
         </a>
         <a
           class="btn btn-lg btn-ghost"
-          href={PRIMARY.url}
+          href={PRIMARY_HREF}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -47,7 +53,7 @@ import { BUSINESS, PRIMARY, SECONDARY } from '../data/catalog';
         </a>
         <a
           class="btn btn-lg btn-ghost"
-          href={SECONDARY.url}
+          href={SECONDARY_HREF}
           target="_blank"
           rel="noopener noreferrer"
         >
