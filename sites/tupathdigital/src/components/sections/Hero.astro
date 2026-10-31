@@ -6,17 +6,18 @@ import coverPlanner from '../../assets/images/etsy-1888381994.jpg';
 import coverVehicles from '../../assets/images/etsy-4443144664.jpg';
 import coverCharacters from '../../assets/images/etsy-4448900410.jpg';
 import {
-  COUPON_END,
-  COUPONS,
   PRIMARY,
+  PRIMARY_HREF,
   SECONDARY,
+  SECONDARY_HREF,
   lowestPrice,
+  productCount,
 } from '../../data/catalog';
 
 const facts = [
   'Instant download',
   'Etsy & Gumroad',
-  `50% off until ${COUPON_END}`,
+  'Prompts, 3D & wallpapers',
 ];
 
 /* Product covers of the stack, back to front. Only the front one is eager. */
@@ -37,13 +38,12 @@ const covers = [
       </h1>
       <p class="lede">
         Prompt guides, 3D game assets, wallpaper packs and practical guides.
-        Pick a product, use the code for its store and download it straight
-        away.
+        Pick a product, open it in its store and download it straight away.
       </p>
       <div class="actions">
         <a
           class="btn btn-lg"
-          href={PRIMARY.url}
+          href={PRIMARY_HREF}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -51,7 +51,7 @@ const covers = [
         </a>
         <a
           class="btn btn-lg btn-ghost"
-          href={SECONDARY.url}
+          href={SECONDARY_HREF}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -96,10 +96,9 @@ const covers = [
             fetchpriority="high"
           />
         </div>
-        <div class="frag f-coupon" data-parallax="0.9">
-          <span class="tag-mono">Code</span>
-          <strong>{COUPONS.Etsy.code}</strong>
-          <span class="tag-mono dim">50% off</span>
+        <div class="frag f-count" data-parallax="0.9">
+          <span class="tag-mono">Catalog</span>
+          <strong>{productCount} products</strong>
         </div>
         <div class="frag f-format" data-parallax="-0.7">
           <span class="tag-mono">Formats</span>
@@ -274,10 +273,7 @@ const covers = [
     text-transform: uppercase;
     color: var(--color-accent);
   }
-  .tag-mono.dim {
-    color: var(--color-ink-soft);
-  }
-  .f-coupon {
+  .f-count {
     left: -2%;
     top: 30%;
   }
@@ -303,7 +299,7 @@ const covers = [
     .frag strong {
       font-size: var(--text-xs);
     }
-    .f-coupon {
+    .f-count {
       left: 0;
     }
     .f-format {

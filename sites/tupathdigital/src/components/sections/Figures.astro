@@ -1,5 +1,5 @@
 ---
-import { COUPON_END, productCount, storeCount } from '../../data/catalog';
+import { productCount, shelves, storeCount } from '../../data/catalog';
 
 const figures = [
   {
@@ -9,9 +9,9 @@ const figures = [
   },
   { value: String(storeCount), label: 'Stores', note: 'Etsy and Gumroad' },
   {
-    value: '50%',
-    label: 'Off with a code',
-    note: `Until ${COUPON_END}`,
+    value: String(shelves.length),
+    label: 'Shelves',
+    note: 'AI, 3D, wallpapers, guides',
   },
   {
     value: 'Instant',

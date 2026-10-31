@@ -107,7 +107,7 @@ const EN: Texts = {
     analytics: {
       none: 'This website does not use analytics and does not set cookies.',
       cookieless:
-        'This website measures visits with a service that does not store information on your device and does not set cookies.',
+        'This website measures visits with Cloudflare Web Analytics, a service of Cloudflare, Inc. It does not store information on your device and does not set cookies. The statistics are aggregated: pages visited, referrer, country and device type.',
       cookies:
         'This website uses analytics cookies and asks for your consent before setting them.',
     },
@@ -173,7 +173,7 @@ const ES: Texts = {
     analytics: {
       none: 'Este sitio web no usa analítica ni instala cookies.',
       cookieless:
-        'Este sitio web mide las visitas con un servicio que no guarda información en tu dispositivo ni instala cookies.',
+        'Este sitio web mide las visitas con Cloudflare Web Analytics, un servicio de Cloudflare, Inc. No guarda información en tu dispositivo ni instala cookies. Las estadísticas son agregadas: páginas visitadas, página de origen, país y tipo de dispositivo.',
       cookies:
         'Este sitio web usa cookies de analítica y pide tu consentimiento antes de instalarlas.',
     },

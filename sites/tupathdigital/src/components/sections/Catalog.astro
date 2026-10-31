@@ -1,5 +1,5 @@
 ---
-import { COUPON_END, productCount, shelves } from '../../data/catalog';
+import { productCount, shelves } from '../../data/catalog';
 import ProductTile from './ProductTile.astro';
 
 /* Filter pills are radio inputs: they work without JavaScript. */
@@ -25,8 +25,8 @@ const filters = [
         Pick your <em class="hl">product</em>
       </h2>
       <p class="lead">
-        {productCount} products on Etsy and Gumroad, half price with a code
-        until {COUPON_END}. Filter by type, then open the listing in its store.
+        {productCount} products on Etsy and Gumroad. Filter by type, then open
+        the listing in its store.
       </p>
     </div>
 

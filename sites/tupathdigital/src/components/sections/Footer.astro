@@ -1,12 +1,12 @@
 ---
 import { Image } from 'astro:assets';
-import brandMark from '../../assets/images/logo.webp';
 import credits from '../../data/credits.json';
 import {
   BUSINESS,
-  COUPON_END,
+  brandMark,
   PRIMARY,
   SECONDARY,
+  SECONDARY_HREF,
   SOCIAL,
 } from '../../data/catalog';
 
@@ -36,7 +36,7 @@ const entries = credits as Credit[];
             </a>
           </li>
           <li>
-            <a href={SECONDARY.url} target="_blank" rel="noopener noreferrer">
+            <a href={SECONDARY_HREF} target="_blank" rel="noopener noreferrer">
               {SECONDARY.label}
             </a>
           </li>
@@ -60,7 +60,7 @@ const entries = credits as Credit[];
           {c.author} ({c.license}).
         </span>
       ))}{' '}
-      &copy; 2026 {BUSINESS}. Coupon codes end on {COUPON_END}.
+      &copy; 2026 {BUSINESS}.
     </p>
   </div>
 </footer>
