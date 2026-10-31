@@ -1,6 +1,5 @@
 ---
 import { Image } from 'astro:assets';
-import { COUPON_END, COUPON_END_ISO } from '../../data/catalog';
 import type { Product } from '../../data/catalog';
 
 interface Props {
@@ -44,7 +43,7 @@ const sizes = '(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw';
           </p>
           <a
             class="btn btn-sm"
-            href={s.url}
+            href={s.href}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`View on ${s.name}: ${s.title}`}
@@ -52,14 +51,6 @@ const sizes = '(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw';
             View on {s.name}
           </a>
         </div>
-        <p class="badge">
-          <span>
-            <b>50% off</b> with code <b class="code">{s.code}</b>
-          </span>
-          <span class="until">
-            Until <time datetime={COUPON_END_ISO}>{COUPON_END}</time>
-          </span>
-        </p>
       </div>
     ))}
   </div>
@@ -169,32 +160,5 @@ const sizes = '(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw';
     color: var(--color-ink-soft);
     font-family: var(--font-mono);
     font-size: var(--text-xs);
-  }
-  .badge {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    margin: 0;
-    padding: 0.7rem 0.9rem;
-    border-radius: var(--radius-sm);
-    background: color-mix(
-      in oklab,
-      var(--color-primary) 16%,
-      var(--color-surface)
-    );
-    color: var(--color-ink);
-    font-size: var(--text-xs);
-    line-height: 1.4;
-  }
-  .badge .code {
-    font-family: var(--font-mono);
-    white-space: nowrap;
-  }
-  .badge .until {
-    color: var(--color-ink-soft);
-  }
-  .badge b {
-    color: var(--color-accent);
-    font-weight: 700;
   }
 </style>

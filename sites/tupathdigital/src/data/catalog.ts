@@ -1,11 +1,13 @@
 /**
- * The catalog of the page. Titles, prices, URLs and coupon codes are read from
+ * The catalog of the page. Titles, prices and URLs are read from
  * brief.json (the owner's listings), so they are shown exactly as given. This
- * file only adds the layout: shelf, cover, alt text, and mono format tags.
+ * file only adds the layout: shelf, cover, alt text, and mono format tags, and
+ * the one helper that tags outbound store links for attribution.
  */
 import type { ImageMetadata } from 'astro';
 import brief from '../../brief.json';
 
+import brandMark from '../assets/images/logo.webp';
 import gumHeoolh from '../assets/images/gumroad-heoolh.png';
 import gumUfvyu from '../assets/images/gumroad-ufvyu.png';
 import gumFrbcf from '../assets/images/gumroad-frbcf.png';
@@ -24,17 +26,31 @@ import etsyFreelance from '../assets/images/etsy-4349241344.jpg';
 import etsyFinanceEs from '../assets/images/etsy-4298208749.jpg';
 import etsyFinanceEn from '../assets/images/etsy-4297967816.jpg';
 
+/** The brand mark, imported once here so the header, the footer and the structured data share one use. */
+export { brandMark };
 export const PRIMARY = brief.goal.primary;
 export const SECONDARY = brief.goal.secondary;
 export const SOCIAL = brief.contact.social;
 export const BUSINESS = brief.business.name;
 
-export const COUPONS = {
-  Etsy: { code: 'FALL2026', url: PRIMARY.url },
-  Gumroad: { code: '92xsh57', url: SECONDARY.url },
+/** Attribution parameters added to every outbound store link (they show up in the Etsy and Gumroad stats). */
+const UTM = {
+  utm_source: 'tupathdigital.com',
+  utm_medium: 'referral',
+  utm_campaign: 'landing',
 } as const;
-export const COUPON_END = 'Oct 31, 2026';
-export const COUPON_END_ISO = '2026-10-31';
+
+/** A store URL with the UTM parameters appended; a query string that is already there is kept. */
+export function storeLink(url: string): string {
+  const link = new URL(url);
+  for (const [key, value] of Object.entries(UTM))
+    link.searchParams.set(key, value);
+  return link.href;
+}
+
+/** Primary and secondary calls to action, with attribution. */
+export const PRIMARY_HREF = storeLink(PRIMARY.url);
+export const SECONDARY_HREF = storeLink(SECONDARY.url);
 
 export type StoreName = 'Etsy' | 'Gumroad';
 
@@ -43,8 +59,10 @@ export interface Store {
   title: string;
   /** Price as listed, formatted like "$14.50". */
   price: string;
+  /** The listing URL from the brief, without attribution (structured data uses it). */
   url: string;
-  code: string;
+  /** The listing URL with the UTM parameters, for the buttons. */
+  href: string;
 }
 
 export interface Product {
@@ -75,7 +93,7 @@ function store(listingId: string): Store {
     title: offer.name,
     price: formatPrice(offer.price),
     url: offer.url,
-    code: COUPONS[name].code,
+    href: storeLink(offer.url),
   };
 }
 

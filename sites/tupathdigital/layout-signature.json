@@ -7,10 +7,10 @@
     "height": 900
   },
   "features": {
-    "sectionCount": 8,
-    "cols1Share": 0.63,
-    "cols2Share": 0.13,
-    "cols3Share": 0.25,
+    "sectionCount": 7,
+    "cols1Share": 0.57,
+    "cols2Share": 0.14,
+    "cols3Share": 0.29,
     "splitRatio": 0.46,
     "fullBleedShare": 0,
     "imageRadius": 0,
@@ -18,11 +18,11 @@
     "buttonShape": "pill",
     "headingScale": 5.9,
     "headingAlign": "left",
-    "headingCase": 0.13,
+    "headingCase": 0.14,
     "eyebrowShare": 1,
-    "wordsPerScreen": 94,
+    "wordsPerScreen": 79,
     "footerType": "minimal",
-    "mediaPerScreen": 2,
+    "mediaPerScreen": 2.3,
     "rotatedShare": 0.09,
     "overlapShare": 0.23,
     "stickyCount": 1
@@ -59,12 +59,6 @@
       "eyebrow": true
     },
     {
-      "id": "coupons",
-      "cols": 1,
-      "fullBleed": false,
-      "eyebrow": true
-    },
-    {
       "id": "faq",
       "cols": 1,
       "fullBleed": false,
@@ -78,22 +72,20 @@
     }
   ],
   "mobile": {
-    "screens": 22.29,
-    "wordsPerScreen": 46,
-    "sectionCount": 8
+    "screens": 19,
+    "wordsPerScreen": 40,
+    "sectionCount": 7
   },
   "hashes": [
     "3a8e8eea9a8e6cb3",
-    "9a9a89808231c6c6",
-    "d292c684d2d29490",
-    "9a924888a0d0d2b2",
-    "9292d2d2d2a186d6",
-    "9696b6da94929292",
-    "1adaa49696969696",
-    "aeb4929292b2da92",
-    "2a82e2b4b45b8484",
-    "ba8a31929030120c",
-    "1668f8f0e0982282",
-    "6a68f8e0f02aa2c2"
+    "8a9e8980a421c6d6",
+    "d29e86c6da959090",
+    "8acaa0d0d2b290b2",
+    "b2d291969696b692",
+    "9a929292a4da6996",
+    "96969648d2929292",
+    "bada1d82a4b4b441",
+    "1a9ad084d0e8f8f0",
+    "6af8e0e01aa292e2"
   ]
 }

@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-31 (add-product-led-saas-archetype merged, PR #43, and archived on `change/add-prospect-landings`, which now implements `add-prospect-landings`; add-landing-restyle merged, PR #42).
+Read this first in a new or compacted session. Last updated: 2026-10-31 (add-prospect-landings merged, PR #44, and archived on `change/tupathdigital-handoff`, which prepares tupathdigital for production; add-product-led-saas-archetype merged, PR #43).
 
 ## Working agreements
 
@@ -51,10 +51,21 @@ Read this first in a new or compacted session. Last updated: 2026-10-31 (add-pro
 | add-lead-forms (brief `forms`, `<LeadForm />` and `forms` layer, Web3Forms with a WhatsApp fallback, CSP only where used, privacy text naming the provider, `legal-forms` report item, starter demo `/forms/`) | Merged (PR #41) and archived on `change/add-landing-restyle`. First real submission pending (owner's key) |
 | add-landing-restyle (`revise-landing --restyle`, palette and font changes on the same layout) | Merged (PR #42), archived on `change/add-product-led-saas-archetype` |
 | add-product-led-saas-archetype (the `product-led-saas` archetype sheet, three traits, reference rules) | Merged (PR #43), archived on `change/add-prospect-landings` |
+| add-prospect-landings (brief `prospect` section with a source per fact, `prospect.mjs write\|kit\|sold`, `noindex` and a visible notice, the `prospect` rule of `check-landing`, the sales kit) | Merged (PR #44), archived on `change/tupathdigital-handoff` |
 
 ## Resume here (2026-10-31)
 
-`main` has everything up to PR #43 (add-product-led-saas-archetype). Branch `change/add-prospect-landings` holds the add-product-led-saas-archetype archive and the in-progress change `add-prospect-landings` (brief `prospect` section with a source per fact, `scripts/prospect.mjs` `write|kit|sold`, `noindex` and a visible notice on every page, an empty sitemap and `X-Robots-Tag`, the `prospect` rule of `check-landing`, the sales kit `SALES.md`; guide `docs/prospect.md`). Open its pull request when the checks pass.
+`main` has everything up to PR #44 (add-prospect-landings). Branch `change/tupathdigital-handoff` holds the add-prospect-landings archive and prepares `sites/tupathdigital/` for production on the owner's domain (owner decisions 2026-10-31):
+- Coupons removed (FALL2026 and 92xsh57 expired on 31 October 2026): no code, discount badge, end date or coupon FAQ left, and the Coupons section is gone. The hero fragment and the figure tile now state facts from the brief (17 products, 4 shelves). New coupons and products will come from the owner.
+- Domain `tupathdigital.com` (apex canonical, `www` redirects at Cloudflare), host Cloudflare Pages, `site` set in `astro.config.mjs`, brief `deploy` filled.
+- SEO opted in: `seoFiles()` (sitemap, `Sitemap:` line), `robots.txt`, canonical, `og:*`, `twitter:card`, JSON-LD (`src/data/seo.ts`: Organization, WebSite and an ItemList of Products with the brief prices and store URLs, no reviews). Primary keyword "AI products" is assumed in the brief.
+- Analytics: Cloudflare Web Analytics, cookieless. The owner enables it in the Pages project (the beacon is injected at the edge, nothing in the HTML); the CSP allows `https://static.cloudflareinsights.com` (script) and `https://cloudflareinsights.com` (connect); the privacy policy names Cloudflare, Inc.
+- UTM (`utm_source=tupathdigital.com&utm_medium=referral&utm_campaign=landing`) on the store buttons and calls to action through `storeLink()` in `catalog.ts`. The footer "Etsy shop" link stays untagged: `check-landing` `brief-facts` needs the exact primary URL as an `href` on the page.
+- Legal holder stays "tupathdigital" for now.
+
+**Next:** `/landing-handoff tupathdigital` to a private repository on Cloudflare Pages (the owner enables Web Analytics in the project).
+
+**Open items:** legal holder data (tax id, address; the Spanish legal notice under LSSI-CE if the owner sells from Spain; the US has no rule set, so the report warns), new coupons and products from the owner, review of the privacy policy by a lawyer before production.
 
 **add-lead-forms in short (merged 2026-10-31, `docs/forms.md`, CLAUDE.md "Lead forms").**
 - **Owner decisions (2026-10-30):** a hosted form service, Web3Forms first, and no backend of our own; a prefilled WhatsApp message as the fallback when there is no access key.
@@ -89,8 +100,8 @@ Read this first in a new or compacted session. Last updated: 2026-10-31 (add-pro
 
 1. ~~`add-landing-restyle`~~: merged (PR #42). The first real restyle round is optional (owner).
 2. ~~`add-product-led-saas-archetype`~~: merged (PR #43). The `product-led-saas` sheet from the four reference sheets, lending `ui-frame-hero`, `two-tone-heading`, `logo-strip-under-hero`, with rules against invented product proof.
-3. Prospect mode (`add-prospect-landings`, in progress on `change/add-prospect-landings`): public facts with sources, no prospect brand assets, `noindex` until sold, a sales kit.
-4. tupathdigital to production in a private repository, last (owner).
+3. ~~Prospect mode (`add-prospect-landings`)~~: merged (PR #44): public facts with sources, no prospect brand assets, `noindex` until sold, a sales kit.
+4. tupathdigital to production in a private repository, last (owner): prepared on `change/tupathdigital-handoff` (see above); next is `/landing-handoff tupathdigital`.
 
 **Two tracks and the repository (owner, 2026-10-28, `docs/channels.md`):** track 1, the owner builds landings and then offers them; track 2 later, a self-serve web app driven by the Agent SDK with the same harness; Telegram serves both. The factory repository stays public (free CI) until the flow is polished and tupathdigital is in production, then goes private.
 
@@ -145,10 +156,10 @@ Reminder scheduled for 2026-11-01 (trigger `trig_013qv2DNicfU16Ah9auQ5uWb`): the
 
 ## tupathdigital (owner's landing) facts
 
-- Brief: `sites/tupathdigital/brief.json` (English page; 20 listings, 3 sold in both stores, so 17 cards; prices in USD; coupons 50% until 31 Oct 2026; downloads instant, some via a Google Drive link; about 9 sales, not shown; no domain yet; legal markets US and EU, holder name `tupathdigital`, legal and privacy email tupathdigital@gmail.com (not `contact.email`), no analytics, forms or embeds; deploy target undecided). Product data: Gumroad public pages, Etsy from the owner's CSV export (Etsy listing pages answer with a bot challenge; never bypassed).
-- Has `/privacy/`, a 404 page, the starter's script CSP, HSTS and COOP. Report warns only on image savings, "no rule set for US" and the "50% off" price claims (review them against the EU 30-day rule or remove the coupons after 31 October).
+- Brief: `sites/tupathdigital/brief.json` (English page; 20 listings, 3 sold in both stores, so 17 cards; prices in USD; coupons removed 2026-10-31 (they expired); downloads instant, some via a Google Drive link; about 9 sales, not shown; no domain yet; legal markets US and EU, holder name `tupathdigital`, legal and privacy email tupathdigital@gmail.com (not `contact.email`), analytics Cloudflare Web Analytics (cookieless), no forms or embeds; Cloudflare Pages on tupathdigital.com). Product data: Gumroad public pages, Etsy from the owner's CSV export (Etsy listing pages answer with a bot challenge; never bypassed).
+- Has `/privacy/`, a 404 page, the starter's script CSP, HSTS and COOP. Report warns only on image savings and "no rule set for US".
 - References: `patterns/craftsman-contractor-21st-app.md`, `patterns/crypgo-21st-app.md`. No 3D models (owner).
-- Coupons: codes and end date live in `sites/tupathdigital/src/data/catalog.ts` (`COUPONS`, `COUPON_END`, `COUPON_END_ISO`); the "50%" figure and the page meta description in `src/pages/index.astro` repeat them. Changing a coupon = edit those, update the brief notes, run site QA and `check-landing`, open a PR. A `coupon` field in the brief schema would make this data-driven (candidate for a later change).
+- Coupons: removed on 2026-10-31. When the owner sends new ones, they need a coupon wording again in `catalog.ts`, the hero, the tiles and the FAQ (git history of `change/tupathdigital-handoff` has the old design); a `coupon` field in the brief schema would make this data-driven (candidate for a later change).
 
 ## Owner decisions to keep
 

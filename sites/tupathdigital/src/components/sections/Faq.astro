@@ -1,14 +1,8 @@
 ---
-import { COUPON_END } from '../../data/catalog';
-
 const items = [
   {
     q: 'How do I get my files?',
     a: 'Download them straight from the store after you buy, or through the Google Drive link included with your purchase.',
-  },
-  {
-    q: 'Where do I enter the code?',
-    a: 'At checkout, on Etsy or on Gumroad. Each store has its own code, shown in the coupon section of this page.',
   },
   {
     q: 'Which store should I choose?',
@@ -17,10 +11,6 @@ const items = [
   {
     q: 'Which file formats do I get?',
     a: 'The formats are named in each listing title: for example PDF, Canva, Notion and ChatGPT for the guides and planners, or GLB, FBX and OBJ for the 3D models. Open the listing for the full details.',
-  },
-  {
-    q: 'When do the codes end?',
-    a: `Both codes end on ${COUPON_END}.`,
   },
 ];
 ---
@@ -32,7 +22,7 @@ const items = [
       <h2 id="faq-title" class="h2">
         Before you <em class="hl">buy</em>
       </h2>
-      <p class="lead">The short answers about downloads, codes and stores.</p>
+      <p class="lead">The short answers about downloads and stores.</p>
     </div>
     <div class="list" data-reveal data-reveal-delay="0.1">
       {items.map((it, i) => (

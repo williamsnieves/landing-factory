@@ -1,7 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import brandMark from '../../assets/images/logo.webp';
-import { BUSINESS, PRIMARY } from '../../data/catalog';
+import { BUSINESS, PRIMARY, PRIMARY_HREF, brandMark } from '../../data/catalog';
 ---
 
 <header class="site-header">
@@ -21,12 +20,12 @@ import { BUSINESS, PRIMARY } from '../../data/catalog';
       <nav aria-label="Page" class="nav">
         <a href="#catalog">Products</a>
         <a href="#how">How it works</a>
-        <a href="#coupons">Coupons</a>
+        <a href="#stores">Stores</a>
         <a href="#faq">FAQ</a>
       </nav>
       <a
         class="btn btn-sm"
-        href={PRIMARY.url}
+        href={PRIMARY_HREF}
         target="_blank"
         rel="noopener noreferrer"
       >
