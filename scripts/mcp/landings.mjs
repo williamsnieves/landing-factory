@@ -226,6 +226,14 @@ function exportOf(root, slug) {
   };
 }
 
+/** The prospect status of a landing's brief (`prospect` or `sold`), or null when the brief has no prospect section. */
+function prospectOf(root, slug) {
+  const path = join(siteDir(root, slug), 'brief.json');
+  if (!existsSync(path)) return null;
+  const status = readJson(path)?.prospect?.status;
+  return typeof status === 'string' && status !== '' ? status : null;
+}
+
 export function getLanding(root, slug) {
   assertSlug(slug);
   const dir = siteDir(root, slug);
@@ -264,6 +272,7 @@ export function getLanding(root, slug) {
     previewUrl: previewUrl(root, slug),
     directions: directionsOf(root, slug),
     revisions: revisionsOf(root, slug),
+    prospect: prospectOf(root, slug),
     ...exportOf(root, slug),
     runPhase: run.phase,
     runTotals: run.totals,

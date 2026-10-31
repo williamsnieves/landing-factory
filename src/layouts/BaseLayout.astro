@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import ProspectNotice from '../components/prospect/ProspectNotice.astro';
 
 interface Props {
   title: string;
@@ -45,7 +46,7 @@ const {
   ogImage,
   ogType = 'website',
   jsonLd,
-  noindex = false,
+  noindex: noindexProp = false,
   skipLabel = 'Skip to content',
   localeSlugs,
 } = Astro.props;
@@ -54,6 +55,13 @@ const {
 const bridge = Object.values(
   import.meta.glob('../i18n/urls.ts', { eager: true }),
 )[0] as I18nBridge | undefined;
+// A prospect landing (src/data/prospect.json, written by scripts/prospect.mjs) is a design proposal for a business that
+// has not bought yet: every page is noindex and shows a notice. A site without the file never imports it.
+const prospect = Object.values(
+  import.meta.glob('../data/prospect.json', { eager: true }),
+)[0] as { default: { status: string; business: string } } | undefined;
+const isProspect = prospect?.default.status === 'prospect';
+const noindex = noindexProp || isProspect;
 const lang = langProp ?? Astro.currentLocale ?? 'en';
 // hreflang alternates: one per locale plus x-default; not on noindex pages (404, placeholders).
 const alternates =
@@ -115,6 +123,9 @@ const jsonLdText = jsonLd
     </a>
     <slot name="header" />
     <main id="main" tabindex="-1">
+      {isProspect && prospect && (
+        <ProspectNotice business={prospect.default.business} locale={lang} />
+      )}
       <slot />
     </main>
     <slot name="footer" />

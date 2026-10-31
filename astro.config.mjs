@@ -4,6 +4,20 @@ import tailwindcss from '@tailwindcss/vite';
 import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
+// A prospect landing (src/data/prospect.json says "prospect", written by scripts/prospect.mjs) is a design proposal for
+// a business that has not bought yet: the sitemap lists no page and dist/_headers gets X-Robots-Tag: noindex for every
+// path. robots.txt keeps Allow: / so crawlers can read the noindex. A site without the file is unchanged.
+function isProspect() {
+  try {
+    const file = fileURLToPath(
+      new URL('./src/data/prospect.json', import.meta.url),
+    );
+    return JSON.parse(readFileSync(file, 'utf8')).status === 'prospect';
+  } catch {
+    return false;
+  }
+}
+
 // Writes dist/sitemap.xml and the Sitemap: line of dist/robots.txt after the build. It reads the built pages, so
 // the sitemap lists exactly the indexable ones: a page with <meta name="robots" content="noindex">, 404.html and
 // /directions/ are left out. URLs are absolute when `site` is set, root-relative otherwise (the report warns).
@@ -42,7 +56,8 @@ function seoFiles() {
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
-        const urls = paths
+        const prospect = isProspect();
+        const urls = (prospect ? [] : paths)
           .sort()
           .map(
             (path) =>
@@ -52,6 +67,16 @@ function seoFiles() {
           `${root}/sitemap.xml`,
           `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`,
         );
+        if (prospect) {
+          const headers = `${root}/_headers`;
+          const base = existsSync(headers)
+            ? `${readFileSync(headers, 'utf8').trimEnd()}\n\n`
+            : '';
+          writeFileSync(
+            headers,
+            `${base}# Prospect landing: a design proposal, not the business's website.\n/*\n  X-Robots-Tag: noindex\n`,
+          );
+        }
         if (site) {
           const file = `${root}/robots.txt`;
           const base = existsSync(file)
@@ -63,7 +88,7 @@ function seoFiles() {
               `${base}\n\nSitemap: ${new URL('/sitemap.xml', site).href}\n`,
             );
         }
-        logger.info(`sitemap.xml: ${paths.length} page(s)`);
+        logger.info(`sitemap.xml: ${urls.length} page(s)`);
       },
     },
   };

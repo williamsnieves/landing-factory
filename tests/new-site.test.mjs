@@ -55,6 +55,8 @@ const EXPECTED_FILES = [
   'src/components/motion/Motion.astro',
   'src/components/motion/README.md',
   'src/components/motion/index.ts',
+  'src/components/prospect/ProspectNotice.astro',
+  'src/components/prospect/texts.ts',
   'src/components/three/README.md',
   'src/components/three/Scene3D.astro',
   'src/components/three/gating.ts',
