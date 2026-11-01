@@ -64,9 +64,9 @@
 - [x] 5.1 `docs/copy.md`; CLAUDE.md "Copy" section, the command row, the vendored skills table; `docs/status.md`.
 
   Verify: `npm run format:check`.
-- [ ] 5.2 Run the picker and `check-landing` on every existing site with a brief, and list the findings in the pull request without fixing them.
+- [x] 5.2 Run the picker and `check-landing` on every existing site with a brief, and list the findings in the pull request without fixing them.
 
   Verify: the outputs are in the pull request description.
-- [ ] 5.3 Final checks: `npm test`, `npm run lint`, `npm run check`, `npm run validate:archetypes`, `openspec validate add-copy-frameworks --strict`.
+- [x] 5.3 Final checks: `npm test`, `npm run lint`, `npm run check`, `npm run validate:archetypes`, `openspec validate add-copy-frameworks --strict`.
 
   Verify: all pass in a clean clone.
