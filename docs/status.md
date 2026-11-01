@@ -55,6 +55,8 @@ Read this first in a new or compacted session. Last updated: 2026-10-31, end of 
 | tupathdigital production prep (coupons removed, domain, SEO opt-in, cookieless analytics, UTM) | Merged (PR #45; a site change, nothing to archive) |
 | tupathdigital handoff (private repository williamsnieves/tupathdigital, Cloudflare Pages, `tupathdigital.com`, `EXPORTED.json`, brand favicon) | Merged (PR #46; williamsnieves/tupathdigital#1 for the favicon). Live on https://tupathdigital.com |
 
+> **In progress (2026-11-01): `add-copy-frameworks`** on branch `change/add-copy-frameworks`. Copy frameworks (our `copy-frameworks` skill, `pick-copy-framework.mjs`), brief `proof` and `audience.awareness`, the `copy-claims` rule of `check-landing`, the vendored `copywriting` skill. Guide: `docs/copy.md`. Follow-up change: `add-neuromarketing-review`.
+
 ## Resume here (2026-10-31, end of day)
 
 **Where we are.** `main` has everything up to PR #46. No branch or pull request is open in the factory. tupathdigital is live on https://tupathdigital.com from the owner's private repository https://github.com/williamsnieves/tupathdigital (Cloudflare Pages, deploys on each merge to its `main`); the factory keeps `sites/tupathdigital/` as the source of truth and the record (`EXPORTED.json`), and its CI no longer builds it. The owner made a promotional video of the landing with Hyperframes for social media (outside the factory; not in any repository).

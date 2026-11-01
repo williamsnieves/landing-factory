@@ -386,6 +386,8 @@ test('missing lists the holder fields and the privacy contact only when a market
     missingFields(noTax).map((m) => m.path),
     [
       'languages',
+      'proof',
+      'audience.awareness',
       'contact.phone',
       'contact.address',
       'legal.holder.taxId',
@@ -424,7 +426,14 @@ test('missing reports only what the fixture lacks; summary marks assumed values'
   const brief = fixture();
   assert.deepEqual(
     missingFields(brief).map((m) => m.path),
-    ['languages', 'contact.phone', 'contact.address', 'brand.fonts'],
+    [
+      'languages',
+      'proof',
+      'audience.awareness',
+      'contact.phone',
+      'contact.address',
+      'brand.fonts',
+    ],
   );
   const summary = summarizeBrief(brief);
   assert.match(summary, /^Taller Plantilla \[es\]/);

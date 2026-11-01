@@ -372,7 +372,13 @@ test(
         'archetype: custom',
       ),
     );
-    assert.deepEqual((await runChecks({ slug: 'good', root })).warnings, []);
+    // (the fixture has no build, so copy-claims only warns that it did not run)
+    assert.deepEqual(
+      (await runChecks({ slug: 'good', root })).warnings.filter(
+        (w) => w.rule === 'archetype-target',
+      ),
+      [],
+    );
     writeFileSync(
       master,
       readFileSync(master, 'utf8').replace(
