@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-31 (tupathdigital handed off: private repository https://github.com/williamsnieves/tupathdigital, live on https://tupathdigital.com through Cloudflare Pages; production prep merged in PR #45; this branch records the export and the brand favicon).
+Read this first in a new or compacted session. Last updated: 2026-10-31, end of day (the owner's 2026-10-28 list is done: add-landing-restyle PR #42, add-product-led-saas-archetype PR #43, add-prospect-landings PR #44, tupathdigital in production on https://tupathdigital.com from a private repository, PRs #45 and #46). Start with "Resume here" and its "What is left".
 
 ## Working agreements
 
@@ -52,8 +52,36 @@ Read this first in a new or compacted session. Last updated: 2026-10-31 (tupathd
 | add-landing-restyle (`revise-landing --restyle`, palette and font changes on the same layout) | Merged (PR #42), archived on `change/add-product-led-saas-archetype` |
 | add-product-led-saas-archetype (the `product-led-saas` archetype sheet, three traits, reference rules) | Merged (PR #43), archived on `change/add-prospect-landings` |
 | add-prospect-landings (brief `prospect` section with a source per fact, `prospect.mjs write\|kit\|sold`, `noindex` and a visible notice, the `prospect` rule of `check-landing`, the sales kit) | Merged (PR #44), archived on `change/tupathdigital-handoff` |
+| tupathdigital production prep (coupons removed, domain, SEO opt-in, cookieless analytics, UTM) | Merged (PR #45; a site change, nothing to archive) |
+| tupathdigital handoff (private repository williamsnieves/tupathdigital, Cloudflare Pages, `tupathdigital.com`, `EXPORTED.json`, brand favicon) | Merged (PR #46; williamsnieves/tupathdigital#1 for the favicon). Live on https://tupathdigital.com |
 
-## Resume here (2026-10-31)
+## Resume here (2026-10-31, end of day)
+
+**Where we are.** `main` has everything up to PR #46. No branch or pull request is open in the factory. tupathdigital is live on https://tupathdigital.com from the owner's private repository https://github.com/williamsnieves/tupathdigital (Cloudflare Pages, deploys on each merge to its `main`); the factory keeps `sites/tupathdigital/` as the source of truth and the record (`EXPORTED.json`), and its CI no longer builds it. The owner made a promotional video of the landing with Hyperframes for social media (outside the factory; not in any repository).
+
+**How a tupathdigital change goes now:** a revision round in the factory (`npm run revise -- tupathdigital --feedback <file>`, or a direct site change on a factory branch for small things), then `node scripts/sync-export.mjs --site tupathdigital --into <clone of the private repository>`, a branch and a pull request there (its CI gives the preview), merge, production. The favicon went this way (williamsnieves/tupathdigital#1).
+
+**What is left (2026-10-31).**
+
+Owner, on tupathdigital:
+1. Enable Cloudflare Web Analytics in the Pages project (Workers & Pages > tupathdigital > Metrics), if not done; the CSP and the privacy policy already allow and name it. Store visits and sales come from Etsy and Gumroad stats (UTM on the store links).
+2. Legal holder data when he decides (tax id, address; an ES market and the LSSI-CE legal notice if he sells from Spain). Today the holder is the name "tupathdigital" only.
+3. New coupons and products: he sends them; they become the **first real revision round** (`npm run revise`), then a sync. A `coupon` field in the brief schema would make coupons a fact instead of copy (candidate small change).
+4. Measure conversion before investing more (owner's goal): visits (Web Analytics) against store clicks and sales (Etsy and Gumroad stats, UTM).
+
+First real runs still missing (the features exist and are tested with stubs only):
+5. A revision round (`npm run revise`) and a restyle round (`--restyle`).
+6. A prospect landing (`prospect.mjs`, sales kit) and a landing on the `product-led-saas` archetype (a SaaS prospect would cover both).
+7. The first real Web3Forms submission with the owner's key on a custom domain (and reading the free plan's monthly limit), and the first real `generate_landing` through the MCP server.
+8. Real deploys to a VPS and to shared hosting (Hostinger), never run with an account.
+
+Decisions waiting for the owner:
+9. The factory repository was to stay public "until tupathdigital is in production" (2026-10-28): that condition is met. Going private costs GitHub Actions minutes (2,000 a month free on private repositories; a factory PR runs about ten jobs, a few minutes each): decide now or keep it public.
+10. Track 1 customers: `docs/customer-runs.md` has one test run (casavela) and no real customer; channels (web app, Telegram) wait for 3 to 5.
+11. Hosting in Spain: LaLiga's court-ordered blocking makes Cloudflare-served sites unreachable on some Spanish ISPs during matches. tupathdigital stays on Cloudflare (owner, 2026-10-31); Hostinger (the shared target) is the alternative if Spanish traffic matters.
+
+Factory follow-ups, small (details under "Factory follow-ups" and "Known gaps"): the TLS wait before the live report on a new Pages project; `section-shots.mjs` keeps stale screenshots; QA full-page captures repeat the top after a pinned section; the hardening and SEO opt-in of the older sites (panaderia, clinica-dental, samurai, estudio-arquitectura, festival-electronica, app-finanzas); `brief-facts` matches the primary call-to-action URL exactly, so a UTM-tagged link fails it; the handoff's first copy into the owner's repository should not hand-copy the export (it missed `scripts/qa/`).
+
 
 **tupathdigital handoff (2026-10-31), done.** `main` has everything up to PR #45 (tupathdigital production prep, details below). The landing now lives in the owner's **private** repository https://github.com/williamsnieves/tupathdigital (exported with `brief.json`), deploys to the Cloudflare Pages project `tupathdigital` from its own CI (the owner added a new `CLOUDFLARE_API_TOKEN` scoped to Pages and `CLOUDFLARE_ACCOUNT_ID`) and is live on https://tupathdigital.com:
 - Vercel was ruled out: its fair-use guidelines restrict Hobby to non-commercial personal use and count advertising the sale of a product as commercial (Pro needed). Hostinger was weighed (shared target, no Cloudflare IPs, paid); the owner stays on Cloudflare Pages for now. Known risk: in Spain, LaLiga's court-ordered blocking of Cloudflare IPs makes `*.pages.dev` and Cloudflare-proxied sites unreachable on some ISPs during football matches (the owner saw it on the preview).
@@ -69,10 +97,6 @@ Read this first in a new or compacted session. Last updated: 2026-10-31 (tupathd
 - Analytics: Cloudflare Web Analytics, cookieless. The owner enables it in the Pages project (the beacon is injected at the edge, nothing in the HTML); the CSP allows `https://static.cloudflareinsights.com` (script) and `https://cloudflareinsights.com` (connect); the privacy policy names Cloudflare, Inc.
 - UTM (`utm_source=tupathdigital.com&utm_medium=referral&utm_campaign=landing`) on the store buttons and calls to action through `storeLink()` in `catalog.ts`. The footer "Etsy shop" link stays untagged: `check-landing` `brief-facts` needs the exact primary URL as an `href` on the page.
 - Legal holder stays "tupathdigital" for now.
-
-**Next:** `/landing-handoff tupathdigital` to a private repository on Cloudflare Pages (the owner enables Web Analytics in the project).
-
-**Open items:** legal holder data (tax id, address; the Spanish legal notice under LSSI-CE if the owner sells from Spain; the US has no rule set, so the report warns), new coupons and products from the owner, review of the privacy policy by a lawyer before production.
 
 **add-lead-forms in short (merged 2026-10-31, `docs/forms.md`, CLAUDE.md "Lead forms").**
 - **Owner decisions (2026-10-30):** a hosted form service, Web3Forms first, and no backend of our own; a prefilled WhatsApp message as the fallback when there is no access key.
@@ -103,12 +127,7 @@ Read this first in a new or compacted session. Last updated: 2026-10-31 (tupathd
 5. CI Lighthouse variance again (PR #39: clinica-dental 89, samurai 86 on mobile; both passed on re-run).
 6. The first real revision round (`npm run revise`) is still not run: the only change the owner asked for was rebuild-class.
 
-**Next, in this order (owner, 2026-10-28, updated 2026-10-31):**
-
-1. ~~`add-landing-restyle`~~: merged (PR #42). The first real restyle round is optional (owner).
-2. ~~`add-product-led-saas-archetype`~~: merged (PR #43). The `product-led-saas` sheet from the four reference sheets, lending `ui-frame-hero`, `two-tone-heading`, `logo-strip-under-hero`, with rules against invented product proof.
-3. ~~Prospect mode (`add-prospect-landings`)~~: merged (PR #44): public facts with sources, no prospect brand assets, `noindex` until sold, a sales kit.
-4. tupathdigital to production in a private repository, last (owner): prepared on `change/tupathdigital-handoff` (see above); next is `/landing-handoff tupathdigital`.
+**The owner's list of 2026-10-28 is done:** `add-landing-restyle` (PR #42), `add-product-led-saas-archetype` (PR #43), `add-prospect-landings` (PR #44) and tupathdigital in production (PRs #45, #46). None of the three new features has had a real run yet (see "What is left").
 
 **Two tracks and the repository (owner, 2026-10-28, `docs/channels.md`):** track 1, the owner builds landings and then offers them; track 2 later, a self-serve web app driven by the Agent SDK with the same harness; Telegram serves both. The factory repository stays public (free CI) until the flow is polished and tupathdigital is in production, then goes private.
 
@@ -135,14 +154,7 @@ Read this first in a new or compacted session. Last updated: 2026-10-31 (tupathd
 - Cleanup done by the owner (2026-10-26): the Netlify site and DNS zone and the old Bitbucket repository are deleted.
 - Live report on `https://williansnieves.com` (2026-10-26, from this session through `--site-url` on a fresh export, the proxy now reaches the domain): passed, 0 fail, 1 warn (an unknown path answers 308, Vercel's trailing-slash redirect, before the 404), 1 not run (plain HTTP did not resolve through the proxy). add-landing-handoff also makes the owner's CI check the domain on every production deploy.
 
-**Next (product plan steps 11 and 12, `docs/product-plan.md`):**
-1. `add-landing-handoff` (merged and archived, see above). Lessons it encodes: the app cannot create repositories or dispatch workflows; the Vercel apex/www choice must match `site`; Namecheap only shows host records after switching to BasicDNS; preview and deployment URLs need the domain in this session's allowed list to be checked from here. For customers, the managed model (a factory GitHub organization and Vercel team, transfer on request) needs a GitHub App that can create repositories.
-2. `add-landing-preview` (merged and archived): 2 or 3 short visual directions before the full build; the owner relays the choice (`directions.mjs choose`). `add-landing-revise` (implemented, PR open): revision rounds, sync and transfer.
-3. Channels decision: recorded (`docs/channels.md`); building waits for 3 to 5 customers recorded in `docs/customer-runs.md`.
-
-Other items the owner can pick: tupathdigital coupons (reminder below), hardening for the other six sites, the factory follow-ups listed below, `add-3d-models`, the first real `generate_landing` through the MCP server.
-
-Reminder scheduled for 2026-11-01 (trigger `trig_013qv2DNicfU16Ah9auQ5uWb`): the tupathdigital coupons FALL2026 (Etsy) and 92xsh57 (Gumroad) end on 31 October 2026; offer the owner to update or remove them.
+**Product plan steps 11 and 12** (`docs/product-plan.md`): handoff, preview and revise are merged and archived; the channels decision is recorded (`docs/channels.md`) and building it waits for 3 to 5 customers recorded in `docs/customer-runs.md`.
 
 ## The owner's personal-brand landing (merged, PR #28)
 
@@ -155,6 +167,7 @@ Reminder scheduled for 2026-11-01 (trigger `trig_013qv2DNicfU16Ah9auQ5uWb`): the
 
 ## Factory follow-ups (found 2026-10-25)
 
+- Found 2026-10-31 (tupathdigital handoff): `check-landing` `brief-facts` compares `goal.primary.url` with an exact `href`, so the landing keeps one untagged link (footer "Etsy shop") beside the UTM-tagged ones; accept a query suffix there. The `/landing-handoff` skill's step 6 says to copy the export into the clone by hand: an exclude of every `qa` folder dropped `scripts/qa/` and the first CI run failed; copy with anchored excludes (`/qa/`) or let a script do it.
 - `claude -p` runs: the new-landing skill called `node /home/user/landing-factory/scripts/ai-images.mjs ...` with an absolute path, which the `--allowedTools` patterns (relative `node scripts/...`) do not match, so AI generation was blocked during the personal-brand build; also `node scripts/deploy/config.mjs --from-brief --write` is not in the allow list, so a run cannot set a non-Cloudflare target. Fix: make the skill use relative script paths (or allow both forms) and add the deploy config command.
 - CI live report on a brand-new Cloudflare Pages project: it runs right after the first deploy, before Cloudflare issues the TLS certificate for the deployment hostname (about two minutes), so `live-tls` fails once. Fix: wait (bounded) for the URL to answer over TLS before the live checks.
 - QA full-page screenshots with motion on repeat the top of the page after a pinned section (capture artifact; the real page and the reduced-motion capture are correct). Fix in `scripts/qa.mjs` (capture full pages with reduced motion, or refresh ScrollTrigger first).
