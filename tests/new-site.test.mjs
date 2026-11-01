@@ -127,6 +127,7 @@ test('the planning templates follow the skill: proposal sections, one RUN.md row
     'Archetype blend',
     'Visual direction',
     'SEO',
+    'Copy plan',
     'Quality targets',
     'Out of scope',
     'Decisions',

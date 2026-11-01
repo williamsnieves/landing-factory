@@ -32,7 +32,7 @@ Headless runs (`claude -p`) cannot ask questions: make the smallest sensible edi
 1. **Read.** The feedback file; `node scripts/brief.mjs summary --site <slug>` and `sites/<slug>/brief.json` if present; `sites/<slug>/PROPOSAL.md`; `design-system/<slug>/MASTER.md`; `sites/<slug>/directions.json` if present (the chosen direction is context, not up for change); `sites/<slug>/revisions.json` for earlier rounds (do not undo a former round unless the feedback asks). Note the baseline: `git status --short -- sites/<slug> design-system/<slug>`, so you can tell this round's files from earlier uncommitted work.
 2. **Classify.** Split the feedback into items (one change each) and give each one kind:
    - `fact`: a price, link, name, contact detail, product, hours or any other customer fact that lives in `brief.json`. A form's access key (`forms[].accessKey`) is a `fact`.
-   - `copy`: wording of existing text (headline, body, button label, microcopy), in every locale of a multi-locale landing.
+   - `copy`: wording of existing text (headline, body, button label, microcopy), in every locale of a multi-locale landing. A `copy` item keeps the landing's copy framework: read the "Copy plan" of `PROPOSAL.md` (the framework, the stage of each section, the chosen headline) and change sentences inside their stage; moving stages between sections or changing the framework is a `rebuild` item. New proof comes only from the customer: a new testimonial, figure, credential, award or press mention is a `fact` item that goes into `proof` in `brief.json` first, never invented in the copy.
    - `content`: an image replaced, added or removed, or a section added or removed **from the existing page map** (a new section in the same design language). Adding, removing or changing a lead form or its fields (`forms` in the brief; the closed list of purposes, fields and providers) is `content` too.
    - `style`: a token or spacing change **within the design system** (a darker shade of the same primary, a larger body size, more space between sections).
    - `restyle`: another palette family or another display or body font family on the same layout ("keep everything, but use our navy and sand colors", "a serif for headings").
@@ -66,7 +66,7 @@ Headless runs (`claude -p`) cannot ask questions: make the smallest sensible edi
 8. **Report and checks, in this order:**
    1. `npm run report -- --site <slug> --only static` (no failing item; fix the site, never a limit);
    2. `node scripts/layout-signature.mjs --site <slug> --write`;
-   3. `node scripts/check-landing.mjs --site <slug>` (credits, photo reuse, tokens, diversity, `brief-facts`, `ai-provenance`, `i18n`; a failure is fixed in the site);
+   3. `node scripts/check-landing.mjs --site <slug>` (credits, photo reuse, tokens, diversity, `brief-facts`, `ai-provenance`, `i18n`, `copy-claims`; a failure is fixed in the site, a `copy-claims` failure by rewriting the copy; a `copy-claims-confirm` or other `copy-claims-*` warning goes under "To confirm with the customer" in REVISION.md);
    4. `node scripts/site-layers.mjs check --site <slug>` and `npm run lint` (a lint failure is fixed in the code, never by turning a rule off);
    5. `npx prettier --write sites/<slug> design-system/<slug>` then `npx prettier --check .`.
    If any file changed after the last QA pass, run `npm run qa -- --site <slug>` once more.
