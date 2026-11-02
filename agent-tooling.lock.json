@@ -117,6 +117,44 @@
       },
       "notes": "Text skill with references, no runtime. Same repository and commit as the other marketingskills entry. It mentions .agents/product-marketing.md, which does not exist here: the brief is the context.",
       "licenseFiles": ["third-party-licenses/marketingskills.LICENSE"]
+    },
+    {
+      "name": "cro",
+      "role": "Review framework for a built page (value proposition, headline, call to action, hierarchy, trust, objections, friction); never decides palette, fonts, the copy framework or facts",
+      "source": "https://github.com/coreyhaines31/marketingskills",
+      "version": null,
+      "commit": "0cd9b3a0ef4c411a1d690419ce843f2a1da32cce",
+      "license": "MIT",
+      "installMethod": "vendored",
+      "installedAt": "2026-11-02",
+      "path": ".claude/skills/cro",
+      "skillFile": ".claude/skills/cro/SKILL.md",
+      "installer": "git checkout of the pinned commit, copy of skills/cro (skill name: cro)",
+      "fetch": {
+        "repo": "https://github.com/coreyhaines31/marketingskills.git",
+        "subpath": "skills/cro"
+      },
+      "notes": "Text skill with references, no runtime. Same repository and commit as the other marketingskills entry. It mentions .agents/product-marketing.md, which does not exist here: the brief is the context. Keeps its references/ folder.",
+      "licenseFiles": ["third-party-licenses/marketingskills.LICENSE"]
+    },
+    {
+      "name": "marketing-psychology",
+      "role": "Reference of principles while writing the Conversion plan; never overrides the conversion-psychology catalog, and never decides palette, fonts, the copy framework or facts",
+      "source": "https://github.com/coreyhaines31/marketingskills",
+      "version": null,
+      "commit": "0cd9b3a0ef4c411a1d690419ce843f2a1da32cce",
+      "license": "MIT",
+      "installMethod": "vendored",
+      "installedAt": "2026-11-02",
+      "path": ".claude/skills/marketing-psychology",
+      "skillFile": ".claude/skills/marketing-psychology/SKILL.md",
+      "installer": "git checkout of the pinned commit, copy of skills/marketing-psychology (skill name: marketing-psychology)",
+      "fetch": {
+        "repo": "https://github.com/coreyhaines31/marketingskills.git",
+        "subpath": "skills/marketing-psychology"
+      },
+      "notes": "Text skill with references, no runtime. Same repository and commit as the other marketingskills entry. It mentions .agents/product-marketing.md, which does not exist here: the brief is the context.",
+      "licenseFiles": ["third-party-licenses/marketingskills.LICENSE"]
     }
   ],
   "mcpServers": [

@@ -473,6 +473,17 @@ Chosen from \`node scripts/pick-copy-framework.mjs --site ${slug}\` (the brief's
 - **Hero headline candidates (2 or 3):** each scored on 4U (useful, urgent, unique, ultra-specific; urgency only when true).
 - **Proof inventory:** the \`proof\` entries of the brief that are real, and what is missing ("no proof available").
 
+## Conversion plan
+
+Written with the \`conversion-psychology\` skill on top of the Copy plan (the plan keeps the persuasion order; this one plans attention, choice, trust and the ending). Every element comes from the brief; nothing is invented.
+
+- **Emotional target:** one of trust, calm, joy, excitement, pride, belonging or relief (optionally a secondary one), with the reason from the brief. It goes to MASTER.md as an input to ui-ux-pro-max, which still picks palette and fonts. Never fear or anger.
+- **Attention path:** the hero's focal point, the one primary call to action and its label, and the secondary action (visually weaker), if any.
+- **Choice:** the offers shown and how many sit side by side (three at most), the highlighted one and why, and the anchor (only from real prices).
+- **Trust and risk:** the proof shown and where (from \`proof\`), contact data, the legal pages, and a guarantee only when the brief states one.
+- **Ending:** the final section and its repeat of the primary call to action.
+- **Ethics check:** the checklist of \`.claude/skills/conversion-psychology/references/ethics.md\`, ticked or explained.
+
 ## 3D
 
 None, or up to two scenes (\`<Scene3D />\`, built from code, no external models). For each scene: purpose, poster (rendered with \`scripts/render-poster.mjs\` or a credited museum image), scroll behavior (\`scrub\` or a looping clock), and the reduced-motion fallback (the poster; no canvas, no JavaScript, no WebGL). Default: none.
@@ -532,6 +543,10 @@ Count, sources and any photo dropped, with the reason.
 
 | #   | Verdict | Failures by check | Fixed | Notes |
 | --- | ------- | ----------------- | ----- | ----- |
+
+## Conversion review
+
+The findings of \`node scripts/conversion-audit.mjs --site ${slug}\`, what the single review round changed, and what is left for a person.
 
 ## Final check
 

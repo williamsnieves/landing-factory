@@ -14,6 +14,8 @@ One line per conflict and how it was resolved (the proposal wins). Also list whe
 
 Style name and a short description in words, plus the archetype constraints it respects (radius family, type contrast, density).
 
+Emotional target: <one primary emotion (trust, calm, joy, excitement, pride, belonging or relief), copied from the proposal's Conversion plan>. It is an input to the palette and font queries, not a rule: evidence that colors or fonts carry emotions is weak, so contrast, legibility and the brief's brand constraints win.
+
 ## 4. Palette
 
 | Role | Token | Hex | Use |
