@@ -459,6 +459,20 @@ Reduced motion: no pin, no scrub, no parallax, no smooth scroll; all content vis
 - **Schema type:** from \`seo.schemaType\` (a schema.org type, JSON-LD in \`src/data/seo.ts\` with customer facts only; no review or rating markup without real reviews).
 - **Title and description per page (and per locale):** within the report limits (title 30 to 60 characters, description 70 to 160), one \`h1\`, the keyword written naturally.
 
+## Copy plan
+
+Chosen from \`node scripts/pick-copy-framework.mjs --site ${slug}\` (the brief's awareness, kind, price, goal, proof, regulated flag and objections). Facts and proof come from the brief only; the writing help is the \`copywriting\` skill, the structure is the plan.
+
+- **Framework:** the id and the picker's reason; any override and why.
+- **Awareness:** from \`audience.awareness\`, or \`problem-aware\` marked assumed.
+- **Stage to section:**
+
+| Section | Stage | What it says | Facts it uses |
+| ------- | ----- | ------------ | ------------- |
+
+- **Hero headline candidates (2 or 3):** each scored on 4U (useful, urgent, unique, ultra-specific; urgency only when true).
+- **Proof inventory:** the \`proof\` entries of the brief that are real, and what is missing ("no proof available").
+
 ## 3D
 
 None, or up to two scenes (\`<Scene3D />\`, built from code, no external models). For each scene: purpose, poster (rendered with \`scripts/render-poster.mjs\` or a credited museum image), scroll behavior (\`scrub\` or a looping clock), and the reduced-motion fallback (the poster; no canvas, no JavaScript, no WebGL). Default: none.

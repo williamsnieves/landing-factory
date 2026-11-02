@@ -21,6 +21,23 @@ export const ASSET_KINDS = [
   'model',
   'other',
 ];
+/** How much the visitor already knows (the awareness ladder); steers the copy framework (scripts/lib/copy-frameworks.mjs). */
+export const AWARENESS_LEVELS = [
+  'unaware',
+  'problem-aware',
+  'solution-aware',
+  'product-aware',
+  'most-aware',
+];
+/** Kinds of real proof the customer can give. */
+export const PROOF_KINDS = [
+  'testimonial',
+  'figure',
+  'credential',
+  'award',
+  'press',
+];
+export const PROOF_MAX = 10;
 export const ANALYTICS_MODES = ['none', 'cookieless', 'cookies'];
 /** Does the customer allow AI-generated images on the page? Empty means not decided, which counts as not allowed. */
 export const AI_IMAGE_MODES = ['allowed', 'not-allowed'];
@@ -75,6 +92,7 @@ export const PROSPECT_FACT_FIELDS = [
   'offer[].name',
   'offer[].price',
   'offer[].url',
+  'proof[].text',
   'goal.primary.url',
 ];
 export const SEO_MAX_TEXT = 120;
@@ -121,7 +139,21 @@ export const SCHEMA = obj({
       url: str({ format: 'http-url' }),
     }),
   ),
-  audience: obj({ who: str(), needs: str(), objections: str() }),
+  audience: obj({
+    who: str(),
+    needs: str(),
+    objections: str(),
+    awareness: str({ enum: AWARENESS_LEVELS }),
+  }),
+  // The customer's real proof, in their own words (add-copy-frameworks). Never assumed: the copy shows only these entries.
+  proof: list(
+    obj({
+      kind: str({ required: true, enum: PROOF_KINDS }),
+      text: str({ required: true }),
+      source: str({ format: 'https-url' }),
+    }),
+    PROOF_MAX,
+  ),
   goal: obj({
     primary: obj({
       label: str({ required: true }),
@@ -335,6 +367,8 @@ const AI_CONSENT = /^brand\.aiImages$/;
 /** The owner's consent to an AI portrait of themselves is theirs alone, never assumed. */
 const PORTRAIT_CONSENT = /^brand\.ownerPortrait$/;
 /** A form's access key is the customer's own account key: never a value chosen for them (also covers `forms` and `forms[i]`). */
+/** Proof is the customer's own evidence: never a value chosen for them (also covers `proof`, `proof[i]` and their fields). */
+const PROOF_KEY = /^proof(\[\d+\](\.\w+)?)?$/;
 const FORM_KEY = /^forms(\[\d+\](\.accessKey)?)?$/;
 
 /** Each check returns an error text (what was expected) or null. `ctx` carries baseDir and patternsDir. */
@@ -600,6 +634,11 @@ export function validateBrief(
             path,
             `owner-portrait consent cannot be assumed ("${field}"): the owner must decide it, or leave it empty (empty counts as not allowed)`,
           );
+        if (PROOF_KEY.test(field))
+          return fail(
+            path,
+            `proof cannot be assumed ("${field}"): it is the customer's own testimonial, figure or credential; leave it empty and the page shows no proof`,
+          );
         if (FORM_KEY.test(field))
           return fail(
             path,
@@ -671,10 +710,19 @@ export function isSourced(brief, path) {
   );
 }
 
+/** A proof entry carries its own `source` URL, which backs its text like a `prospect.sources` entry. */
+function hasProofSource(brief, path) {
+  const match = /^proof\[(\d+)\]/.exec(path);
+  return match ? isFilled(brief?.proof?.[Number(match[1])]?.source) : false;
+}
+
 /** Filled fact fields of a prospect brief that have neither a source nor an `assumed` entry. */
 export function uncoveredProspectFacts(brief) {
   return prospectFactPaths(brief).filter(
-    (path) => !isSourced(brief, path) && !isAssumed(brief, path),
+    (path) =>
+      !isSourced(brief, path) &&
+      !isAssumed(brief, path) &&
+      !hasProofSource(brief, path),
   );
 }
 
@@ -717,7 +765,9 @@ function prospectErrors(brief) {
   for (const path of uncoveredProspectFacts(brief))
     fail(
       path,
-      'a prospect fact needs a source in prospect.sources (https URL and retrieval date) or an entry in assumed',
+      path.startsWith('proof[')
+        ? 'a prospect proof entry needs a source (an https URL in its "source" field); proof cannot be assumed'
+        : 'a prospect fact needs a source in prospect.sources (https URL and retrieval date) or an entry in assumed',
     );
   const brand = "a prospect landing cannot use the prospect's brand";
   const consent = 'a prospect cannot consent';
@@ -832,12 +882,22 @@ export const MISSING_FIELDS = [
     false,
     'Which products or services are on the page, with name, price and link?',
   ],
+  [
+    'proof',
+    false,
+    'What real proof can the page show (testimonials, figures, credentials, awards, press), in your own words and with a source link if there is one? Nothing is invented: with none, the page shows none.',
+  ],
   ['audience.who', false, 'Who is it for?'],
   ['audience.needs', false, 'What do those people need or want?'],
   [
     'audience.objections',
     false,
     'What holds them back from buying or contacting?',
+  ],
+  [
+    'audience.awareness',
+    false,
+    'Does the visitor already know they have the problem, that solutions exist, or your product? (unaware, problem-aware, solution-aware, product-aware, most-aware)',
   ],
   ['goal.primary.label', true, 'What is the one action the page should drive?'],
   [
@@ -1058,6 +1118,12 @@ export function summarizeBrief(brief) {
   field('Audience', 'audience.who');
   field('Needs', 'audience.needs');
   field('Objections', 'audience.objections');
+  field('Awareness', 'audience.awareness');
+  (brief.proof ?? []).forEach((p, index) =>
+    lines.push(
+      `Proof ${index + 1}: ${p.kind} "${p.text}"${p.source ? `, ${p.source}` : ''}`,
+    ),
+  );
   const goal = brief.goal?.primary ?? {};
   if (goal.label)
     lines.push(

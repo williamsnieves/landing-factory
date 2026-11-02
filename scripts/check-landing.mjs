@@ -68,6 +68,13 @@ import {
 export { parseLandingMeta };
 import { checkPrompt, formatViolations } from './lib/ai-prompt-policy.mjs';
 import {
+  COVERED_LANGUAGES,
+  briefStatesClaim,
+  foldText,
+  scanClaims,
+} from './lib/copy-claims.mjs';
+import { LEGAL_PATHS } from './report/legal-rules.mjs';
+import {
   alternatesOf,
   canonicalOf,
   htmlLang,
@@ -1763,6 +1770,124 @@ export function checkProspect(siteDir, manifest = readManifest(siteDir)) {
 }
 
 // --------------------------------------------------------------------------------------------------
+// Rule: copy-claims (design: add-copy-frameworks, Decision 4)
+
+/** Brief fields whose text is the customer's own claim; assumed ones are the agent's and never count. */
+function briefClaimText(brief) {
+  const paths = [
+    'business.description',
+    'audience.who',
+    'audience.needs',
+    'audience.objections',
+    'legal.constraints',
+  ];
+  (Array.isArray(brief.offer) ? brief.offer : []).forEach((_, i) =>
+    paths.push(`offer[${i}].description`),
+  );
+  (Array.isArray(brief.proof) ? brief.proof : []).forEach((_, i) =>
+    paths.push(`proof[${i}].text`),
+  );
+  return foldText(
+    paths
+      .filter((path) => !isAssumed(brief, path))
+      .map((path) => getPath(brief, path))
+      .filter((value) => typeof value === 'string')
+      .join('\n'),
+  );
+}
+
+/** Is this built page a legal page (the report's paths, a locale prefix ignored, or data-legal-page)? */
+function isLegalPage(page, html) {
+  if (/\bdata-legal-page\s*=/i.test(html)) return true;
+  const path = page.replace(/(?:\/index)?\.html$/, '').replace(/\/+$/, '');
+  return Object.keys(LEGAL_PATHS).some((suffix) => path.endsWith(suffix));
+}
+
+/** Primary subtag of `<html lang>`, or null when the page has none. */
+function pageLanguage(html) {
+  const match = /<html\b[^>]*\blang\s*=\s*["']?([A-Za-z]{2,3})/i.exec(html);
+  return match ? match[1].toLowerCase() : null;
+}
+
+const MAX_PER_ID = 10;
+
+/**
+ * Scan the visible text of every built page except 404.html and the legal pages. Fails on promises (guaranteed
+ * results, results within a time span, absolute superlatives, health and money promises) and warns about the
+ * rest. A failing phrase the brief states in the customer's own words (non-assumed text) becomes the warning
+ * `copy-claims-confirm`. Returns { failures, warnings }; without a build it only warns.
+ */
+export function checkCopyClaims(siteDir) {
+  const slug = basename(siteDir);
+  const dist = join(siteDir, 'dist');
+  const warnings = [];
+  const failures = [];
+  if (!existsSync(dist) || !statSync(dist).isDirectory()) {
+    warnings.push({
+      rule: 'copy-claims-no-build',
+      item: 'dist',
+      message: `copy-claims did not run: sites/${slug}/dist does not exist; build first (npm run build -w site-${slug}) so the copy can be checked`,
+    });
+    return { failures, warnings };
+  }
+  let briefText = '';
+  const briefPath = join(siteDir, 'brief.json');
+  if (existsSync(briefPath))
+    try {
+      briefText = briefClaimText(JSON.parse(readFileSync(briefPath, 'utf8')));
+    } catch {
+      briefText = ''; // brief-facts reports an unreadable brief
+    }
+  const paths = walk(
+    dist,
+    (path) => path.endsWith('.html') && basename(path) !== '404.html',
+  ).sort();
+  for (const path of paths) {
+    const page = `/${posix(relative(dist, path))}`;
+    const html = readFileSync(path, 'utf8');
+    if (isLegalPage(page, html)) continue;
+    const lang = pageLanguage(html);
+    if (lang && !COVERED_LANGUAGES.includes(lang)) {
+      warnings.push({
+        rule: 'copy-claims-language',
+        item: page,
+        message: `${page}: the page language "${lang}" is not covered by copy-claims (Spanish and English only); a person must read this copy for promises`,
+      });
+      continue;
+    }
+    const perId = new Map();
+    for (const hit of scanClaims(htmlToText(html), lang)) {
+      const shown = `${page}: "${hit.phrase}" (${hit.id}): ${hit.reason}`;
+      if (hit.level === 'fail') {
+        if (briefStatesClaim(briefText, hit.terms))
+          warnings.push({
+            rule: 'copy-claims-confirm',
+            item: `${page}#${hit.id}`,
+            message: `${page}: "${hit.phrase}" (${hit.id}) matches a claim the brief states in the customer's own words; a person must confirm it before launch`,
+          });
+        else failures.push(failure('copy-claims', `${page}#${hit.id}`, shown));
+        continue;
+      }
+      const count = (perId.get(hit.id) ?? 0) + 1;
+      perId.set(hit.id, count);
+      if (count <= MAX_PER_ID)
+        warnings.push({
+          rule: `copy-claims-${hit.id}`,
+          item: `${page}#${hit.id}`,
+          message: shown,
+        });
+      else if (count === MAX_PER_ID + 1)
+        warnings.push({
+          rule: `copy-claims-${hit.id}`,
+          item: `${page}#${hit.id}`,
+          message: `${page}: more ${hit.id} matches not listed`,
+        });
+    }
+  }
+  return { failures, warnings };
+}
+
+// --------------------------------------------------------------------------------------------------
 // Orchestration
 
 export async function runChecks({
@@ -1777,6 +1902,7 @@ export async function runChecks({
   if (!existsSync(join(siteDir, 'package.json')))
     throw new RunError(`sites/${slug} is not a site`);
   const manifest = readManifest(siteDir);
+  const copyClaims = checkCopyClaims(siteDir);
 
   const results = [
     ['images-credited', () => checkUncredited(siteDir, manifest)],
@@ -1796,6 +1922,7 @@ export async function runChecks({
         ),
     ],
     ['scenes', () => checkScenes(siteDir, manifest)],
+    ['copy-claims', () => copyClaims.failures],
     ...(readI18nConfig(siteDir) ? [['i18n', () => checkI18n(siteDir)]] : []),
     ...(manifest.images.some(isAi)
       ? [['ai-provenance', () => checkAiProvenance(siteDir, manifest)]]
@@ -1833,7 +1960,11 @@ export async function runChecks({
     checks: results.map((r) => ({ name: r.name, ok: !r.failures.length })),
     skipped: refs.length ? [] : ['originality'],
     failures,
-    warnings: [...archetypeWarnings(slug, root), ...i18nWarnings(siteDir)],
+    warnings: [
+      ...archetypeWarnings(slug, root),
+      ...i18nWarnings(siteDir),
+      ...copyClaims.warnings,
+    ],
   };
 }
 
@@ -1880,6 +2011,9 @@ Final check of sites/<slug>/ after site QA passes. Fails, naming the item, when:
   prospect          (only with prospect.status in brief.json) a prospect page without noindex or the visible notice, a sitemap URL,
                     no X-Robots-Tag: noindex in dist/_headers, a customer or AI image, an unsourced fact or a stale
                     src/data/prospect.json; a sold site that still shows the notice (docs/prospect.md)
+  copy-claims       a promise in the built copy (404.html and legal pages skipped; Spanish and English): guaranteed results,
+                    results within a time span, absolute superlatives, health or money promises, unless the brief states
+                    the claim in the customer's own words (then a warning asks a person to confirm it)
   copy-match        (--refs) ${SHINGLE_WORDS} words in a row of the built page also occur in a reference
 
   --site <slug>     the site (required)
@@ -1888,7 +2022,8 @@ Final check of sites/<slug>/ after site QA passes. Fails, naming the item, when:
   --json            print the result as JSON
   --help            show this help
 
-Warning (not a failure): archetype-target, the signature is outside the primary archetype's ranges.
+Warnings (not failures): archetype-target, the signature is outside the primary archetype's ranges; copy-claims-confirm,
+copy-claims-language, copy-claims-unsourced-stat, -study-claim, -round-number and -urgency, wording a person should look at.
 Hero types: ${HERO_TYPES.join(', ')}.
 Exit codes: 0 passed, 1 failed, 2 the run broke (unknown site, no dist/ with --refs, unreadable reference).`;
 

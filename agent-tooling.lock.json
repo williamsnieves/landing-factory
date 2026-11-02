@@ -98,6 +98,25 @@
       },
       "notes": "Text skill with references, no runtime. Same repository and commit as the other marketingskills entry. It mentions .agents/product-marketing.md, which does not exist here: the brief is the context.",
       "licenseFiles": ["third-party-licenses/marketingskills.LICENSE"]
+    },
+    {
+      "name": "copywriting",
+      "role": "Writing help for landing copy: headline formulas, section copy types, avoiding AI tells; never picks the framework",
+      "source": "https://github.com/coreyhaines31/marketingskills",
+      "version": null,
+      "commit": "0cd9b3a0ef4c411a1d690419ce843f2a1da32cce",
+      "license": "MIT",
+      "installMethod": "vendored",
+      "installedAt": "2026-11-01",
+      "path": ".claude/skills/copywriting",
+      "skillFile": ".claude/skills/copywriting/SKILL.md",
+      "installer": "git checkout of the pinned commit, copy of skills/copywriting (skill name: copywriting)",
+      "fetch": {
+        "repo": "https://github.com/coreyhaines31/marketingskills.git",
+        "subpath": "skills/copywriting"
+      },
+      "notes": "Text skill with references, no runtime. Same repository and commit as the other marketingskills entry. It mentions .agents/product-marketing.md, which does not exist here: the brief is the context.",
+      "licenseFiles": ["third-party-licenses/marketingskills.LICENSE"]
     }
   ],
   "mcpServers": [
