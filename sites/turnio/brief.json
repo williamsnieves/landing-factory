@@ -1,0 +1,114 @@
+{
+  "version": 1,
+  "language": "es",
+  "languages": ["es"],
+  "business": {
+    "name": "Turnio",
+    "description": "Turnio es un software de reservas online para peluquerías y centros de estética: tus clientes reservan desde un enlace o Instagram a cualquier hora, la agenda se llena sola y cada cita recibe un recordatorio por WhatsApp para que nadie se olvide.",
+    "city": "Madrid",
+    "country": "ES",
+    "kind": "product"
+  },
+  "offer": [
+    {
+      "name": "Plan Gratis",
+      "description": "Para empezar: un profesional, hasta 50 citas al mes, enlace de reservas y recordatorios por email.",
+      "price": "0 €",
+      "currency": "EUR",
+      "url": "https://app.example.com/registro?plan=gratis"
+    },
+    {
+      "name": "Plan Pro",
+      "description": "Citas ilimitadas, recordatorios por WhatsApp, reservas desde Instagram y pago de señal al reservar. Prueba de 14 días sin tarjeta.",
+      "price": "19 €/mes",
+      "currency": "EUR",
+      "url": "https://app.example.com/registro?plan=pro"
+    },
+    {
+      "name": "Plan Equipo",
+      "description": "Todo lo del Pro para hasta 8 profesionales, agenda por cabina o sillón e informes de ocupación.",
+      "price": "39 €/mes",
+      "currency": "EUR",
+      "url": "https://app.example.com/registro?plan=equipo"
+    }
+  ],
+  "audience": {
+    "who": "Dueñas y dueños de peluquerías, barberías y centros de estética pequeños (1 a 8 profesionales) en España.",
+    "needs": "Dejar de contestar WhatsApps para dar citas mientras atienden, reducir los clientes que no se presentan y ver la agenda de la semana de un vistazo.",
+    "objections": "Ya me apaño con WhatsApp y una libreta; mis clientes mayores no sabrán reservar por internet; cambiar de sistema me quitará tiempo que no tengo.",
+    "awareness": "solution-aware"
+  },
+  "goal": {
+    "primary": {
+      "label": "Empieza gratis",
+      "url": "https://app.example.com/registro?plan=gratis"
+    },
+    "secondary": {
+      "label": "Prueba el Pro 14 días",
+      "url": "https://app.example.com/registro?plan=pro"
+    }
+  },
+  "tone": ["cercano", "claro", "práctico", "moderno"],
+  "contact": {
+    "email": "hola@example.com"
+  },
+  "references": {
+    "liked": [
+      {
+        "url": "https://linear.app/",
+        "sheet": "linear-app",
+        "why": "Producto enmarcado en el hero y secciones de funciones limpias."
+      },
+      {
+        "url": "https://stripe.com/",
+        "sheet": "stripe-com",
+        "why": "Claridad y precios fáciles de comparar."
+      }
+    ]
+  },
+  "seo": {
+    "primaryKeyword": "app de reservas para peluquerías",
+    "keywords": [
+      "software de citas para peluquería",
+      "recordatorios de citas por WhatsApp",
+      "agenda online centro de estética"
+    ],
+    "schemaType": "SoftwareApplication"
+  },
+  "deploy": { "target": "cloudflare-pages" },
+  "assumed": [
+    {
+      "field": "business.name",
+      "reason": "SaaS ficticio para la prueba de las skills de copy y conversión (2026-11-02)."
+    },
+    {
+      "field": "business.description",
+      "reason": "Descripción del producto ficticio."
+    },
+    {
+      "field": "offer",
+      "reason": "Planes y precios ficticios, típicos de un SaaS de reservas para pequeños negocios."
+    },
+    {
+      "field": "goal.primary.url",
+      "reason": "Registro de ejemplo en example.com."
+    },
+    {
+      "field": "goal.secondary.url",
+      "reason": "Registro de ejemplo en example.com."
+    },
+    {
+      "field": "contact.email",
+      "reason": "Dominio reservado example.com."
+    },
+    {
+      "field": "audience.awareness",
+      "reason": "Las peluquerías ya conocen las apps de reservas; dudan de cuál elegir y de si les compensa cambiar."
+    },
+    {
+      "field": "seo.primaryKeyword",
+      "reason": "Búsqueda típica de quien busca este tipo de software."
+    }
+  ],
+  "notes": "Prueba de punta a punta de add-copy-frameworks y add-neuromarketing-review con el arquetipo product-led-saas. Sin pruebas sociales (proof vacío a propósito): la landing no debe inventar testimonios, logos de clientes, cifras ni valoraciones. Sin formulario: las llamadas a la acción van al registro."
+}
