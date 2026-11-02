@@ -33,6 +33,8 @@
 //                      visible notice naming the business, a sitemap URL, no X-Robots-Tag: noindex for /* in dist/_headers, a customer
 //                      or AI image in assets.json, a fact without a source or an assumed entry, a stale src/data/prospect.json;
 //                      sold: prospect.json not "sold" or a page still showing the notice (see docs/prospect.md)
+//   dark-patterns      a pre-checked checkbox in a form, a countdown timer (data-countdown or a ticking page script) or
+//                      confirmshaming on a link or button, on every built page except 404.html (Spanish and English)
 //   copy-match         (--refs) 8 words in a row of the built page text also appear in a reference page
 //
 // Warnings (never failures): archetype-target, the built layout signature is outside the ranges of the primary
@@ -74,6 +76,8 @@ import {
   scanClaims,
 } from './lib/copy-claims.mjs';
 import { LEGAL_PATHS } from './report/legal-rules.mjs';
+import { pageScripts, scanDarkPatterns } from './lib/dark-patterns.mjs';
+import { parseTree } from './lib/html-tree.mjs';
 import {
   alternatesOf,
   canonicalOf,
@@ -1797,7 +1801,7 @@ function briefClaimText(brief) {
 }
 
 /** Is this built page a legal page (the report's paths, a locale prefix ignored, or data-legal-page)? */
-function isLegalPage(page, html) {
+export function isLegalPage(page, html) {
   if (/\bdata-legal-page\s*=/i.test(html)) return true;
   const path = page.replace(/(?:\/index)?\.html$/, '').replace(/\/+$/, '');
   return Object.keys(LEGAL_PATHS).some((suffix) => path.endsWith(suffix));
@@ -1888,6 +1892,44 @@ export function checkCopyClaims(siteDir) {
 }
 
 // --------------------------------------------------------------------------------------------------
+// Rule: dark-patterns (design: add-neuromarketing-review, Decision 5)
+
+/**
+ * Fails on a pre-checked checkbox in a form, a countdown timer (data-countdown or a ticking script) and
+ * confirmshaming on a link or button, on every built page except 404.html. Returns { failures, warnings };
+ * without a build it only warns (`dark-patterns-no-build`).
+ */
+export function checkDarkPatterns(siteDir) {
+  const slug = basename(siteDir);
+  const dist = join(siteDir, 'dist');
+  const warnings = [];
+  const failures = [];
+  if (!existsSync(dist) || !statSync(dist).isDirectory()) {
+    warnings.push({
+      rule: 'dark-patterns-no-build',
+      item: 'dist',
+      message: `dark-patterns did not run: sites/${slug}/dist does not exist; build first (npm run build -w site-${slug}) so the pages can be checked`,
+    });
+    return { failures, warnings };
+  }
+  const paths = walk(
+    dist,
+    (path) => path.endsWith('.html') && basename(path) !== '404.html',
+  ).sort();
+  for (const path of paths) {
+    const page = `/${posix(relative(dist, path))}`;
+    const tree = parseTree(readFileSync(path, 'utf8'));
+    for (const hit of scanDarkPatterns({
+      page,
+      tree,
+      scripts: pageScripts(dist, tree),
+    }))
+      failures.push(failure('dark-patterns', hit.item, hit.message));
+  }
+  return { failures, warnings };
+}
+
+// --------------------------------------------------------------------------------------------------
 // Orchestration
 
 export async function runChecks({
@@ -1903,6 +1945,7 @@ export async function runChecks({
     throw new RunError(`sites/${slug} is not a site`);
   const manifest = readManifest(siteDir);
   const copyClaims = checkCopyClaims(siteDir);
+  const darkPatterns = checkDarkPatterns(siteDir);
 
   const results = [
     ['images-credited', () => checkUncredited(siteDir, manifest)],
@@ -1923,6 +1966,7 @@ export async function runChecks({
     ],
     ['scenes', () => checkScenes(siteDir, manifest)],
     ['copy-claims', () => copyClaims.failures],
+    ['dark-patterns', () => darkPatterns.failures],
     ...(readI18nConfig(siteDir) ? [['i18n', () => checkI18n(siteDir)]] : []),
     ...(manifest.images.some(isAi)
       ? [['ai-provenance', () => checkAiProvenance(siteDir, manifest)]]
@@ -1964,6 +2008,7 @@ export async function runChecks({
       ...archetypeWarnings(slug, root),
       ...i18nWarnings(siteDir),
       ...copyClaims.warnings,
+      ...darkPatterns.warnings,
     ],
   };
 }
@@ -2014,6 +2059,9 @@ Final check of sites/<slug>/ after site QA passes. Fails, naming the item, when:
   copy-claims       a promise in the built copy (404.html and legal pages skipped; Spanish and English): guaranteed results,
                     results within a time span, absolute superlatives, health or money promises, unless the brief states
                     the claim in the customer's own words (then a warning asks a person to confirm it)
+  dark-patterns     a pre-checked checkbox in a form, a countdown timer (data-countdown, or a page script that pairs setInterval
+                    with day/hour/minute/second labels) or confirmshaming on a link or button (404.html skipped; Spanish and
+                    English). A deadline written as a date, an unchecked box and a plain "No, gracias" pass
   copy-match        (--refs) ${SHINGLE_WORDS} words in a row of the built page also occur in a reference
 
   --site <slug>     the site (required)
