@@ -1,6 +1,6 @@
 # Proposal: turnio
 
-Status: **proposed**. Fill every section; the checkpoint waits for approval unless the run is automatic.
+Status: **approved** (owner, 2026-11-03, with the Pro tag correction in Decision 10). Fill every section; the checkpoint waits for approval unless the run is automatic.
 
 ## Brief
 
@@ -121,7 +121,7 @@ Written with the `conversion-psychology` skill on top of the Copy plan (the plan
 
 - **Emotional target:** **relief** (primary), **calm** (secondary). The audience arrives tired of answering appointment messages while they cut and colour (`audience.needs`); tone words "cercano, claro, práctico" (`tone`). Relief is named plainly; no fear of losing clients.
 - **Attention path:** the hero's focal point is the `h1`, then the filled "Empieza gratis" button directly under it (`goal.primary`, `https://app.example.com/registro?plan=gratis`), then the agenda mock below. Secondary action "Prueba el Pro 14 días" (`goal.secondary`) is an outlined button of the same height but no fill, placed after the primary. No gaze cue (no photo with a face). The header repeats the filled primary button only.
-- **Choice:** three offers side by side (Plan Gratis 0 €, Plan Pro 19 €/mes, Plan Equipo 39 €/mes), in the brief's order. Highlighted: **Plan Pro**, with a mono tag "el que incluye WhatsApp" (a fact, not a popularity claim), because the brief's own description centres on the WhatsApp reminder and Instagram booking, which only Pro and Equipo include; its button is the secondary goal "Prueba el Pro 14 días". Plan Gratis keeps the primary "Empieza gratis" button. No anchor beyond the real prices; no struck prices, no discounts. The comparison table lists only features named in the offer descriptions.
+- **Choice:** three offers side by side (Plan Gratis 0 €, Plan Pro 19 €/mes, Plan Equipo 39 €/mes), in the brief's order. Highlighted: **Plan Pro**, with a mono tag "con recordatorios por WhatsApp" (a fact, not a popularity claim; Equipo includes them too, so the tag never says "only"), because the brief's own description centres on the WhatsApp reminder and Instagram booking, which only Pro and Equipo include; its button is the secondary goal "Prueba el Pro 14 días". Plan Gratis keeps the primary "Empieza gratis" button. No anchor beyond the real prices; no struck prices, no discounts. The comparison table lists only features named in the offer descriptions.
 - **Trust and risk:** no proof available (`proof` empty). Risk is lowered with brief facts only: a free plan at 0 €, and the Pro trial "de 14 días sin tarjeta" (`offer[1].description`). Contact: `hola@example.com` (assumed) in the footer. No legal pages (no market in the brief). No guarantee: the brief states none.
 - **Ending:** section 10 repeats "Empieza gratis" as the filled button, with "Prueba el Pro 14 días" as the outlined one.
 - **Ethics check:**
@@ -165,3 +165,4 @@ Online shop, cart, payments, backend forms, CMS, multiple languages, a real sign
 7. The highlighted plan is Pro (it holds the WhatsApp reminder); the page's primary action stays "Empieza gratis".
 8. No photographs, no AI images and no 3D: the visuals are HTML/CSS mocks of the product with no client names, figures or ratings.
 9. Deploy target: the brief asks for `cloudflare-pages`, which is the site's current `cloudflare` target; `node scripts/deploy/config.mjs --site turnio --from-brief --write` confirms it at the build. No `deploy.domain`, so `site` stays unset (absolute canonical and sitemap URLs come at the hand-off).
+10. Owner review (2026-11-03): approved as proposed. Correction: the Pro tag says "con recordatorios por WhatsApp", not "el que incluye WhatsApp", because Plan Equipo includes the WhatsApp reminders too.
