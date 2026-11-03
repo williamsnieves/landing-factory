@@ -1,0 +1,94 @@
+---
+/**
+ * Pricing: the three plans side by side in the brief's order (Pro highlighted), then a real comparison
+ * table with only what the offer descriptions name. The table fits 375 px without scrolling: short plan
+ * headers and icon cells.
+ */
+import Container from '../ui/Container.astro';
+import TwoTone from '../ui/TwoTone.astro';
+import PlanCard from '../ui/PlanCard.astro';
+import PlanCell from '../ui/PlanCell.astro';
+import { comparison, plans } from '../../data/plans';
+import { pricing } from '../../content/site';
+
+const delays = ['0', '0.08', '0.16'];
+---
+
+<section
+  id={pricing.id}
+  aria-labelledby={`${pricing.id}-titulo`}
+  class="scroll-mt-20 pt-28 md:pt-36 lg:pt-44"
+>
+  <Container>
+    <div data-reveal>
+      <TwoTone
+        text={pricing.heading}
+        id={`${pricing.id}-titulo`}
+        class="mx-auto max-w-3xl text-center text-2xl leading-[1.1] font-medium tracking-[-0.015em] text-balance"
+      />
+    </div>
+
+    <div class="mt-10 grid gap-4 md:mt-14 lg:grid-cols-3 lg:gap-6">
+      {plans.map((plan, index) => (
+        <PlanCard
+          plan={plan}
+          filled={plan.id === 'gratis'}
+          delay={delays[index]}
+        />
+      ))}
+    </div>
+
+    <div
+      data-reveal
+      class="md:bg-surface md:border-line mt-8 md:mt-6 md:rounded-md md:border md:px-7 md:py-4"
+    >
+      <table
+        aria-label={pricing.tableLabel}
+        class="w-full border-collapse text-left text-xs md:text-sm"
+      >
+        <thead>
+          <tr class="border-line border-b">
+            <th
+              scope="col"
+              class="text-ink-muted py-4 pr-2 align-bottom font-normal md:w-[46%] md:pr-3"
+            >
+              {pricing.featureHeader}
+            </th>
+            {plans.map((plan) => (
+              <th
+                scope="col"
+                class:list={[
+                  'px-1 py-4 align-bottom font-medium md:px-3',
+                  plan.featured ? 'text-primary' : 'text-ink',
+                ]}
+              >
+                {plan.name}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {comparison.map((row) => (
+            <tr class="border-line border-b last:border-b-0">
+              <th
+                scope="row"
+                class="text-ink-soft py-4 pr-2 font-normal md:pr-3"
+              >
+                {row.feature}
+              </th>
+              {row.cells.map((cell) => (
+                <td class="px-1 py-4 align-middle md:px-3">
+                  <PlanCell
+                    cell={cell}
+                    included={pricing.included}
+                    notIncluded={pricing.notIncluded}
+                  />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </Container>
+</section>

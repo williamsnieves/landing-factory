@@ -1,0 +1,66 @@
+---
+/**
+ * The salon's public booking page on a phone: service, day and time chosen, then "Reservar". HTML and CSS.
+ */
+import MockFrame from '../ui/MockFrame.astro';
+import { bookingPage } from '../../data/mocks';
+
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props;
+const chip = (selected: boolean) =>
+  selected
+    ? 'bg-primary-soft text-primary ring-1 ring-primary'
+    : 'bg-paper text-ink-soft ring-1 ring-line';
+---
+
+<MockFrame label={label} class="w-full max-w-sm p-5 md:p-6">
+  <div class="flex items-center gap-3">
+    <span class="bg-panel text-ink flex size-10 items-center justify-center rounded-pill text-sm font-medium">
+      T
+    </span>
+    <span class="text-ink text-base font-medium">{bookingPage.salon}</span>
+  </div>
+
+  <p class="text-ink-muted mt-6 text-xs">{bookingPage.steps.service}</p>
+  <div class="mt-2 flex flex-wrap gap-2">
+    {bookingPage.services.map((service) => (
+      <span
+        class:list={['rounded-sm px-3 py-2 text-sm', chip(service.selected)]}
+      >
+        {service.name}
+      </span>
+    ))}
+  </div>
+
+  <p class="text-ink-muted mt-5 text-xs">{bookingPage.steps.day}</p>
+  <div class="mt-2 grid grid-cols-6 gap-1.5">
+    {bookingPage.days.map((day) => (
+      <span
+        class:list={['rounded-sm py-2 text-center text-sm', chip(day.selected)]}
+      >
+        {day.name}
+      </span>
+    ))}
+  </div>
+
+  <p class="text-ink-muted mt-5 text-xs">{bookingPage.steps.time}</p>
+  <div class="mt-2 grid grid-cols-2 gap-2">
+    {bookingPage.slots.map((slot) => (
+      <span
+        class:list={[
+          'rounded-sm py-2 text-center text-sm tabular-nums',
+          chip(slot.selected),
+        ]}
+      >
+        {slot.time}
+      </span>
+    ))}
+  </div>
+
+  <span class="bg-primary text-primary-contrast mt-6 flex min-h-11 items-center justify-center rounded-sm text-sm font-medium">
+    {bookingPage.button}
+  </span>
+</MockFrame>

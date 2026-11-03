@@ -1,0 +1,50 @@
+---
+/**
+ * Hero: the two-tone h1 with the keyword, one line, the filled primary and outlined secondary actions, then
+ * the day agenda on a full-bleed ruled band, cropped by the band's lower edge. The frame drifts gently on
+ * scroll (data-parallax on the inner layer of the overflow-hidden band; none under reduced motion).
+ */
+import Container from '../ui/Container.astro';
+import RuledBand from '../ui/RuledBand.astro';
+import TwoTone from '../ui/TwoTone.astro';
+import Button from '../ui/Button.astro';
+import DayAgenda from '../mocks/DayAgenda.astro';
+import { hero } from '../../content/site';
+---
+
+<section id="inicio" class="pt-14 md:pt-24 lg:pt-28">
+  <Container>
+    <div data-reveal>
+      <TwoTone
+        as="h1"
+        text={hero.heading}
+        class="max-w-5xl text-3xl leading-[1.06] font-medium tracking-[-0.025em] md:text-4xl md:leading-[1.03]"
+      />
+    </div>
+    <p
+      data-reveal
+      data-reveal-delay="0.08"
+      class="text-ink-soft mt-6 max-w-2xl text-base md:mt-8 md:text-lg"
+    >
+      {hero.intro}
+    </p>
+    <div data-reveal data-reveal-delay="0.16" class="mt-8 md:mt-10">
+      <div class="flex flex-wrap gap-3">
+        <Button href={hero.primary.href}>{hero.primary.label}</Button>
+        <Button href={hero.secondary.href} variant="outlined">
+          {hero.secondary.label}
+        </Button>
+      </div>
+      <p class="text-ink-muted mt-4 text-sm">{hero.note}</p>
+    </div>
+  </Container>
+
+  <RuledBand
+    class="relative mt-12 h-[28rem] overflow-hidden md:mt-16 md:h-[34rem] lg:h-[38rem]"
+    inner="pt-14 md:pt-16"
+  >
+    <div data-parallax="0.08" class="lg:px-14">
+      <DayAgenda label={hero.mockLabel} />
+    </div>
+  </RuledBand>
+</section>

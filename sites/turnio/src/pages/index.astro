@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Motion from '../components/motion/Motion.astro';
+import Header from '../components/sections/Header.astro';
+import Hero from '../components/sections/Hero.astro';
+import FactStrip from '../components/sections/FactStrip.astro';
+import Statement from '../components/sections/Statement.astro';
+import FeatureBooking from '../components/sections/FeatureBooking.astro';
+import FeatureReminders from '../components/sections/FeatureReminders.astro';
+import FeatureAgenda from '../components/sections/FeatureAgenda.astro';
+import Steps from '../components/sections/Steps.astro';
+import Pricing from '../components/sections/Pricing.astro';
+import Faq from '../components/sections/Faq.astro';
+import Closing from '../components/sections/Closing.astro';
+import Footer from '../components/sections/Footer.astro';
+import { meta } from '../content/site';
+import { softwareApplication } from '../data/seo';
+---
+
+<BaseLayout
+  title={meta.title}
+  description={meta.description}
+  lang="es"
+  skipLabel={meta.skipLabel}
+  jsonLd={softwareApplication}
+>
+  <Motion slot="head" />
+  <Header slot="header" />
+  <Hero />
+  <FactStrip />
+  <Statement />
+  <FeatureBooking />
+  <FeatureReminders />
+  <FeatureAgenda />
+  <Steps />
+  <Pricing />
+  <Faq />
+  <Closing />
+  <Footer slot="footer" />
+</BaseLayout>

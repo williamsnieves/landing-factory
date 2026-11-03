@@ -1,0 +1,26 @@
+---
+/** Not-found content: the hour line, a two-tone h1 and the way back home or to the free sign-up. */
+import Container from '../ui/Container.astro';
+import TimeRule from '../ui/TimeRule.astro';
+import TwoTone from '../ui/TwoTone.astro';
+import Button from '../ui/Button.astro';
+import { notFound } from '../../content/site';
+---
+
+<section id="no-encontrada" class="pt-20 pb-28 md:pt-32 md:pb-40">
+  <Container>
+    <TimeRule label={notFound.time} />
+    <TwoTone
+      as="h1"
+      text={notFound.heading}
+      class="mt-10 max-w-4xl text-3xl leading-[1.08] font-medium tracking-[-0.02em]"
+    />
+    <p class="text-ink-soft mt-6 max-w-xl text-lg">{notFound.body}</p>
+    <div class="mt-10 flex flex-wrap gap-3">
+      <Button href={notFound.primary.href}>{notFound.primary.label}</Button>
+      <Button href={notFound.home.href} variant="outlined">
+        {notFound.home.label}
+      </Button>
+    </div>
+  </Container>
+</section>

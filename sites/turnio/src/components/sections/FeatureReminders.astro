@@ -1,0 +1,32 @@
+---
+/** Feature "recordatorios" (19:00), flipped: the reminder chat on the left, heading and copy on the right. */
+import Container from '../ui/Container.astro';
+import TimeRule from '../ui/TimeRule.astro';
+import FeatureText from '../ui/FeatureText.astro';
+import ReminderChat from '../mocks/ReminderChat.astro';
+import { reminders } from '../../content/site';
+---
+
+<section
+  id={reminders.id}
+  aria-labelledby={`${reminders.id}-titulo`}
+  class="scroll-mt-20 pt-28 md:pt-36 lg:pt-44"
+>
+  <Container>
+    <TimeRule label={reminders.time} />
+    <div class="grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-x-8">
+      <div
+        data-reveal
+        class="bg-panel order-2 mt-2 flex justify-center rounded-lg p-4 md:p-10 lg:order-1 lg:col-span-6 lg:mt-10 lg:p-12"
+      >
+        <ReminderChat
+          label={reminders.mockLabel}
+          depositLabel={reminders.depositLabel}
+        />
+      </div>
+      <div class="order-1 lg:order-2 lg:col-span-5 lg:col-start-8">
+        <FeatureText feature={reminders} split={false} />
+      </div>
+    </div>
+  </Container>
+</section>

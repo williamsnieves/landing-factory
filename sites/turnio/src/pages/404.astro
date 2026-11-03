@@ -1,0 +1,20 @@
+---
+// Not-found page: the build emits dist/404.html, which static hosts serve with status 404.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/sections/Header.astro';
+import NotFound from '../components/sections/NotFound.astro';
+import Footer from '../components/sections/Footer.astro';
+import { meta, notFound } from '../content/site';
+---
+
+<BaseLayout
+  title={notFound.title}
+  description={notFound.description}
+  lang="es"
+  skipLabel={meta.skipLabel}
+  noindex
+>
+  <Header slot="header" />
+  <NotFound />
+  <Footer slot="footer" />
+</BaseLayout>

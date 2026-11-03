@@ -1,0 +1,25 @@
+---
+/** Feature "agenda" (lunes 08:55): heading left, copy right; below, on a full-bleed ruled band, the week view and the report. */
+import Container from '../ui/Container.astro';
+import RuledBand from '../ui/RuledBand.astro';
+import TimeRule from '../ui/TimeRule.astro';
+import FeatureText from '../ui/FeatureText.astro';
+import WeekView from '../mocks/WeekView.astro';
+import { agenda } from '../../content/site';
+---
+
+<section
+  id={agenda.id}
+  aria-labelledby={`${agenda.id}-titulo`}
+  class="scroll-mt-20 pt-28 md:pt-36 lg:pt-44"
+>
+  <Container>
+    <TimeRule label={agenda.time} />
+    <FeatureText feature={agenda} />
+  </Container>
+  <RuledBand class="mt-10 md:mt-14" inner="py-6 md:py-14 lg:py-16">
+    <div data-reveal data-reveal-delay="0.16" class="lg:px-14">
+      <WeekView label={agenda.mockLabel} reportLabel={agenda.reportLabel} />
+    </div>
+  </RuledBand>
+</section>

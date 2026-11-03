@@ -1,0 +1,12 @@
+---
+/** The page column: about 1280 px wide, 20 px gutters on phones, 32 to 48 px from tablets up. */
+interface Props {
+  class?: string;
+}
+
+const { class: extra } = Astro.props;
+---
+
+<div class:list={['mx-auto w-full max-w-7xl px-5 md:px-8 lg:px-12', extra]}>
+  <slot />
+</div>

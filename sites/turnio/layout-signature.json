@@ -1,0 +1,109 @@
+{
+  "site": "turnio",
+  "version": 1,
+  "page": "/",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "features": {
+    "sectionCount": 10,
+    "cols1Share": 0.7,
+    "cols2Share": 0.3,
+    "cols3Share": 0,
+    "splitRatio": 0.82,
+    "fullBleedShare": 0.4,
+    "imageRadius": 0,
+    "buttonRadius": 24,
+    "buttonShape": "pill",
+    "headingScale": 4.5,
+    "headingAlign": "center",
+    "headingCase": 0,
+    "eyebrowShare": 0,
+    "wordsPerScreen": 83,
+    "footerType": "minimal",
+    "mediaPerScreen": 0.4,
+    "rotatedShare": 0,
+    "overlapShare": 0,
+    "stickyCount": 0
+  },
+  "sections": [
+    {
+      "id": "inicio",
+      "cols": 1,
+      "fullBleed": true,
+      "eyebrow": false
+    },
+    {
+      "id": "datos",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "idea",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "reservas",
+      "cols": 2,
+      "fullBleed": true,
+      "eyebrow": false
+    },
+    {
+      "id": "recordatorios",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "agenda",
+      "cols": 2,
+      "fullBleed": true,
+      "eyebrow": false
+    },
+    {
+      "id": "empezar",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "precios",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "preguntas",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "empieza",
+      "cols": 1,
+      "fullBleed": true,
+      "eyebrow": false
+    }
+  ],
+  "mobile": {
+    "screens": 11.95,
+    "wordsPerScreen": 61,
+    "sectionCount": 10
+  },
+  "hashes": [
+    "cd266f3c5a72e1d8",
+    "8dacac9c5953123f",
+    "050a316544e064e4",
+    "1d1a64106a432353",
+    "5d12317745626b8b",
+    "cd621d8e4b4bc096",
+    "c55a4b6c69c26260",
+    "4d621e1e0c1c0000",
+    "150e5c106a6e0818",
+    "250edc204e6e0818"
+  ]
+}

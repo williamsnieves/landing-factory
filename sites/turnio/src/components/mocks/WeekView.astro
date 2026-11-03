@@ -1,0 +1,77 @@
+---
+/**
+ * The week at a glance, filtered by chair or cabin (Plan Equipo), and an occupancy report drawn as bars with
+ * no numbers. Abstract blocks only: no names, no figures.
+ */
+import MockFrame from '../ui/MockFrame.astro';
+import { weekView } from '../../data/mocks';
+
+interface Props {
+  label: string;
+  reportLabel: string;
+}
+
+const { label, reportLabel } = Astro.props;
+---
+
+<MockFrame label={label} class="overflow-hidden">
+  <div class="grid lg:grid-cols-[minmax(0,1fr)_20rem]">
+    <div class="p-4 md:p-6">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <span class="text-ink text-sm font-medium">{weekView.title}</span>
+        <span class="bg-primary-soft text-primary rounded-pill px-3 py-1 font-mono text-xs">
+          {weekView.tag}
+        </span>
+      </div>
+      <div class="mt-4 flex flex-wrap gap-1.5">
+        {weekView.filters.map((filter) => (
+          <span
+            class:list={[
+              'rounded-sm px-3 py-1.5 text-xs',
+              filter.selected
+                ? 'bg-ink text-paper'
+                : 'bg-paper text-ink-soft ring-line ring-1',
+            ]}
+          >
+            {filter.name}
+          </span>
+        ))}
+      </div>
+      <div class="mt-5 grid grid-cols-6 gap-1.5 md:gap-3">
+        {weekView.days.map((day) => (
+          <div class="min-w-0">
+            <span class="text-ink-muted block text-xs">{day.name}</span>
+            <div class="bg-paper mt-2 flex h-44 flex-col gap-1 rounded-sm p-1 md:h-56">
+              {day.blocks.map((share, index) => (
+                <span
+                  class:list={[
+                    'block rounded-sm',
+                    index % 2 === 0 ? 'bg-primary-soft' : 'bg-panel',
+                  ]}
+                  style={`height: ${Math.round(share * 100)}%`}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="border-line border-t p-4 md:p-6 lg:border-t-0 lg:border-l">
+      <span class="text-ink text-sm font-medium">{reportLabel}</span>
+      <div class="mt-5 space-y-3">
+        {weekView.report.map((row) => (
+          <div class="flex items-center gap-3">
+            <span class="text-ink-muted w-9 shrink-0 text-xs">{row.name}</span>
+            <span class="bg-panel h-3 flex-1 rounded-sm">
+              <span
+                class="bg-primary block h-full rounded-sm"
+                style={`width: ${Math.round(row.share * 100)}%`}
+              />
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</MockFrame>

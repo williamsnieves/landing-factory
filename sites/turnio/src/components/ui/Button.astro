@@ -1,0 +1,29 @@
+---
+/**
+ * Link styled as a button: `filled` for the primary action (berry fill), `outlined` for the secondary one
+ * (ink border, no fill). Same height for both, pill shape (the linear-app reference's primary action),
+ * feedback through color and a 1 px press.
+ */
+interface Props {
+  href: string;
+  variant?: 'filled' | 'outlined';
+  size?: 'md' | 'sm';
+  class?: string;
+}
+
+const { href, variant = 'filled', size = 'md', class: extra } = Astro.props;
+---
+
+<a
+  href={href}
+  class:list={[
+    'inline-flex items-center justify-center rounded-pill font-medium whitespace-nowrap transition-[background-color,color,transform] duration-150 ease-out active:translate-y-px',
+    size === 'md' ? 'min-h-12 px-6 text-base' : 'min-h-11 px-4 text-sm',
+    variant === 'filled'
+      ? 'bg-primary text-primary-contrast hover:bg-accent focus-visible:bg-accent'
+      : 'border-ink text-ink hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper border',
+    extra,
+  ]}
+>
+  <slot />
+</a>

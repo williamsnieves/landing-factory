@@ -1,0 +1,43 @@
+---
+/**
+ * A social profile header with a "Reservar" action button next to "Mensaje", drawn in HTML and CSS
+ * (no platform logo or brand mark).
+ */
+import MockFrame from '../ui/MockFrame.astro';
+import { instagramProfile } from '../../data/mocks';
+
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props;
+---
+
+<MockFrame label={label} class="w-full max-w-sm p-5 md:p-6">
+  <div class="flex items-center gap-4">
+    <span class="ring-primary bg-panel size-14 shrink-0 rounded-pill ring-2 ring-offset-2"></span>
+    <div class="min-w-0">
+      <p class="text-ink text-base font-medium">{instagramProfile.name}</p>
+      <p class="text-ink-muted text-sm">{instagramProfile.kind}</p>
+    </div>
+  </div>
+  <div class="mt-5 grid grid-cols-2 gap-2">
+    {instagramProfile.actions.map((action, index) => (
+      <span
+        class:list={[
+          'flex min-h-10 items-center justify-center rounded-sm text-sm font-medium',
+          index === 0
+            ? 'bg-primary text-primary-contrast'
+            : 'bg-panel text-ink',
+        ]}
+      >
+        {action}
+      </span>
+    ))}
+  </div>
+  <div class="mt-5 grid grid-cols-3 gap-1">
+    <span class="bg-panel aspect-square rounded-sm"></span>
+    <span class="bg-primary-soft aspect-square rounded-sm"></span>
+    <span class="bg-panel aspect-square rounded-sm"></span>
+  </div>
+</MockFrame>

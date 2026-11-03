@@ -1,0 +1,68 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/plus-jakarta-sans';
+@import '@fontsource-variable/jetbrains-mono';
+@import './tokens.css';
+
+@layer base {
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    overflow-x: clip;
+    font-size: var(--text-base);
+    line-height: 1.6;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 3px;
+  }
+}
+
+/* The one soft shadow (MASTER.md): only on the hero agenda frame and the floating mobile menu. */
+@utility frame-shadow {
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--color-ink) 4%, transparent),
+    0 12px 32px -12px color-mix(in srgb, var(--color-ink) 12%, transparent);
+}
+
+/* The ruled page of the salon's appointment book: an hour line every 64 px and a dashed half hour,
+ * drawn by public/hour-lines.svg (ink at 7 and 3.5 percent opacity) over the panel color. */
+@utility hour-lines {
+  background-color: var(--color-panel);
+  background-image: url('/hour-lines.svg');
+  background-size: 8px 64px;
+}
+
+/* Native disclosure widgets (FAQ, mobile menu) draw their own marker. */
+summary {
+  list-style: none;
+}
+summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Motion layer -----------------------------------------------------------
+ * Hidden initial states apply ONLY when the .js-motion class is on <html>.
+ * That class is added by the inline script in <Motion /> when JavaScript runs
+ * and prefers-reduced-motion is not "reduce". Without it, everything is visible.
+ */
+.js-motion [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 2rem, 0);
+}
+
+/* Lenis recommended base styles */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}
