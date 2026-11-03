@@ -963,6 +963,29 @@ export function hrefsOf(html) {
 }
 
 const trimSlash = (url) => url.replace(/\/+$/, '');
+
+/**
+ * An href that is the brief's URL plus tracking: both absolute http(s) URLs, same origin, same path (trailing
+ * slashes ignored), every query parameter of the brief URL present with the same value; extra parameters (UTM)
+ * and a fragment are allowed.
+ */
+function sameLinkWithExtras(href, wanted) {
+  let a;
+  let b;
+  try {
+    a = new URL(href);
+    b = new URL(wanted);
+  } catch {
+    return false;
+  }
+  if (!/^https?:$/.test(a.protocol) || !/^https?:$/.test(b.protocol))
+    return false;
+  if (a.origin !== b.origin || trimSlash(a.pathname) !== trimSlash(b.pathname))
+    return false;
+  return [...b.searchParams].every(([key, value]) =>
+    a.searchParams.getAll(key).includes(value),
+  );
+}
 const digitsOnly = (text) => String(text).replace(/[\s().-]/g, '');
 
 /** Does the page carry the fact? `text` is the visible text (lines joined), `hrefs` the link targets. */
@@ -971,7 +994,11 @@ function factPresent(fact, text, hrefs) {
     case 'text':
       return squash(text).includes(squash(fact.value));
     case 'url':
-      return hrefs.some((href) => trimSlash(href) === trimSlash(fact.value));
+      return hrefs.some(
+        (href) =>
+          trimSlash(href) === trimSlash(fact.value) ||
+          sameLinkWithExtras(href, fact.value),
+      );
     case 'email': {
       const email = fact.value.toLowerCase();
       return (

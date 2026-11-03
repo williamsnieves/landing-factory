@@ -32,7 +32,7 @@ How the factory plans the order of a landing's copy, writes from that plan and c
 
 `node scripts/pick-copy-framework.mjs --site <slug> [--top N] [--json]` prints the top candidates (3 by default) with score, reasons and the stage-to-section map. `--list` prints the catalog. Exit 0 ok, 2 bad usage, a missing site or an invalid brief. The same brief always gives the same ranking; ties break by score, then id. It never writes anything.
 
-Signals come from the brief: awareness (else `problem-aware`, printed as assumed), `business.kind`, the prices of the offer (`low` under 50, `high` over 500 in the offer's own currency, `mixed` when the offers span classes), the goal (`buy`, `booking` or `lead`, read from the primary action's label and URL), `proof` (real or none), `legal.regulated` and whether objections are stated. Without a brief the defaults are used and the output says so.
+Signals come from the brief: awareness (else `problem-aware`, printed as assumed), `business.kind`, the prices of the offer (`low` under 50, `high` over 500 in the offer's own currency, `mixed` when the offers span classes), the goal (`booking`, `signup`, `buy` or `lead`, read from the primary action's label and URL in that order; `signup` is a free sign-up, account creation or trial), `proof` (real or none), `legal.regulated` and whether objections are stated. Without a brief the defaults are used and the output says so.
 
 | Awareness        | Ranks first   |
 | ---------------- | ------------- |

@@ -104,7 +104,10 @@ test('deploy job: the live report runs after the URL is captured, before the com
   assert.ok(capture < live && live < comment && comment < fail);
   const body = stepOf('deploy', 'Landing report (live checks)').body;
   assert.match(body, /continue-on-error: true/);
-  assert.match(body, /npm run report -- --only live --url "\$DEPLOY_URL"/);
+  assert.match(
+    body,
+    /npm run report -- --only live --wait-tls 300 --url "\$DEPLOY_URL"/,
+  );
   assert.match(
     body,
     /DEPLOY_URL: \$\{\{ steps\.output\.outputs\.url \|\| steps\.target_deploy\.outputs\.url \}\}/,
@@ -141,7 +144,7 @@ test('site job: static report after QA and before any deploy step, live report a
   assert.ok(deploy < capture && capture < live && live < comment);
   assert.match(
     stepOf(job, 'Landing report (live checks)').body,
-    /npm run report -- --site "\$SITE" --only live --url "\$DEPLOY_URL"/,
+    /npm run report -- --site "\$SITE" --only live --wait-tls 300 --url "\$DEPLOY_URL"/,
   );
   const artifact = stepOf(job, 'Upload landing report').body;
   assert.match(artifact, /name: landing-report-\$\{\{ matrix\.site \}\}$/m);

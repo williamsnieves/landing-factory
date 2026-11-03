@@ -27,7 +27,7 @@ node scripts/pick-copy-framework.mjs --site <slug> --json
 node scripts/pick-copy-framework.mjs --list                 # the whole catalog
 ```
 
-The picker reads `audience.awareness` (how much the visitor already knows: `unaware`, `problem-aware`, `solution-aware`, `product-aware`, `most-aware`), `business.kind`, the prices of the offer, the primary action, the `proof` list, `legal.regulated` and `audience.objections`. Without `audience.awareness` it uses `problem-aware` and says so: carry that into the proposal's Decisions as an assumption the reviewer can change. Without a brief it uses defaults and says so. The same brief always gives the same ranking.
+The picker reads `audience.awareness` (how much the visitor already knows: `unaware`, `problem-aware`, `solution-aware`, `product-aware`, `most-aware`), `business.kind`, the prices of the offer, the primary action (its goal: `booking`, `signup` for a free sign-up or trial, `buy` or `lead`), the `proof` list, `legal.regulated` and `audience.objections`. Without `audience.awareness` it uses `problem-aware` and says so: carry that into the proposal's Decisions as an assumption the reviewer can change. When the level is stated but listed in `assumed`, it uses it and asks to confirm it with the customer. Without a brief it uses defaults and says so. The same brief always gives the same ranking.
 
 Take the top candidate unless the brief clearly argues otherwise. An override is allowed, and its reason is written in the Copy plan. Notes marked `!` in the output are binding:
 

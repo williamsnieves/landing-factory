@@ -284,7 +284,7 @@ jobs:
         continue-on-error: true
         env:
           DEPLOY_URL: ${{ steps.output.outputs.url || steps.target_deploy.outputs.url }}
-        run: npm run report -- --only live --url "$DEPLOY_URL"
+        run: npm run report -- --only live --wait-tls 300 --url "$DEPLOY_URL"
 
       - name: Summarize live report
         if: steps.gate.outputs.enabled == 'true'
@@ -623,7 +623,7 @@ jobs:
         continue-on-error: true
         env:
           DEPLOY_URL: ${{ steps.output.outputs.url || steps.target_deploy.outputs.url }}
-        run: npm run report -- --site "$SITE" --only live --url "$DEPLOY_URL"
+        run: npm run report -- --site "$SITE" --only live --wait-tls 300 --url "$DEPLOY_URL"
 
       - name: Summarize landing report
         if: always()

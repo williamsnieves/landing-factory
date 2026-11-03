@@ -92,10 +92,14 @@ export function formatResult(result, top) {
   const lines = [
     `pick-copy-framework ${result.site}`,
     result.brief
-      ? `  signals (brief.json): awareness ${s.awareness}${s.awarenessAssumed ? ' (assumed)' : ''}, kind ${s.kind}, price ${s.price}, goal ${s.goal}, proof ${s.proof}, regulated ${s.regulated}, objections ${s.objections}`
+      ? `  signals (brief.json): awareness ${s.awareness}${s.awarenessSource === 'assumed' ? ' (listed as assumed)' : s.awarenessAssumed ? ' (assumed)' : ''}, kind ${s.kind}, price ${s.price}, goal ${s.goal}, proof ${s.proof}, regulated ${s.regulated}, objections ${s.objections}`
       : `  no brief.json: default signals (awareness ${s.awareness} assumed, kind ${s.kind}, price ${s.price}, goal ${s.goal}, proof ${s.proof}, regulated ${s.regulated}, objections ${s.objections})`,
   ];
-  if (s.awarenessAssumed)
+  if (s.awarenessSource === 'assumed')
+    lines.push(
+      `  note: audience.awareness is ${s.awareness} but listed as assumed; confirm it with the customer`,
+    );
+  else if (s.awarenessAssumed)
     lines.push(
       `  note: audience.awareness is not stated, so ${s.awareness} was assumed; list it as assumed in the proposal or ask the customer`,
     );

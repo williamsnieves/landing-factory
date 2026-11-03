@@ -28,6 +28,7 @@ import { seoItems } from './report/seo.mjs';
 import { countStatuses, summaryLine, verdictOf } from './report/items.mjs';
 import { checkLinks, linkItem, outboundLinks } from './report/links.mjs';
 import { runLiveChecks } from './report/live.mjs';
+import { waitForTls } from './report/wait-tls.mjs';
 import { OWASP_EDITION } from './report/owasp.mjs';
 import {
   distPerfItems,
@@ -107,6 +108,9 @@ report.md to qa/<slug>/report/<timestamp>/ (qa/report/<timestamp>/ for the start
                       caching, private paths, unknown path)
   --site-url          the same on the landing's own domain: the origin of the absolute canonical URL in
                       dist/index.html (needs "site" in astro.config.mjs and a build); not with --url
+  --wait-tls <secs>   before the live checks, request the home page every 10 s until it answers over HTTPS
+                      or the time (1 to 600 s) runs out; for a new Pages project whose certificate is not
+                      issued yet. Live runs only; the checks then run unchanged
   --external-links    request each outbound link once (at most 50, sequential) and report broken ones;
                       bot blocks (403, 429, challenges) are listed as unverified, never retried
   --only static|live  static: everything that reads dist/ and the source (default without --url);
@@ -154,6 +158,7 @@ function parse(argv) {
       site: { type: 'string' },
       url: { type: 'string' },
       'site-url': { type: 'boolean' },
+      'wait-tls': { type: 'string' },
       'external-links': { type: 'boolean' },
       only: { type: 'string' },
       skip: { type: 'string' },
@@ -191,6 +196,18 @@ export async function runReport(values, deps = {}) {
     throw new RunError('--site-url and --url cannot be used together');
   if (values.only === 'live' && !values.url && !values['site-url'])
     throw new RunError('--only live needs --url <deployed-url> or --site-url');
+  let waitTlsSeconds = null;
+  if (values['wait-tls'] !== undefined) {
+    if (!/^\d+$/.test(String(values['wait-tls'])))
+      throw new RunError('--wait-tls must be an integer from 1 to 600');
+    waitTlsSeconds = Number(values['wait-tls']);
+    if (waitTlsSeconds < 1 || waitTlsSeconds > 600)
+      throw new RunError('--wait-tls must be an integer from 1 to 600');
+    if ((!values.url && !values['site-url']) || values.only === 'static')
+      throw new RunError(
+        '--wait-tls needs the live checks: use --url or --site-url, and not --only static',
+      );
+  }
   const checkUrl = (flag) => {
     let parsed;
     try {
@@ -367,7 +384,21 @@ export async function runReport(values, deps = {}) {
   }
 
   let liveHtml = null;
+  let waitedTlsMs = null;
   if (groups.has('live')) {
+    if (waitTlsSeconds !== null) {
+      const clock = deps.now ?? (() => new Date());
+      const waited = await waitForTls({
+        baseUrl: values.url,
+        seconds: waitTlsSeconds,
+        fetchImpl: deps.fetchImpl,
+        timeoutMs: reportConfig.live.timeoutMs,
+        sleepFn: deps.sleepFn,
+        now: () => clock().getTime(),
+        log: deps.log ?? ((line) => console.error(line)),
+      });
+      waitedTlsMs = waited.waitedMs;
+    }
     try {
       const live = await runLiveChecks({
         baseUrl: values.url,
@@ -417,6 +448,7 @@ export async function runReport(values, deps = {}) {
     summary: summaryLine(verdict, counts),
     startedAt: startedAt.toISOString(),
     finishedAt: finishedAt.toISOString(),
+    ...(waitedTlsMs !== null ? { waitedTlsMs } : {}),
     skipped: [...skip],
     groups: [...groups],
     pages: model ? model.pages.map((p) => p.path) : [],

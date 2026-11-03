@@ -73,7 +73,13 @@ export const FRAMEWORKS = [
       'product-aware': 1,
       'most-aware': 1,
     },
-    fits: ['goal:buy', 'goal:booking', 'kind:event', 'kind:product'],
+    fits: [
+      'goal:buy',
+      'goal:booking',
+      'goal:signup',
+      'kind:event',
+      'kind:product',
+    ],
     avoid: [],
     promiseLed: false,
     proofStage: 'desire',
@@ -155,7 +161,7 @@ export const FRAMEWORKS = [
       'product-aware': 4,
       'most-aware': 0,
     },
-    fits: ['kind:product', 'goal:buy', 'price:low', 'price:mid'],
+    fits: ['kind:product', 'goal:buy', 'goal:signup', 'price:low', 'price:mid'],
     avoid: ['kind:content'],
     promiseLed: false,
     proofStage: null,
@@ -505,7 +511,13 @@ export const FRAMEWORKS = [
       'product-aware': 1,
       'most-aware': 3,
     },
-    fits: ['price:low', 'goal:buy', 'kind:product', 'kind:event'],
+    fits: [
+      'price:low',
+      'goal:buy',
+      'goal:signup',
+      'kind:product',
+      'kind:event',
+    ],
     avoid: ['price:high', 'objections:present'],
     promiseLed: false,
     proofStage: null,
@@ -584,21 +596,30 @@ const priceClass = (value) =>
 
 const BOOKING =
   /\b(book|booking|reserv\w*|appointment|schedule|calendly|cita|agenda\w*|turno)\b/;
+// A free sign-up, account creation or trial (folded text: accents are gone, so "regístrate" is "registrate").
+const SIGNUP =
+  /\b(sign[\s-]?up|register|registration|create (an|your) account|free trial|start (for )?free|try (it )?free|get started|registro|registrate|crea tu cuenta|crear cuenta|prueba gratis|empieza gratis|empezar gratis|comienza gratis)\b/;
 const BUY =
   /\b(buy|purchase|checkout|cart|shop|store|order|pay|stripe|gumroad|etsy|compra\w*|tienda|pedir|pedido|carrito|pago)\b/;
 
-/** `buy`, `booking` or `lead` from the primary call to action; `lead` when nothing says otherwise. */
+/**
+ * `booking`, `signup`, `buy` or `lead` from the primary call to action's label and URL, checked in that order;
+ * `lead` when nothing says otherwise.
+ */
 export function goalOf(brief) {
   const primary = brief?.goal?.primary ?? {};
   const text = fold(`${primary.label ?? ''} ${primary.url ?? ''}`);
   if (BOOKING.test(text)) return 'booking';
+  if (SIGNUP.test(text)) return 'signup';
   if (BUY.test(text)) return 'buy';
   return 'lead';
 }
 
 /**
  * Signals of a brief for the picker. Without a brief (null) every signal takes its default and `noBrief` is true.
- * `awarenessAssumed` is true when the brief does not state the awareness (or lists it in `assumed`).
+ * `awarenessAssumed` is true when the brief does not state the awareness (or lists it in `assumed`);
+ * `awarenessSource` says which: `stated`, `assumed` (a valid level listed in `assumed`), `default` (missing or
+ * invalid) or `no-brief`.
  */
 export function deriveSignals(brief) {
   const noBrief = !brief || typeof brief !== 'object';
@@ -607,6 +628,13 @@ export function deriveSignals(brief) {
   const awareness = AWARENESS_LEVELS.includes(stated)
     ? stated
     : AWARENESS_DEFAULT;
+  const awarenessSource = noBrief
+    ? 'no-brief'
+    : !AWARENESS_LEVELS.includes(stated)
+      ? 'default'
+      : isAssumed(b, 'audience.awareness')
+        ? 'assumed'
+        : 'stated';
   const classes = (Array.isArray(b.offer) ? b.offer : [])
     .map((o) => parsePrice(o?.price))
     .filter((v) => v !== null)
@@ -624,10 +652,8 @@ export function deriveSignals(brief) {
     : 'other';
   return {
     awareness,
-    awarenessAssumed:
-      noBrief ||
-      !AWARENESS_LEVELS.includes(stated) ||
-      isAssumed(b, 'audience.awareness'),
+    awarenessAssumed: awarenessSource !== 'stated',
+    awarenessSource,
     kind,
     price,
     goal: noBrief ? 'lead' : goalOf(b),
