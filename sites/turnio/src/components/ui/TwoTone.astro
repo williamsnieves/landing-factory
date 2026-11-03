@@ -1,0 +1,20 @@
+---
+/**
+ * Two-tone heading or statement: the lead clause in full ink, the continuation muted, same size and weight.
+ */
+import type { TwoTone as TwoToneText } from '../../content/site';
+
+interface Props {
+  as?: 'h1' | 'h2' | 'h3' | 'p';
+  text: TwoToneText;
+  class?: string;
+  id?: string;
+}
+
+const { as: Tag = 'h2', text, class: extra, id } = Astro.props;
+---
+
+<Tag id={id} class:list={['text-pretty', extra]}>
+  <span class="text-ink">{text.lead}</span>{' '}
+  <span class="text-ink-muted">{text.rest}</span>
+</Tag>

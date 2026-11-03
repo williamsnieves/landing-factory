@@ -1,0 +1,20 @@
+---
+/**
+ * A full-bleed band ruled like a page of the salon's appointment book (hour lines on the panel color). The
+ * product mocks sit on it; the content keeps the page column through Container.
+ */
+import Container from './Container.astro';
+
+interface Props {
+  class?: string;
+  inner?: string;
+}
+
+const { class: extra, inner } = Astro.props;
+---
+
+<div class:list={['hour-lines w-full', extra]}>
+  <Container class={inner}>
+    <slot />
+  </Container>
+</div>

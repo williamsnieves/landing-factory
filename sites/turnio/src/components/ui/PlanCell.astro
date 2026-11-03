@@ -1,0 +1,47 @@
+---
+/** One cell value of the comparison table: a check, a dash (each with a text alternative) or a short text. */
+import type { Cell } from '../../data/plans';
+
+interface Props {
+  cell: Cell;
+  included: string;
+  notIncluded: string;
+}
+
+const { cell, included, notIncluded } = Astro.props;
+---
+
+{cell.kind === 'yes' ? (
+  <span role="img" aria-label={included} class="text-primary inline-flex">
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      width="20"
+      height="20"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M4.5 10.5l3.5 3.5 7.5-8" />
+    </svg>
+  </span>
+) : cell.kind === 'no' ? (
+  <span role="img" aria-label={notIncluded} class="text-ink-muted inline-flex">
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      width="20"
+      height="20"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+    >
+      <path d="M6 10h8" />
+    </svg>
+  </span>
+) : (
+  <span class="text-ink">{cell.text}</span>
+)}

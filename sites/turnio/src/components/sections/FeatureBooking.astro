@@ -1,0 +1,35 @@
+---
+/** Feature "reservas" (23:40): heading left, copy right; below, on a full-bleed ruled band, the booking page and the profile button. */
+import Container from '../ui/Container.astro';
+import RuledBand from '../ui/RuledBand.astro';
+import TimeRule from '../ui/TimeRule.astro';
+import FeatureText from '../ui/FeatureText.astro';
+import BookingPage from '../mocks/BookingPage.astro';
+import InstagramProfile from '../mocks/InstagramProfile.astro';
+import { booking } from '../../content/site';
+---
+
+<section
+  id={booking.id}
+  aria-labelledby={`${booking.id}-titulo`}
+  class="scroll-mt-20 pt-28 md:pt-36 lg:pt-44"
+>
+  <Container>
+    <TimeRule label={booking.time} />
+    <FeatureText feature={booking} />
+  </Container>
+  <RuledBand class="mt-10 md:mt-14" inner="py-8 md:py-14 lg:py-16">
+    <div
+      data-reveal
+      data-reveal-delay="0.16"
+      class="grid gap-4 sm:grid-cols-2 md:gap-6"
+    >
+      <div class="flex justify-center sm:justify-end">
+        <BookingPage label={booking.mockLabel} />
+      </div>
+      <div class="flex items-start justify-center sm:justify-start sm:pt-16">
+        <InstagramProfile label={booking.instagramLabel} />
+      </div>
+    </div>
+  </RuledBand>
+</section>

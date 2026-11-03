@@ -1,0 +1,108 @@
+---
+/**
+ * Hero mock: one day of a salon's agenda, chairs and the cabin as columns, half-hour rows, appointment blocks
+ * labeled by service and time, and (from 1024 px) the detail of a new booking. Drawn in HTML and CSS.
+ */
+import MockFrame from '../ui/MockFrame.astro';
+import { dayAgenda } from '../../data/mocks';
+
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props;
+const toneClass = {
+  soft: 'bg-primary-soft',
+  panel: 'bg-panel',
+  new: 'bg-primary-soft ring-1 ring-primary',
+} as const;
+---
+
+<MockFrame label={label} shadow class="overflow-hidden">
+  <div class="border-line flex items-center justify-between gap-3 border-b px-4 py-3 md:px-6">
+    <div class="flex items-baseline gap-3">
+      <span class="text-ink text-sm font-medium">{dayAgenda.title}</span>
+      <span class="text-ink-muted text-sm">{dayAgenda.day}</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="border-line hidden rounded-sm border p-0.5 text-xs sm:flex">
+        {dayAgenda.views.map((view, index) => (
+          <span
+            class:list={[
+              'rounded-sm px-3 py-1',
+              index === 0 ? 'bg-panel text-ink' : 'text-ink-muted',
+            ]}
+          >
+            {view}
+          </span>
+        ))}
+      </span>
+      <span class="bg-primary text-primary-contrast rounded-sm px-3 py-1.5 text-xs font-medium">
+        + {dayAgenda.newLabel}
+      </span>
+    </div>
+  </div>
+
+  <div class="flex">
+    <div class="min-w-0 flex-1 px-2 pt-3 pb-6 md:px-6 md:pt-4">
+      <div class="grid grid-cols-[2.75rem_repeat(3,minmax(0,1fr))] gap-x-1.5 md:grid-cols-[3.5rem_repeat(3,minmax(0,1fr))] md:gap-x-3">
+        <span></span>
+        {dayAgenda.columns.map((column) => (
+          <span class="text-ink-soft pb-2 text-xs font-medium">{column}</span>
+        ))}
+      </div>
+      <div class="grid grid-cols-[2.75rem_repeat(3,minmax(0,1fr))] grid-rows-[repeat(10,2.75rem)] gap-x-1.5 md:grid-cols-[3.5rem_repeat(3,minmax(0,1fr))] md:grid-rows-[repeat(10,3.25rem)] md:gap-x-3">
+        {dayAgenda.hours.map((hour, row) => (
+          <>
+            <span
+              class="text-ink-muted -mt-2 text-xs tabular-nums"
+              style={`grid-column: 1; grid-row: ${row + 1}`}
+            >
+              {row % 2 === 0 ? hour : ''}
+            </span>
+            <span
+              class="border-line border-t"
+              style={`grid-column: 2 / -1; grid-row: ${row + 1}`}
+            />
+          </>
+        ))}
+        {dayAgenda.blocks.map((block) => (
+          <span
+            class:list={[
+              'm-0.5 flex flex-col rounded-sm px-2 py-1 leading-tight md:px-3 md:py-1.5',
+              toneClass[block.tone],
+            ]}
+            style={`grid-column: ${block.column + 2}; grid-row: ${block.start + 1} / span ${block.span}`}
+          >
+            <span class="text-ink text-xs font-medium">{block.service}</span>
+            {block.time && (
+              <span class="text-ink-soft text-xs tabular-nums">
+                {block.time}
+              </span>
+            )}
+            {block.note && (
+              <span class="text-primary mt-auto text-xs font-medium">
+                {block.note}
+              </span>
+            )}
+          </span>
+        ))}
+      </div>
+    </div>
+
+    <div class="border-line hidden w-72 shrink-0 border-l p-6 lg:block">
+      <p class="text-ink flex items-center gap-2 text-sm font-medium">
+        <span class="bg-primary rounded-pill size-2"></span>
+        {dayAgenda.detail.title}
+      </p>
+      <dl class="mt-5 space-y-3 text-sm">
+        {dayAgenda.detail.rows.map((row) => (
+          <div class="border-line flex justify-between gap-4 border-b pb-3">
+            <dt class="text-ink-muted">{row.label}</dt>
+            <dd class="text-ink">{row.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </div>
+</MockFrame>

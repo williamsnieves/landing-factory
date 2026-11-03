@@ -1,17 +1,40 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-
-const title = 'turnio';
-const description = 'This site is under construction.';
-const lang = 'es';
-const message = 'This site is under construction.';
+import Motion from '../components/motion/Motion.astro';
+import Header from '../components/sections/Header.astro';
+import Hero from '../components/sections/Hero.astro';
+import FactStrip from '../components/sections/FactStrip.astro';
+import Statement from '../components/sections/Statement.astro';
+import FeatureBooking from '../components/sections/FeatureBooking.astro';
+import FeatureReminders from '../components/sections/FeatureReminders.astro';
+import FeatureAgenda from '../components/sections/FeatureAgenda.astro';
+import Steps from '../components/sections/Steps.astro';
+import Pricing from '../components/sections/Pricing.astro';
+import Faq from '../components/sections/Faq.astro';
+import Closing from '../components/sections/Closing.astro';
+import Footer from '../components/sections/Footer.astro';
+import { meta } from '../content/site';
+import { softwareApplication } from '../data/seo';
 ---
 
-<BaseLayout title={title} description={description} lang={lang} noindex>
-  <section class="mx-auto max-w-3xl px-6 py-32 md:py-48">
-    <h1 class="font-display text-3xl leading-tight tracking-tight text-balance">
-      {title}
-    </h1>
-    <p class="text-ink-soft mt-6 text-lg">{message}</p>
-  </section>
+<BaseLayout
+  title={meta.title}
+  description={meta.description}
+  lang="es"
+  skipLabel={meta.skipLabel}
+  jsonLd={softwareApplication}
+>
+  <Motion slot="head" />
+  <Header slot="header" />
+  <Hero />
+  <FactStrip />
+  <Statement />
+  <FeatureBooking />
+  <FeatureReminders />
+  <FeatureAgenda />
+  <Steps />
+  <Pricing />
+  <Faq />
+  <Closing />
+  <Footer slot="footer" />
 </BaseLayout>

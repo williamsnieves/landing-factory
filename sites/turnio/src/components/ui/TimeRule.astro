@@ -1,0 +1,17 @@
+---
+/**
+ * The hour line of the salon's appointment book: a hairline across the module with the time it is filed
+ * under, in mono. The page's one deliberate label device (times are scene labels, not metrics).
+ */
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="border-line flex items-baseline gap-4 border-t pt-3">
+  <span class="text-ink-muted font-mono text-xs tracking-[0.02em]">
+    {label}
+  </span>
+</div>

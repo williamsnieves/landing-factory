@@ -1,0 +1,25 @@
+---
+/**
+ * A product screen drawn in HTML: a white frame with a hairline and the 12 px radius. The whole mock is one
+ * image for assistive technology (`role="img"` with a description), so its inner labels are not read twice.
+ */
+interface Props {
+  label: string;
+  class?: string;
+  shadow?: boolean;
+}
+
+const { label, class: extra, shadow = false } = Astro.props;
+---
+
+<div
+  role="img"
+  aria-label={label}
+  class:list={[
+    'bg-surface border-line rounded-md border',
+    shadow && 'frame-shadow',
+    extra,
+  ]}
+>
+  <slot />
+</div>

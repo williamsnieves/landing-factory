@@ -1,0 +1,55 @@
+---
+/**
+ * Text of a feature module: two-tone h2 and the short copy, optionally with a plain text link. `split` puts the
+ * heading on the left (5 columns) and the copy on the right (6 columns) from 1024 px; otherwise they stack.
+ */
+import type { FeatureCopy } from '../../content/site';
+import TwoTone from './TwoTone.astro';
+
+interface Props {
+  feature: FeatureCopy;
+  split?: boolean;
+}
+
+const { feature, split = true } = Astro.props;
+---
+
+<div
+  class:list={[
+    'mt-8 grid gap-6 md:mt-10',
+    split && 'lg:grid-cols-12 lg:gap-x-8',
+  ]}
+>
+  <div data-reveal class:list={[split && 'lg:col-span-5']}>
+    <TwoTone
+      text={feature.heading}
+      id={`${feature.id}-titulo`}
+      class="text-2xl leading-[1.1] font-medium tracking-[-0.015em]"
+    />
+  </div>
+  <div
+    data-reveal
+    data-reveal-delay="0.08"
+    class:list={['max-w-xl space-y-4', split && 'lg:col-span-6 lg:col-start-7']}
+  >
+    {feature.body.map((paragraph) => (
+      <p class="text-ink-soft">{paragraph}</p>
+    ))}
+    {feature.link && (
+      <p>
+        <a
+          href={feature.link.href}
+          class="text-primary hover:text-accent group inline-flex items-center gap-1.5 font-medium underline-offset-4 hover:underline"
+        >
+          {feature.link.label}
+          <span
+            aria-hidden="true"
+            class="transition-transform duration-150 group-hover:translate-x-0.5"
+          >
+            →
+          </span>
+        </a>
+      </p>
+    )}
+  </div>
+</div>

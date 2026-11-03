@@ -1,0 +1,22 @@
+---
+/** The situation Turnio replaces, as one large centered two-tone heading: the page's pause between the hero and the features. */
+import Container from '../ui/Container.astro';
+import TwoTone from '../ui/TwoTone.astro';
+import { statement } from '../../content/site';
+---
+
+<section
+  id="idea"
+  aria-labelledby="idea-titulo"
+  class="pt-28 md:pt-36 lg:pt-44"
+>
+  <Container>
+    <div data-reveal>
+      <TwoTone
+        text={statement}
+        id="idea-titulo"
+        class="mx-auto max-w-5xl text-center text-2xl leading-[1.14] font-medium tracking-[-0.02em] text-balance md:text-3xl"
+      />
+    </div>
+  </Container>
+</section>

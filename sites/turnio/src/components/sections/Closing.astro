@@ -1,0 +1,35 @@
+---
+/** Closing: one centered two-tone line and the two actions again, on a full-bleed ruled band. */
+import RuledBand from '../ui/RuledBand.astro';
+import TwoTone from '../ui/TwoTone.astro';
+import Button from '../ui/Button.astro';
+import { closing } from '../../content/site';
+---
+
+<section
+  id={closing.id}
+  aria-labelledby={`${closing.id}-titulo`}
+  class="mt-28 scroll-mt-20 md:mt-36 lg:mt-44"
+>
+  <RuledBand inner="py-20 md:py-28 lg:py-36">
+    <div>
+      <div data-reveal>
+        <TwoTone
+          text={closing.line}
+          id={`${closing.id}-titulo`}
+          class="mx-auto max-w-4xl text-center text-3xl leading-[1.08] font-medium tracking-[-0.02em] text-balance"
+        />
+      </div>
+      <div
+        data-reveal
+        data-reveal-delay="0.08"
+        class="mt-8 flex flex-wrap justify-center gap-3 md:mt-10"
+      >
+        <Button href={closing.primary.href}>{closing.primary.label}</Button>
+        <Button href={closing.secondary.href} variant="outlined">
+          {closing.secondary.label}
+        </Button>
+      </div>
+    </div>
+  </RuledBand>
+</section>

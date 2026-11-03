@@ -1,0 +1,51 @@
+---
+/**
+ * One plan: name, price and the brief's own description, with its sign-up button. The featured plan gets a
+ * berry top rule, the factual mono tag and the filled button; the others an outlined one, except the free
+ * plan, which carries the page's primary action.
+ */
+import type { Plan } from '../../data/plans';
+import Button from './Button.astro';
+import MonoLabel from './MonoLabel.astro';
+
+interface Props {
+  plan: Plan;
+  /** Use the filled button (the free plan's primary action and the featured plan). */
+  filled: boolean;
+  delay?: string;
+}
+
+const { plan, filled, delay = '0' } = Astro.props;
+---
+
+<article
+  data-reveal
+  data-reveal-delay={delay}
+  aria-labelledby={`plan-${plan.id}`}
+  class:list={[
+    'bg-surface flex h-full flex-col rounded-md border p-6 md:p-7',
+    plan.featured ? 'border-primary' : 'border-line',
+  ]}
+>
+  <h3 id={`plan-${plan.id}`} class="text-ink text-lg font-medium">
+    {plan.name}
+  </h3>
+  <p class="text-ink mt-3 text-xl font-medium tracking-[-0.015em] tabular-nums">
+    {plan.price}
+  </p>
+  {plan.tag && (
+    <p class="mt-4">
+      <MonoLabel tag>{plan.tag}</MonoLabel>
+    </p>
+  )}
+  <p class="text-ink-soft mt-4 text-base">{plan.description}</p>
+  <div class="mt-auto pt-8">
+    <Button
+      href={plan.url}
+      variant={filled ? 'filled' : 'outlined'}
+      class="w-full"
+    >
+      {plan.cta}
+    </Button>
+  </div>
+</article>

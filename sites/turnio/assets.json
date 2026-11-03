@@ -1,3 +1,15 @@
 {
-  "images": []
+  "images": [
+    {
+      "file": "hour-lines.svg",
+      "title": "Ruled hour lines of an appointment book (background pattern)",
+      "sourcePage": "site code: public/hour-lines.svg",
+      "author": "Original",
+      "license": "Original (drawn in site code)",
+      "credit": false,
+      "source": "self",
+      "retrievedAt": "2026-11-03T09:50:00.000Z",
+      "note": "An 8 x 64 px SVG tile with one hour line and one dashed half-hour line, drawn by hand for this site."
+    }
+  ]
 }

@@ -1,0 +1,64 @@
+---
+/**
+ * Sticky header: the name in type, four anchors and the primary action. Under 768 px the anchors move into a
+ * native <details> disclosure, so the menu works without JavaScript.
+ */
+import Container from '../ui/Container.astro';
+import Button from '../ui/Button.astro';
+import { header, nav } from '../../content/site';
+---
+
+<header class="bg-paper border-line sticky top-0 z-40 border-b">
+  <Container class="flex h-16 items-center justify-between gap-4">
+    <a
+      href="/"
+      aria-label={header.homeLabel}
+      class="text-ink hover:text-primary text-lg font-semibold tracking-[-0.02em] transition-colors duration-150"
+    >
+      Turnio
+    </a>
+
+    <nav aria-label={header.navLabel} class="hidden md:block">
+      <ul class="flex items-center gap-8">
+        {nav.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              class="text-ink-soft hover:text-ink text-sm transition-colors duration-150"
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <Button href={header.cta.href} size="sm">
+        {header.cta.label}
+      </Button>
+      <details class="group relative md:hidden">
+        <summary class="border-ink text-ink hover:bg-ink hover:text-paper flex min-h-11 cursor-pointer items-center rounded-pill border px-4 text-sm font-medium transition-colors duration-150">
+          {header.menuLabel}
+        </summary>
+        <nav
+          aria-label={header.navLabel}
+          class="bg-surface border-line frame-shadow absolute top-full right-0 mt-2 w-56 rounded-md border p-2"
+        >
+          <ul>
+            {nav.map((link) => (
+              <li>
+                <a
+                  href={link.href}
+                  class="text-ink hover:bg-panel flex min-h-11 items-center rounded-sm px-3 text-base"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </Container>
+</header>

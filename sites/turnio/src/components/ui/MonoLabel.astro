@@ -1,0 +1,21 @@
+---
+/** Small mono label (fact strip, steps, plan tag). `tag` sets it on the soft berry fill. */
+interface Props {
+  tag?: boolean;
+  class?: string;
+}
+
+const { tag = false, class: extra } = Astro.props;
+---
+
+<span
+  class:list={[
+    'font-mono text-xs tracking-[0.02em]',
+    tag
+      ? 'bg-primary-soft text-primary rounded-pill inline-block px-3 py-1'
+      : 'text-ink-muted',
+    extra,
+  ]}
+>
+  <slot />
+</span>
