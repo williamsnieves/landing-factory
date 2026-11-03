@@ -515,3 +515,132 @@ test('the CLI checks outbound links of the build with --external-links and never
     site.cleanup();
   }
 });
+
+// --- --wait-tls ---------------------------------------------------------------------------------------------
+
+/** A fetch that fails TLS `failures` times (null: always), then behaves like stubHost(). */
+function slowCertificate(failures) {
+  const good = stubHost();
+  let calls = 0;
+  const fetchImpl = async (url, init) => {
+    const u = new URL(url);
+    if (u.protocol === 'https:') {
+      calls += 1;
+      if (failures === null || calls <= failures)
+        throw Object.assign(new TypeError('fetch failed'), {
+          cause: Object.assign(new Error('certificate not issued yet'), {
+            code: 'ERR_TLS_CERT_ALTNAME_INVALID',
+          }),
+        });
+    }
+    return good(url, init);
+  };
+  return { fetchImpl, calls: () => calls };
+}
+
+/** A fake clock: sleeping advances it, nothing really waits. */
+function fakeClock() {
+  let time = Date.parse('2026-11-03T10:00:00Z');
+  const sleeps = [];
+  return {
+    sleeps,
+    now: () => new Date(time),
+    sleepFn: async (ms) => {
+      sleeps.push(ms);
+      time += ms;
+    },
+  };
+}
+
+const LIVE_ARGS = ['--only', 'live', '--skip', 'external-links'];
+
+test('--wait-tls: TLS fails twice, then the home page answers: two sleeps, live-tls passes, the wait is recorded', async () => {
+  const site = makeSite();
+  const clock = fakeClock();
+  const cert = slowCertificate(2);
+  try {
+    const { code, report, out } = await runReport(
+      site,
+      [...LIVE_ARGS, '--url', 'https://site.example/', '--wait-tls', '60'],
+      { fetchImpl: cert.fetchImpl, now: clock.now, sleepFn: clock.sleepFn },
+    );
+    assert.notEqual(code, 2, out);
+    assert.deepEqual(clock.sleeps, [10000, 10000]);
+    assert.equal(report.waitedTlsMs, 20000);
+    assert.equal(report.items.find((i) => i.id === 'live-tls').status, 'pass');
+    assert.match(
+      out,
+      /\[report\] waiting for TLS on site\.example: attempt 2, ERR_TLS_CERT_ALTNAME_INVALID/,
+    );
+  } finally {
+    site.cleanup();
+  }
+});
+
+test('--wait-tls: a certificate that never arrives keeps the deadline and live-tls fails', async () => {
+  const site = makeSite();
+  const clock = fakeClock();
+  const cert = slowCertificate(null);
+  try {
+    const { code, report } = await runReport(
+      site,
+      [...LIVE_ARGS, '--url', 'https://site.example/', '--wait-tls', '30'],
+      { fetchImpl: cert.fetchImpl, now: clock.now, sleepFn: clock.sleepFn },
+    );
+    assert.equal(code, 1);
+    assert.deepEqual(clock.sleeps, [10000, 10000, 10000]);
+    assert.ok(report.waitedTlsMs <= 30000);
+    assert.equal(report.items.find((i) => i.id === 'live-tls').status, 'fail');
+  } finally {
+    site.cleanup();
+  }
+});
+
+test('--wait-tls: an answering host waits nothing and without the option no waitedTlsMs is written', async () => {
+  const site = makeSite();
+  const clock = fakeClock();
+  try {
+    const waited = await runReport(
+      site,
+      [...LIVE_ARGS, '--url', 'https://site.example/', '--wait-tls', '60'],
+      {
+        fetchImpl: stubHost(),
+        now: clock.now,
+        sleepFn: clock.sleepFn,
+      },
+    );
+    assert.deepEqual(clock.sleeps, []);
+    assert.equal(waited.report.waitedTlsMs, 0);
+    const plain = await runReport(
+      site,
+      [...LIVE_ARGS, '--url', 'https://site.example/'],
+      { fetchImpl: stubHost() },
+    );
+    assert.equal('waitedTlsMs' in plain.report, false);
+  } finally {
+    site.cleanup();
+  }
+});
+
+test('--wait-tls: bad values, static-only and a run without a URL exit 2', async () => {
+  const site = makeSite();
+  try {
+    const url = ['--url', 'https://site.example/'];
+    for (const args of [
+      [...LIVE_ARGS, ...url, '--wait-tls', '0'],
+      [...LIVE_ARGS, ...url, '--wait-tls', '601'],
+      [...LIVE_ARGS, ...url, '--wait-tls', 'abc'],
+      [...LIVE_ARGS, ...url, '--wait-tls', '1.5'],
+      ['--only', 'static', ...url, '--wait-tls', '60'],
+      ['--skip', 'external-links', '--wait-tls', '60'],
+    ]) {
+      const { code, err } = await runReport(site, args, {
+        fetchImpl: stubHost(),
+      });
+      assert.equal(code, 2, args.join(' '));
+      assert.match(err, /--wait-tls/);
+    }
+  } finally {
+    site.cleanup();
+  }
+});

@@ -454,7 +454,10 @@ test('workflow: both deploy paths, the live report with continue-on-error, the c
   );
   const live = stepOf('deploy', 'Landing report (live checks)');
   assert.match(live.body, /continue-on-error: true/);
-  assert.match(live.body, /npm run report -- --only live --url "\$DEPLOY_URL"/);
+  assert.match(
+    live.body,
+    /npm run report -- --only live --wait-tls 300 --url "\$DEPLOY_URL"/,
+  );
   const last = jobs.deploy.steps.at(-1);
   assert.equal(last.name, 'Fail when the live report failed');
   assert.match(last.body, /steps\.live_report\.outcome == 'failure'/);

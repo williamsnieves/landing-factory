@@ -598,6 +598,39 @@ test('brief-facts: a missing price or name, URL or email fails naming the field'
   );
 });
 
+test('brief-facts: a primary URL tagged with extra parameters or a fragment passes; another path, host or parameter value fails', async () => {
+  const url = 'https://example.com/tienda/pack-notion-freelance';
+  const hrefAs = (href) => goodPage.replace(`href="${url}"`, `href="${href}"`);
+  const run = async (href, change) => {
+    const root = briefRoot(change);
+    withDist(root, hrefAs(href));
+    return (await factFailures(root)).map((f) => f.item);
+  };
+  assert.deepEqual(
+    await run(`${url}?utm_source=landing&utm_medium=cta#top`),
+    [],
+  );
+  assert.deepEqual(await run(`${url}/?utm_source=landing`), []);
+  assert.deepEqual(await run(`${url}-otro?utm_source=landing`), [
+    'goal.primary.url',
+  ]);
+  assert.deepEqual(
+    await run('https://other.example.com/tienda/pack-notion-freelance?x=1'),
+    ['goal.primary.url'],
+  );
+  const withPlan = (brief) => {
+    brief.goal.primary.url = `${url}?plan=gratis`;
+    return brief;
+  };
+  assert.deepEqual(await run(`${url}?plan=gratis&utm_source=x`, withPlan), []);
+  assert.deepEqual(await run(`${url}?plan=pro&utm_source=x`, withPlan), [
+    'goal.primary.url',
+  ]);
+  assert.deepEqual(await run(`${url}?utm_source=x`, withPlan), [
+    'goal.primary.url',
+  ]);
+});
+
 test('brief-facts: a phone must be on the page unless it is assumed or empty; spaces and tel: links are accepted', async () => {
   const withPhone = (extra = {}) =>
     briefRoot((brief) => {

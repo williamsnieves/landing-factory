@@ -126,6 +126,7 @@ test('signals derive from the brief', () => {
     {
       awareness: 'problem-aware',
       awarenessAssumed: true,
+      awarenessSource: 'default',
       kind: 'product',
       price: 'low',
       goal: 'buy',
@@ -182,6 +183,14 @@ test('signals derive from the brief', () => {
   );
   assert.equal(listed.awarenessAssumed, true);
   assert.equal(deriveSignals(null).noBrief, true);
+  assert.equal(stated.awarenessSource, 'stated');
+  assert.equal(listed.awarenessSource, 'assumed');
+  assert.equal(deriveSignals(brief()).awarenessSource, 'default');
+  assert.equal(
+    deriveSignals(brief({ audience: { awareness: 'nope' } })).awarenessSource,
+    'default',
+  );
+  assert.equal(deriveSignals(null).awarenessSource, 'no-brief');
 
   const goal = (label, url = '') =>
     goalOf({ goal: { primary: { label, url } } });
@@ -189,6 +198,62 @@ test('signals derive from the brief', () => {
   assert.equal(goal('Comprar el pack', 'https://x.example/tienda/p'), 'buy');
   assert.equal(goal('Escribirnos', 'mailto:a@b.co'), 'lead');
   assert.equal(goal('Learn more'), 'lead');
+  // Free sign-up, account creation and trials are their own goal, English and Spanish, label or URL.
+  assert.equal(
+    goal('Empieza gratis', 'https://app.example.com/registro?plan=gratis'),
+    'signup',
+  );
+  assert.equal(goal('Start free trial', 'https://app.example.com/'), 'signup');
+  assert.equal(goal('Sign up'), 'signup');
+  assert.equal(goal('Regístrate'), 'signup');
+  assert.equal(goal('Crea tu cuenta'), 'signup');
+  assert.equal(goal('Go', 'https://app.example.com/signup'), 'signup');
+  assert.equal(
+    goal('Reservar cita', 'https://app.example.com/registro'),
+    'booking',
+  );
+  assert.equal(goal('Buy now', 'https://x.example/checkout'), 'buy');
+});
+
+test('a sign-up goal adds the goal:signup reason to FAB, AIDA and SLAP only', () => {
+  const b = brief({
+    goal: {
+      primary: {
+        label: 'Empieza gratis',
+        url: 'https://app.example.com/registro',
+      },
+    },
+  });
+  assert.equal(deriveSignals(b).goal, 'signup');
+  for (const c of rank(b)) {
+    const has = c.reasons.some((r) => r.includes('goal:signup'));
+    assert.equal(has, ['fab', 'aida', 'slap'].includes(c.id), c.id);
+  }
+});
+
+test('the picker note says an assumed awareness is stated but to be confirmed', () => {
+  const root = site(
+    'assumed',
+    brief({
+      audience: { awareness: 'solution-aware' },
+      assumed: [{ field: 'audience.awareness', reason: 'guess' }],
+    }),
+  );
+  const out = spawnSync(
+    'node',
+    ['scripts/pick-copy-framework.mjs', '--site', 'assumed'],
+    {
+      cwd: ROOT,
+      encoding: 'utf8',
+      env: { ...process.env, LANDING_FACTORY_ROOT: root },
+    },
+  );
+  assert.equal(out.status, 0, out.stderr);
+  assert.match(
+    out.stdout,
+    /note: audience\.awareness is solution-aware but listed as assumed; confirm it with the customer/,
+  );
+  assert.doesNotMatch(out.stdout, /not stated/);
 });
 
 test('one fixture per awareness level ranks its frameworks first', () => {

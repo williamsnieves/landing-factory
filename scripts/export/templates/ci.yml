@@ -272,7 +272,7 @@ jobs:
         continue-on-error: true
         env:
           DEPLOY_URL: ${{ steps.output.outputs.url || steps.target_deploy.outputs.url }}
-        run: npm run report -- --only live --url "$DEPLOY_URL"
+        run: npm run report -- --only live --wait-tls 300 --url "$DEPLOY_URL"
 
       # Production only: the same live checks on the landing's own domain (the origin of the canonical URL in
       # dist/index.html, which is absolute when astro.config.mjs sets `site`). While the domain does not point
