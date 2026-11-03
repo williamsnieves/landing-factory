@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-10-31, end of day (the owner's 2026-10-28 list is done: add-landing-restyle PR #42, add-product-led-saas-archetype PR #43, add-prospect-landings PR #44, tupathdigital in production on https://tupathdigital.com from a private repository, PRs #45 and #46). Start with "Resume here" and its "What is left".
+Read this first in a new or compacted session. Last updated: 2026-11-02 (copy and conversion work merged: add-copy-frameworks PR #48, add-neuromarketing-review PR #49; before that the owner's 2026-10-28 list: PRs #42 to #46, tupathdigital in production on https://tupathdigital.com from a private repository). Start with "Resume here" and its "What is left".
 
 ## Working agreements
 
@@ -54,18 +54,17 @@ Read this first in a new or compacted session. Last updated: 2026-10-31, end of 
 | add-prospect-landings (brief `prospect` section with a source per fact, `prospect.mjs write\|kit\|sold`, `noindex` and a visible notice, the `prospect` rule of `check-landing`, the sales kit) | Merged (PR #44), archived on `change/tupathdigital-handoff` |
 | tupathdigital production prep (coupons removed, domain, SEO opt-in, cookieless analytics, UTM) | Merged (PR #45; a site change, nothing to archive) |
 | tupathdigital handoff (private repository williamsnieves/tupathdigital, Cloudflare Pages, `tupathdigital.com`, `EXPORTED.json`, brand favicon) | Merged (PR #46; williamsnieves/tupathdigital#1 for the favicon). Live on https://tupathdigital.com |
+| Status update (2026-10-31) | Merged (PR #47; docs only) |
+| add-copy-frameworks (our `copy-frameworks` skill and `pick-copy-framework.mjs`, Copy plan in the proposal, brief `proof` and `audience.awareness`, the `copy-claims` rule of `check-landing`, vendored `copywriting`; guide `docs/copy.md`) | Merged (PR #48), archived on `change/add-neuromarketing-review` |
+| add-neuromarketing-review (our `conversion-psychology` skill with evidence levels, Conversion plan, `conversion-audit.mjs` and one review round before the polish, the `dark-patterns` rule, vendored `cro` and `marketing-psychology`; guide `docs/conversion.md`) | Merged (PR #49), archived on `docs/archive-neuromarketing-review` |
 
-> **In progress (2026-11-01): `add-copy-frameworks`** on branch `change/add-copy-frameworks`. Copy frameworks (our `copy-frameworks` skill, `pick-copy-framework.mjs`), brief `proof` and `audience.awareness`, the `copy-claims` rule of `check-landing`, the vendored `copywriting` skill. Guide: `docs/copy.md`. Follow-up change: `add-neuromarketing-review`.
+## Resume here (2026-11-02)
 
-> **In progress (2026-11-02): `add-neuromarketing-review`** on branch `change/add-neuromarketing-review`. Our `conversion-psychology` skill (catalog with evidence levels, Conversion plan, ethics checklist), vendored `cro` and `marketing-psychology`, `scripts/conversion-audit.mjs` (heuristic audit of the built page, one review round before the polish), and the `dark-patterns` rule of `check-landing` (pre-checked boxes, countdown timers, confirmshaming). Guide: `docs/conversion.md`. Existing sites are not edited: their audit findings are listed in the pull request.
-
-## Resume here (2026-10-31, end of day)
-
-**Where we are.** `main` has everything up to PR #46. No branch or pull request is open in the factory. tupathdigital is live on https://tupathdigital.com from the owner's private repository https://github.com/williamsnieves/tupathdigital (Cloudflare Pages, deploys on each merge to its `main`); the factory keeps `sites/tupathdigital/` as the source of truth and the record (`EXPORTED.json`), and its CI no longer builds it. The owner made a promotional video of the landing with Hyperframes for social media (outside the factory; not in any repository).
+**Where we are.** `main` has everything up to PR #49 (copy frameworks and the conversion review, from the owner's copywriting and neuromarketing resources of 2026-11-01). Only the archive pull request of add-neuromarketing-review may be open. Every new landing now gets a Copy plan and a Conversion plan in its proposal, one conversion review round after QA, and the `copy-claims` and `dark-patterns` rules in its final check; existing landings are unchanged (their audit findings are in PR #49: personal-brand has no call to action in its closing section; tupathdigital has 22 link destinations and 6 offers side by side). tupathdigital is live on https://tupathdigital.com from the owner's private repository https://github.com/williamsnieves/tupathdigital (Cloudflare Pages, deploys on each merge to its `main`); the factory keeps `sites/tupathdigital/` as the source of truth and the record (`EXPORTED.json`), and its CI no longer builds it. The owner made a promotional video of the landing with Hyperframes for social media (outside the factory; not in any repository).
 
 **How a tupathdigital change goes now:** a revision round in the factory (`npm run revise -- tupathdigital --feedback <file>`, or a direct site change on a factory branch for small things), then `node scripts/sync-export.mjs --site tupathdigital --into <clone of the private repository>`, a branch and a pull request there (its CI gives the preview), merge, production. The favicon went this way (williamsnieves/tupathdigital#1).
 
-**What is left (2026-10-31).**
+**What is left (2026-11-02).** The copy and conversion skills are first used for real by the first revision round of tupathdigital (item 3) or the first new landing.
 
 Owner, on tupathdigital:
 1. Enable Cloudflare Web Analytics in the Pages project (Workers & Pages > tupathdigital > Metrics), if not done; the CSP and the privacy policy already allow and name it. Store visits and sales come from Etsy and Gumroad stats (UTM on the store links).
