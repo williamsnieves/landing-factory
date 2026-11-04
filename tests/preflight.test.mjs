@@ -245,3 +245,58 @@ test('an unknown source is rejected', async () => {
   assert.equal(bad.status, 2);
   assert.match(bad.stderr, /unknown source "artic"/);
 });
+
+test('--sources pixabay: a missing key or an unreachable host only warns, the result stays ok and the key is never printed', async () => {
+  const fakeKey = 'pk-' + 'x'.repeat(30);
+  const plain = stubFetch();
+  await runPreflight({ fetch: plain, chromium: okChromium });
+  assert.ok(plain.calls.every((c) => !c.url.includes('pixabay')));
+
+  // Host and key fine: no warning.
+  const good = await runPreflight({
+    sources: ['commons', 'pixabay'],
+    fetch: stubFetch(),
+    chromium: okChromium,
+    env: { PIXABAY_API_KEY: fakeKey },
+  });
+  assert.equal(good.ok, true);
+  assert.equal(good.checks.length, HOST_CHECKS.length + 3);
+  assert.ok(good.checks.some((c) => c.name === 'Pixabay' && c.ok));
+  assert.ok(good.checks.every((c) => !c.warning));
+  assert.ok(!JSON.stringify(good).includes(fakeKey));
+  assert.ok(!formatReport(good).includes(fakeKey));
+
+  // No key: a warning that names the variable and the fallback.
+  const noKey = await runPreflight({
+    sources: ['commons', 'pixabay'],
+    fetch: stubFetch(),
+    chromium: okChromium,
+    env: {},
+  });
+  assert.equal(noKey.ok, true);
+  const report = formatReport(noKey);
+  assert.match(report, /all checks passed \(1 warning\)/);
+  assert.match(report, /warn Pixabay key: PIXABAY_API_KEY is not set/);
+  assert.match(report, /falls back to Commons/);
+
+  // Unreachable and blocked hosts warn too.
+  for (const answer of [
+    403,
+    Object.assign(new Error('fetch failed'), { cause: { code: 'ENOTFOUND' } }),
+  ]) {
+    const down = await runPreflight({
+      sources: ['pixabay'],
+      fetch: stubFetch({ 'pixabay.com': answer }),
+      chromium: okChromium,
+      env: { PIXABAY_API_KEY: fakeKey },
+    });
+    assert.equal(down.ok, true);
+    const text = formatReport(down);
+    assert.match(
+      text,
+      /warn Pixabay: pixabay\.com (answered HTTP 403|is not reachable)/,
+    );
+    assert.match(text, /allow pixabay\.com/);
+    assert.ok(!text.includes(fakeKey));
+  }
+});

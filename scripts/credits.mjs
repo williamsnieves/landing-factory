@@ -9,6 +9,7 @@
 //     customer" table when the manifest has entries with source "customer" (files the customer gave,
 //     with owner and permission; no public credit line unless credit: true) and an "AI-generated images" table
 //     for entries with source "ai" (tool, model, date and terms link; the prompt stays in assets.json), and
+//     one "Photos provided by" line under the photo table for each stock provider used (Pixabay, Pexels), and
 //   - sites/<slug>/src/data/credits.json: the entries that need a visible credit (credit: true),
 //     one per source photo or customer file, for the footer to import.
 // Idempotent. With --check nothing is written; exit 1 when either file is out of date.
@@ -111,7 +112,19 @@ export function groupBySource(entries) {
 const creditedAuthor = (group) =>
   group.creditLine ? `${group.author}. ${group.creditLine}` : group.author;
 
-/** The footer list: one {author, license, url} per credited source photo, then per customer file with credit: true. */
+/** Stock providers whose photos are credited with a "Photos provided by" line (source -> name and site). */
+export const STOCK_PROVIDERS = [
+  { source: 'pixabay', name: 'Pixabay', url: 'https://pixabay.com' },
+  { source: 'pexels', name: 'Pexels', url: 'https://www.pexels.com' },
+];
+
+/** The providers a manifest uses, in the order of STOCK_PROVIDERS. */
+export const providersUsed = (entries) =>
+  STOCK_PROVIDERS.filter((provider) =>
+    entries.some((entry) => entry?.source === provider.source),
+  );
+
+/** The footer list: one {author, license, url} per credited source photo, then per customer file with credit: true, then one line per stock provider used. */
 export function creditList(entries) {
   const stock = groupBySource(entries.filter(isStock))
     .filter((group) => group.credit)
@@ -127,7 +140,12 @@ export function creditList(entries) {
       license: entry.permission,
       url: entry.sourcePage ?? '',
     }));
-  return [...stock, ...customer];
+  const providers = providersUsed(entries).map((provider) => ({
+    author: provider.name,
+    license: `Photos provided by ${provider.name}`,
+    url: provider.url,
+  }));
+  return [...stock, ...customer, ...providers];
 }
 
 export function renderCreditsJson(entries) {
@@ -175,6 +193,15 @@ export function renderPhotoTable(entries) {
     ],
     rows,
   );
+}
+
+/** One "Photos provided by [Provider](url)." paragraph per stock provider used, or '' when there is none. */
+export function renderProviderLines(entries) {
+  return providersUsed(entries)
+    .map(
+      (provider) => `Photos provided by [${provider.name}](${provider.url}).`,
+    )
+    .join('\n\n');
 }
 
 /** The "Provided by the customer" part: files the customer gave, or '' when there are none. */
@@ -232,7 +259,7 @@ export function renderAiSection(entries) {
 
 const APPENDED_INTRO = `## Photographs
 
-Photographs come from Wikimedia Commons (renditions served by \`upload.wikimedia.org\`, or crops of them) or from The Met's Open Access collection (public domain; the museum's credit line is kept). Authors and licenses were read from the Commons file metadata or the museum's record. The table below is generated from \`assets.json\` by \`node scripts/credits.mjs --site <slug>\`; edit the manifest, not the table. Photos under a license that requires attribution are credited in the page footer.`;
+Photographs come from Wikimedia Commons (renditions served by \`upload.wikimedia.org\`, or crops of them), from The Met's Open Access collection (public domain; the museum's credit line is kept) or from the stock sites Pixabay and Pexels (downloaded once and served from this site). Authors and licenses were read from the Commons file metadata or the museum's record. The table below is generated from \`assets.json\` by \`node scripts/credits.mjs --site <slug>\`; edit the manifest, not the table. Photos under a license that requires attribution are credited in the page footer.`;
 
 /**
  * New CREDITS.md text: the block between the markers is replaced; without markers a "Photographs"
@@ -245,6 +272,7 @@ export function renderCreditsFile(existing, entries) {
   // Customer files and AI images get their own parts; a manifest of only those has no stock photo table.
   const body = [
     stock.length || (!customer && !ai) ? renderPhotoTable(stock) : '',
+    renderProviderLines(entries),
     customer,
     ai,
   ]

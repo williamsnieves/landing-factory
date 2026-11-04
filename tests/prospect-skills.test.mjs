@@ -29,7 +29,7 @@ test('the new-landing skill names the prospect rules: sources, archive images, n
   for (const needle of [
     'Prospect landings',
     'Prospect: facts and sources',
-    'Commons and The Met only',
+    'Pixabay, Pexels photos the owner imported, Commons and The Met only',
     'no AI images',
     'ui-ux-pro-max only',
     'node scripts/prospect.mjs write --site <slug>',

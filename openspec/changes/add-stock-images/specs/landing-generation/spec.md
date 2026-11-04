@@ -59,7 +59,7 @@ A stock photo showing a person SHALL be presented as illustrative and SHALL neve
 - **THEN** the build must replace it, since a stock person never stands for the business's people
 
 ### Requirement: Every landing carries visuals
-The final check SHALL fail when a built home page has no visual, or when its first section has none, and SHALL warn when fewer than half of the sections in `<main>` carry one. A visual is an `img`, a `picture`, a `video`, a `[data-scene]` poster or an inline `svg` whose `viewBox` is at least 96 units wide. On a multi-locale site each locale's home page is checked.
+The final check SHALL fail when a built home page has no visual, or when its first section has none, and SHALL warn when fewer than half of the sections in `<main>` carry one. A visual is an `img`, a `picture`, a `video`, a `[data-scene]` poster, an element with `role="img"` and an `aria-label`, or an inline `svg` whose `viewBox` is at least 96 units wide. On a multi-locale site each locale's home page is checked.
 
 #### Scenario: Text-only hero
 - **WHEN** the first section of `dist/index.html` holds only headings, text and buttons with a 24-unit icon

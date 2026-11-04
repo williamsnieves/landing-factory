@@ -21,8 +21,10 @@ sites/<slug>/.run.log. Without --auto the run stops after the proposal so you ca
                           sites/<slug>/brief.json is used the same way without the flag. With a brief --niche is
                           optional (the skill uses business.description) and --lang defaults to the brief's language.
   --refs a,b              slugs of patterns/<slug>.md sheets to draw from (0-3, optional)
-  --sources a,b           image sources: commons (default) and/or met (The Met Open Access, public domain;
-                          for historical or cultural niches). Preflight checks their hosts.
+  --sources a,b           image sources: pixabay and commons (default: pixabay,commons), met (The Met Open
+                          Access, public domain; for historical or cultural niches). Pixabay needs
+                          PIXABAY_API_KEY and pixabay.com allowed; without them preflight only warns and the
+                          build falls back to Commons (docs/images.md). Preflight checks their hosts.
   --auto                  do not stop at the proposal checkpoint; build, QA and finish
   --dry-run               stop after PROPOSAL.md, design-system/<slug>/MASTER.md and tokens.css
   --max-attempts N        QA fix attempts before the run fails (default 5; 0 fails at the first red QA)
@@ -77,7 +79,7 @@ LANG_TAG="es"
 LANG_SET=0
 LANGS_TAGS=""
 TITLE=""
-SOURCES=""
+SOURCES="pixabay,commons"
 BRIEF=""
 DIRECTIONS=0
 COUNT=""
@@ -120,7 +122,7 @@ if [ -n "$COUNT" ]; then
 fi
 [ "$DIRECTIONS" -eq 0 ] || [ "$DRY_RUN" -eq 0 ] || die_usage "--directions cannot be combined with --dry-run"
 [ -z "$LANGS_TAGS" ] || [[ "$LANGS_TAGS" =~ ^[a-z]{2,3}(-[a-z0-9]+)*(,[a-z]{2,3}(-[a-z0-9]+)*)+$ ]] || die_usage "--langs takes two or more comma-separated lowercase language tags such as en,es, got \"$LANGS_TAGS\""
-[ -z "$SOURCES" ] || [[ "$SOURCES" =~ ^(commons|met)(,(commons|met))*$ ]] || die_usage "--sources takes a comma list of commons, met, got \"$SOURCES\""
+[[ "$SOURCES" =~ ^(pixabay|commons|met)(,(pixabay|commons|met))*$ ]] || die_usage "--sources takes a comma list of pixabay, commons, met, got \"$SOURCES\""
 if [ -n "$REFS" ]; then
   IFS=',' read -r -a REF_LIST <<< "$REFS"
   [ "${#REF_LIST[@]}" -le 3 ] || die_usage "--refs takes at most 3 pattern sheets"

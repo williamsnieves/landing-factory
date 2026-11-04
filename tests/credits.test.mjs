@@ -441,3 +441,123 @@ test('an owner portrait is listed under AI-generated images, noting it is a port
   // It adds no footer credit line, like any AI image.
   assert.doesNotMatch(read(root, 'src/data/credits.json'), /owner\.png/);
 });
+
+const pixabayEntry = {
+  file: 'room.jpg',
+  title: 'Treatment room',
+  sourcePage: 'https://pixabay.com/photos/room-1/',
+  author: 'anaruiz',
+  authorUrl: 'https://pixabay.com/users/anaruiz-7/',
+  license: 'Pixabay Content License',
+  licenseUrl: 'https://pixabay.com/service/license-summary/',
+  credit: true,
+  source: 'pixabay',
+  pixabayId: 1,
+  note: 'hero',
+};
+const pexelsEntry = {
+  file: 'studio.jpg',
+  title: 'Photo by Ana Ruiz',
+  sourcePage: 'https://www.pexels.com/photo/studio-2/',
+  author: 'Ana Ruiz',
+  license: 'Pexels License',
+  licenseUrl: 'https://www.pexels.com/license/',
+  credit: true,
+  source: 'pexels',
+  imported: true,
+  note: '',
+};
+
+test('stock providers: no provider line without Pixabay or Pexels, one line each with them, in the table and credits.json', () => {
+  const root = freshRoot();
+  const base = JSON.parse(read(root, 'assets.json'));
+  const withImages = (...extra) => {
+    writeFileSync(
+      join(root, 'sites/demo/assets.json'),
+      JSON.stringify({ images: [...base.images, ...extra] }),
+    );
+    syncCredits({ slug: 'demo', root });
+    return {
+      md: read(root, 'CREDITS.md'),
+      list: JSON.parse(read(root, 'src/data/credits.json')),
+    };
+  };
+
+  const none = withImages();
+  assert.doesNotMatch(none.md, /Photos provided by/);
+  assert.ok(none.list.every((item) => !/provided by/i.test(item.license)));
+
+  const one = withImages(pixabayEntry);
+  assert.match(one.md, /anaruiz/);
+  assert.match(
+    one.md,
+    /Pixabay Content License, https:\/\/pixabay\.com\/service\/license-summary\//,
+  );
+  assert.equal(
+    one.md.match(/Photos provided by \[Pixabay\]\(https:\/\/pixabay\.com\)\./g)
+      .length,
+    1,
+  );
+  assert.doesNotMatch(one.md, /Photos provided by \[Pexels\]/);
+  assert.deepEqual(one.list.slice(-2), [
+    {
+      author: 'anaruiz',
+      license: 'Pixabay Content License',
+      url: 'https://pixabay.com/photos/room-1/',
+    },
+    {
+      author: 'Pixabay',
+      license: 'Photos provided by Pixabay',
+      url: 'https://pixabay.com',
+    },
+  ]);
+
+  const two = withImages(
+    pixabayEntry,
+    {
+      ...pixabayEntry,
+      file: 'room-b.jpg',
+      sourcePage: 'https://pixabay.com/photos/room-3/',
+    },
+    pexelsEntry,
+  );
+  assert.match(two.md, /Ana Ruiz/);
+  assert.equal(two.md.match(/Photos provided by \[Pixabay\]/g).length, 1);
+  assert.equal(
+    two.md.match(
+      /Photos provided by \[Pexels\]\(https:\/\/www\.pexels\.com\)\./g,
+    ).length,
+    1,
+  );
+  assert.deepEqual(
+    two.list.slice(-2).map((item) => item.license),
+    ['Photos provided by Pixabay', 'Photos provided by Pexels'],
+  );
+  assert.equal(
+    syncCredits({ slug: 'demo', root, check: true }).stale.length,
+    0,
+  );
+});
+
+test('CREDITS.md with stock providers passes prettier --check', () => {
+  const root = freshRoot();
+  const base = JSON.parse(read(root, 'assets.json'));
+  writeFileSync(
+    join(root, 'sites/demo/assets.json'),
+    JSON.stringify({ images: [...base.images, pixabayEntry, pexelsEntry] }),
+  );
+  syncCredits({ slug: 'demo', root });
+  const result = spawnSync(
+    process.execPath,
+    [
+      join(ROOT, 'node_modules/prettier/bin/prettier.cjs'),
+      '--config',
+      join(ROOT, '.prettierrc.json'),
+      '--check',
+      join(root, 'sites/demo/CREDITS.md'),
+      join(root, 'sites/demo/src/data/credits.json'),
+    ],
+    { cwd: ROOT, encoding: 'utf8' },
+  );
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+});

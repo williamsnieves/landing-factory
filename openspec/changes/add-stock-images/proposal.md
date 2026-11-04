@@ -60,7 +60,7 @@ Both sources fit the factory's rules. Their photos are downloaded and served fro
 - **Every landing carries visuals.** A new `check-landing` rule, `visual-assets`, reads the built home page (and each locale's home page).
   - It fails when the first section (the hero) has no visual, or when the page has none at all.
   - It warns (`visual-assets-sparse`) when fewer than half of the sections in `<main>` carry one.
-  - A visual is an `img`, a `picture`, a `video`, a `[data-scene]` poster or an inline `svg` whose `viewBox` is at least 96 units wide, so icons do not count.
+  - A visual is an `img`, a `picture`, a `video`, a `[data-scene]` poster, an HTML and CSS illustration with `role="img"` and an `aria-label`, or an inline `svg` whose `viewBox` is at least 96 units wide, so icons do not count.
   - The proposal's imagery plan names a visual for the hero and for at least half of the sections.
 
 ## Capabilities

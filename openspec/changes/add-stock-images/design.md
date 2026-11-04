@@ -69,6 +69,7 @@
   - an `img`, or a `picture` with an `img` inside;
   - a `video`;
   - an element with `data-scene`;
+  - an element with `role="img"` and an `aria-label` of at least 10 characters (an illustration drawn in HTML and CSS, such as a product mock);
   - an inline `svg` with a `viewBox` width of at least 96 that is not `aria-hidden="true"` with width or height attributes under 48.
 - **Failures and warnings:**
   - no visual on the page: fail;

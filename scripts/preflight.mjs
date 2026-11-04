@@ -59,7 +59,32 @@ export const SOURCE_HOST_CHECKS = {
     },
   ],
 };
+// Pixabay is optional: a host that does not answer or a missing key is a warning, never a failure, and the
+// build falls back to Commons (design: add-stock-images). The key is only tested for being set, never printed.
+SOURCE_HOST_CHECKS.pixabay = [
+  {
+    name: 'Pixabay',
+    host: 'pixabay.com',
+    // Any answer proves the host is reachable; the API itself needs a key this check does not send.
+    url: 'https://pixabay.com/',
+    method: 'HEAD',
+    soft: true,
+  },
+];
 export const SOURCES = ['commons', ...Object.keys(SOURCE_HOST_CHECKS)];
+
+/** The Pixabay key is set in the environment (a boolean: the value is never read into the result). */
+export function checkPixabayKey(env = process.env) {
+  if (String(env.PIXABAY_API_KEY ?? '').trim())
+    return { name: 'Pixabay key', ok: true, detail: 'PIXABAY_API_KEY is set' };
+  return {
+    name: 'Pixabay key',
+    ok: true,
+    warning: true,
+    detail: 'PIXABAY_API_KEY is not set',
+    fix: "set PIXABAY_API_KEY in the environment's settings (docs/images.md); until then the build falls back to Commons and SVG art",
+  };
+}
 
 const FETCH_TIMEOUT_MS = 12_000;
 
@@ -68,6 +93,19 @@ const reachable = (status) =>
   (status >= 200 && status < 400) || status === 404 || status === 429;
 
 export async function checkHost(check, fetchFn, timeoutMs = FETCH_TIMEOUT_MS) {
+  const result = await probeHost(check, fetchFn, timeoutMs);
+  // A soft check (an optional source) only warns: the result stays ok and the fix says what happens instead.
+  if (check.soft && !result.ok)
+    return {
+      ...result,
+      ok: true,
+      warning: true,
+      fix: `${result.fix}; until then the build falls back to Commons`,
+    };
+  return result;
+}
+
+async function probeHost(check, fetchFn, timeoutMs) {
   try {
     const response = await fetchFn(check.url, {
       method: check.method,
@@ -212,6 +250,7 @@ export async function runPreflight({
   chromium,
   timeoutMs,
   sources = ['commons'],
+  env = process.env,
 } = {}) {
   const unknown = sources.filter((name) => !SOURCES.includes(name));
   if (unknown.length)
@@ -227,21 +266,31 @@ export async function runPreflight({
       hosts.map((check) => checkHost(check, fetchFn, timeoutMs)),
     )),
     await checkChromium(chromium),
+    ...(sources.includes('pixabay') ? [checkPixabayKey(env)] : []),
   ];
   if (slug !== undefined) checks.push(checkSlug(slug, sitesDir));
   return { ok: checks.every((c) => c.ok), checks };
 }
 
 export function formatReport(result) {
+  const warned = result.checks.filter((c) => c.ok && c.warning);
   const lines = [
-    result.ok ? 'preflight: all checks passed' : 'preflight: FAILED',
+    result.ok
+      ? `preflight: all checks passed${warned.length ? ` (${warned.length} warning${warned.length === 1 ? '' : 's'})` : ''}`
+      : 'preflight: FAILED',
   ];
   for (const c of result.checks)
-    lines.push(`  ${c.ok ? 'ok  ' : 'FAIL'} ${c.name}: ${c.detail}`);
+    lines.push(
+      `  ${c.ok ? (c.warning ? 'warn' : 'ok  ') : 'FAIL'} ${c.name}: ${c.detail}`,
+    );
   const failed = result.checks.filter((c) => !c.ok);
   if (failed.length) {
     lines.push('', 'To fix:');
     for (const c of failed) lines.push(`  - ${c.name}: ${c.fix}`);
+  }
+  if (warned.length) {
+    lines.push('', 'Warnings (not blocking):');
+    for (const c of warned) lines.push(`  - ${c.name}: ${c.fix}`);
   }
   return lines.join('\n');
 }
@@ -257,7 +306,8 @@ Checks before generating a landing, naming every failure in one message:
 
   --slug <slug>       also check the slug
   --sources <list>    image sources to check, comma separated (default commons; met adds
-                      collectionapi.metmuseum.org and images.metmuseum.org)
+                      collectionapi.metmuseum.org and images.metmuseum.org; pixabay checks pixabay.com and that
+                      PIXABAY_API_KEY is set, and only warns: the build then falls back to Commons)
   --json              print the result as JSON
   --chromium-path     print only the Chromium path found (exit 1 when there is none)
   --help              show this help

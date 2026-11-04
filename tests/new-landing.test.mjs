@@ -163,7 +163,7 @@ test('--dry-run scaffolds the site with its templates, then runs claude with the
   const args = recorded();
   assert.deepEqual(args.slice(0, 9), [
     '-p',
-    `/new-landing ${slug} --niche "a \\"quoted\\" niche" --refs sonomabakery-com --dry-run --max-attempts 3 --lang es`,
+    `/new-landing ${slug} --niche "a \\"quoted\\" niche" --refs sonomabakery-com --sources pixabay,commons --dry-run --max-attempts 3 --lang es`,
     '--permission-mode',
     'acceptEdits',
     '--model',
@@ -209,7 +209,7 @@ test('the exit code follows the Result line the skill writes in RUN.md', () => {
   assert.match(checkpoint.stdout, /--resume --auto/);
   assert.deepEqual(recorded().slice(0, 2), [
     '-p',
-    `/new-landing ${slug} --niche "dental clinic" --resume --max-attempts 5 --lang es`,
+    `/new-landing ${slug} --niche "dental clinic" --sources pixabay,commons --resume --max-attempts 5 --lang es`,
   ]);
   const auto = resume('passed', ['--auto']);
   assert.equal(auto.status, 0, auto.stderr);
@@ -252,7 +252,10 @@ test('a failing preflight stops before anything is created or claude is started'
 test('--sources is validated and passed to the skill', () => {
   const bad = run([slug, '--niche', 'samurai', '--sources', 'artic']);
   assert.equal(bad.status, 2);
-  assert.match(bad.stderr, /--sources takes a comma list of commons, met/);
+  assert.match(
+    bad.stderr,
+    /--sources takes a comma list of pixabay, commons, met/,
+  );
   const ok = run(
     [
       slug,
@@ -269,6 +272,30 @@ test('--sources is validated and passed to the skill', () => {
   );
   assert.equal(ok.status, 0, ok.stderr);
   assert.ok(recorded()[1].includes('--sources commons,met'));
+});
+
+test('--sources defaults to pixabay,commons and accepts pixabay', () => {
+  const plain = run([slug, '--niche', 'physio', '--dry-run', '--resume'], {
+    STUB_RESULT: 'dry-run-done',
+  });
+  assert.equal(plain.status, 0, plain.stderr);
+  assert.ok(recorded()[1].includes('--sources pixabay,commons'));
+  const only = run(
+    [
+      slug,
+      '--niche',
+      'physio',
+      '--sources',
+      'pixabay',
+      '--dry-run',
+      '--resume',
+    ],
+    { STUB_RESULT: 'dry-run-done' },
+  );
+  assert.equal(only.status, 0, only.stderr);
+  assert.ok(recorded()[1].includes('--sources pixabay '));
+  assert.equal(run([slug, '--niche', 'x', '--sources', 'flickr']).status, 2);
+  assert.match(run(['--help']).stdout, /pixabay,commons/);
 });
 
 test('the skill is not anchored on a generated site and drives the archetype flow', () => {
@@ -328,7 +355,7 @@ test('--brief makes --niche optional, copies the brief and its assets into the s
   assert.ok(existsSync(join(factoryRoot, 'sites', briefSlug, 'package.json')));
   assert.deepEqual(recorded().slice(0, 2), [
     '-p',
-    `/new-landing ${briefSlug} --brief ${brief} --dry-run --max-attempts 5 --lang es`,
+    `/new-landing ${briefSlug} --brief ${brief} --sources pixabay,commons --dry-run --max-attempts 5 --lang es`,
   ]);
 });
 
@@ -346,7 +373,7 @@ test('with a brief, --niche and --lang still pass through; the brief language is
   assert.match(
     recorded()[1],
     new RegExp(
-      `^/new-landing ${slugEn} --niche "templates" --brief .*brief\\.json --max-attempts 5 --lang en$`,
+      `^/new-landing ${slugEn} --niche "templates" --brief .*brief\\.json --sources pixabay,commons --max-attempts 5 --lang en$`,
     ),
   );
   assert.match(
@@ -373,7 +400,7 @@ test('an existing sites/<slug>/brief.json is used without the flag', () => {
   assert.match(
     recorded()[1],
     new RegExp(
-      `^/new-landing ${briefSlug} --brief .*/${briefSlug}/brief\\.json --resume --max-attempts 5 --lang es$`,
+      `^/new-landing ${briefSlug} --brief .*/${briefSlug}/brief\\.json --sources pixabay,commons --resume --max-attempts 5 --lang es$`,
     ),
   );
 });
@@ -551,7 +578,7 @@ test('--directions and --count go to the skill; --count alone, a bad count and -
   assert.equal(r.status, 0, r.stdout + r.stderr);
   assert.equal(
     recorded()[1],
-    `/new-landing ${slug} --niche "dental clinic" --resume --directions --count 2 --max-attempts 5 --lang es`,
+    `/new-landing ${slug} --niche "dental clinic" --sources pixabay,commons --resume --directions --count 2 --max-attempts 5 --lang es`,
   );
   assert.match(r.stdout, /directions ready/);
   const noCount = run([slug, '--niche', 'x', '--resume', '--directions'], {

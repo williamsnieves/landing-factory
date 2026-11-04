@@ -242,7 +242,7 @@ export function salesKit({ slug, brief, proposal = '', run = '', revisions }) {
     "The page cannot be published as the business's site until all of this exists:",
     '',
     "1. The business's own assets (logo, photos, colors, fonts) with the owner and written permission, recorded in `brief.json` `assets`.",
-    '2. Its consent to AI images, if you want any (`brand.aiImages`). Without it the page keeps archive images only.',
+    '2. Its consent to AI images, if you want any (`brand.aiImages`). Without it the page keeps stock and archive images only.',
     `3. Legal holder data: name, tax id, address, email and the privacy contact (\`legal.holder\`, \`legal.privacyContact\`); markets ${markets.length ? `now set to ${markets.join(', ')}` : 'not set yet (\`legal.markets\`)'}. The legal pages are built from them; nothing is invented.`,
     '4. A domain the business controls (`deploy.domain`) and a hosting target.',
     `5. Mark the prospect as a customer: \`node scripts/prospect.mjs sold --site ${slug}\`. This removes the notice and the \`noindex\` on the next build.`,

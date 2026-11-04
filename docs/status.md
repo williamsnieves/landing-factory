@@ -61,7 +61,7 @@ Read this first in a new or compacted session. Last updated: 2026-11-03 (copy an
 
 ## Resume here (2026-11-03)
 
-**Where we are.** `main` has everything up to PR #55. Open: `add-stock-images` (proposal, branch `change/add-pexels-images`; Pexels paused new API keys, so Pixabay is the automatic source and Pexels photos are imported by hand).
+**Where we are.** `main` has everything up to PR #55. Open: `add-stock-images` (PR from branch `change/add-pexels-images`). Pexels paused new API keys on 2026-11-04, so Pixabay is the automatic source and the owner imports Pexels photos by hand. The change also adds the `visual-assets` final-check rule. Still pending: the real Pixabay run (task 6.2), which needs a new session to load `PIXABAY_API_KEY` and `pixabay.com` allowed in the environment; and the owner's check of the Pixabay API page (task 6.1)..
 
 **fisioterapia-ribera prospect test (2026-11-03 to 2026-11-04, PR #55).** The first real prospect run: a fictional physiotherapy clinic in Zaragoza, every fact assumed, no sources and no proof, regulated health niche. It used `swiss-grid-minimal+warm-local-service` with a 0-50 minute ruler as its twist, PAS copy and a trust-and-calm conversion plan. Proposal $1.91, build $12.73 (34 min). QA, `check-landing` (including `prospect`) and the static report passed. Findings:
 - The run skipped the sales kit; it was written by hand.

@@ -253,7 +253,9 @@ test('a countdown element, a ticking page script and confirmshaming each fail; t
 
 test('404.html is skipped', async () => {
   const root = withDist(freshRoot(), {
-    'index.html': html('<h1>Taller</h1>'),
+    'index.html': html(
+      '<section><img src="/a.jpg" alt="" /></section><h1>Taller</h1>',
+    ),
     '404.html': html(
       '<form><input type="checkbox" name="n" checked></form><div data-countdown></div>',
     ),
