@@ -94,7 +94,9 @@ test('a prospect site is noindex with the notice in the page language, an empty 
     ),
   );
   assert.doesNotMatch(dist('sitemap.xml'), /<url>/);
-  assert.match(dist('_headers'), /\/\*\n {2}X-Robots-Tag: noindex\n$/);
+  // one /* block: Cloudflare Pages served only the last of two, dropping the security headers
+  assert.equal(dist('_headers').match(/^\/\*$/gm).length, 1);
+  assert.match(dist('_headers'), /^\/\*\n {2}X-Robots-Tag: noindex\n/m);
   assert.match(dist('robots.txt'), /Allow: \//);
   // the original header rules are still there
   assert.match(dist('_headers'), /X-Content-Type-Options: nosniff/);

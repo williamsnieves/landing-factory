@@ -68,14 +68,17 @@ function seoFiles() {
           `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`,
         );
         if (prospect) {
+          // The header joins the existing /* block: Cloudflare Pages served only the last of two /* blocks
+          // (2026-11-04), which dropped the security headers of the first one.
           const headers = `${root}/_headers`;
-          const base = existsSync(headers)
-            ? `${readFileSync(headers, 'utf8').trimEnd()}\n\n`
-            : '';
-          writeFileSync(
-            headers,
-            `${base}# Prospect landing: a design proposal, not the business's website.\n/*\n  X-Robots-Tag: noindex\n`,
-          );
+          const lines = existsSync(headers)
+            ? readFileSync(headers, 'utf8').trimEnd().split('\n')
+            : [];
+          const header = '  X-Robots-Tag: noindex';
+          const block = lines.findIndex((line) => line.trim() === '/*');
+          if (block === -1) lines.push('', '/*', header);
+          else lines.splice(block + 1, 0, header);
+          writeFileSync(headers, `${lines.join('\n').trim()}\n`);
         }
         if (site) {
           const file = `${root}/robots.txt`;

@@ -105,6 +105,10 @@ All on the last build (2026-11-04T20:20Z):
 
 - Nothing behind a login: the brief names no assets or links.
 
+## CI follow-up (2026-11-04)
+
+The first CI run's live report failed `live-headers-baseline`: the prospect step of `seoFiles()` appended a second `/*` block to `dist/_headers`, and Cloudflare Pages served only that one, so the deployed page lost its CSP `frame-ancestors`, HSTS, COOP and Permissions-Policy. Fixed in the starter and this site's `astro.config.mjs`: the `X-Robots-Tag` line now joins the existing `/*` block. The CI wait for the new project's certificate (`--wait-tls`) worked: 13 attempts, about two minutes.
+
 ## Totals
 
 Wall clock, approximate tokens when the session reports them, remaining failures if the run did not finish.

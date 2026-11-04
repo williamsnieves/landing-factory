@@ -39,7 +39,7 @@ The notice on the pages, the checks and the sales kit support honest presentatio
 
 - every page carries `<meta name="robots" content="noindex">`;
 - `BaseLayout` renders `<ProspectNotice />` at the top of `<main>`: a `role="note"` strip with `data-prospect-notice` saying "Design proposal prepared for {business}. This is not its official website." (Spanish: "Propuesta de diseño preparada para {business}. No es su web oficial."). It uses the site's `ink` and `paper` tokens, has no JavaScript and cannot be dismissed. A language without a text shows English; add one in `src/components/prospect/texts.ts`;
-- the sitemap has no URL and `dist/_headers` gets a `/*` block with `X-Robots-Tag: noindex`;
+- the sitemap has no URL and `dist/_headers` gets `X-Robots-Tag: noindex` inside its existing `/*` block (a second `/*` block would replace the security headers on Cloudflare Pages);
 - `robots.txt` keeps `Allow: /`: a `Disallow` would hide the `noindex` from crawlers and the URL could still be indexed from links.
 
 A site without the file builds exactly as before. Existing sites keep their own copy of the layout and are not changed.
