@@ -1,0 +1,23 @@
+---
+/**
+ * A small note that marks the values next to it as example data (the brief lists them as assumed). It is always its
+ * own element, never inside the element that holds the value.
+ */
+interface Props {
+  text: string;
+  tone?: 'ink' | 'paper';
+  class?: string;
+}
+const { text, tone = 'ink', class: extra = '' } = Astro.props;
+---
+
+<p
+  class:list={[
+    'text-xs',
+    tone === 'paper' ? 'text-primary-contrast' : 'text-ink-soft',
+    extra,
+  ]}
+  data-example-note
+>
+  {text}
+</p>

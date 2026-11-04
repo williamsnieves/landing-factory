@@ -1,0 +1,7 @@
+{
+  "target": "cloudflare",
+  "cloudflare": {
+    "pagesProject": "fisioterapia-ribera",
+    "productionBranch": "main"
+  }
+}

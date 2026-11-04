@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Motion from '../components/motion/Motion.astro';
+import SiteHeader from '../components/sections/SiteHeader.astro';
+import Hero from '../components/sections/Hero.astro';
+import PracticalStrip from '../components/sections/PracticalStrip.astro';
+import Treatments from '../components/sections/Treatments.astro';
+import Session from '../components/sections/Session.astro';
+import FirstVisit from '../components/sections/FirstVisit.astro';
+import Prices from '../components/sections/Prices.astro';
+import Questions from '../components/sections/Questions.astro';
+import Contact from '../components/sections/Contact.astro';
+import Closing from '../components/sections/Closing.astro';
+import SiteFooter from '../components/sections/SiteFooter.astro';
+import { meta } from '../data/site';
+import { jsonLd, ogImage } from '../data/seo';
+---
+
+<BaseLayout
+  title={meta.title}
+  description={meta.description}
+  lang="es"
+  skipLabel={meta.skipLabel}
+  ogImage={ogImage}
+  jsonLd={jsonLd}
+>
+  <Motion slot="head" />
+  <SiteHeader slot="header" />
+  <Hero />
+  <PracticalStrip />
+  <Treatments />
+  <Session />
+  <FirstVisit />
+  <Prices />
+  <Questions />
+  <Contact />
+  <Closing />
+  <SiteFooter slot="footer" />
+</BaseLayout>

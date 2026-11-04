@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "language": "es",
+  "languages": ["es"],
+  "prospect": {
+    "status": "prospect",
+    "sources": []
+  },
+  "business": {
+    "name": "Fisioterapia Ribera",
+    "description": "Clínica de fisioterapia de barrio con dos fisioterapeutas colegiados. Tratan dolor de espalda y cuello, lesiones deportivas y recuperación tras una operación, con sesiones individuales de 50 minutos y un plan de ejercicios para casa.",
+    "city": "Zaragoza",
+    "country": "ES",
+    "kind": "service"
+  },
+  "offer": [
+    {
+      "name": "Primera valoración",
+      "description": "Entrevista, exploración y plan de tratamiento por escrito. Incluye la primera sesión de tratamiento.",
+      "price": "45 €",
+      "currency": "EUR"
+    },
+    {
+      "name": "Sesión de fisioterapia",
+      "description": "Sesión individual de 50 minutos con el mismo fisioterapeuta de principio a fin.",
+      "price": "40 €",
+      "currency": "EUR"
+    },
+    {
+      "name": "Bono de 5 sesiones",
+      "description": "Cinco sesiones individuales para un mismo tratamiento, válidas durante tres meses.",
+      "price": "180 €",
+      "currency": "EUR"
+    }
+  ],
+  "audience": {
+    "who": "Vecinos del barrio de 30 a 65 años con dolor de espalda o cuello por el trabajo, corredores y aficionados al deporte con una lesión, y personas que salen de una operación de rodilla o cadera.",
+    "needs": "Saber qué les pasa y qué pueden hacer, que les atienda siempre la misma persona, sesiones sin prisas y un horario compatible con el trabajo.",
+    "objections": "No sé si lo mío es para un fisio o para el médico; ya fui a otro sitio y solo me pusieron aparatos; no tengo tiempo para ir dos veces por semana.",
+    "awareness": "problem-aware"
+  },
+  "goal": {
+    "primary": {
+      "label": "Pide tu primera valoración",
+      "url": "https://reservas.example.com/fisioterapia-ribera"
+    },
+    "secondary": {
+      "label": "Llámanos",
+      "url": "tel:+34976000000"
+    }
+  },
+  "tone": ["cercano", "profesional", "tranquilo", "claro"],
+  "contact": {
+    "phone": "+34 976 000 000",
+    "email": "hola@example.com",
+    "address": "Calle de Ejemplo 12, 50000 Zaragoza",
+    "hours": "Lunes a viernes de 8:00 a 14:00 y de 16:00 a 21:00"
+  },
+  "legal": {
+    "regulated": true,
+    "constraints": "Sanidad: no prometer curaciones ni resultados, no comparar con otros centros, no dar consejos médicos en la página."
+  },
+  "seo": {
+    "primaryKeyword": "fisioterapeuta en Zaragoza",
+    "keywords": [
+      "fisioterapia dolor de espalda Zaragoza",
+      "fisioterapia deportiva Zaragoza",
+      "rehabilitación tras operación de rodilla"
+    ],
+    "serviceArea": ["Zaragoza"],
+    "schemaType": "MedicalClinic"
+  },
+  "deploy": { "target": "cloudflare-pages" },
+  "assumed": [
+    {
+      "field": "business.name",
+      "reason": "Prospecto ficticio para la primera prueba real de landings de prospecto (2026-11-03)."
+    },
+    { "field": "business.city", "reason": "Ciudad elegida para la prueba." },
+    { "field": "business.country", "reason": "Mercado de la prueba." },
+    {
+      "field": "offer[0].name",
+      "reason": "Servicio típico de una clínica de fisioterapia; ficticio."
+    },
+    {
+      "field": "offer[0].price",
+      "reason": "Precio ficticio, en el rango habitual."
+    },
+    { "field": "offer[1].name", "reason": "Servicio típico; ficticio." },
+    {
+      "field": "offer[1].price",
+      "reason": "Precio ficticio, en el rango habitual."
+    },
+    { "field": "offer[2].name", "reason": "Servicio típico; ficticio." },
+    {
+      "field": "offer[2].price",
+      "reason": "Precio ficticio, en el rango habitual."
+    },
+    {
+      "field": "goal.primary.url",
+      "reason": "Reserva de ejemplo en example.com."
+    },
+    {
+      "field": "contact.phone",
+      "reason": "Teléfono de ejemplo; se marca como dato de ejemplo en la página."
+    },
+    { "field": "contact.email", "reason": "Dominio reservado example.com." },
+    { "field": "contact.address", "reason": "Dirección de ejemplo." },
+    {
+      "field": "contact.hours",
+      "reason": "Horario típico de una clínica de barrio; ficticio."
+    },
+    {
+      "field": "audience.awareness",
+      "reason": "Quien tiene dolor sabe lo que le pasa pero no si un fisio es la solución ni cuál elegir."
+    },
+    {
+      "field": "seo.primaryKeyword",
+      "reason": "Búsqueda típica de este servicio."
+    }
+  ],
+  "notes": "Primera ejecución real del flujo de prospecto (prospect.mjs, aviso, noindex, kit de ventas) con un negocio ficticio: no hay fuentes públicas reales, así que cada dato está en assumed y sources queda vacío. Sin proof: no inventar testimonios, valoraciones ni cifras. Nicho sanitario regulado: nada de promesas de curación o resultados. Sin mercado legal: sin titular no se construyen páginas legales. Imágenes solo de Commons."
+}

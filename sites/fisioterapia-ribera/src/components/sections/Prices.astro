@@ -1,0 +1,65 @@
+---
+/**
+ * Precios (PAS: Solution; Conversion plan "Choice"). The brief's three offers side by side in 4-column cells with
+ * thin rules. "Primera valoración" is highlighted with a 2 px primary rule and carries the primary action because
+ * every new patient starts there. Prices are shown exactly as given: no savings arithmetic, no struck-through price.
+ */
+import ActionLink from '../ui/ActionLink.astro';
+import ExampleNote from '../ui/ExampleNote.astro';
+import { exampleNotes, prices, primaryAction } from '../../data/site';
+---
+
+<section
+  id="precios"
+  aria-labelledby="precios-titulo"
+  class="border-line border-t py-16 md:py-24"
+>
+  <div class="wrap">
+    <div class="grid-12 gap-y-3" data-reveal>
+      <h2
+        id="precios-titulo"
+        class="col-span-12 text-xl leading-tight font-semibold md:col-span-4"
+      >
+        {prices.heading}
+      </h2>
+      <p class="col-span-12 max-w-[56ch] text-lg md:col-span-8">
+        {prices.intro}
+      </p>
+    </div>
+    <ul class="grid-12 mt-12 gap-y-10 md:mt-16">
+      {prices.offers.map((offer, index) => (
+        <li
+          class:list={[
+            'col-span-12 flex flex-col pt-6 md:col-span-4',
+            offer.highlighted
+              ? 'border-primary border-t-2'
+              : 'border-line border-t',
+          ]}
+          data-reveal
+          data-reveal-y="16"
+          data-reveal-delay={String(index * 0.1)}
+        >
+          <h3 class="text-xl leading-tight font-semibold">{offer.name}</h3>
+          <p class="mt-4 text-2xl leading-none font-semibold tabular-nums">
+            {offer.price}
+          </p>
+          <p class="mt-4 max-w-[36ch] text-base">{offer.description}</p>
+          {offer.highlighted && (
+            <div class="mt-6">
+              <p class="text-primary text-sm font-semibold">
+                {prices.highlightNote}
+              </p>
+              <div class="mt-3">
+                <ActionLink
+                  href={primaryAction.href}
+                  label={primaryAction.label}
+                />
+              </div>
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
+    <ExampleNote text={exampleNotes.prices} class="mt-10" />
+  </div>
+</section>

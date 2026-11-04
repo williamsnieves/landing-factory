@@ -1,0 +1,46 @@
+---
+/**
+ * A rectangular photo on the grid (radius 0) with its caption below, aligned to the same left edge. The crop is CSS
+ * only (`object-fit: cover` plus the `crop` classes); the source file is never edited.
+ */
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  caption: string;
+  /** Classes for the aspect ratio and object-position of the crop. */
+  crop: string;
+  sizes: string;
+  widths: number[];
+  /** The hero photo is the LCP candidate: eager and high priority. */
+  priority?: boolean;
+  class?: string;
+}
+const {
+  src,
+  alt,
+  caption,
+  crop,
+  sizes,
+  widths,
+  priority = false,
+  class: extra = '',
+} = Astro.props;
+---
+
+<figure class={extra}>
+  <Picture
+    src={src}
+    alt={alt}
+    formats={['avif', 'webp']}
+    widths={widths}
+    width={Math.max(...widths)}
+    height={Math.round((Math.max(...widths) * src.height) / src.width)}
+    sizes={sizes}
+    priority={priority}
+    class:list={['bg-surface block w-full object-cover', crop]}
+  />
+  <figcaption class="text-ink-soft mt-2 text-xs">{caption}</figcaption>
+</figure>
