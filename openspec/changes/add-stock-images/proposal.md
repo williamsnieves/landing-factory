@@ -46,10 +46,12 @@ Both sources fit the factory's rules. Their photos are downloaded and served fro
   6. SVG and CSS art made in the build.
 
   `--sources` defaults to `pixabay,commons`, and `--sources commons,met` keeps working.
-- **The license rules** (the same in both licenses; the Pexels list was confirmed by the owner from its license page on 2026-11-04):
+- **The license rules** (both lists confirmed by the owner from the license pages on 2026-11-04):
   - no identifiable person in a bad light or an offensive way;
   - no implied endorsement by the people or brands in a photo, so a stock person is never presented as the business's team, customers or patients, and never placed next to a quote, a name or a result;
   - no photo as part of a logo, brand mark, trade name or business name;
+  - no photo that shows a recognisable trademark, logo or brand (Pixabay);
+  - no misleading or deceptive use;
   - no selling of unaltered copies;
   - no redistribution on other stock platforms.
 

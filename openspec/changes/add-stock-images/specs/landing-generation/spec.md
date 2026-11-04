@@ -48,7 +48,11 @@ Generation SHALL take images in this order: the customer's files; AI images wher
 - **THEN** the build searches Pixabay before Commons and records the chosen photo with its provenance
 
 ### Requirement: Stock photo license rules
-A stock photo showing a person SHALL be presented as illustrative and SHALL never be shown as the business's team, customers or patients, placed next to a quote, a name or a result, or shown in a bad light; no stock photo SHALL be used in a logo, brand mark or business name.
+A stock photo showing a person SHALL be presented as illustrative and SHALL never be shown as the business's team, customers or patients, placed next to a quote, a name or a result, or shown in a bad light; no stock photo SHALL be used in a logo, brand mark or business name, or show a recognisable trademark, logo or brand.
+
+#### Scenario: Branded product in a stock photo
+- **WHEN** the best Pixabay match for a café shows a recognisable soft-drink logo
+- **THEN** the build skips it and picks another photo
 
 #### Scenario: Stock person next to a quote
 - **WHEN** a draft places a Pixabay portrait beside a testimonial

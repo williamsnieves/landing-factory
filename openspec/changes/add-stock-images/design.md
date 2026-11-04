@@ -15,7 +15,7 @@
   - **Search:** `GET https://pixabay.com/api/` with `key`, `q`, `lang`, `image_type=photo`, `orientation` (`all`, `horizontal`, `vertical`), `min_width`, `min_height`, `safesearch=true`, `per_page` (3 to 200), `page` and `id`. The key is a URL parameter.
   - **A hit** has `id`, `pageURL`, `tags`, `previewURL`, `webformatURL` (640 px), `largeImageURL` (up to 1280 px), `imageWidth`, `imageHeight`, `user`, `user_id` and `userImageURL`. Larger files need approved full API access, which this change does not use.
   - **Terms:** about 100 requests per 60 seconds; requests cached for 24 hours; no permanent hotlinking (images are downloaded to your server); no systematic mass downloads; and show users where images come from when displaying search results.
-  - **The content license:** free commercial use and modification without required attribution, with the same restrictions as Pexels (offensive or bad-light use of identifiable people, implied endorsement, unaltered resale, redistribution as standalone files on other platforms, use in a trademark).
+  - **The content license** (prohibited uses confirmed by the owner from the license page on 2026-11-04): no sale or distribution of content on a standalone basis (unchanged, without creative effort); no commercial use of content that shows recognisable trademarks, logos or brands; no immoral or illegal use, especially of content with recognisable people; no misleading or deceptive use; no use as part of a trademark, design mark, trade name, business name or service mark. Commercial use without required attribution is assumed from the license summary and kept in task 6.1.
   - **Size:** 1280 px is enough for most sections. For a full-bleed hero the skill prefers a Pexels import, Commons at 1920 px or SVG art, and RUN.md notes it.
 
 ## Module
@@ -95,6 +95,7 @@
   - the "Foto ilustrativa" / "Illustrative photo" caption where a photo could be read as the business;
   - never a stock person beside a quote, a name or a result;
   - never a stock photo in a logo or brand mark;
+  - skip any stock photo that shows a recognisable trademark, logo, brand or branded product (Pixabay forbids its commercial use);
   - with no Pixabay key or host, note it in RUN.md Images and use Commons and SVG.
 - **Imagery plan:** the proposal names a visual for the hero and for at least half of the sections, each tagged with its source.
 - **Prospect section:** Pixabay, imported Pexels photos, Commons and The Met.
