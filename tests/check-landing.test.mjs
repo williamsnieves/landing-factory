@@ -352,7 +352,7 @@ test('--refs: a deliberately copied sentence in the built page is reported, an o
     mkdirSync(site(root, 'dist'), { recursive: true });
     writeFileSync(
       site(root, 'dist/index.html'),
-      `<html><body><h1>Good</h1><p>We bake slowly. ${copied}</p><p>Pan nuestro de cada dia.</p></body></html>`,
+      `<html><body><main><section><img src="/hero.jpg" alt="" /></section></main><h1>Good</h1><p>We bake slowly. ${copied}</p><p>Pan nuestro de cada dia.</p></body></html>`,
     );
     const out = [];
     const code = await main(
@@ -370,7 +370,7 @@ test('--refs: a deliberately copied sentence in the built page is reported, an o
     // Rewriting the sentence passes.
     writeFileSync(
       site(root, 'dist/index.html'),
-      '<html><body><p>Our loaves prove overnight, then bake until the crust crackles.</p></body></html>',
+      '<html><body><main><section><img src="/hero.jpg" alt="" /></section></main><p>Our loaves prove overnight, then bake until the crust crackles.</p></body></html>',
     );
     assert.equal(
       await main(['--site', 'good', '--refs', `${server.base}/ref`], quiet, {
@@ -402,7 +402,10 @@ test('exit codes: 1 on failures, 2 when the run breaks (no dist, unreadable refe
     2,
   );
   mkdirSync(site(root, 'dist'));
-  writeFileSync(site(root, 'dist/index.html'), '<p>x</p>');
+  writeFileSync(
+    site(root, 'dist/index.html'),
+    '<main><section><img src="/hero.jpg" alt="" /></section></main><p>x</p>',
+  );
   // Unreadable reference (connection refused).
   assert.equal(
     await main(['--site', 'good', '--refs', 'http://127.0.0.1:1/x'], quiet, {
@@ -822,7 +825,10 @@ async function aiRoot({
   } catch {
     // an entry with a missing field makes the credits throw; the rule still runs
   }
-  withDist(root, html);
+  withDist(
+    root,
+    '<main><section><img src="/hero.jpg" alt="" /></section></main>' + html,
+  );
   return root;
 }
 const aiFailures = async (root) => {
@@ -1309,4 +1315,204 @@ test('prospect: a sold site passes without the notice and fails while a page sti
     (await prospectFailures(sold)).map((f) => f.item),
     ['src/data/prospect.json'],
   );
+});
+
+// --- visual-assets (design: add-stock-images) --------------------------------------------------------------
+
+const ICON_24 =
+  '<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M0 0h24v24H0z"/></svg>';
+const ART_120 =
+  '<svg viewBox="0 0 120 80" aria-hidden="true"><circle cx="40" cy="40" r="30"/></svg>';
+const PHOTO = '<img src="/_astro/hero.jpg" alt="A treatment room" />';
+const plainSection = (n) =>
+  `<section id="s${n}"><h2>Section ${n}</h2><p>Text only.</p></section>`;
+const visualPage = (inside, before = '') =>
+  `<!doctype html><html lang="en"><head><title>x</title></head><body><header>${ICON_24}</header><main id="main">${before}${inside}</main></body></html>`;
+
+function visualRoot(html, extra = () => {}) {
+  const root = freshRoot();
+  mkdirSync(site(root, 'dist'), { recursive: true });
+  writeFileSync(site(root, 'dist/index.html'), html);
+  extra(root);
+  return root;
+}
+const visualWarnings = async (root) =>
+  (await runChecks({ slug: 'good', root })).warnings.filter((w) =>
+    w.rule.startsWith('visual-assets'),
+  );
+
+test('visual-assets: a hero with only a 24-unit icon fails and names the section', async () => {
+  const root = visualRoot(
+    visualPage(
+      `<section id="hero"><h1>Welcome</h1>${ICON_24}<a href="/x">Book</a></section>${plainSection(2)}<section id="gallery">${PHOTO}</section>`,
+    ),
+  );
+  const failures = await failuresOf(root, 'visual-assets');
+  assert.equal(failures.length, 1);
+  assert.equal(failures[0].item, '/index.html');
+  assert.match(failures[0].message, /first section .*#hero.* has no visual/);
+});
+
+test('visual-assets: a hero with an img passes; a picture, a video and a data-scene count too', async () => {
+  for (const hero of [
+    PHOTO,
+    `<picture><source srcset="/a.webp" />${PHOTO}</picture>`,
+    '<video src="/a.mp4" muted></video>',
+    '<figure data-scene="orb"><div>poster</div></figure>',
+  ]) {
+    const root = visualRoot(
+      visualPage(`<section id="hero"><h1>Hi</h1>${hero}</section>`),
+    );
+    assert.deepEqual(await failuresOf(root, 'visual-assets'), [], hero);
+  }
+});
+
+test('visual-assets: a 120-unit decorative SVG counts, a small aria-hidden one does not', async () => {
+  const art = visualRoot(
+    visualPage(`<section id="hero"><h1>Hi</h1>${ART_120}</section>`),
+  );
+  assert.deepEqual(await failuresOf(art, 'visual-assets'), []);
+  const bigButTiny =
+    '<svg viewBox="0 0 200 200" width="24" aria-hidden="true"></svg>';
+  const small = visualRoot(
+    visualPage(`<section id="hero"><h1>Hi</h1>${bigButTiny}</section>`),
+  );
+  assert.equal((await failuresOf(small, 'visual-assets')).length, 1);
+  // An aria-hidden artwork without width or height attributes still counts.
+  const unsized = visualRoot(
+    visualPage(
+      `<section id="hero"><h1>Hi</h1><svg viewBox="0 0 200 200" aria-hidden="true"></svg></section>`,
+    ),
+  );
+  assert.deepEqual(await failuresOf(unsized, 'visual-assets'), []);
+});
+
+test('visual-assets: an HTML and CSS illustration with role="img" and an aria-label counts; without a label it does not', async () => {
+  const mock = visualRoot(
+    visualPage(
+      `<section id="hero"><h1>Hi</h1><div role="img" aria-label="A day of bookings in the agenda"><div>10:00</div></div></section>`,
+    ),
+  );
+  assert.deepEqual(await failuresOf(mock, 'visual-assets'), []);
+  const unlabeled = visualRoot(
+    visualPage(
+      `<section id="hero"><h1>Hi</h1><div role="img"><div>10:00</div></div></section>`,
+    ),
+  );
+  assert.equal((await failuresOf(unlabeled, 'visual-assets')).length, 1);
+});
+
+test('visual-assets: a page with no visual at all fails once, naming the page', async () => {
+  const root = visualRoot(visualPage(`${plainSection(1)}${plainSection(2)}`));
+  const failures = await failuresOf(root, 'visual-assets');
+  assert.equal(failures.length, 1);
+  assert.match(failures[0].message, /no visual at all/);
+});
+
+test('visual-assets: two of eight sections with visuals warns visual-assets-sparse, four of eight does not', async () => {
+  const sections = (withVisual) =>
+    Array.from({ length: 8 }, (_, i) =>
+      withVisual.includes(i)
+        ? `<section id="s${i}"><h2>S</h2>${PHOTO}</section>`
+        : plainSection(i),
+    ).join('');
+  const sparse = visualRoot(visualPage(sections([0, 5])));
+  assert.deepEqual(await failuresOf(sparse, 'visual-assets'), []);
+  const [warning] = await visualWarnings(sparse);
+  assert.equal(warning.rule, 'visual-assets-sparse');
+  assert.match(warning.message, /only 2 of 8 sections/);
+  const half = visualRoot(visualPage(sections([0, 1, 4, 7])));
+  assert.deepEqual(await visualWarnings(half), []);
+  // The run still passes with the warning.
+  const result = await runChecks({ slug: 'good', root: sparse });
+  assert.ok(result.checks.some((c) => c.name === 'visual-assets' && c.ok));
+});
+
+test('visual-assets: the prospect notice is not a section; without sections the direct children of main are used', async () => {
+  const notice =
+    '<p role="note" data-prospect-notice>Not the official site.</p>';
+  const root = visualRoot(
+    visualPage(`<section id="hero"><h1>Hi</h1>${PHOTO}</section>`, notice),
+  );
+  assert.deepEqual(await failuresOf(root, 'visual-assets'), []);
+  assert.deepEqual(await visualWarnings(root), []);
+  // The notice before a text-only first section must not hide the failure either way.
+  const textFirst = visualRoot(
+    visualPage(`${plainSection(1)}<section id="b">${PHOTO}</section>`, notice),
+  );
+  assert.equal((await failuresOf(textFirst, 'visual-assets')).length, 1);
+  const noSections = visualRoot(
+    visualPage(`<div class="hero"><h1>Hi</h1>${PHOTO}</div><div>more</div>`),
+  );
+  assert.deepEqual(await failuresOf(noSections, 'visual-assets'), []);
+  assert.deepEqual(await visualWarnings(noSections), []);
+});
+
+test('visual-assets: no build only warns visual-assets-no-build', async () => {
+  const result = await runChecks({ slug: 'good', root: freshRoot() });
+  assert.deepEqual(result.failures, []);
+  assert.ok(result.warnings.some((w) => w.rule === 'visual-assets-no-build'));
+});
+
+test('visual-assets: every locale home page of a multi-locale site is checked', async () => {
+  const root = visualRoot(
+    visualPage(`<section id="hero"><h1>Hi</h1>${PHOTO}</section>`),
+    (r) => {
+      writeFileSync(
+        site(r, 'astro.config.mjs'),
+        "export default { i18n: { locales: ['en', 'es'], defaultLocale: 'en', routing: { prefixDefaultLocale: false } } };\n",
+      );
+      mkdirSync(site(r, 'dist/es'), { recursive: true });
+      writeFileSync(
+        site(r, 'dist/es/index.html'),
+        visualPage(`<section id="hero"><h1>Hola</h1>${ICON_24}</section>`),
+      );
+    },
+  );
+  const failures = await failuresOf(root, 'visual-assets');
+  assert.deepEqual(
+    failures.map((f) => f.item),
+    ['/es/index.html'],
+  );
+});
+
+test('images-credited, credits-in-sync and prospect accept Pixabay and Pexels entries', async () => {
+  const root = await prospectRoot();
+  writeFileSync(site(root, 'src/assets/images/room.jpg'), 'x');
+  writeFileSync(site(root, 'src/assets/images/studio.jpg'), 'x');
+  edit(site(root, 'assets.json'), (text) => {
+    const data = JSON.parse(text);
+    data.images.push(
+      {
+        file: 'room.jpg',
+        title: 'Treatment room',
+        sourcePage: 'https://pixabay.com/photos/room-1/',
+        author: 'anaruiz',
+        license: 'Pixabay Content License',
+        licenseUrl: 'https://pixabay.com/service/license-summary/',
+        credit: true,
+        source: 'pixabay',
+        pixabayId: 1,
+      },
+      {
+        file: 'studio.jpg',
+        title: 'Photo by Ana Ruiz',
+        sourcePage: 'https://www.pexels.com/photo/studio-2/',
+        author: 'Ana Ruiz',
+        license: 'Pexels License',
+        licenseUrl: 'https://www.pexels.com/license/',
+        credit: true,
+        source: 'pexels',
+        imported: true,
+      },
+    );
+    return JSON.stringify(data, null, 2);
+  });
+  // Stale credits first, then in sync after credits.mjs runs.
+  assert.equal((await failuresOf(root, 'credits-stale')).length, 1);
+  const { syncCredits } = await import('../scripts/credits.mjs');
+  syncCredits({ slug: 'good', root });
+  assert.deepEqual(await failuresOf(root, 'credits-stale'), []);
+  assert.deepEqual(await failuresOf(root, 'uncredited-image'), []);
+  assert.deepEqual(await failuresOf(root, 'prospect'), []);
 });

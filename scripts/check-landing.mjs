@@ -35,6 +35,10 @@
 //                      sold: prospect.json not "sold" or a page still showing the notice (see docs/prospect.md)
 //   dark-patterns      a pre-checked checkbox in a form, a countdown timer (data-countdown or a ticking page script) or
 //                      confirmshaming on a link or button, on every built page except 404.html (Spanish and English)
+//   visual-assets      the built home page (each locale's home page on a multi-locale site) has no visual at all, or its first
+//                      section (the hero) has none. A visual is an img, a picture, a video, a [data-scene] poster or an inline
+//                      svg with a viewBox at least 96 units wide (icons do not count), or a role="img" illustration with an aria-label. Warning visual-assets-sparse: fewer than
+//                      half of the sections in <main> carry one (see docs/images.md)
 //   copy-match         (--refs) 8 words in a row of the built page text also appear in a reference page
 //
 // Warnings (never failures): archetype-target, the built layout signature is outside the ranges of the primary
@@ -77,7 +81,13 @@ import {
 } from './lib/copy-claims.mjs';
 import { LEGAL_PATHS } from './report/legal-rules.mjs';
 import { pageScripts, scanDarkPatterns } from './lib/dark-patterns.mjs';
-import { parseTree } from './lib/html-tree.mjs';
+import {
+  elementChildren,
+  findAll,
+  parseTree,
+  selectorOf,
+  textOf,
+} from './lib/html-tree.mjs';
 import {
   alternatesOf,
   canonicalOf,
@@ -1784,7 +1794,7 @@ export function checkProspect(siteDir, manifest = readManifest(siteDir)) {
     if (entry?.source === 'customer' || entry?.source === 'ai')
       fail(
         'assets.json',
-        `assets.json has ${entry.source === 'ai' ? 'an AI image' : 'a customer file'} (${entry.file ?? entry.name ?? '?'}); a prospect landing uses archive images only: nobody has agreed to anything else`,
+        `assets.json has ${entry.source === 'ai' ? 'an AI image' : 'a customer file'} (${entry.file ?? entry.name ?? '?'}); a prospect landing uses stock and archive images only (Pixabay, Pexels, Commons, The Met): nobody has agreed to anything else`,
       );
   let uncovered = [];
   try {
@@ -1957,6 +1967,131 @@ export function checkDarkPatterns(siteDir) {
 }
 
 // --------------------------------------------------------------------------------------------------
+// Rule: every landing carries visuals (design: add-stock-images, "visual-assets")
+
+export const MIN_SVG_VIEWBOX = 96;
+export const SMALL_ICON_SIZE = 48;
+
+const numeric = (value) => {
+  const n = Number.parseFloat(value);
+  return Number.isFinite(n) ? n : null;
+};
+
+/**
+ * Is this element a visual: an img, a video, a [data-scene], an illustration drawn in HTML and CSS
+ * (role="img" with an aria-label, such as a product mock), or an inline svg that is not an icon?
+ */
+export function isVisual(node) {
+  if (node.name === 'img' || node.name === 'video') return true;
+  if (node.attrs && 'data-scene' in node.attrs) return true;
+  if (
+    node.attrs?.role === 'img' &&
+    String(node.attrs['aria-label'] ?? '').trim().length >= 10
+  )
+    return true;
+  if (node.name !== 'svg') return false;
+  const box = String(node.attrs.viewbox ?? '')
+    .trim()
+    .split(/[\s,]+/);
+  const width = box.length === 4 ? numeric(box[2]) : null;
+  if (width === null || width < MIN_SVG_VIEWBOX) return false;
+  const small = [node.attrs.width, node.attrs.height].some(
+    (value) => numeric(value) !== null && numeric(value) < SMALL_ICON_SIZE,
+  );
+  return !(node.attrs['aria-hidden'] === 'true' && small);
+}
+
+const NON_CONTENT = new Set(['script', 'style', 'template', 'noscript']);
+
+/** The sections of a page: direct `section` children of <main>, else its direct children; the prospect notice is skipped. */
+export function pageSections(tree) {
+  const main =
+    findAll(tree, (n) => n.name === 'main')[0] ??
+    findAll(tree, (n) => n.name === 'body')[0];
+  if (!main) return { main: null, sections: [] };
+  const children = elementChildren(main).filter(
+    (n) => !NON_CONTENT.has(n.name) && !('data-prospect-notice' in n.attrs),
+  );
+  const sections = children.filter((n) => n.name === 'section');
+  return { main, sections: sections.length ? sections : children };
+}
+
+function sectionLabel(section) {
+  const heading = findAll(section, (n) => /^h[1-3]$/.test(n.name))[0];
+  const text = heading ? textOf(heading).slice(0, 60) : '';
+  if (section.attrs.id) return `#${section.attrs.id}`;
+  return text ? `"${text}"` : selectorOf(section);
+}
+
+/** Failures and warnings of one home page's HTML. `page` is its path, for the messages. */
+export function visualAssetsOfHtml(html, page) {
+  const failures = [];
+  const warnings = [];
+  const { main, sections } = pageSections(parseTree(html));
+  const has = (node) => findAll(node, isVisual).length > 0 || isVisual(node);
+  if (!main || !has(main)) {
+    failures.push(
+      failure(
+        'visual-assets',
+        page,
+        `${page} has no visual at all (an img, picture, video, [data-scene] poster, a role="img" illustration with an aria-label, or an inline svg with a viewBox at least ${MIN_SVG_VIEWBOX} wide); a landing carries images or SVG art, see docs/images.md`,
+      ),
+    );
+    return { failures, warnings };
+  }
+  if (!sections.length || !has(sections[0]))
+    failures.push(
+      failure(
+        'visual-assets',
+        page,
+        `the first section of ${page}${sections[0] ? ` (${sectionLabel(sections[0])})` : ''} has no visual; the hero needs a photo, a poster or an SVG artwork (icons under ${MIN_SVG_VIEWBOX} units do not count)`,
+      ),
+    );
+  const withVisual = sections.filter(has).length;
+  if (sections.length && withVisual * 2 < sections.length)
+    warnings.push({
+      rule: 'visual-assets-sparse',
+      item: page,
+      message: `only ${withVisual} of ${sections.length} sections of ${page} carry a visual; the imagery plan names a visual for at least half of them`,
+    });
+  return { failures, warnings };
+}
+
+export function checkVisualAssets(siteDir) {
+  const slug = basename(siteDir);
+  const dist = join(siteDir, 'dist');
+  const failures = [];
+  const warnings = [];
+  const noBuild = (message) =>
+    warnings.push({
+      rule: 'visual-assets-no-build',
+      item: 'dist',
+      message: `visual-assets did not run: ${message}; build first (npm run build -w site-${slug}) so the home page can be checked`,
+    });
+  if (!existsSync(dist) || !statSync(dist).isDirectory()) {
+    noBuild(`sites/${slug}/dist does not exist`);
+    return { failures, warnings };
+  }
+  const config = readI18nConfig(siteDir);
+  const files =
+    config && !config.problems.length
+      ? config.locales.map((locale) => localeIndexFile(config, locale))
+      : ['index.html'];
+  for (const file of files) {
+    const path = join(dist, file);
+    if (!existsSync(path)) {
+      // A missing locale home page is reported by the i18n rule; without i18n there is nothing to read.
+      if (!config) noBuild(`sites/${slug}/dist/${file} does not exist`);
+      continue;
+    }
+    const result = visualAssetsOfHtml(readFileSync(path, 'utf8'), `/${file}`);
+    failures.push(...result.failures);
+    warnings.push(...result.warnings);
+  }
+  return { failures, warnings };
+}
+
+// --------------------------------------------------------------------------------------------------
 // Orchestration
 
 export async function runChecks({
@@ -1973,6 +2108,7 @@ export async function runChecks({
   const manifest = readManifest(siteDir);
   const copyClaims = checkCopyClaims(siteDir);
   const darkPatterns = checkDarkPatterns(siteDir);
+  const visualAssets = checkVisualAssets(siteDir);
 
   const results = [
     ['images-credited', () => checkUncredited(siteDir, manifest)],
@@ -1994,6 +2130,7 @@ export async function runChecks({
     ['scenes', () => checkScenes(siteDir, manifest)],
     ['copy-claims', () => copyClaims.failures],
     ['dark-patterns', () => darkPatterns.failures],
+    ['visual-assets', () => visualAssets.failures],
     ...(readI18nConfig(siteDir) ? [['i18n', () => checkI18n(siteDir)]] : []),
     ...(manifest.images.some(isAi)
       ? [['ai-provenance', () => checkAiProvenance(siteDir, manifest)]]
@@ -2036,6 +2173,7 @@ export async function runChecks({
       ...i18nWarnings(siteDir),
       ...copyClaims.warnings,
       ...darkPatterns.warnings,
+      ...visualAssets.warnings,
     ],
   };
 }

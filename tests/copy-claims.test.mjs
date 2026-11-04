@@ -290,7 +290,7 @@ test('English pages and nested pages are scanned; clean pages pass', async () =>
 test('warn ids never fail: stats, studies, round numbers and urgency', async () => {
   const root = withDist(freshRoot(), {
     'index.html': page(
-      '<p>El 87% de los clientes repite.</p><p>Los estudios demuestran que funciona.</p><p>Más de +10.000 clientes.</p><p>Últimas unidades.</p>',
+      '<section><img src="/a.jpg" alt="" /></section><p>El 87% de los clientes repite.</p><p>Los estudios demuestran que funciona.</p><p>Más de +10.000 clientes.</p><p>Últimas unidades.</p>',
     ),
   });
   assert.deepEqual(await copyFailures(root), []);

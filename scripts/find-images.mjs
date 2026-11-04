@@ -1,26 +1,41 @@
 #!/usr/bin/env node
-// Find and download openly licensed images from Wikimedia Commons and, with --source met, The Met's
-// Open Access collection (public-domain objects), into a site, recording each one in
-// sites/<slug>/assets.json (the manifest scripts/credits.mjs and scripts/check-landing.mjs read).
+// Find and download openly licensed images from Wikimedia Commons, with --source met The Met's Open Access
+// collection (public-domain objects) and with --source pixabay Pixabay stock photos, into a site, recording
+// each one in sites/<slug>/assets.json (the manifest scripts/credits.mjs and scripts/check-landing.mjs read).
+// Photos the owner downloaded from Pexels by hand are recorded with `import` (no network, no key).
 //
-//   node scripts/find-images.mjs search "<query>" [--source commons,met] [--limit N] [--min-width W] [--orientation O] [--json]
-//   node scripts/find-images.mjs get <site-slug> <commons-title|page-id|url|met:<id>|Met url> [--as file] [--width W] [--note text]
+//   node scripts/find-images.mjs search "<query>" [--source commons,met,pixabay] [--lang es] [--limit N] [--min-width W] [--orientation O] [--json]
+//   node scripts/find-images.mjs get <site-slug> <commons-title|page-id|url|met:<id>|Met url|pixabay:<id>|Pixabay url> [--as file] [--width W] [--note text]
+//   node scripts/find-images.mjs import <site-slug> <file> --source pexels --page <url> --author <name> [--author-url <url>] [--title text] [--as file] [--note text]
 //
+// The Pixabay key is read only from PIXABAY_API_KEY and is masked in everything printed (lib/pixabay.mjs).
+
 // Requests go through HTTPS_PROXY when it is set (same re-exec as the analyze-reference scripts), are
 // throttled (>= 1 s apart), retry HTTP 429/503 honoring Retry-After with a capped exponential backoff,
 // and carry a descriptive User-Agent (Wikimedia requires one). Run with --help for details.
 // Exit codes: 0 ok, 1 nothing usable / rejected / request failed, 2 bad usage.
 import {
+  copyFileSync,
   existsSync,
   mkdirSync,
   readFileSync,
   renameSync,
+  statSync,
   writeFileSync,
 } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
+import {
+  assertImageOrigin,
+  getPixabayPhoto,
+  maskKey,
+  parsePixabayRef,
+  pixabayEntry,
+  readKey as readPixabayKey,
+  searchPixabay,
+} from './lib/pixabay.mjs';
 import { reexecWithEnvProxy } from './lib/proxy.mjs';
 import { validateSlug } from './new-site.mjs';
 
@@ -38,7 +53,10 @@ export const MIME_EXTENSIONS = {
   'image/webp': '.webp',
 };
 export const ORIENTATIONS = ['landscape', 'portrait', 'square'];
-export const SOURCES = ['commons', 'met'];
+export const SOURCES = ['commons', 'met', 'pixabay'];
+
+export const PEXELS_LICENSE = 'Pexels License';
+export const PEXELS_LICENSE_URL = 'https://www.pexels.com/license/';
 
 export const MET_API = 'https://collectionapi.metmuseum.org/public/collection';
 export const MET_LICENSE = 'Public domain (museum open access)';
@@ -359,15 +377,40 @@ export async function searchImages(client, query, options = {}) {
   return { ...result, usable: result.usable.slice(0, limit) };
 }
 
-/** Search the chosen sources (default Commons). Results of every source are concatenated, Commons first. */
+/**
+ * Search the chosen sources (default Commons). Results of every source are concatenated in the order given.
+ * Pixabay needs PIXABAY_API_KEY: alone it fails without one; next to other sources it is skipped with a
+ * warning (`options.warn`) so the others still answer.
+ */
 export async function searchAll(client, query, options = {}) {
   const sources = options.sources ?? ['commons'];
   const merged = { usable: [], rejected: [], filtered: 0 };
   for (const source of sources) {
-    const result =
-      source === 'met'
-        ? await searchMet(client, query, options)
-        : await searchImages(client, query, options);
+    let result;
+    if (source === 'met') result = await searchMet(client, query, options);
+    else if (source === 'pixabay') {
+      let key;
+      try {
+        key = options.pixabayKey ?? readPixabayKey(options.env);
+      } catch (error) {
+        if (sources.length === 1) throw error;
+        options.warn?.(`skipping Pixabay: ${error.message}`);
+        continue;
+      }
+      result = await searchPixabay({
+        query,
+        orientation: options.orientation,
+        minWidth: options.minWidth,
+        lang: options.lang,
+        limit: options.limit ?? 10,
+        perPage: Math.max(3, (options.limit ?? 10) * 2),
+        client,
+        key,
+        cacheDir: options.cacheDir,
+        now: options.now,
+        env: options.env,
+      });
+    } else result = await searchImages(client, query, options);
     merged.usable.push(...result.usable.map((c) => ({ source, ...c })));
     merged.rejected.push(...result.rejected);
     merged.filtered += result.filtered;
@@ -632,13 +675,198 @@ async function downloadMet(client, candidate, target, requestedWidth) {
   return { bytes: data.length, width: info.width };
 }
 
+/** Download one Pixabay photo (largeImageURL, up to 1280 px) from a Pixabay host and append its manifest entry. */
+async function getPixabayImage(
+  client,
+  { slug, id, as, note, siteDir, now, env },
+) {
+  const candidate = await getPixabayPhoto(id, { client, env });
+  // Refuse a foreign download host before anything is requested or written.
+  assertImageOrigin(candidate.originalUrl, env);
+  const file = chooseFileName(
+    candidate,
+    as ?? `${fileStem(candidate.title)}-${candidate.pixabayId}`,
+  );
+  const manifestPath = join(siteDir, 'assets.json');
+  const manifest = readManifest(manifestPath);
+  const target = join(siteDir, 'src/assets/images', file);
+  if (existsSync(target) || manifest.images.some((e) => e.file === file))
+    throw new Error(
+      `${file} already exists in sites/${slug}; pick another name with --as`,
+    );
+  const response = await client.request(candidate.originalUrl, {
+    headers: { accept: 'image/*' },
+  });
+  if (!response.ok)
+    throw new RequestError(
+      `download failed: HTTP ${response.status} for ${candidate.originalUrl}`,
+      response.status,
+    );
+  if (response.url) assertImageOrigin(response.url, env);
+  const bytes = Buffer.from(await response.arrayBuffer());
+  const kind = sniffImage(bytes);
+  if (!kind) throw new Error('download is not a JPEG, PNG or WebP image');
+  if (kind.mime !== candidate.mime)
+    throw new Error(
+      `download is ${kind.mime} but the file name says ${candidate.mime}`,
+    );
+  mkdirSync(dirname(target), { recursive: true });
+  writeFileSync(target, bytes);
+  const entry = pixabayEntry(candidate, { file, note, now });
+  manifest.images.push(entry);
+  writeManifest(manifestPath, manifest);
+  return {
+    entry,
+    path: target,
+    bytes: bytes.length,
+    width: candidate.width ?? 0,
+    original: false,
+  };
+}
+
+/** The type of an image file from its first bytes: { mime, ext } for JPEG, PNG and WebP, else null. */
+export function sniffImage(bytes) {
+  if (
+    bytes.length >= 3 &&
+    bytes[0] === 0xff &&
+    bytes[1] === 0xd8 &&
+    bytes[2] === 0xff
+  )
+    return { mime: 'image/jpeg', ext: '.jpg' };
+  if (
+    bytes.length >= 8 &&
+    bytes
+      .subarray(0, 8)
+      .equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
+  )
+    return { mime: 'image/png', ext: '.png' };
+  if (
+    bytes.length >= 12 &&
+    bytes.subarray(0, 4).toString('latin1') === 'RIFF' &&
+    bytes.subarray(8, 12).toString('latin1') === 'WEBP'
+  )
+    return { mime: 'image/webp', ext: '.webp' };
+  return null;
+}
+
+/** A usage error (exit 2) raised by the import command. */
+export class UsageError extends Error {}
+
 /**
- * Download one file (Commons, or a Met object) into sites/<slug>/src/assets/images/ and append its manifest entry.
+ * Record a photo the owner downloaded from pexels.com by hand: copy it into src/assets/images/ and append the
+ * entry. No network, no key. The page must be a https://www.pexels.com/photo/... URL (UsageError otherwise).
+ */
+export function importPexels({
+  slug,
+  file,
+  page,
+  author,
+  authorUrl,
+  title,
+  as,
+  note = '',
+  root = ROOT,
+  now = new Date(),
+}) {
+  let pageUrl;
+  try {
+    pageUrl = new URL(String(page));
+  } catch {
+    throw new UsageError(`--page is not a URL: ${page}`);
+  }
+  if (
+    pageUrl.protocol !== 'https:' ||
+    pageUrl.hostname !== 'www.pexels.com' ||
+    !/^\/photo\/[^/]+\/?$/.test(pageUrl.pathname)
+  )
+    throw new UsageError(
+      '--page must be the photo page, https://www.pexels.com/photo/<name>-<id>/',
+    );
+  const name = String(author ?? '').trim();
+  if (!name) throw new UsageError('--author (the photographer) is required');
+  let authorPage = '';
+  if (authorUrl) {
+    try {
+      const u = new URL(String(authorUrl));
+      if (u.protocol !== 'https:' || !/(^|\.)pexels\.com$/.test(u.hostname))
+        throw new Error();
+      authorPage = `${u.origin}${u.pathname}`;
+    } catch {
+      throw new UsageError(
+        '--author-url must be an https://www.pexels.com/ URL',
+      );
+    }
+  }
+  const slugError = validateSlug(slug);
+  if (slugError) throw new UsageError(slugError);
+  const siteDir = join(root, 'sites', slug);
+  if (!existsSync(siteDir))
+    throw new Error(
+      `sites/${slug} does not exist; run npm run new-site -- ${slug} first`,
+    );
+  if (!file || !existsSync(file) || !statSync(file).isFile())
+    throw new Error(`no such file: ${file}`);
+  const bytes = readFileSync(file);
+  const kind = sniffImage(bytes);
+  if (!kind) throw new Error(`${file} is not a JPEG, PNG or WebP image`);
+
+  const stem = basename(file).replace(/\.[A-Za-z0-9]+$/, '');
+  const fileName = chooseFileName({ mime: kind.mime, title: stem }, as);
+  const wanted = {
+    'image/jpeg': /\.jpe?g$/,
+    'image/png': /\.png$/,
+    'image/webp': /\.webp$/,
+  }[kind.mime];
+  if (!wanted.test(fileName))
+    throw new Error(
+      `--as ${fileName}: the file is ${kind.mime}, use a matching extension`,
+    );
+  const manifestPath = join(siteDir, 'assets.json');
+  const manifest = readManifest(manifestPath);
+  const target = join(siteDir, 'src/assets/images', fileName);
+  if (existsSync(target) || manifest.images.some((e) => e.file === fileName))
+    throw new Error(
+      `${fileName} already exists in sites/${slug}; pick another name with --as`,
+    );
+  const id = /-(\d+)\/?$/.exec(pageUrl.pathname)?.[1];
+  mkdirSync(dirname(target), { recursive: true });
+  copyFileSync(file, target);
+  const entry = {
+    file: fileName,
+    title: String(title ?? '').trim() || `Photo by ${name}`,
+    sourcePage: `${pageUrl.origin}${pageUrl.pathname}`,
+    author: name,
+    ...(authorPage ? { authorUrl: authorPage } : {}),
+    license: PEXELS_LICENSE,
+    licenseUrl: PEXELS_LICENSE_URL,
+    credit: true,
+    source: 'pexels',
+    ...(id ? { pexelsId: Number(id) } : {}),
+    imported: true,
+    retrievedAt: now.toISOString(),
+    note,
+  };
+  manifest.images.push(entry);
+  writeManifest(manifestPath, manifest);
+  return { entry, path: target, bytes: bytes.length };
+}
+
+/**
+ * Download one file (Commons, a Met object or a Pixabay photo) into sites/<slug>/src/assets/images/ and append its manifest entry.
  * Rejects licenses outside the allow-list before downloading anything.
  */
 export async function getImage(
   client,
-  { slug, ref, as, width, note, root = ROOT, now = new Date() },
+  {
+    slug,
+    ref,
+    as,
+    width,
+    note,
+    root = ROOT,
+    now = new Date(),
+    env = process.env,
+  },
 ) {
   const slugError = validateSlug(slug);
   if (slugError) throw new Error(slugError);
@@ -647,6 +875,18 @@ export async function getImage(
     throw new Error(
       `sites/${slug} does not exist; run npm run new-site -- ${slug} first`,
     );
+
+  const pixabayId = parsePixabayRef(ref);
+  if (pixabayId !== null)
+    return getPixabayImage(client, {
+      slug,
+      id: pixabayId,
+      as,
+      note,
+      siteDir,
+      now,
+      env,
+    });
 
   const metId = parseMetRef(ref);
   const candidate =
@@ -706,14 +946,18 @@ export async function getImage(
 // CLI
 
 const HELP = `Usage:
-  node scripts/find-images.mjs search "<query>" [--source commons,met] [--limit N] [--min-width W] [--orientation O] [--json]
+  node scripts/find-images.mjs search "<query>" [--source commons,met,pixabay] [--lang <tag>] [--limit N] [--min-width W] [--orientation O] [--json]
   node scripts/find-images.mjs get <site-slug> <ref> [--as <file>] [--width W] [--note <text>] [--json]
+  node scripts/find-images.mjs import <site-slug> <file> --source pexels --page <url> --author <name> [--author-url <url>] [--title <text>] [--as <file>] [--note <text>] [--json]
 
-search   Search Wikimedia Commons (default) and/or The Met Open Access collection. Lists usable images with
-         size, orientation, license and author.
-           --source LIST      commons, met or commons,met (default commons). Met results are public-domain
-                              objects with images; they carry no pixel size, so --min-width and
+search   Search Wikimedia Commons (default), The Met Open Access collection and/or Pixabay. Lists usable images
+         with size, orientation, license and author.
+           --source LIST      commons, met, pixabay, or a comma list (default commons). Met results are
+                              public-domain objects with images; they carry no pixel size, so --min-width and
                               --orientation do not apply to them. Each needs one request, so it is slow.
+                              Pixabay: photos only, safe search on; the key comes from PIXABAY_API_KEY (never
+                              an argument) and identical searches are cached for 24 hours in .cache/pixabay/.
+           --lang TAG         language of the query for Pixabay (es, en, ...)
            --limit N          results to show (default 10)
            --min-width W      original width at least W px
            --orientation O    landscape, portrait or square
@@ -722,16 +966,61 @@ get      Download one file into sites/<site-slug>/src/assets/images/ and append 
          sites/<site-slug>/assets.json. Run scripts/credits.mjs afterwards.
            <ref>              a Commons title, page id or URL; or met:<objectID> / a metmuseum.org collection
                               URL for The Met (resized to a web JPEG; entry gets source "met" and the
-                              museum's creditLine, credit true)
+                              museum's creditLine, credit true); or pixabay:<id> / a pixabay.com photo page URL
+                              (the large image, up to 1280 px, from pixabay.com; entry gets source "pixabay")
            --as <file>        file name (default: slug of the Commons title)
            --width W          960, 1280 or 1920 (default 1920; the original is used when it is smaller)
            --note <text>      free text stored in the manifest (what the photo shows, crop plans)
+import   Record a photo the owner downloaded from pexels.com by hand (no network, no key): copy <file> (JPEG,
+         PNG or WebP) into src/assets/images/ and append an entry with source "pexels", the Pexels License
+         and credit true. --page must be https://www.pexels.com/photo/<name>-<id>/; --author is the photographer.
 
-Licenses kept: CC0, public domain, CC BY, CC BY-SA; Met objects flagged public domain (Open Access). NonCommercial, NoDerivatives and unknown licenses are
-rejected with the reason. Requests are throttled (1 s apart) and retried on HTTP 429/503 with backoff.
+Licenses kept: CC0, public domain, CC BY, CC BY-SA; Met objects flagged public domain (Open Access); Pixabay and
+Pexels photos under their content licenses (see docs/images.md for what they forbid). NonCommercial, NoDerivatives
+and unknown licenses are rejected with the reason. Requests are throttled (1 s apart) and retried on HTTP 429/503
+with backoff.
 Exit codes: 0 ok, 1 nothing usable / rejected / request failed, 2 bad usage.`;
 
-const stderrLog = (message) => console.error(`find-images: ${message}`);
+const stderrLog = (message) =>
+  console.error(`find-images: ${maskKey(message)}`);
+
+/** The repository root; LANDING_FACTORY_ROOT moves it (tests only). */
+const factoryRoot = () =>
+  process.env.LANDING_FACTORY_ROOT
+    ? resolve(process.env.LANDING_FACTORY_ROOT)
+    : ROOT;
+
+/** The `import` command: exit 2 for a usage error, 1 for a file or site problem. */
+function runImport(args, values, io, usage) {
+  if (args.length !== 2) return usage('import needs <site-slug> and <file>');
+  if (values.source?.trim().toLowerCase() !== 'pexels')
+    return usage('import needs --source pexels (the only source it records)');
+  if (!values.page) return usage('import needs --page <pexels photo URL>');
+  if (!values.author) return usage('import needs --author <photographer>');
+  try {
+    const result = importPexels({
+      slug: args[0],
+      file: resolve(args[1]),
+      page: values.page,
+      author: values.author,
+      authorUrl: values['author-url'],
+      title: values.title,
+      as: values.as,
+      note: values.note,
+      root: factoryRoot(),
+    });
+    if (values.json) io.log(JSON.stringify(result.entry, null, 2));
+    else
+      io.log(
+        `Imported ${result.entry.file} (${(result.bytes / 1024).toFixed(0)} KB) into sites/${args[0]}/src/assets/images/\n  ${result.entry.title}\n  ${result.entry.author}, ${result.entry.license} (credit required)\nAppended to sites/${args[0]}/assets.json. Next: node scripts/credits.mjs --site ${args[0]}`,
+      );
+    return 0;
+  } catch (error) {
+    if (error instanceof UsageError) return usage(error.message);
+    io.error(`find-images: ${error.message}`);
+    return 1;
+  }
+}
 
 export async function main(argv, io = console, clientOptions = {}) {
   let parsed;
@@ -744,6 +1033,11 @@ export async function main(argv, io = console, clientOptions = {}) {
         'min-width': { type: 'string' },
         orientation: { type: 'string' },
         source: { type: 'string' },
+        lang: { type: 'string' },
+        page: { type: 'string' },
+        author: { type: 'string' },
+        'author-url': { type: 'string' },
+        title: { type: 'string' },
         json: { type: 'boolean' },
         as: { type: 'string' },
         width: { type: 'string' },
@@ -784,6 +1078,14 @@ export async function main(argv, io = console, clientOptions = {}) {
   if (values.orientation && !ORIENTATIONS.includes(values.orientation))
     return usage(`--orientation must be one of ${ORIENTATIONS.join(', ')}`);
 
+  if (
+    values.lang !== undefined &&
+    !/^[a-z]{2,3}(-[A-Za-z0-9]+)*$/.test(values.lang)
+  )
+    return usage('--lang must be a language tag such as es or en');
+
+  if (command === 'import') return runImport(args, values, io, usage);
+
   const sources = (values.source ?? 'commons')
     .split(',')
     .map((x) => x.trim().toLowerCase())
@@ -808,6 +1110,9 @@ export async function main(argv, io = console, clientOptions = {}) {
         minWidth,
         orientation: values.orientation,
         sources,
+        lang: values.lang,
+        cacheDir: join(factoryRoot(), '.cache/pixabay'),
+        warn: stderrLog,
       });
       waits();
       if (values.json) io.log(JSON.stringify(result.usable, null, 2));
@@ -816,6 +1121,12 @@ export async function main(argv, io = console, clientOptions = {}) {
           const size = c.width
             ? `${c.width}x${c.height} ${c.orientation}`
             : 'size unknown';
+          if (c.source === 'pixabay') {
+            io.log(
+              `${i + 1}. [pixabay] pixabay:${c.pixabayId}  ${size}, by ${c.author}\n   ${c.tags}\n   ${c.license} (credit shown); get ref: pixabay:${c.pixabayId}\n   ${c.sourcePage}`,
+            );
+            return;
+          }
           const ref =
             c.source === 'met' ? `   get ref: met:${c.objectId}\n` : '';
           io.log(
@@ -840,9 +1151,7 @@ export async function main(argv, io = console, clientOptions = {}) {
         width,
         note: values.note,
         // Tests only: keep sites/ in another folder.
-        ...(process.env.LANDING_FACTORY_ROOT
-          ? { root: resolve(process.env.LANDING_FACTORY_ROOT) }
-          : {}),
+        root: factoryRoot(),
       });
       waits();
       if (values.json) io.log(JSON.stringify(result.entry, null, 2));
@@ -854,7 +1163,8 @@ export async function main(argv, io = console, clientOptions = {}) {
     }
   } catch (error) {
     waits();
-    io.error(`find-images: ${error.message}`);
+    // The Pixabay key is a URL parameter: nothing that reaches the output may carry it.
+    io.error(`find-images: ${maskKey(error.message)}`);
     return 1;
   }
   return usage(

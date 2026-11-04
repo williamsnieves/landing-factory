@@ -7,7 +7,7 @@ The notice on the pages, the checks and the sales kit support honest presentatio
 ## The flow
 
 1. **Brief.** `/brief-intake <slug>` asks whether the business has already hired you or is a prospect. For a prospect it writes `prospect.status: "prospect"` and asks, for every fact it fills, which public page shows it and when you read it. You record the sources by hand; nothing is scraped.
-2. **Build.** `npm run new-landing -- <slug> --brief sites/<slug>/brief.json`. The run adds the facts and sources to `PROPOSAL.md`, writes `src/data/prospect.json`, builds with archive images and a palette chosen from the niche, runs the final check and writes `SALES.md`.
+2. **Build.** `npm run new-landing -- <slug> --brief sites/<slug>/brief.json`. The run adds the facts and sources to `PROPOSAL.md`, writes `src/data/prospect.json`, builds with stock and archive images (Pixabay, Pexels photos the owner imported, Commons, The Met; see `docs/images.md`) and a palette chosen from the niche, runs the final check and writes `SALES.md`.
 3. **Show it.** The preview URL is in the pull request comment (CI prints it). The first contact is yours, by hand (see "First contact").
 4. **If they buy.** `node scripts/prospect.mjs sold --site <slug>`, then `/brief-intake <slug>` for their real data and consent, a revision round for their assets, and `/landing-handoff <slug>`.
 

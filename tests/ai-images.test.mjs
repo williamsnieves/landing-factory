@@ -561,9 +561,9 @@ test('the new-landing skill orders the image sources, limits AI to illustrative 
     'utf8',
   );
   for (const needle of [
-    '**AI images** (the fifth source',
-    "1) the customer's own files; 2) Commons and The Met for real-world subjects",
-    '3) an AI image, only for an illustrative, abstract, texture or generic-object need',
+    '**AI images** (only for illustrative art',
+    'The full source order is under "Source order and stock photos"',
+    'An AI image is only for an illustrative, abstract, texture or generic-object need',
     'Never use an AI image where the page presents the picture as a real photo',
     '`brand.aiImages` must be `allowed`',
     'without a brief (a demo niche) it is allowed',
@@ -576,7 +576,7 @@ test('the new-landing skill orders the image sources, limits AI to illustrative 
     'never by an override',
     '`OPENAI_API_KEY`',
     'Never write it, print it or pass it as an argument',
-    'fall back to Commons and The Met',
+    'fall back to the stock sources, Commons and The Met',
     'never invent an image',
     '<p data-ai-disclosure>',
     'Some images on this page were generated with AI.',
@@ -586,7 +586,7 @@ test('the new-landing skill orders the image sources, limits AI to illustrative 
     '`ai-provenance`',
   ])
     assert.ok(skill.includes(needle), needle);
-  // The AI rules sit with the image rules, before the 3D scenes, and the order is customer, archives, AI.
+  // The AI rules sit with the image rules, before the 3D scenes, and the order is customer, stock, archives, AI.
   assert.ok(skill.indexOf('**AI images**') > skill.indexOf('**Images**'));
   assert.ok(skill.indexOf('**AI images**') < skill.indexOf('**3D scenes**'));
   assert.doesNotMatch(skill, /sk-[A-Za-z0-9]/);
