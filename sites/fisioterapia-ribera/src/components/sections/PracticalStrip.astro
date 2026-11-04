@@ -1,0 +1,50 @@
+---
+/**
+ * Practical strip (lent trait `practical-strip`): where, when, phone and booking in one line each, four cells on a
+ * 3-3-3-3 grid separated by thin rules, values in tabular figures. The example-data note is its own element below.
+ */
+import ExampleNote from '../ui/ExampleNote.astro';
+import { exampleNotes, strip } from '../../data/site';
+
+// Thin rules between cells: stacked on phones, 2 x 2 from `sm`, one row of four from `lg`.
+const rules = [
+  '',
+  'border-line border-t pt-6 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-6',
+  'border-line border-t pt-6 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6',
+  'border-line border-t pt-6 sm:border-l sm:pl-6 lg:border-t-0 lg:pt-0',
+];
+---
+
+<section
+  id="datos"
+  aria-label={strip.label}
+  class="border-line border-y py-8 md:py-10"
+>
+  <div class="wrap">
+    <dl class="grid-12 gap-y-6">
+      {strip.facts.map((fact, index) => (
+        <div
+          data-reveal
+          data-reveal-y="16"
+          data-reveal-delay={String(index * 0.08)}
+          class:list={['col-span-12 sm:col-span-6 lg:col-span-3', rules[index]]}
+        >
+          <dt class="text-ink-soft text-sm">{fact.label}</dt>
+          <dd class="mt-1 text-lg leading-snug tabular-nums">
+            {fact.href ? (
+              <a
+                href={fact.href}
+                class="decoration-ink-soft hover:text-primary hover:decoration-primary underline decoration-1 underline-offset-4 transition-colors duration-(--duration-fast)"
+              >
+                {fact.value}
+              </a>
+            ) : (
+              fact.value
+            )}
+          </dd>
+        </div>
+      ))}
+    </dl>
+    <ExampleNote text={exampleNotes.facts} class="mt-6" />
+  </div>
+</section>

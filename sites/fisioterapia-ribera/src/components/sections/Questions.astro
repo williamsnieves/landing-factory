@@ -1,0 +1,53 @@
+---
+/**
+ * Preguntas (PAS: Solution). 4 + 8: the heading on the left, native <details> on the right, one per objection of
+ * the brief plus how to book. Answers use brief facts only: no session frequency, no medical advice.
+ */
+import SectionHead from '../ui/SectionHead.astro';
+import { questions } from '../../data/site';
+---
+
+<section
+  id="preguntas"
+  aria-labelledby="preguntas-titulo"
+  class="border-line border-t py-16 md:py-24"
+>
+  <div class="wrap grid-12 gap-y-8">
+    <div class="col-span-12 md:col-span-4">
+      <SectionHead
+        id="preguntas-titulo"
+        heading={questions.heading}
+        intro={questions.intro}
+      />
+    </div>
+    <div class="border-line col-span-12 border-b md:col-span-8">
+      {questions.items.map((item, index) => (
+        <details
+          class="faq border-line group border-t"
+          open={index === 0}
+          data-reveal
+          data-reveal-y="16"
+          data-reveal-delay={String(index * 0.08)}
+        >
+          <summary class="hover:text-primary flex min-h-14 cursor-pointer list-none items-center justify-between gap-6 py-4 text-lg font-semibold transition-colors duration-(--duration-fast)">
+            <span>{item.question}</span>
+            <span
+              class="text-primary relative block size-4 shrink-0"
+              aria-hidden="true"
+            >
+              <span class="bg-primary absolute top-1/2 left-0 h-0.5 w-4 -translate-y-1/2" />
+              <span class="bg-primary absolute top-0 left-1/2 h-4 w-0.5 -translate-x-1/2 transition-transform duration-(--duration-fast) group-open:scale-y-0" />
+            </span>
+          </summary>
+          <p class="max-w-[60ch] pb-6 text-base">{item.answer}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+</style>

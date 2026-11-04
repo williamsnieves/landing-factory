@@ -1,0 +1,101 @@
+{
+  "site": "fisioterapia-ribera",
+  "version": 1,
+  "page": "/",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "features": {
+    "sectionCount": 9,
+    "cols1Share": 0.56,
+    "cols2Share": 0.33,
+    "cols3Share": 0.11,
+    "splitRatio": 0.76,
+    "fullBleedShare": 0,
+    "imageRadius": 0,
+    "buttonRadius": 0,
+    "buttonShape": "text",
+    "headingScale": 2.4,
+    "headingAlign": "left",
+    "headingCase": 0,
+    "eyebrowShare": 0,
+    "wordsPerScreen": 114,
+    "footerType": "minimal",
+    "mediaPerScreen": 0.3,
+    "rotatedShare": 0,
+    "overlapShare": 0,
+    "stickyCount": 1
+  },
+  "sections": [
+    {
+      "id": "inicio",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "datos",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "tratamos",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "sesion",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "primera-visita",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "precios",
+      "cols": 3,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "preguntas",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "contacto",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "reserva",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    }
+  ],
+  "mobile": {
+    "screens": 11.81,
+    "wordsPerScreen": 70,
+    "sectionCount": 9
+  },
+  "hashes": [
+    "78a153717353530c",
+    "5978525f570c5351",
+    "51110166069e1a51",
+    "491e86604f4f4c4f",
+    "4b82465b5b696080",
+    "4b4e5e194343663c",
+    "653458a080846d67",
+    "c1a480696666680d"
+  ]
+}

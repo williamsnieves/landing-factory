@@ -1,3 +1,26 @@
 {
-  "images": []
+  "images": [
+    {
+      "file": "hero-tratamiento-pierna.jpg",
+      "title": "File:Leg treatment in physiatry closeup. Physiotherapist working examining treating.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Leg_treatment_in_physiatry_closeup._Physiotherapist_working_examining_treating.jpg",
+      "author": "Shixart1985",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "credit": true,
+      "retrievedAt": "2026-11-04T19:53:13.259Z",
+      "note": "Illustrative stock: captioned as illustrative, never presented as the clinic, its team or its patients. Cropped with object-position to the hands on the thigh; the branded socks and the blurred background person fall outside the crop."
+    },
+    {
+      "file": "tratamos-rodilla.jpg",
+      "title": "File:The fastest route is acute with JBER Hospital Acute Care Clinic 151014-F-WT808-026.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:The_fastest_route_is_acute_with_JBER_Hospital_Acute_Care_Clinic_151014-F-WT808-026.jpg",
+      "author": "Airman 1st Class Christopher Morales",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "credit": false,
+      "retrievedAt": "2026-11-04T19:59:05.011Z",
+      "note": "Illustrative stock: a knee during a strap exercise, no face or brand. Captioned as illustrative; crop with object-position toward the left so the uniform sleeve at the right edge stays out."
+    }
+  ]
 }

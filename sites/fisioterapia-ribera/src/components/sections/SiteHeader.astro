@@ -1,0 +1,67 @@
+---
+/**
+ * Sticky header (warm-local-service header, a planned deviation from the Swiss header with no background): the name
+ * on the left column line, anchors on the grid, the phone as a text link and the one filled primary action.
+ */
+import ActionLink from '../ui/ActionLink.astro';
+import {
+  business,
+  contact,
+  nav,
+  primaryAction,
+  primaryActionShort,
+} from '../../data/site';
+
+interface Props {
+  /** Prefix for the section anchors: '' on the home page, '/' on other pages. */
+  base?: string;
+}
+const { base = '' } = Astro.props;
+---
+
+<header class="bg-paper border-line sticky top-0 z-40 border-b">
+  <div class="wrap flex min-h-16 items-center justify-between gap-4 md:min-h-18">
+    <a
+      href={base ? '/' : '#inicio'}
+      class="text-base font-semibold whitespace-nowrap"
+    >
+      {business.name}
+    </a>
+    <nav aria-label="Secciones" class="hidden lg:block">
+      <ul class="flex gap-8 text-sm">
+        {nav.map((item) => (
+          <li>
+            <a
+              href={`${base}${item.href}`}
+              class="hover:text-primary inline-flex min-h-11 items-center underline-offset-4 transition-colors duration-(--duration-fast) hover:underline"
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <div class="flex items-center gap-6">
+      <a
+        href={contact.phoneHref}
+        class="hover:text-primary hidden min-h-11 items-center text-sm tabular-nums underline underline-offset-4 md:inline-flex"
+      >
+        {contact.phone}
+      </a>
+      <span class="sm:hidden">
+        <ActionLink
+          href={primaryAction.href}
+          label={primaryActionShort}
+          size="sm"
+        />
+      </span>
+      <span class="hidden sm:inline">
+        <ActionLink
+          href={primaryAction.href}
+          label={primaryAction.label}
+          size="sm"
+        />
+      </span>
+    </div>
+  </div>
+</header>

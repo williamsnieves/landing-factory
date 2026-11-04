@@ -1,6 +1,6 @@
 # Proposal: fisioterapia-ribera
 
-Status: **proposed**. Fill every section; the checkpoint waits for approval unless the run is automatic.
+Status: **approved** (owner, 2026-11-04, as proposed).
 
 ## Brief
 

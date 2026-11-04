@@ -1,0 +1,67 @@
+---
+/**
+ * Footer: a quiet four-column grid aligned with the sections, small type, no wordmark. Photo credits come from
+ * src/data/credits.json (written by scripts/credits.mjs; never edited by hand). The last line says the page is a
+ * design proposal with example data.
+ */
+import credits from '../../data/credits.json';
+import { business, contact, footer } from '../../data/site';
+---
+
+<footer class="border-line border-t py-14 text-sm md:py-16">
+  <div class="wrap grid-12 gap-y-10">
+    <div class="col-span-12 space-y-6 md:col-span-6">
+      <div>
+        <p class="font-semibold">{business.name}</p>
+        <p class="text-ink-soft mt-2 max-w-[36ch]">{footer.about}</p>
+      </div>
+      <div>
+        <h2 class="font-semibold">{footer.contactHeading}</h2>
+        <ul class="mt-2 space-y-1 tabular-nums">
+          <li>{contact.address}</li>
+          <li>
+            <a
+              href={contact.phoneHref}
+              class="hover:text-primary underline underline-offset-4"
+            >
+              {contact.phone}
+            </a>
+          </li>
+          <li>
+            <a
+              href={contact.emailHref}
+              class="hover:text-primary underline underline-offset-4"
+            >
+              {contact.email}
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="font-semibold">{footer.hoursHeading}</h2>
+        <p class="mt-2 max-w-[30ch] tabular-nums">{contact.hours}</p>
+      </div>
+    </div>
+    <div class="col-span-12 md:col-span-6">
+      <h2 class="font-semibold">{footer.creditsHeading}</h2>
+      <p class="text-ink-soft mt-2">{footer.creditsIntro}</p>
+      <ul class="mt-2 space-y-1">
+        {credits.map((credit) => (
+          <li>
+            {credit.author}, {credit.license},{' '}
+            <a
+              href={credit.url}
+              class="hover:text-primary underline underline-offset-4"
+            >
+              {footer.creditsLinkLabel}
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="text-ink-soft mt-2">{footer.publicDomainNote}</p>
+    </div>
+    <p class="border-line text-ink-soft col-span-12 border-t pt-6 text-xs">
+      {footer.prospectLine}
+    </p>
+  </div>
+</footer>

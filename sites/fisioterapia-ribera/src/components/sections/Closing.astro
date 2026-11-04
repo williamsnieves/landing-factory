@@ -1,0 +1,43 @@
+---
+/**
+ * Cierre (PAS: Solution; the ending of the Conversion plan). The one colour field of the page (a planned deviation:
+ * the Swiss sheet prefers space over colour bands): a flush-left heading on eight columns, the primary action in its
+ * inverse form and the phone as the quiet alternative. White on primary is 7.1:1.
+ */
+import ActionLink from '../ui/ActionLink.astro';
+import PhoneLink from '../ui/PhoneLink.astro';
+import {
+  closing,
+  contact,
+  primaryAction,
+  secondaryAction,
+} from '../../data/site';
+---
+
+<section
+  id="reserva"
+  aria-labelledby="reserva-titulo"
+  class="bg-primary text-primary-contrast py-20 md:py-28"
+>
+  <div class="wrap grid-12">
+    <div class="col-span-12 md:col-span-8" data-reveal>
+      <h2 id="reserva-titulo" class="text-3xl leading-[1.15] font-semibold">
+        {closing.heading}
+      </h2>
+      <p class="mt-4 max-w-[48ch] text-lg">{closing.text}</p>
+      <div class="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3">
+        <ActionLink
+          href={primaryAction.href}
+          label={primaryAction.label}
+          variant="inverse"
+        />
+        <PhoneLink
+          label={secondaryAction.label}
+          phone={contact.phone}
+          href={secondaryAction.href}
+          tone="paper"
+        />
+      </div>
+    </div>
+  </div>
+</section>
