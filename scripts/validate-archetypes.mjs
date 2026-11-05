@@ -20,7 +20,7 @@ const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const HELP = `Usage: node scripts/validate-archetypes.mjs [file...]
 
 Validates design-archetypes/*.md (or the given files): required front matter (name, summary, signals.fits,
-signals.avoid, lends, rejects, hero, signature), names from the closed vocabularies (${SIGNALS.length} signals,
+signals.avoid, impact, lends, rejects, hero, signature), names from the closed vocabularies (${SIGNALS.length} signals,
 ${TRAITS.length} traits), signature features and ranges, the required body sections and that each lent trait
 is defined in "## Lendable traits". Across the catalog, a trait is lent by one sheet only.
 Exit codes: 0 valid, 1 violations, 2 bad usage.`;

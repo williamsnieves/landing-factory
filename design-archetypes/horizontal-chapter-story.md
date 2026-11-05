@@ -4,6 +4,7 @@ summary: 'A story told in chapters. One pinned section scrolls a horizontal trac
 signals:
   fits: [storytelling, educational, heritage, premium, photo-rich, calm]
   avoid: [data-heavy, conversion-first, product-showcase]
+impact: [balanced, bold]
 lends: [horizontal-chapter, chapter-index]
 rejects: [bento-grid, stat-strip, comparison-table]
 hero: [full-bleed-photo, typographic, video]

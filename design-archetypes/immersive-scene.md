@@ -4,6 +4,7 @@ summary: 'Full-bleed media or a 3D scene fills the screen with minimal chrome; s
 signals:
   fits: [experimental, storytelling, premium, photo-rich, bold]
   avoid: [data-heavy, editorial-content, local-service, few-assets]
+impact: [bold]
 lends: [scene-backdrop, chaptered-overlay]
 rejects: [stat-strip, comparison-table, hours-card]
 hero: [video, full-bleed-photo, illustration]

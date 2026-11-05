@@ -4,6 +4,7 @@ summary: 'Playful and handmade: overlapping, slightly rotated photos, paper text
 signals:
   fits: [playful, craft, photo-rich, local-service, heritage]
   avoid: [serious, technical, data-heavy, premium]
+impact: [balanced, bold]
 lends: [overlap-collage, handwritten-accent]
 rejects: [visible-grid, mono-labels, stat-strip]
 hero: [collage]

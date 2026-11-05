@@ -66,7 +66,12 @@ export const TRAITS = [
   'ui-frame-hero',
   'two-tone-heading',
   'logo-strip-under-hero',
+  'statement-band',
+  'line-art-thread',
 ];
+
+/** How striking a page looks, apart from the tone of its copy. A sheet lists the levels its grammar can deliver. */
+export const IMPACT_LEVELS = ['quiet', 'balanced', 'bold'];
 
 export const REQUIRED_SECTIONS = [
   'Layout grammar',
@@ -263,6 +268,14 @@ export function validateArchetype(text, fileName) {
         add(at('signals.avoid'), 'signals', `"${s}" is in both fits and avoid`);
   }
 
+  if (!('impact' in data))
+    add(1, 'impact', `is required (a list of ${IMPACT_LEVELS.join(', ')})`);
+  else {
+    checkList('impact', data.impact, IMPACT_LEVELS, 'impact level');
+    if (Array.isArray(data.impact) && !data.impact.length)
+      add(at('impact'), 'impact', 'must not be empty');
+  }
+
   if (!('lends' in data)) add(1, 'lends', 'is required');
   const lends =
     'lends' in data ? checkList('lends', data.lends, TRAITS, 'trait') : [];
@@ -348,7 +361,7 @@ export function sheetFiles(root) {
     .map((f) => join(dir, f));
 }
 
-/** Parsed catalog: [{ name, summary, fits, avoid, lends, rejects, hero, signature, file }], by name. */
+/** Parsed catalog: [{ name, summary, fits, avoid, lends, rejects, hero, impact, signature, file }], by name. */
 export function loadCatalog(root) {
   return sheetFiles(root)
     .map((file) => {
@@ -363,6 +376,7 @@ export function loadCatalog(root) {
         lends: d.lends ?? [],
         rejects: d.rejects ?? [],
         hero: d.hero ?? [],
+        impact: d.impact ?? [],
         signature: d.signature ?? {},
         file,
       };

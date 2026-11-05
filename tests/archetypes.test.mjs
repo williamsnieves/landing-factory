@@ -28,14 +28,14 @@ const sheet = (name) =>
   readFileSync(join(ROOT, 'design-archetypes', `${name}.md`), 'utf8');
 const quiet = { log() {}, error() {} };
 
-test('the catalog has 11 valid sheets and the validator exits 0', () => {
-  assert.equal(loadCatalog(ROOT).length, 11);
+test('the catalog has 12 valid sheets and the validator exits 0', () => {
+  assert.equal(loadCatalog(ROOT).length, 12);
   const r = spawnSync(process.execPath, ['scripts/validate-archetypes.mjs'], {
     cwd: ROOT,
     encoding: 'utf8',
   });
   assert.equal(r.status, 0, r.stderr);
-  assert.match(r.stdout, /11 sheet\(s\) valid/);
+  assert.match(r.stdout, /12 sheet\(s\) valid/);
 });
 
 test('every trait has exactly one owner sheet and every signal is used', () => {
@@ -186,6 +186,67 @@ test('CLI help and unknown options', () => {
     });
   assert.equal(run('--help').status, 0);
   assert.equal(run('--nope').status, 2);
-  assert.equal(readdirSync(join(ROOT, 'design-archetypes')).length, 12);
+  assert.equal(readdirSync(join(ROOT, 'design-archetypes')).length, 13);
   void quiet;
+});
+
+test('every sheet lists the impact levels it can deliver, and the levels match the catalog design', () => {
+  const byName = Object.fromEntries(
+    loadCatalog(ROOT).map((a) => [a.name, a.impact]),
+  );
+  assert.deepEqual(byName, {
+    'bento-product-showcase': ['balanced', 'bold'],
+    'brutalist-raw': ['bold'],
+    'calm-statement': ['balanced', 'bold'],
+    'collage-scrapbook': ['balanced', 'bold'],
+    'data-and-proof': ['quiet', 'balanced'],
+    'editorial-magazine': ['quiet', 'balanced'],
+    'horizontal-chapter-story': ['balanced', 'bold'],
+    'immersive-scene': ['bold'],
+    'product-led-saas': ['quiet', 'balanced'],
+    'swiss-grid-minimal': ['quiet'],
+    'typographic-poster': ['bold'],
+    'warm-local-service': ['quiet', 'balanced'],
+  });
+});
+
+test('calm-statement lends statement-band and line-art-thread and the README names it as their owner', () => {
+  const calm = loadCatalog(ROOT).find((a) => a.name === 'calm-statement');
+  assert.deepEqual(calm.lends, ['statement-band', 'line-art-thread']);
+  const readme = readFileSync(
+    join(ROOT, 'design-archetypes/README.md'),
+    'utf8',
+  );
+  for (const trait of calm.lends)
+    assert.match(
+      readme,
+      new RegExp(`\\|\\s*\`${trait}\`\\s*\\|\\s*calm-statement\\s*\\|`),
+      trait,
+    );
+  assert.match(readme, /\[calm-statement\]\(calm-statement\.md\)/);
+});
+
+test('a sheet without impact, with an unknown level, with duplicates or an empty list is reported', () => {
+  const good = sheet('swiss-grid-minimal');
+  assert.deepEqual(validateArchetype(good, 'swiss-grid-minimal'), []);
+  const fieldsOf = (text) =>
+    validateArchetype(text, 'swiss-grid-minimal').map(
+      (v) => `${v.field}: ${v.message}`,
+    );
+  assert.match(
+    fieldsOf(good.replace(/^impact:.*$/m, '')).join('\n'),
+    /impact: is required/,
+  );
+  assert.match(
+    fieldsOf(good.replace(/^impact:.*$/m, 'impact: [loud]')).join('\n'),
+    /impact: unknown impact level "loud" \(allowed: quiet, balanced, bold\)/,
+  );
+  assert.match(
+    fieldsOf(good.replace(/^impact:.*$/m, 'impact: [quiet, quiet]')).join('\n'),
+    /impact: has duplicate entries/,
+  );
+  assert.match(
+    fieldsOf(good.replace(/^impact:.*$/m, 'impact: []')).join('\n'),
+    /impact: must not be empty/,
+  );
 });

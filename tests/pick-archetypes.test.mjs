@@ -253,6 +253,8 @@ test('clear references give a reference-led (custom) outcome with archetypes onl
   assert.ok(top.refTraits.includes('ref:scroll-story/horizontal-chapter'));
   assert.equal(top.fills.length, 2);
   assert.ok(top.reasons.some((r) => /reference-led: scroll-story/.test(r)));
+  // the references set the look, so the requested impact counts as met
+  assert.ok(top.reasons.some((r) => /impact balanced counts as met/.test(r)));
   // named archetype blends are still listed after it
   assert.ok(
     result.blends.some((b) => b.primary === 'horizontal-chapter-story'),
@@ -336,4 +338,123 @@ test('a local-service, craft brief does not rank product-led-saas first', () => 
   addSite(root, 'x', { signals: 'local-service, craft' });
   const result = pickBlends({ root, slug: 'x', refs: [] });
   assert.notEqual(result.blends[0].primary, 'product-led-saas');
+});
+
+// ------------------------------------------------------------------------------------------------
+// Impact level (brand.impact): add-calm-statement-archetype
+
+const FISIO_SIGNALS =
+  'local-service, calm, serious, conversion-first, educational, few-assets';
+const lone = (result, name) =>
+  result.blends.find((b) => b.primary === name && !b.secondary);
+
+function impactSite(root, impact, assumed = []) {
+  const dir = addSite(root, 'clinic', { signals: FISIO_SIGNALS });
+  if (impact !== undefined || assumed.length)
+    writeFileSync(
+      join(dir, 'brief.json'),
+      JSON.stringify({
+        brand: impact === undefined ? {} : { impact },
+        assumed: assumed.map((field) => ({ field, reason: 'test' })),
+      }),
+    );
+  return dir;
+}
+
+test('balanced impact (assumed by default) ranks calm-statement above swiss-grid-minimal and warm-local-service', () => {
+  const root = freshRoot();
+  impactSite(root);
+  const r = pickBlends({ root, slug: 'clinic' });
+  assert.deepEqual(r.impact, { level: 'balanced', assumed: true });
+  // brief.json without signals still reads them from PROPOSAL.md
+  assert.equal(r.signalsSource, 'PROPOSAL.md');
+  assert.equal(r.blends[0].primary, 'calm-statement');
+  const calm = lone(r, 'calm-statement');
+  const swiss = lone(r, 'swiss-grid-minimal');
+  const warm = lone(r, 'warm-local-service');
+  // fits: local-service 1 + calm 1 + serious 1 + conversion-first 1 + educational 1 + few-assets 1.5, impact +2
+  assert.equal(calm.score, 8.5);
+  // fits: calm 1 + serious 1 + educational 1, impact -2
+  assert.equal(swiss.score, 1);
+  // fits: local-service 1 + calm 1 + conversion-first 1, impact +2
+  assert.equal(warm.score, 5);
+  assert.ok(calm.score > swiss.score && calm.score > warm.score);
+  assert.ok(calm.reasons.some((x) => /impact balanced \(\+2\)/.test(x)));
+  assert.ok(swiss.reasons.some((x) => /does not list impact balanced/.test(x)));
+});
+
+test('quiet impact gives swiss-grid-minimal two points, takes two from calm-statement and ranks swiss first', () => {
+  const root = freshRoot();
+  impactSite(root, 'quiet');
+  const quietResult = pickBlends({ root, slug: 'clinic' });
+  assert.deepEqual(quietResult.impact, { level: 'quiet', assumed: false });
+  const calm = lone(quietResult, 'calm-statement');
+  const swiss = lone(quietResult, 'swiss-grid-minimal');
+  assert.equal(calm.score, 4.5);
+  assert.equal(swiss.score, 5);
+  assert.ok(swiss.score > calm.score);
+  assert.ok(
+    calm.reasons.some((x) => /does not list impact quiet \(-2\)/.test(x)),
+  );
+  assert.ok(swiss.reasons.some((x) => /impact quiet \(\+2\)/.test(x)));
+  // the score moves by four between balanced and quiet for each of them
+  const balanced = pickBlends({
+    root: freshRootWith('balanced'),
+    slug: 'clinic',
+  });
+  assert.equal(lone(balanced, 'calm-statement').score - calm.score, 4);
+  assert.equal(swiss.score - lone(balanced, 'swiss-grid-minimal').score, 4);
+});
+
+function freshRootWith(impact) {
+  const root = freshRoot();
+  impactSite(root, impact);
+  return root;
+}
+
+test('an assumed impact is reported as assumed; an unknown level is a usage error', () => {
+  const assumedRoot = freshRoot();
+  impactSite(assumedRoot, 'bold', ['brand.impact']);
+  assert.deepEqual(pickBlends({ root: assumedRoot, slug: 'clinic' }).impact, {
+    level: 'bold',
+    assumed: true,
+  });
+  const badRoot = freshRoot();
+  impactSite(badRoot, 'loud');
+  assert.throws(
+    () => pickBlends({ root: badRoot, slug: 'clinic' }),
+    /unknown brand\.impact "loud"/,
+  );
+});
+
+test('the CLI names the impact level and whether it was assumed', async () => {
+  const lines = [];
+  const io = { log: (m) => lines.push(m), error: (m) => lines.push(m) };
+  const assumedRoot = freshRoot();
+  impactSite(assumedRoot);
+  assert.equal(
+    await main(['--site', 'clinic', '--root', assumedRoot, '--top', '2'], io),
+    0,
+  );
+  assert.match(lines.join('\n'), /impact: balanced \(assumed\)/);
+  lines.length = 0;
+  assert.equal(
+    await main(
+      [
+        '--site',
+        'clinic',
+        '--root',
+        freshRootWith('quiet'),
+        '--json',
+        '--top',
+        '1',
+      ],
+      io,
+    ),
+    0,
+  );
+  assert.deepEqual(JSON.parse(lines.join('\n')).impact, {
+    level: 'quiet',
+    assumed: false,
+  });
 });

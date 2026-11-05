@@ -4,6 +4,7 @@ summary: 'Friendly and practical: what, where, when and how to reach us come fir
 signals:
   fits: [local-service, conversion-first, craft, calm, heritage, photo-rich]
   avoid: [experimental, technical, bold]
+impact: [quiet, balanced]
 lends: [hours-card, practical-strip]
 rejects: [marquee-type, giant-numerals, scene-backdrop]
 hero: [split, full-bleed-photo]

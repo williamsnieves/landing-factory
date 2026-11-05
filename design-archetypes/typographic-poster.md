@@ -4,6 +4,7 @@ summary: 'Type is the image. Huge display lettering, tight cropping and bold col
 signals:
   fits: [bold, playful, experimental, few-assets, premium]
   avoid: [photo-rich, data-heavy, local-service]
+impact: [bold]
 lends: [marquee-type, giant-numerals]
 rejects: [bento-grid, spec-chips, practical-strip]
 hero: [typographic]
