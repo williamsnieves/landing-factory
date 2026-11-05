@@ -2,7 +2,7 @@
 
 Where a landing's photos come from, in which order, how the keys work, what the licenses forbid and how every landing is checked for visuals. Design: `openspec/changes/add-stock-images/design.md`.
 
-**The rules and checks here support compliance and are not legal advice.** The license points below were read from the providers' pages by the owner on 2026-11-04; the providers can change them, so a person confirms them again (task 6.1 of the change) before a landing goes live.
+**The rules and checks here support compliance and are not legal advice.** The license points below were read from the providers' pages by the owner on 2026-11-04; the providers can change them, so a person confirms them again before a landing goes live.
 
 ## Sources and order
 
@@ -68,7 +68,7 @@ Not allowed, so the build never does it:
 
 A photo that shows people is illustrative: the page carries the caption "Foto ilustrativa" (`es`) or "Illustrative photo" (`en`) wherever it could be read as showing the business, and the build prefers hands, spaces and objects for the business's own roles. Credits: Pixabay and Pexels photos appear in the photo table of `CREDITS.md` and in `src/data/credits.json` with the photographer and the license, plus one "Photos provided by Pixabay" or "Photos provided by Pexels" line for each provider used.
 
-Pending owner confirmation (task 6.1): the Pixabay API facts in `design.md` (parameters, limits, the 24-hour cache rule, no permanent hotlinking) and that commercial use needs no attribution, to be read at `https://pixabay.com/api/docs/` and `https://pixabay.com/service/license-summary/`.
+Verified on 2026-11-05 by a real run (search and download with the owner's key): the key travels as the `key` URL parameter and is masked in every printed line, the hits carry the fields the code reads, the large image is 1280 px on its long side (a 3508 x 2480 photo downloads at 1280 x 905), and Pixabay repeats tags, which the tool removes. The rate limit (about 100 requests a minute), the 24-hour cache rule and the ban on permanent hotlinking come from Pixabay's API documentation and were not re-read from this session.
 
 ## Every landing carries visuals
 
