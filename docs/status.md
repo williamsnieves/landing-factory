@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-11-03 (copy and conversion work merged: add-copy-frameworks PR #48, add-neuromarketing-review PR #49 and its archive PR #50; their first real run, the `turnio` test landing, PR #51; before that the owner's 2026-10-28 list: PRs #42 to #46, tupathdigital in production on https://tupathdigital.com from a private repository). Start with "Resume here" and its "What is left".
+Read this first in a new or compacted session. Last updated: 2026-11-05 (since 2026-11-03: fix-test-run-findings PR #53 and archive #54; the first real prospect test, fisioterapia-ribera, PR #55; add-stock-images PR #56 and archive #57 with the first real Pixabay run; add-calm-statement-archetype PR #58, merged and **not archived yet**). Start with "Resume here" and its "What is left".
 
 ## Working agreements
 
@@ -61,7 +61,17 @@ Read this first in a new or compacted session. Last updated: 2026-11-03 (copy an
 
 ## Resume here (2026-11-03)
 
-**Where we are.** `main` has everything up to PR #56 (`add-stock-images`, archived as `2026-11-05-add-stock-images`). Pixabay works for real: `PIXABAY_API_KEY` is in the environment and `pixabay.com` and `cdn.pixabay.com` are allowed (a real search and download on 2026-11-05). Open: `add-calm-statement-archetype` (PR: an archetype for calm but striking pages without photos, an impact level `brand.impact` in the brief and the picker, and a signature moment in every proposal); next, a rebuild of fisioterapia-ribera with Pixabay photos to compare. casavela and festival-electronica fail the new `visual-assets` rule (text-only heroes); fix them in their next revision.
+**Where we are.** `main` has everything up to PR #58 (`add-calm-statement-archetype`), merged on 2026-11-05 and **not archived yet**: the first commit of the next branch archives it (`openspec archive add-calm-statement-archetype --yes`), as the working agreements say. No branch or pull request is open besides this status update.
+
+**What add-calm-statement-archetype brought (PR #58).**
+- A 12th archetype, `calm-statement`: calm but striking pages without photographs (one oversized statement per screen, soft full-bleed colour fields, one recurring drawn line or shape, slow reveals). It lends `statement-band` and `line-art-thread`.
+- `brand.impact` in the brief (`quiet`, `balanced`, `bold`; it may be assumed, `/brief-intake` asks it). Every sheet lists the impact levels it can deliver, and `pick-archetypes` adds or subtracts 2 by impact (`balanced` assumed when empty). The weight is 2, not 1, because with 1 a `quiet` request still left `calm-statement` first; a reference-led (`custom`) outcome also gets the bonus, so clear references keep leading.
+- A "Signature moment" section in every `PROPOSAL.md` (section, what it shows, technique, reduced-motion and no-JS form, brief facts), at every impact level, recorded in RUN.md "Design decisions".
+- For fisioterapia-ribera's signals the picker now ranks `calm-statement` first (8.5 balanced against `swiss-grid-minimal` 1; with `quiet`, swiss 5 against 4.5).
+
+**Images (add-stock-images, PR #56, archived in #57).** Pexels paused new API keys on 2026-11-04, so Pixabay is the automatic stock source (`find-images.mjs --source pixabay`, key in `PIXABAY_API_KEY` as a Claude environment variable, never a GitHub or network secret since it travels in the URL; downloads only from `pixabay.com`/`cdn.pixabay.com`, large image up to 1280 px) and Pexels photos the owner picks are imported by hand (`find-images.mjs import ... --source pexels`). The owner confirmed both license pages (no recognisable brands or logos, no stock photo in a logo or business name, no implied endorsement, stock people captioned as illustrative). The first real Pixabay search and download worked on 2026-11-05. The `visual-assets` final-check rule fails a home page or hero with no visual (photo, poster, `role="img"` illustration or SVG of at least 96 units); casavela and festival-electronica fail it today (text-only heroes) and get a visual in their next revision.
+
+**fisioterapia-ribera (PR #55).** The first real prospect run (fictional physiotherapy clinic in Zaragoza): proposal $1.91, build $12.73. It found and fixed a real bug (prospect builds wrote a second `/*` block in `_headers`, and Cloudflare Pages served only that one, dropping the security headers). The owner judged the page "correct but not striking", which led to the two changes above. Open findings from that run: the run skipped the sales kit (written by hand); `layout-diversity` turned the approved filled button into a text link; `layout-signature` counted the off-screen skip link as a filled button; `SALES.md` repeats the proposal's planned deviations; the static report did not catch duplicated `_headers` blocks.
 
 **fisioterapia-ribera prospect test (2026-11-03 to 2026-11-04, PR #55).** The first real prospect run: a fictional physiotherapy clinic in Zaragoza, every fact assumed, no sources and no proof, regulated health niche. It used `swiss-grid-minimal+warm-local-service` with a 0-50 minute ruler as its twist, PAS copy and a trust-and-calm conversion plan. Proposal $1.91, build $12.73 (34 min). QA, `check-landing` (including `prospect`) and the static report passed. Findings:
 - The run skipped the sales kit; it was written by hand.
@@ -82,7 +92,13 @@ Owner verdict: correct but not striking. Causes: no references, a quiet archetyp
 
 **How a tupathdigital change goes now:** a revision round in the factory (`npm run revise -- tupathdigital --feedback <file>`, or a direct site change on a factory branch for small things), then `node scripts/sync-export.mjs --site tupathdigital --into <clone of the private repository>`, a branch and a pull request there (its CI gives the preview), merge, production. The favicon went this way (williamsnieves/tupathdigital#1). A revision round now also runs the conversion audit and the `copy-claims` and `dark-patterns` rules.
 
-**What is left (2026-11-03).**
+**What is left (2026-11-05).**
+
+Next, in order (the owner chose them on 2026-11-04 and 2026-11-05):
+A. Archive `add-calm-statement-archetype` (first commit of the next branch).
+B. Rebuild fisioterapia-ribera with the new archetype and Pixabay photos to compare with the version the owner found flat (same brief; set `brand.impact`, `balanced` by default; stop at the proposal for review).
+C. A small follow-up change for the prospect-run findings: run the sales kit for prospect briefs in `new-landing.sh`, ignore the skip link in `layout-signature`, warn on duplicated path blocks in `dist/_headers` in the static report, and write the final design (not the planned deviations) in `SALES.md`.
+D. Ideas the owner raised, not started: maps (a static map image or click-to-load embed, an `add-maps` change), a newsletter provider in the forms layer (MailerLite or Brevo, EU data), and content from outside sources at build time (Google Sheets or a git-based CMS; a CMS is out of scope today).
 
 Owner, on tupathdigital:
 1. Enable Cloudflare Web Analytics in the Pages project (Workers & Pages > tupathdigital > Metrics), if not done; the CSP and the privacy policy already allow and name it. Store visits and sales come from Etsy and Gumroad stats (UTM on the store links).
@@ -92,7 +108,7 @@ Owner, on tupathdigital:
 
 First real runs still missing (the features exist and are tested with stubs only):
 5. A revision round (`npm run revise`) and a restyle round (`--restyle`).
-6. A prospect landing (`prospect.mjs`, sales kit). The `product-led-saas` archetype is now covered by the turnio test (PR #51).
+6. A prospect landing for a real business (the fictional fisioterapia-ribera test ran the flow on 2026-11-04, PR #55).
 7. The first real Web3Forms submission with the owner's key on a custom domain (and reading the free plan's monthly limit), and the first real `generate_landing` through the MCP server.
 8. Real deploys to a VPS and to shared hosting (Hostinger), never run with an account.
 
