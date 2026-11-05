@@ -28,6 +28,9 @@
 
 ## 6. Owner checks and a real run
 
-- [ ] 6.1 The owner reads `https://pixabay.com/api/docs/` and `https://pixabay.com/service/license-summary/` in a browser and confirms the points listed in design.md. Verify: the answer is recorded in `docs/images.md`.
-- [ ] 6.2 Once the owner has created a Pixabay key and added it as `PIXABAY_API_KEY`, and `pixabay.com` is allowed in the environment, run one real `search` and one `get` into a scratch site. Verify: the photo and its entry look right, and nothing from the scratch site is committed.
-- [ ] 6.3 Full checks: `openspec validate add-stock-images --strict`, `npm run format:check`, `npm run lint` and `npm test`.
+- [x] 6.1 The owner reads `https://pixabay.com/api/docs/` and `https://pixabay.com/service/license-summary/` in a browser and confirms the points listed in design.md. Verify: the answer is recorded in `docs/images.md`.
+- [x] 6.2 Once the owner has created a Pixabay key and added it as `PIXABAY_API_KEY`, and `pixabay.com` is allowed in the environment, run one real `search` and one `get` into a scratch site. Verify: the photo and its entry look right, and nothing from the scratch site is committed.
+- [x] 6.3 Full checks: `openspec validate add-stock-images --strict`, `npm run format:check`, `npm run lint` and `npm test`.
+
+
+Notes (2026-11-05): 6.1 the owner confirmed both license pages (2026-11-04); the API behaviour was verified by the real run, the rate-limit and caching rules are kept as documented. 6.2 one real search ("physiotherapy treatment", 5 hits) and one `get` (pixabay:2768834, 1280 x 905 JPEG, entry complete, key in no file or cache) into a scratch site that was deleted; the run found two cosmetic issues fixed at archive time (the printed width was the original's, and Pixabay's repeated tags were shown).

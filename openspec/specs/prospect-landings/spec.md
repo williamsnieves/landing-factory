@@ -13,11 +13,15 @@ A brief whose `prospect.status` is `prospect` SHALL have every filled fact field
 - **THEN** `brief validate` exits 1 naming `contact.phone`
 
 ### Requirement: No prospect brand or consent
-While `prospect.status` is `prospect`, the brief SHALL NOT carry assets, brand colors or fonts, AI image or owner portrait consent, legal holder identity or forms, and the build SHALL use only archive images and a palette and fonts chosen from the niche.
+While `prospect.status` is `prospect`, the brief SHALL NOT carry assets, brand colors or fonts, AI image or owner portrait consent, legal holder identity or forms, and the build SHALL use only stock images (Pixabay, imported Pexels photos, Commons or The Met) and a palette and fonts chosen from the niche.
 
 #### Scenario: Prospect logo in the brief
 - **WHEN** a prospect brief lists an asset of kind `logo`
 - **THEN** validation fails saying a prospect landing cannot use the prospect's brand
+
+#### Scenario: Stock photo on a prospect
+- **WHEN** a prospect landing records a photo with `source: "pixabay"` or `source: "pexels"`
+- **THEN** the `prospect` rule of the final check passes it, as it passes Commons and The Met
 
 ### Requirement: Prospect pages are marked and not indexed
 A site whose `src/data/prospect.json` has status `prospect` SHALL render on every page a `noindex` robots meta tag and a visible notice in the page language naming the business and saying the page is not its official website, SHALL publish a sitemap without URLs and SHALL send `X-Robots-Tag: noindex` for every path. A site without the file SHALL build as before.

@@ -33,6 +33,7 @@ import {
   maskKey,
   parsePixabayRef,
   pixabayEntry,
+  largeImageWidth,
   readKey as readPixabayKey,
   searchPixabay,
 } from './lib/pixabay.mjs';
@@ -719,7 +720,7 @@ async function getPixabayImage(
     entry,
     path: target,
     bytes: bytes.length,
-    width: candidate.width ?? 0,
+    width: largeImageWidth(candidate.width, candidate.height),
     original: false,
   };
 }

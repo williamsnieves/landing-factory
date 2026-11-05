@@ -161,6 +161,32 @@ export function parsePixabayRef(ref) {
 const upperFirst = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 
 /** "physiotherapy, back, massage, spa" -> "Physiotherapy, back, massage". */
+/** Pixabay repeats tags ("masaje, masaje, masaje"); keep each once, in order. */
+export function uniqueTags(tags) {
+  const seen = new Set();
+  return String(tags ?? '')
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter(
+      (tag) =>
+        tag && !seen.has(tag.toLowerCase()) && seen.add(tag.toLowerCase()),
+    )
+    .join(', ');
+}
+
+/** Long side of Pixabay's large image (`largeImageURL`). */
+export const LARGE_IMAGE_SIDE = 1280;
+
+/** Width of the large image Pixabay serves for a photo of `width` x `height`. */
+export function largeImageWidth(width, height) {
+  const w = Number(width) || 0;
+  const h = Number(height) || 0;
+  const long = Math.max(w, h);
+  return long > LARGE_IMAGE_SIDE
+    ? Math.round((w * LARGE_IMAGE_SIDE) / long)
+    : w;
+}
+
 export function titleFromTags(tags) {
   const first = String(tags ?? '')
     .split(',')
@@ -196,7 +222,7 @@ export function toPixabayCandidate(hit) {
     source: 'pixabay',
     pixabayId: hit.id,
     title: titleFromTags(hit.tags),
-    tags: String(hit.tags ?? ''),
+    tags: uniqueTags(hit.tags),
     sourcePage,
     width,
     height,
@@ -217,7 +243,7 @@ export function toPixabayCandidate(hit) {
     license: PIXABAY_LICENSE,
     licenseUrl: PIXABAY_LICENSE_URL,
     credit: true,
-    description: String(hit.tags ?? '').slice(0, 200),
+    description: uniqueTags(hit.tags).slice(0, 200),
     allowed: true,
     rejection: '',
   };

@@ -333,3 +333,18 @@ test('an error that names the request URL has the key masked', async () => {
     /no such photo at Pixabay: 5/,
   );
 });
+
+test('uniqueTags keeps each Pixabay tag once, in order', async () => {
+  const { uniqueTags } = await import('../scripts/lib/pixabay.mjs');
+  assert.equal(
+    uniqueTags('masaje, terapia, masaje, Masaje, spa, terapia'),
+    'masaje, terapia, spa',
+  );
+});
+
+test('largeImageWidth scales the long side to 1280 px', async () => {
+  const { largeImageWidth } = await import('../scripts/lib/pixabay.mjs');
+  assert.equal(largeImageWidth(3508, 2480), 1280);
+  assert.equal(largeImageWidth(2480, 3508), 905);
+  assert.equal(largeImageWidth(800, 600), 800);
+});
