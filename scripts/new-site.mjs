@@ -433,6 +433,16 @@ Chosen from \`node scripts/pick-archetypes.mjs --site ${slug}\` (signals of the 
 - **Twist from the requirement:** one idea that comes from this business, not from a catalog.
 - **Planned deviations:**
 
+## Signature moment
+
+The one moment a visitor should remember, at every impact level (\`quiet\` means a quieter moment, not none). Built from brief facts only; never invented proof, figures or results.
+
+- **Section:** where it lives.
+- **What it shows:**
+- **Technique:** scale, colour field, drawn shape, motion, 3D or photo.
+- **Reduced motion and no JavaScript:** what the visitor sees.
+- **Brief facts used:**
+
 ## Page map
 
 | #   | Section | Height | Purpose | Layout idea |

@@ -4,6 +4,8 @@
 import { existsSync } from 'node:fs';
 import { isAbsolute, join, normalize, sep } from 'node:path';
 
+import { IMPACT_LEVELS } from './archetypes.mjs';
+
 export const BRIEF_VERSION = 1;
 
 export const BUSINESS_KINDS = [
@@ -43,6 +45,9 @@ export const ANALYTICS_MODES = ['none', 'cookieless', 'cookies'];
 export const AI_IMAGE_MODES = ['allowed', 'not-allowed'];
 /** May the page show an AI portrait of the brand owner (a personal brand)? Empty means not decided, which counts as not allowed. */
 export const OWNER_PORTRAIT_MODES = ['allowed', 'not-allowed'];
+// IMPACT_LEVELS (quiet, balanced, bold): how striking the page should look, apart from the tone of its copy.
+// Empty means not decided: the synthesis then uses `balanced`, reported as assumed.
+export { IMPACT_LEVELS };
 /** schema.org types the SEO step can write JSON-LD for (seo.schemaType). Extend the list here. */
 export const SCHEMA_TYPES = [
   'LocalBusiness',
@@ -193,6 +198,8 @@ export const SCHEMA = obj({
     aiImages: str({ enum: AI_IMAGE_MODES }),
     // An AI portrait of the owner of a personal brand (the one exception to "AI images never show people"): the owner decides, never assumed.
     ownerPortrait: str({ enum: OWNER_PORTRAIT_MODES }),
+    // How striking the look should be, separate from the tone of the copy (a calm tone does not mean a quiet look); may be assumed.
+    impact: str({ enum: IMPACT_LEVELS }),
   }),
   references: obj({
     liked: list(
@@ -973,6 +980,11 @@ export const MISSING_FIELDS = [
   ['brand.colors', false, 'Are there brand colors to keep?'],
   ['brand.fonts', false, 'Are there brand fonts to keep?'],
   [
+    'brand.impact',
+    false,
+    'How striking should the page look: quiet, balanced or bold? This is about the look, not the tone of the copy; a calm tone can still have a bold look.',
+  ],
+  [
     'brand.aiImages',
     false,
     'May the page use AI-generated illustrations (never photos of your people or products)? Empty counts as not allowed.',
@@ -1149,6 +1161,7 @@ export function summarizeBrief(brief) {
   field('Brand fonts', 'brand.fonts');
   field('Keep', 'brand.keep');
   field('Avoid', 'brand.avoid');
+  field('Impact', 'brand.impact');
   field('AI images', 'brand.aiImages');
   if (isPersonalBrand(brief)) lines.push('Personal brand: yes');
   field('Owner portrait', 'brand.ownerPortrait');

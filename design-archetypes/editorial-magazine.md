@@ -4,6 +4,7 @@ summary: 'Reads like a magazine feature: multi-column text, drop caps, pull quot
 signals:
   fits: [editorial-content, premium, heritage, educational, storytelling, craft]
   avoid: [conversion-first, product-showcase, few-assets]
+impact: [quiet, balanced]
 lends: [drop-cap, pull-quote]
 rejects: [bento-grid, marquee-type]
 hero: [split, full-bleed-photo, typographic]

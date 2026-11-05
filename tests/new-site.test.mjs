@@ -125,6 +125,7 @@ test('the planning templates follow the skill: proposal sections, one RUN.md row
     'Motion plan',
     '3D',
     'Archetype blend',
+    'Signature moment',
     'Visual direction',
     'SEO',
     'Copy plan',
@@ -139,6 +140,21 @@ test('the planning templates follow the skill: proposal sections, one RUN.md row
   assert.match(proposal, /^- \*\*Signals:\*\*/m);
   assert.match(proposal, /pick-archetypes\.mjs --site cafeteria/);
   assert.match(proposal, /Lent traits/);
+  // The signature moment follows the archetype blend and names the parts the synthesis must fill.
+  assert.ok(
+    proposal.indexOf('## Signature moment') >
+      proposal.indexOf('## Archetype blend'),
+    'Signature moment comes after Archetype blend',
+  );
+  const moment = proposal.slice(proposal.indexOf('## Signature moment'));
+  for (const part of [
+    'Section',
+    'What it shows',
+    'Technique',
+    'Reduced motion and no JavaScript',
+    'Brief facts used',
+  ])
+    assert.ok(moment.slice(0, 900).includes(`**${part}:**`), part);
   const run = readFileSync(join(site, 'RUN.md'), 'utf8');
   assert.match(run, /^# Run log: cafeteria/);
   assert.match(run, /^Result: pending$/m);

@@ -61,17 +61,17 @@ The body uses the same H2 sections as every sheet, written in our own words:
 - **Brief:** `brand.impact`, enum `IMPACT_LEVELS = ['quiet', 'balanced', 'bold']`. It may be listed in `assumed`.
 - **Picker:**
   - `impact = brief.brand?.impact`, else `balanced`, with `impactAssumed` true when missing or listed in `assumed`.
-  - `scoreArchetype` adds `+IMPACT_WEIGHT` (1) when `a.impact.includes(impact)`, else `-IMPACT_WEIGHT`.
+  - `scoreArchetype` adds `+IMPACT_WEIGHT` (2, so the customer's explicit choice outweighs any single signal) when `a.impact.includes(impact)`, else `-IMPACT_WEIGHT`.
+  - A reference-led (`custom`) outcome gets `+IMPACT_WEIGHT` too: the owner's references set the look, so the requested impact counts as met, and clear references keep leading as before.
   - The secondary of a blend keeps the existing half weight of its whole score, impact included.
   - The CLI's reasons line says `impact balanced (assumed)`.
   - A site without `brief.json` uses `balanced`, assumed.
 - **Validator:** `impact` is required, a non-empty subset of `IMPACT_LEVELS` without duplicates.
-- **Expected effect on fisioterapia-ribera's signals** (`local-service, calm, serious, conversion-first, few-assets`, impact `balanced`):
-  - `calm-statement` scores 1 (local-service) + 1 (calm) + 1 (serious) + 1 (conversion-first) + 1.5 (few-assets) + 1 (impact) = 6.5;
-  - `swiss-grid-minimal` scores 2 (calm, serious) - 1 (impact) = 1;
-  - `warm-local-service` scores 3 (local-service, calm, conversion-first) + 1 (impact) = 4; it lists `photo-rich` in fits, not `few-assets`, so it gains nothing there.
+- **Expected effect on fisioterapia-ribera's signals** (its PROPOSAL.md lists `local-service, calm, serious, conversion-first, educational, few-assets`):
+  - with `balanced` (assumed): `calm-statement` 6.5 + 2 = 8.5, `warm-local-service` 3 + 2 = 5, `swiss-grid-minimal` 3 - 2 = 1;
+  - with `quiet`: `swiss-grid-minimal` 3 + 2 = 5, `warm-local-service` 5, `calm-statement` 6.5 - 2 = 4.5, so a quiet request does change the winner.
 
-  The exact numbers are asserted in the test against the real sheets.
+  The weight is 2, not 1, because with 1 a `quiet` request still left `calm-statement` first (5.5 against 4): the customer's explicit choice must outweigh any single signal. The tests assert these numbers against the real sheets.
 
 ## Signature moment
 

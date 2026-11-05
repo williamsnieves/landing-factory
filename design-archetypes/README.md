@@ -19,6 +19,7 @@ summary: 'one or two sentences, at most 240 characters'
 signals:
   fits: [signals the archetype suits]
   avoid: [signals it does not suit]
+impact: [impact levels its grammar can deliver]
 lends: [one to three traits others may borrow]
 rejects: [lent traits that clash with this grammar]
 hero: [allowed hero types]
@@ -28,13 +29,13 @@ signature:
 ---
 ```
 
-The body has these H2 sections, all non-empty: Layout grammar, Header and footer, Typography, Imagery, Buttons and links, Motion, Lendable traits (one bullet `- \`trait\`: description`per lent trait, matching`lends`), Do, Don't. Sheets are written in our own words, contain no URLs and never name a real site as a template.
+`impact` is a non-empty list from the closed set `quiet`, `balanced`, `bold` (see "Impact" below). The body has these H2 sections, all non-empty: Layout grammar, Header and footer, Typography, Imagery, Buttons and links, Motion, Lendable traits (one bullet `- \`trait\`: description`per lent trait, matching`lends`), Do, Don't. Sheets are written in our own words, contain no URLs and never name a real site as a template.
 
 `signature` holds target ranges for the features of the layout signature (below): a two-number list for a count, ratio or pixel feature, the allowed values for a category.
 
 ## Signals (closed vocabulary)
 
-The synthesis writes a `Signals: a, b, c` line in the Brief of `PROPOSAL.md` (or the intake writes `signals` in `brief.json`) using only these words. `photo-rich` and `few-assets` describe the assets the customer has and weigh more in the score.
+The synthesis writes a `Signals: a, b, c` line in the Brief of `PROPOSAL.md` (or the intake writes `signals` in `brief.json`) using only these words. `photo-rich` and `few-assets` describe the assets the customer has and weigh more in the score. The tone words (`calm`, `bold`, ...) describe the requirement; how striking the look should be is a separate answer, the impact level (see "Impact").
 
 | Signal              | Meaning                                                       |
 | ------------------- | ------------------------------------------------------------- |
@@ -56,6 +57,16 @@ The synthesis writes a `Signals: a, b, c` line in the Brief of `PROPOSAL.md` (or
 | `educational`       | teaches a topic to a newcomer                                 |
 | `photo-rich`        | many good photographs are available                           |
 | `few-assets`        | little or no photography; type and shapes must carry the page |
+
+## Impact
+
+`impact` says how striking a page may look, apart from the tone of its copy: a calm tone does not mean a quiet look. The brief carries the level in `brand.impact` (`quiet`, `balanced` or `bold`; `balanced` is assumed when it is empty). Each sheet lists the levels its grammar can deliver, and `pick-archetypes` adds two points to a primary whose list holds the brief's level and subtracts two when it does not, so an explicit choice outweighs any single signal (the secondary of a blend keeps half of its own score, impact included). The output names the level and says when it was assumed.
+
+| Level      | Meaning                                                                  |
+| ---------- | ------------------------------------------------------------------------ |
+| `quiet`    | restrained: order and space carry the page, nothing competes for the eye |
+| `balanced` | calm surface with one deliberate moment of scale, colour or shape        |
+| `bold`     | a strong, memorable look: big type, strong colour, a pronounced gesture  |
 
 ## Lendable traits (closed vocabulary)
 
@@ -86,6 +97,8 @@ A trait has one owner sheet (which defines it). A secondary archetype lends one 
 | `ui-frame-hero`         | product-led-saas         |
 | `two-tone-heading`      | product-led-saas         |
 | `logo-strip-under-hero` | product-led-saas         |
+| `statement-band`        | calm-statement           |
+| `line-art-thread`       | calm-statement           |
 
 ## Blends
 
@@ -137,6 +150,7 @@ The header of `scripts/layout-signature.mjs` documents how each one is measured.
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [bento-product-showcase](bento-product-showcase.md)     | A tile grid of mixed sizes that presents a product or a service line as a set of feature tiles, with product shots and short claims.                          |
 | [brutalist-raw](brutalist-raw.md)                       | Raw, structural pages: hard edges, visible grid lines, monospaced labels, dense blocks and text links instead of buttons. Honest and loud without decoration. |
+| [calm-statement](calm-statement.md)                     | Calm but striking without photographs: one idea per screen set very large in generous space, soft full-bleed colour fields and one drawn shape that recurs.   |
 | [collage-scrapbook](collage-scrapbook.md)               | Playful and handmade: overlapping, slightly rotated photos, paper textures, handwritten accents and stickers, arranged like a scrapbook page.                 |
 | [data-and-proof](data-and-proof.md)                     | Evidence first: figures, small charts drawn in CSS or SVG, comparison tables and clear claims with their sources.                                             |
 | [editorial-magazine](editorial-magazine.md)             | Reads like a magazine feature: multi-column text, drop caps, pull quotes, captions and a strong masthead, with photographs set among the words.               |

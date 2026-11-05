@@ -392,6 +392,7 @@ test('missing lists the holder fields and the privacy contact only when a market
       'contact.address',
       'legal.holder.taxId',
       'brand.fonts',
+      'brand.impact',
     ],
   );
 });
@@ -433,6 +434,7 @@ test('missing reports only what the fixture lacks; summary marks assumed values'
       'contact.phone',
       'contact.address',
       'brand.fonts',
+      'brand.impact',
     ],
   );
   const summary = summarizeBrief(brief);
@@ -1038,4 +1040,51 @@ test('the brief-intake skill asks the search question without inventing keywords
     skill.indexOf('## The search question') >
       skill.indexOf('## The legal step'),
   );
+});
+
+test('brand.impact accepts quiet, balanced, bold and empty; rejects other values naming the allowed ones; older briefs stay valid', () => {
+  for (const value of ['quiet', 'balanced', 'bold', '']) {
+    const brief = fixture();
+    brief.brand.impact = value;
+    assert.deepEqual(errorsOf(brief), [], value || '(empty)');
+  }
+  const bad = fixture();
+  bad.brand.impact = 'loud';
+  const errors = errorsOf(bad);
+  assert.deepEqual(paths(errors), ['brand.impact']);
+  assert.match(errors[0].message, /expected one of quiet, balanced, bold/);
+  const older = fixture();
+  assert.equal(getPath(older, 'brand.impact'), undefined);
+  assert.deepEqual(errorsOf(older), []);
+  assert.equal(emptyBrief().brand.impact, '');
+});
+
+test('brand.impact may be listed as assumed, unlike a consent; a calm tone with bold impact is valid', () => {
+  const brief = fixture();
+  brief.tone = ['tranquilo'];
+  brief.brand.impact = 'bold';
+  brief.assumed = [
+    ...(brief.assumed ?? []),
+    { field: 'brand.impact', reason: 'the customer left the look to us' },
+  ];
+  assert.deepEqual(errorsOf(brief), []);
+  assert.ok(isAssumed(brief, 'brand.impact'));
+  assert.match(summarizeBrief(brief), /Impact: bold \(assumed\)/);
+});
+
+test('brief missing lists brand.impact as recommended until it is answered; summary shows it', () => {
+  const brief = fixture();
+  delete brief.brand.impact;
+  const missing = missingFields(brief);
+  const entry = missing.find((m) => m.path === 'brand.impact');
+  assert.ok(entry, 'brand.impact is listed');
+  assert.equal(entry.required, false);
+  assert.match(entry.hint, /quiet, balanced or bold/);
+  // interview order: right after the brand fonts question, before the AI-image consent
+  const order = missing.map((m) => m.path);
+  if (order.includes('brand.aiImages'))
+    assert.ok(order.indexOf('brand.impact') < order.indexOf('brand.aiImages'));
+  brief.brand.impact = 'quiet';
+  assert.ok(!missingFields(brief).some((m) => m.path === 'brand.impact'));
+  assert.match(summarizeBrief(brief), /^Impact: quiet$/m);
 });

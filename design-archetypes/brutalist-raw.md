@@ -4,6 +4,7 @@ summary: 'Raw, structural pages: hard edges, visible grid lines, monospaced labe
 signals:
   fits: [technical, experimental, bold, serious, few-assets, data-heavy]
   avoid: [premium, calm, heritage]
+impact: [bold]
 lends: [visible-grid, mono-labels]
 rejects: [handwritten-accent, scene-backdrop]
 hero: [typographic, split]

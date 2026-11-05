@@ -5,6 +5,7 @@ signals:
   fits:
     [technical, premium, conversion-first, product-showcase, calm, few-assets]
   avoid: [heritage, craft, local-service, playful, editorial-content]
+impact: [quiet, balanced]
 lends: [ui-frame-hero, two-tone-heading, logo-strip-under-hero]
 rejects: [overlap-collage, handwritten-accent, drop-cap]
 hero: [typographic, split, video]

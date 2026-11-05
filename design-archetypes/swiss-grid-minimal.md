@@ -4,6 +4,7 @@ summary: 'A strict twelve-column grid, flush-left text, small type contrast, no 
 signals:
   fits: [premium, serious, calm, technical, editorial-content, educational]
   avoid: [playful, bold, experimental]
+impact: [quiet]
 lends: [flush-left-axis, split-sticky]
 rejects: [marquee-type, overlap-collage, handwritten-accent, giant-numerals]
 hero: [typographic, split]

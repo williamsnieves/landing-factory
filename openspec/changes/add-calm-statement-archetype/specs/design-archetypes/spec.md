@@ -8,11 +8,11 @@ The catalog SHALL include a `calm-statement` archetype for calm but striking pag
 - **THEN** `pick-archetypes` ranks `calm-statement` above `swiss-grid-minimal` and `warm-local-service`
 
 ### Requirement: Impact level in the ranking
-Every archetype sheet SHALL list the impact levels (`quiet`, `balanced`, `bold`) its grammar can deliver, and the picker SHALL add one point to a primary whose list holds the brief's impact level and subtract one when it does not, using `balanced` and reporting it as assumed when the brief gives none.
+Every archetype sheet SHALL list the impact levels (`quiet`, `balanced`, `bold`) its grammar can deliver, and the picker SHALL add two points to a primary whose list holds the brief's impact level and subtract two when it does not, using `balanced` and reporting it as assumed when the brief gives none.
 
 #### Scenario: Quiet impact requested
 - **WHEN** the brief sets `brand.impact` to `quiet`
-- **THEN** `swiss-grid-minimal` gains a point, `calm-statement` loses one, and the output names the level
+- **THEN** `swiss-grid-minimal` gains two points, `calm-statement` loses two, `swiss-grid-minimal` ranks above `calm-statement` for the same signals, and the output names the level
 
 #### Scenario: Sheet without impact
 - **WHEN** an archetype sheet has no `impact` list or lists an unknown level

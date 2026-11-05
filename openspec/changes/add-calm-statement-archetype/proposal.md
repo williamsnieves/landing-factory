@@ -30,7 +30,7 @@ The owner decided (2026-11-04) to add a new archetype, an impact level in the br
   - It may be listed in `assumed`, and `balanced` is used when it is empty, reported as assumed.
   - `brief missing` lists it among the recommended fields, `summary` shows it, and `/brief-intake` asks "how striking should the page look?" without assuming.
   - Older briefs stay valid.
-- **Impact in the picker.** Every archetype sheet gets an `impact` list: the levels its grammar can deliver. `pick-archetypes` adds 1 to a primary whose list holds the brief's level and subtracts 1 when it does not.
+- **Impact in the picker.** Every archetype sheet gets an `impact` list: the levels its grammar can deliver. `pick-archetypes` adds 2 to a primary whose list holds the brief's level and subtracts 2 when it does not.
   - The levels per sheet:
     - `[quiet]`: swiss-grid-minimal;
     - `[quiet, balanced]`: data-and-proof, editorial-magazine, product-led-saas, warm-local-service;

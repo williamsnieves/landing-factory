@@ -14,10 +14,13 @@
 //   archetype score  = sum over brief signals of +1 (fits) or -1 (avoid), asset signals x1.5,
 //                      plus 0.5 per reference-derived signal fit (-0.5 per avoid),
 //                      plus 0.75 per reference trait the archetype owns, plus 0.5 when a reference hero type is allowed.
+//                      plus IMPACT_WEIGHT when the archetype's `impact` list holds the brief's impact level
+//                      (`brand.impact`, else `balanced`, reported as assumed), minus IMPACT_WEIGHT when it does not.
 //   blend primary+secondary = primary score + 0.5 x secondary score + 0.25 x compatible lent traits (max 2)
 //                      + 0.5 per reference trait the secondary lends. The secondary must lend at least one trait
 //                      the primary does not reject. A blend without a secondary is just the primary's score.
-//   custom (reference-led) = 1.25 x reference evidence (distinct signals and traits from the sheets), offered
+//   custom (reference-led) = 1.25 x reference evidence (distinct signals and traits from the sheets) + IMPACT_WEIGHT
+//                      (the references set the look, so the requested impact counts as met), offered
 //                      only with at least CUSTOM_MIN pieces of evidence and one trait. The references are then the
 //                      base and the best archetypes (by the brief) only fill gaps.
 // Excluded: a primary + secondary pair (or a lone primary) recorded as `archetype:` in another site's
@@ -34,10 +37,12 @@ import { parseArgs } from 'node:util';
 import {
   ASSET_SIGNALS,
   CUSTOM,
+  IMPACT_LEVELS,
   SIGNALS,
   loadCatalog,
   readArchetypeMeta,
 } from './lib/archetypes.mjs';
+import { isAssumed } from './lib/brief-schema.mjs';
 import { SLUG_PATTERN, listSites } from './lib/sites.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -48,6 +53,8 @@ export const REF_HERO_BONUS = 0.5;
 export const CUSTOM_MIN = 4;
 export const CUSTOM_WEIGHT = 1.25;
 export const MAX_PRIMARY_USES = 2;
+export const IMPACT_WEIGHT = 2;
+export const DEFAULT_IMPACT = 'balanced';
 
 class UsageError extends Error {}
 
@@ -105,6 +112,30 @@ export function readSignals(root, slug) {
     );
   if (!signals.length) throw new UsageError(`${source} lists no signals`);
   return { signals: [...new Set(signals)], source };
+}
+
+/**
+ * The impact level of a site: `brand.impact` of its brief, else `balanced`. `assumed` is true when the level is the
+ * default (no brief, or the field is empty) or the brief lists `brand.impact` in `assumed`.
+ */
+export function readImpact(root, slug) {
+  const briefPath = join(root, 'sites', slug, 'brief.json');
+  if (!existsSync(briefPath)) return { level: DEFAULT_IMPACT, assumed: true };
+  let brief;
+  try {
+    brief = JSON.parse(readFileSync(briefPath, 'utf8'));
+  } catch (error) {
+    throw new UsageError(`${briefPath}: ${error.message}`);
+  }
+  const value = String(brief?.brand?.impact ?? '')
+    .trim()
+    .toLowerCase();
+  if (!value) return { level: DEFAULT_IMPACT, assumed: true };
+  if (!IMPACT_LEVELS.includes(value))
+    throw new UsageError(
+      `unknown brand.impact "${value}" in brief.json (allowed: ${IMPACT_LEVELS.join(', ')})`,
+    );
+  return { level: value, assumed: isAssumed(brief, 'brand.impact') };
 }
 
 // --------------------------------------------------------------------------------------------------
@@ -298,7 +329,7 @@ const weightOf = (signal) =>
   ASSET_SIGNALS.includes(signal) ? ASSET_WEIGHT : 1;
 const round = (n) => Math.round(n * 1000) / 1000;
 
-function scoreArchetype(a, signals, refSignals, refHeroes) {
+function scoreArchetype(a, signals, refSignals, refHeroes, impact) {
   let score = 0;
   const fits = [];
   const avoids = [];
@@ -325,7 +356,9 @@ function scoreArchetype(a, signals, refSignals, refHeroes) {
   }
   const heroes = refHeroes.filter((h) => a.hero.includes(h));
   if (heroes.length) score += REF_HERO_BONUS;
-  return { score, fits, avoids, refFits, refAvoids, heroes };
+  const impactFit = a.impact.includes(impact);
+  score += impactFit ? IMPACT_WEIGHT : -IMPACT_WEIGHT;
+  return { score, fits, avoids, refFits, refAvoids, heroes, impactFit };
 }
 
 /**
@@ -339,6 +372,7 @@ export function pickBlends({ root = ROOT, slug, refs } = {}) {
   if (!catalog.length)
     throw new UsageError('design-archetypes/ has no valid archetype sheets');
   const { signals, source } = readSignals(root, slug);
+  const impact = readImpact(root, slug);
   const refSlugs = refs ?? discoverRefs(root, slug);
   const sheets = [];
   for (const r of refSlugs) {
@@ -358,7 +392,7 @@ export function pickBlends({ root = ROOT, slug, refs } = {}) {
   const own = new Map(
     catalog.map((a) => [
       a.name,
-      scoreArchetype(a, signals, refSignals, refHeroes),
+      scoreArchetype(a, signals, refSignals, refHeroes, impact.level),
     ]),
   );
   const used = usedBlends(root, slug);
@@ -384,6 +418,11 @@ export function pickBlends({ root = ROOT, slug, refs } = {}) {
         r.push(
           `a reference hero (${s.heroes.join(', ')}) is allowed by ${arch.name}`,
         );
+      r.push(
+        s.impactFit
+          ? `${arch.name} can deliver impact ${impact.level} (+${IMPACT_WEIGHT})`
+          : `${arch.name} does not list impact ${impact.level} (-${IMPACT_WEIGHT})`,
+      );
       return r;
     };
     const options = [{ secondary: null }];
@@ -468,7 +507,8 @@ export function pickBlends({ root = ROOT, slug, refs } = {}) {
     blends.push({
       primary: CUSTOM,
       secondary: null,
-      score: round(CUSTOM_WEIGHT * evidenceList.length),
+      // The references define the look, so a reference-led outcome meets the requested impact.
+      score: round(CUSTOM_WEIGHT * evidenceList.length + IMPACT_WEIGHT),
       traits: [],
       available: [],
       refTraits: [...refTraitSource.entries()].map(
@@ -477,6 +517,7 @@ export function pickBlends({ root = ROOT, slug, refs } = {}) {
       reasons: [
         `reference-led: ${sheets.map((s) => s.slug).join(', ')} give ${evidenceList.length} signals and traits (${evidenceList.join(', ')})`,
         `archetypes only fill gaps: ${fills.join(', ')} (best by the brief)`,
+        `the references set the look, so impact ${impact.level} counts as met (+${IMPACT_WEIGHT})`,
       ],
       fills,
     });
@@ -492,6 +533,7 @@ export function pickBlends({ root = ROOT, slug, refs } = {}) {
     site: slug,
     signals,
     signalsSource: source,
+    impact,
     refs: sheets,
     blends,
     excluded: excluded.sort((a, b) => a.blend.localeCompare(b.blend)),
@@ -506,6 +548,7 @@ export function formatResult(result, top) {
   const lines = [
     `pick-archetypes ${result.site}`,
     `  signals (${result.signalsSource}): ${result.signals.join(', ')}`,
+    `  impact: ${result.impact.level}${result.impact.assumed ? ' (assumed)' : ''}`,
   ];
   if (result.refs.length)
     for (const r of result.refs)
@@ -548,7 +591,8 @@ export function formatResult(result, top) {
 
 const HELP = `Usage: node scripts/pick-archetypes.mjs --site <slug> [--refs a,b] [--top N] [--json]
 
-Ranks archetype blends (design-archetypes/) for sites/<slug>/ from its signals and reference sheets.
+Ranks archetype blends (design-archetypes/) for sites/<slug>/ from its signals, its impact level
+(brand.impact of brief.json, else balanced, reported as assumed) and reference sheets.
   --site <slug>   the site; signals come from brief.json ("signals") or the "Signals:" line of PROPOSAL.md
   --refs a,b      pattern sheets (patterns/<slug>.md) that steer the blend; default: the ones named in
                   RUN.md (Inputs, References) and PROPOSAL.md

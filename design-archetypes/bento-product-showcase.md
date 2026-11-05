@@ -5,6 +5,7 @@ signals:
   fits:
     [product-showcase, premium, technical, photo-rich, conversion-first, bold]
   avoid: [heritage, editorial-content, few-assets]
+impact: [balanced, bold]
 lends: [bento-grid, spec-chips]
 rejects: [drop-cap, pull-quote, horizontal-chapter]
 hero: [split, illustration, full-bleed-photo]

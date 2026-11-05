@@ -4,6 +4,7 @@ summary: 'Evidence first: figures, small charts drawn in CSS or SVG, comparison 
 signals:
   fits: [data-heavy, technical, serious, conversion-first, educational]
   avoid: [playful, heritage, craft]
+impact: [quiet, balanced]
 lends: [stat-strip, comparison-table]
 rejects: [handwritten-accent, overlap-collage, drop-cap]
 hero: [split, typographic, illustration]
