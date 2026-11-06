@@ -22,6 +22,7 @@ export function layoutPage({
   paper = '#fbf7f0',
   hue = 24,
   mono = false,
+  skipLink = false, // an off-screen filled skip link before everything else, as BaseLayout writes it
 } = {}) {
   const font = mono ? 'ui-monospace, monospace' : 'Georgia, serif';
   const button =
@@ -70,11 +71,13 @@ export function layoutPage({
   .card img { height: 200px; }
   footer { padding: 48px 64px; background: #222; color: #eee; overflow: hidden; }
   .mark { font-size: 220px; line-height: 1; margin: 0; white-space: nowrap; }
+  .skip { position: fixed; top: 12px; left: 12px; transform: translateY(-80px); background: #111; color: #fff; padding: 12px 20px; font-size: 14px; border-radius: 999px; }
   .cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
 </style></head>
 <body>
+${skipLink ? '<a class="skip" href="#main">Skip to content</a>' : ''}
 <header><a href="#">Maison</a><nav><a href="#s1">One</a><a href="#s2">Two</a></nav></header>
-<main>
+<main id="main">
 ${[1, 2, 3, 4].map((n) => `<section id="s${n}">${section(n)}</section>`).join('\n')}
 </main>
 <footer>${footerHtml}</footer>

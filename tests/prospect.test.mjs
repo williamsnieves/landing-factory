@@ -9,6 +9,7 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { after, beforeEach, test } from 'node:test';
@@ -163,9 +164,12 @@ Primary: editorial-calm. Twist: the waiting room.
   }
   assert.match(
     kit,
-    /\| contact\.phone \| \+34 954 000 111 \| https:\/\/example\.com\/alameda\/contacto \| 2026-10-30 \|/,
+    /\| contact\.phone\s+\| \+34 954 000 111\s+\| https:\/\/example\.com\/alameda\/contacto\s+\| 2026-10-30\s+\|/,
   );
-  assert.match(kit, /\| contact\.hours \| .* \| The site does not list hours/);
+  assert.match(
+    kit,
+    /\| contact\.hours\s+\| .* \| The site does not list hours/,
+  );
   // go-live list
   for (const needle of [
     /own assets/,
@@ -249,4 +253,112 @@ test('sold refuses a site without a prospect section and one already sold', () =
   const none = cli(['sold', '--site', slug]);
   assert.equal(none.code, 1);
   assert.match(none.stderr, /not a prospect landing/);
+});
+
+// --- fix-prospect-run-findings: formatted kit, built page, image sources ----------------------------------
+
+const PROPOSAL_WITH_DEVIATIONS = `# Proposal
+
+## Archetype blend
+
+- **Primary:** \`calm-statement\`.
+- **Secondary:** \`warm-local-service\`.
+- **Lent traits:** \`hours-card\`.
+- **Planned deviations:** a sticky header that the sheet does not plan.
+
+## Page map
+
+| # | Section | Height |
+| - | ------- | ------ |
+| 1 | Hero | 1 viewport |
+`;
+
+const MASTER = `# Master
+
+\`\`\`landing-meta
+primary: #7a2e3f
+display-font: Fraunces
+body-font: Inter
+hero: typographic
+archetype: calm-statement+warm-local-service
+traits: hours-card
+\`\`\`
+`;
+
+test('kit is Prettier-formatted', () => {
+  assert.equal(cli(['kit', '--site', slug]).code, 0);
+  const result = spawnSync(
+    process.execPath,
+    [
+      join(ROOT, 'node_modules/prettier/bin/prettier.cjs'),
+      '--check',
+      '--config',
+      join(ROOT, '.prettierrc.json'),
+      join(site, 'SALES.md'),
+    ],
+    { encoding: 'utf8' },
+  );
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+});
+
+test('kit lists the final design and drops the planned deviations', () => {
+  writeFileSync(join(site, 'PROPOSAL.md'), PROPOSAL_WITH_DEVIATIONS);
+  writeFileSync(
+    join(site, 'RUN.md'),
+    '# Run\n\nResult: passed\n\n- **Signature moment: built as planned.** A drawn line under the hero.\n',
+  );
+  mkdirSync(join(tmp, 'design-system', slug), { recursive: true });
+  writeFileSync(join(tmp, 'design-system', slug, 'MASTER.md'), MASTER);
+  assert.equal(cli(['kit', '--site', slug]).code, 0);
+  const kit = readFileSync(join(site, 'SALES.md'), 'utf8');
+  assert.match(kit, /Primary color: #7a2e3f/);
+  assert.match(kit, /Display font: Fraunces/);
+  assert.match(kit, /Body font: Inter/);
+  assert.match(kit, /Hero: typographic/);
+  assert.match(kit, /Archetype: calm-statement\+warm-local-service/);
+  assert.match(
+    kit,
+    /Signature moment: built as planned\. A drawn line under the hero\./,
+  );
+  assert.match(kit, /Lent traits/);
+  assert.doesNotMatch(kit, /Planned deviations/);
+  assert.doesNotMatch(kit, /sticky header that the sheet/);
+});
+
+test('kit prints "not recorded" for a missing MASTER.md and Signature moment', () => {
+  rmSync(join(tmp, 'design-system'), { recursive: true, force: true });
+  writeFileSync(join(site, 'RUN.md'), '# Run\n\nResult: passed\n');
+  assert.equal(cli(['kit', '--site', slug]).code, 0);
+  const kit = readFileSync(join(site, 'SALES.md'), 'utf8');
+  for (const label of [
+    'Primary color',
+    'Display font',
+    'Body font',
+    'Hero',
+    'Signature moment',
+  ])
+    assert.match(kit, new RegExp(`${label}: not recorded`));
+});
+
+test('kit names the image sources of assets.json, else every source a prospect may use', () => {
+  rmSync(join(site, 'assets.json'), { force: true });
+  cli(['kit', '--site', slug]);
+  let kit = readFileSync(join(site, 'SALES.md'), 'utf8');
+  assert.match(
+    kit,
+    /images come from Pixabay, Pexels \(photos imported by hand\), Wikimedia Commons, The Met Open Access/,
+  );
+  writeFileSync(
+    join(site, 'assets.json'),
+    JSON.stringify({
+      images: [
+        { file: 'a.jpg', source: 'pixabay' },
+        { file: 'b.jpg', source: 'met' },
+      ],
+    }),
+  );
+  cli(['kit', '--site', slug]);
+  kit = readFileSync(join(site, 'SALES.md'), 'utf8');
+  assert.match(kit, /images come from Pixabay, The Met Open Access and/);
+  assert.doesNotMatch(kit, /Wikimedia Commons/);
 });

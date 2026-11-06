@@ -277,6 +277,12 @@ case "$RESULT" in
     if [ "$AUTO" -eq 1 ] && [ "$DRY_RUN" -eq 0 ] && ! skipped final-check; then
       node scripts/check-landing.mjs --site "$SLUG" || { echo "new-landing: final check failed" >&2; exit 1; }
     fi
+    # A prospect landing always ends with its sales kit (the skill's last step is easy to skip); it overwrites the
+    # skill's own SALES.md with the same text.
+    if [ "$AUTO" -eq 1 ] && [ "$DRY_RUN" -eq 0 ] && [ -f "$SITE_DIR/brief.json" ] \
+      && node -e 'const s = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).prospect?.status; process.exit(s === "prospect" ? 0 : 1)' "$SITE_DIR/brief.json" 2> /dev/null; then
+      node scripts/prospect.mjs kit --site "$SLUG" || { echo "new-landing: the sales kit failed" >&2; exit 1; }
+    fi
     echo "new-landing: $SLUG passed. Review $SITE_DIR/RUN.md, then commit and open a PR."
     ;;
   checkpoint)

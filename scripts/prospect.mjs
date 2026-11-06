@@ -12,6 +12,7 @@
 // Design: openspec/changes/add-prospect-landings/design.md. Guide: docs/prospect.md.
 // Exit codes: 0 ok / up to date, 1 stale (--check), invalid brief or refused, 2 bad usage or unreadable input.
 // LANDING_FACTORY_ROOT=<dir> reads and writes sites/ in <dir> instead of this repo (tests only).
+import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -26,6 +27,7 @@ import {
   uncoveredProspectFacts,
   validateBrief,
 } from './lib/brief-schema.mjs';
+import { parseLandingMeta } from './lib/archetypes.mjs';
 import { SLUG_PATTERN } from './lib/sites.mjs';
 import { renderLegalJson } from './legal.mjs';
 
@@ -150,15 +152,55 @@ function valueOf(brief, field) {
   return '';
 }
 
-/** The text of SALES.md. `proposal`, `run` and `revisions` are the contents of the site's files (empty when missing). */
-export function salesKit({ slug, brief, proposal = '', run = '', revisions }) {
+const IMAGE_SOURCES = {
+  pixabay: 'Pixabay',
+  pexels: 'Pexels (photos imported by hand)',
+  commons: 'Wikimedia Commons',
+  met: 'The Met Open Access',
+};
+
+/** The image sources named by the "Rules" line: those `assets.json` lists, else every source a prospect may use. */
+function imageSourceNames(assets) {
+  const used = [
+    ...new Set(
+      (assets?.images ?? [])
+        .map((image) => IMAGE_SOURCES[image?.source])
+        .filter(Boolean),
+    ),
+  ];
+  return used.length ? used : Object.values(IMAGE_SOURCES);
+}
+
+/** The text after `Signature moment:` in RUN.md "Design decisions", without Markdown emphasis, or ''. */
+function signatureMomentOf(run) {
+  const match = /^[-*\s]*\**\s*Signature moment:\s*(.+)$/im.exec(run);
+  return match ? match[1].replace(/\*\*/g, '').trim() : '';
+}
+
+/**
+ * The text of SALES.md. `proposal`, `run`, `master` (design-system/<slug>/MASTER.md), `assets` (parsed assets.json)
+ * and `revisions` are the contents of the site's files (empty or null when missing).
+ */
+export function salesKit({
+  slug,
+  brief,
+  proposal = '',
+  run = '',
+  master = '',
+  assets = null,
+  revisions,
+}) {
   const name = text(brief.business?.name);
   const sources = brief.prospect?.sources ?? [];
   const assumed = brief.assumed ?? [];
   const result = /^Result:\s*(\S+)/m.exec(run)?.[1] ?? 'not recorded';
   const blend = sectionOf(proposal, 'archetype blend')
     .map((line) => line.trimEnd())
-    .filter((line) => line.trim() !== '');
+    .filter((line) => line.trim() !== '')
+    .filter((line) => !/^\s*[-*]\s+\**Planned deviations/i.test(line));
+  const meta = master ? parseLandingMeta(master) : null;
+  const moment = signatureMomentOf(run);
+  const recorded = (value) => (text(value) ? text(value) : 'not recorded');
   const names = sectionNames(proposal);
   const rounds = Array.isArray(revisions?.rounds) ? revisions.rounds.length : 0;
   const { locales, multilingual } = briefLocales(brief);
@@ -190,6 +232,17 @@ export function salesKit({ slug, brief, proposal = '', run = '', revisions }) {
     add('Archetype blend (from `PROPOSAL.md`):', '', ...blend, '');
   else
     add('Archetype blend: not recorded (no `PROPOSAL.md` section found).', '');
+  add(
+    'Final design (what the build recorded):',
+    '',
+    `- Archetype: ${recorded(meta?.archetype)}`,
+    `- Primary color: ${recorded(meta?.primary)}`,
+    `- Display font: ${recorded(meta?.displayFont)}`,
+    `- Body font: ${recorded(meta?.bodyFont)}`,
+    `- Hero: ${recorded(meta?.hero)}`,
+    `- Signature moment: ${recorded(moment)}`,
+    '',
+  );
   if (names.length)
     add(`Sections: ${names.map((n, i) => `${i + 1}. ${n}`).join('; ')}.`, '');
   else add('Sections: not recorded (no page map in `PROPOSAL.md`).', '');
@@ -198,7 +251,7 @@ export function salesKit({ slug, brief, proposal = '', run = '', revisions }) {
     '',
     '- Every page is `noindex`, the sitemap is empty and the server sends `X-Robots-Tag: noindex`.',
     '- Every page shows a notice saying it is a design proposal and not the official website.',
-    '- No logo, photo, color or font of the business is used: the images come from Wikimedia Commons or The Met and the palette and fonts are chosen from the niche.',
+    `- No logo, photo, color or font of the business is used: the images come from ${imageSourceNames(assets).join(', ')} and the palette and fonts are chosen from the niche.`,
     '- No AI images, no legal holder, no forms: nobody has agreed to any of them.',
     '',
     '## Facts and sources',
@@ -276,6 +329,30 @@ export function salesKit({ slug, brief, proposal = '', run = '', revisions }) {
   return out.join('\n');
 }
 
+/** Format Markdown with the repository's Prettier and config (sync, like the export), so `prettier --check` passes. */
+function formatMarkdown(content, filepath) {
+  const bin = join(ROOT, 'node_modules', 'prettier', 'bin', 'prettier.cjs');
+  return execFileSync(
+    process.execPath,
+    [
+      bin,
+      '--config',
+      join(ROOT, '.prettierrc.json'),
+      '--stdin-filepath',
+      filepath,
+    ],
+    { input: content, encoding: 'utf8', cwd: ROOT },
+  );
+}
+
+function readJsonIfValid(file) {
+  try {
+    return existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function writeKit({ slug, root = ROOT }) {
   const { siteDir, brief } = loadSite(slug, root);
   if (!isProspect(brief))
@@ -291,14 +368,17 @@ export function writeKit({ slug, root = ROOT }) {
   } catch {
     revisions = null;
   }
-  const content = salesKit({
+  const raw = salesKit({
     slug,
     brief,
     proposal: readIfExists(join(siteDir, 'PROPOSAL.md')),
     run: readIfExists(join(siteDir, 'RUN.md')),
+    master: readIfExists(join(root, 'design-system', slug, 'MASTER.md')),
+    assets: readJsonIfValid(join(siteDir, 'assets.json')),
     revisions,
   });
   const path = join(siteDir, 'SALES.md');
+  const content = formatMarkdown(raw, path);
   writeFileSync(path, content);
   return { path, content };
 }
