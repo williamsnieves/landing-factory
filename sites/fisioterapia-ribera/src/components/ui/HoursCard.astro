@@ -1,0 +1,123 @@
+---
+// The hours card (trait `hours-card` of warm-local-service): opening hours in a real table, next to the address and
+// the action. Without JavaScript it is a plain table. A small script then marks today's row (dot and the word "Hoy",
+// never colour alone) and says whether the clinic is open now, in Zaragoza time.
+import { hoursCard } from '../../content/site';
+
+const schedule = JSON.stringify(
+  hoursCard.rows.map((row) => ({ days: row.days, intervals: row.intervals })),
+);
+---
+
+<div
+  class="bg-surface border-line rounded-lg border p-6 md:p-8"
+  data-hours-card
+  data-schedule={schedule}
+>
+  <p class="font-display text-ink text-xl">{hoursCard.title}</p>
+  <table
+    class="mt-5 w-full border-collapse text-sm"
+    aria-label={hoursCard.tableLabel}
+  >
+    <tbody>
+      {hoursCard.rows.map((row, index) => (
+        <tr
+          data-row={index}
+          class="border-line border-t first:border-t-0 data-today:font-semibold"
+        >
+          <th
+            scope="row"
+            class="text-ink py-3 pr-4 text-left align-top font-normal"
+          >
+            <span class="inline-flex items-center gap-2">
+              <span
+                class="bg-accent rounded-pill hidden size-2 [tr[data-today]_&]:inline-block"
+                aria-hidden="true"
+              />
+              {row.label}
+              <span class="text-ink-soft hidden text-xs [tr[data-today]_&]:inline">
+                {hoursCard.todayLabel}
+              </span>
+            </span>
+          </th>
+          <td class="text-ink py-3 text-right align-top tabular-nums">
+            {/* Each range stays on one line ("16:00–21:00" never breaks at the dash) */}
+            {row.times.split(' y ').map((range, i) => (
+              <>
+                {i > 0 && ' y '}
+                <span class="whitespace-nowrap">{range}</span>
+              </>
+            ))}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  <p class="text-ink mt-4 text-sm font-semibold" data-hours-status hidden></p>
+</div>
+
+<script>
+  import { hoursCard } from '../../content/site';
+
+  interface Row {
+    days: number[];
+    intervals: { from: number; to: number }[];
+  }
+
+  const pad = (minutes: number) =>
+    `${Math.floor(minutes / 60)}:${String(minutes % 60).padStart(2, '0')}`;
+  for (const card of document.querySelectorAll<HTMLElement>(
+    '[data-hours-card]',
+  )) {
+    const rows = JSON.parse(card.dataset.schedule ?? '[]') as Row[];
+    // Day and time in Zaragoza, wherever the visitor is.
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/Madrid',
+      weekday: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    }).formatToParts(new Date());
+    const get = (type: string) =>
+      parts.find((part) => part.type === type)?.value ?? '';
+    const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(
+      get('weekday'),
+    );
+    const now = Number(get('hour')) * 60 + Number(get('minute'));
+    if (day < 0 || Number.isNaN(now)) continue;
+
+    const index = rows.findIndex((row) => row.days.includes(day));
+    card.querySelector(`[data-row="${index}"]`)?.setAttribute('data-today', '');
+
+    const intervalsOf = (d: number) =>
+      rows.find((row) => row.days.includes(d))?.intervals ?? [];
+    const open = intervalsOf(day).find(
+      (slot) => now >= slot.from && now < slot.to,
+    );
+    let text: string;
+    if (open) text = `${hoursCard.openNow} ${pad(open.to)}.`;
+    else {
+      const later = intervalsOf(day).find((slot) => slot.from > now);
+      if (later)
+        text = `${hoursCard.closedNow} ${hoursCard.opensAt} ${pad(later.from)}.`;
+      else {
+        let next = '';
+        for (let step = 1; step <= 7 && !next; step += 1) {
+          const d = (day + step) % 7;
+          const first = intervalsOf(d)[0];
+          if (first)
+            next =
+              step === 1
+                ? `${hoursCard.opensTomorrow} ${pad(first.from)}.`
+                : `${hoursCard.opensDay} ${hoursCard.dayNames[d]} ${hoursCard.atTime} ${pad(first.from)}.`;
+        }
+        text = `${hoursCard.closedNow} ${next}`.trim();
+      }
+    }
+    const status = card.querySelector<HTMLElement>('[data-hours-status]');
+    if (status) {
+      status.textContent = text;
+      status.hidden = false;
+    }
+  }
+</script>

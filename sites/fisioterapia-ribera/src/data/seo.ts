@@ -1,37 +1,29 @@
-/**
- * Structured data and the Open Graph image of the home page.
- *
- * JSON-LD carries only facts the brief does not list as assumed: the business description and the service area.
- * Name, telephone, email, address and opening hours are all assumed in this prospect brief, so they stay out of the
- * markup until the business confirms them. No review or rating markup: the brief has no reviews.
- */
+// Structured data (schema.org JSON-LD) and the Open Graph image of the home page.
+// Customer facts only: the brief's phone, email, address and hours are sample data for this prospect, so they are left
+// out, and there is no review or rating markup (the brief has no proof).
 import { getImage } from 'astro:assets';
-import heroPhoto from '../assets/images/hero-tratamiento-pierna.jpg';
-import { business } from './site';
+import { business, seo } from '../content/site';
+import photo from '../assets/images/manos-espalda.jpg';
 
 export interface MedicalClinicJsonLd {
   '@context': 'https://schema.org';
   '@type': 'MedicalClinic';
+  name: string;
   description: string;
   areaServed: { '@type': 'City'; name: string };
+  medicalSpecialty: 'PhysicalTherapy';
 }
 
 export const jsonLd: MedicalClinicJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'MedicalClinic',
-  description: business.description,
-  areaServed: { '@type': 'City', name: 'Zaragoza' },
+  name: business.name,
+  description: seo.description,
+  areaServed: { '@type': 'City', name: business.city },
+  medicalSpecialty: 'PhysicalTherapy',
 };
 
-const og = await getImage({
-  src: heroPhoto,
-  // A 4:5 crop from the left edge keeps the branded socks and the blurred background person out of the picture.
-  width: 960,
-  height: 1200,
-  fit: 'cover',
-  position: 'left',
-  format: 'jpg',
-});
+const og = await getImage({ src: photo, width: 1200, format: 'jpg' });
 
-/** Root-relative URL of the Open Graph image (a 960 x 1200 crop of the hero photo). */
+/** Root-relative URL of the Open Graph image (absolute once `site` is set at hand-off). */
 export const ogImage: string = og.src;

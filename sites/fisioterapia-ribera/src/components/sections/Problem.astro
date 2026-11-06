@@ -1,0 +1,36 @@
+---
+// Problem (#lo-tuyo), a statement band on the clay field: one oversized line about not knowing whom to see, a short
+// supporting text, and the thread crossing the band below them on its way down the page.
+import Thread from '../ui/Thread.astro';
+import { problem } from '../../content/site';
+---
+
+<section
+  id="lo-tuyo"
+  class="bg-field-clay relative overflow-clip"
+  aria-labelledby="lo-tuyo-title"
+>
+  <div class="mx-auto flex min-h-[80svh] max-w-7xl flex-col justify-center px-4 pt-28 pb-10 md:px-8 md:pt-40 xl:px-16">
+    <h2
+      id="lo-tuyo-title"
+      data-reveal
+      data-reveal-y="48"
+      class="font-display text-ink max-w-[12em] text-5xl leading-[1.04] font-normal tracking-[-0.02em] text-balance"
+    >
+      {problem.statement}
+    </h2>
+    <p
+      data-reveal
+      data-reveal-delay="0.15"
+      class="text-ink mt-10 max-w-xl text-lg leading-relaxed md:ml-[33%]"
+    >
+      {problem.text}
+    </p>
+  </div>
+  <Thread
+    class="text-primary h-28 w-full md:h-44"
+    viewBox="0 0 1440 200"
+    preserveAspectRatio="none"
+    d="M-20 40 C260 30 420 170 720 150 C980 132 1100 30 1300 60 C1380 72 1420 120 1430 200"
+  />
+</section>

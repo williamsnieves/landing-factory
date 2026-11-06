@@ -1,39 +1,43 @@
 ---
+// Home page of Fisioterapia Ribera: it only composes the layout and the sections (copy in src/content/site.ts).
+// No noindex here: src/data/prospect.json makes BaseLayout add it while the page is a prospect proposal.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Motion from '../components/motion/Motion.astro';
-import SiteHeader from '../components/sections/SiteHeader.astro';
+import FontPreload from '../components/ui/FontPreload.astro';
+import Header from '../components/sections/Header.astro';
 import Hero from '../components/sections/Hero.astro';
-import PracticalStrip from '../components/sections/PracticalStrip.astro';
-import Treatments from '../components/sections/Treatments.astro';
-import Session from '../components/sections/Session.astro';
+import Practical from '../components/sections/Practical.astro';
+import Problem from '../components/sections/Problem.astro';
+import WhoWeSee from '../components/sections/WhoWeSee.astro';
 import FirstVisit from '../components/sections/FirstVisit.astro';
+import SamePerson from '../components/sections/SamePerson.astro';
 import Prices from '../components/sections/Prices.astro';
 import Questions from '../components/sections/Questions.astro';
-import Contact from '../components/sections/Contact.astro';
 import Closing from '../components/sections/Closing.astro';
-import SiteFooter from '../components/sections/SiteFooter.astro';
-import { meta } from '../data/site';
+import Footer from '../components/sections/Footer.astro';
+import { seo, skipLabel } from '../content/site';
 import { jsonLd, ogImage } from '../data/seo';
 ---
 
 <BaseLayout
-  title={meta.title}
-  description={meta.description}
+  title={seo.title}
+  description={seo.description}
   lang="es"
-  skipLabel={meta.skipLabel}
-  ogImage={ogImage}
   jsonLd={jsonLd}
+  ogImage={ogImage}
+  skipLabel={skipLabel}
 >
+  <FontPreload slot="head" />
   <Motion slot="head" />
-  <SiteHeader slot="header" />
+  <Header slot="header" />
   <Hero />
-  <PracticalStrip />
-  <Treatments />
-  <Session />
+  <Practical />
+  <Problem />
+  <WhoWeSee />
   <FirstVisit />
+  <SamePerson />
   <Prices />
   <Questions />
-  <Contact />
   <Closing />
-  <SiteFooter slot="footer" />
+  <Footer slot="footer" />
 </BaseLayout>

@@ -1,0 +1,22 @@
+---
+// A quiet note that the values next to it are sample data. It is always its own element, never inside the element
+// that holds the value, so a reader (and the final check) can tell the label from the fact.
+interface Props {
+  text: string;
+  tone?: 'light' | 'deep';
+  class?: string;
+}
+
+const { text, tone = 'light', class: className = '' } = Astro.props;
+---
+
+<p
+  data-sample-note
+  class:list={[
+    'text-xs leading-snug',
+    tone === 'deep' ? 'text-on-deep-soft' : 'text-ink-soft',
+    className,
+  ]}
+>
+  {text}
+</p>

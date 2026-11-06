@@ -1,0 +1,9 @@
+---
+// Preloads the Latin subsets of the two self-hosted variable fonts, so they arrive with the stylesheet. Without it the
+// fallback fonts paint first and the swap re-wraps the hero text, which moved the vertically centred hero (CLS).
+import loraUrl from '@fontsource-variable/lora/files/lora-latin-wght-normal.woff2?url';
+import nunitoUrl from '@fontsource-variable/nunito-sans/files/nunito-sans-latin-wght-normal.woff2?url';
+---
+
+<link rel="preload" href={loraUrl} as="font" type="font/woff2" crossorigin />
+<link rel="preload" href={nunitoUrl} as="font" type="font/woff2" crossorigin />

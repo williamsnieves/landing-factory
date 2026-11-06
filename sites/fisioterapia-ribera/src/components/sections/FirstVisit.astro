@@ -1,65 +1,59 @@
 ---
-/**
- * La primera visita (PAS: Solution). 4 + 8: the heading on the left, a real ordered list of what the first
- * assessment includes on the right (from offer[0].description), with the primary action under it (mid-page).
- */
-import SectionHead from '../ui/SectionHead.astro';
-import ActionLink from '../ui/ActionLink.astro';
-import PhoneLink from '../ui/PhoneLink.astro';
-import {
-  contact,
-  firstVisit,
-  primaryAction,
-  secondaryAction,
-} from '../../data/site';
+// How a visit works (#primera-visita), the Story and solution stage, on the sand field: the statement, then the thread
+// drawn through the four parts of the first visit the brief names (horizontal from 768 px, vertical on phones), ending
+// in the exercise plan for home. It shows order only, never minutes or results.
+import Thread from '../ui/Thread.astro';
+import { firstVisit } from '../../content/site';
 ---
 
 <section
   id="primera-visita"
-  aria-labelledby="primera-visita-titulo"
-  class="border-line border-t py-16 md:py-24"
+  class="bg-field-sand relative overflow-clip"
+  aria-labelledby="primera-visita-title"
 >
-  <div class="wrap grid-12 gap-y-8">
-    <div class="col-span-12 md:col-span-4">
-      <SectionHead
-        id="primera-visita-titulo"
-        heading={firstVisit.heading}
-        intro={firstVisit.intro}
+  <div class="mx-auto max-w-7xl px-4 py-28 md:px-8 md:py-44 xl:px-16">
+    <h2
+      id="primera-visita-title"
+      data-reveal
+      data-reveal-y="48"
+      class="font-display text-ink max-w-[11em] text-5xl leading-[1.04] font-normal tracking-[-0.02em] text-balance"
+    >
+      {firstVisit.statement}
+    </h2>
+    <p class="text-ink mt-10 max-w-xl text-lg md:mt-14">{firstVisit.intro}</p>
+    <div class="relative mt-14 md:mt-20">
+      <Thread
+        class="text-primary absolute inset-x-0 top-0 hidden h-12 w-full md:block"
+        viewBox="0 0 1000 60"
+        preserveAspectRatio="none"
+        d="M0 36 C60 20 95 30 125 30 C210 30 290 46 375 30 C460 14 540 30 625 30 C710 30 790 46 875 30 C930 20 970 30 1000 26"
       />
-    </div>
-    <div class="col-span-12 md:col-span-8">
-      <ol class="border-line border-b">
+      <ol class="grid gap-0 md:grid-cols-4 md:gap-8">
         {firstVisit.steps.map((step, index) => (
           <li
-            class="border-line grid grid-cols-[2.5rem_minmax(0,1fr)] gap-x-4 border-t py-6"
             data-reveal
-            data-reveal-y="16"
-            data-reveal-delay={String(index * 0.08)}
+            data-reveal-delay={(index * 0.1).toFixed(1)}
+            class="border-primary relative border-l-[3px] pb-12 pl-8 md:border-l-0 md:pt-20 md:pb-0 md:pl-0 md:text-center"
           >
             <span
-              class="text-primary text-lg font-semibold tabular-nums"
+              class="bg-accent rounded-pill absolute top-1 -left-[9px] size-4 md:top-6 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2"
               aria-hidden="true"
-            >
-              {index + 1}
-            </span>
-            <div>
-              <h3 class="text-lg leading-snug font-semibold">{step.title}</h3>
-              <p class="mt-1 max-w-[56ch] text-base">{step.text}</p>
-            </div>
+            />
+            <h3 class="text-ink text-lg leading-snug font-semibold">
+              {step.name}
+            </h3>
+            <p class="text-ink mt-2 text-base leading-relaxed md:mx-auto md:max-w-[16rem]">
+              {step.text}
+            </p>
           </li>
         ))}
       </ol>
-      <div
-        class="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3"
-        data-reveal
-      >
-        <ActionLink href={primaryAction.href} label={primaryAction.label} />
-        <PhoneLink
-          label={secondaryAction.label}
-          phone={contact.phone}
-          href={secondaryAction.href}
-        />
-      </div>
     </div>
+    <p
+      data-reveal
+      class="font-display text-primary mt-4 text-4xl leading-[1.08] tracking-[-0.02em] md:mt-24 md:max-w-[14em]"
+    >
+      {firstVisit.ending}
+    </p>
   </div>
 </section>

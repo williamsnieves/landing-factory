@@ -17,14 +17,14 @@ Archetype blend (from `PROPOSAL.md`):
 
 Chosen from `node scripts/pick-archetypes.mjs --site fisioterapia-ribera` (signals of the Brief, no reference sheets, blends other sites already use). The archetype sheets in `design-archetypes/` are a starting grammar, not a template: any deviation goes in RUN.md "Design decisions".
 
-- **Primary:** `swiss-grid-minimal` (owns the grid, flush-left type, rectangular photos, quiet footer).
+- **Primary:** `calm-statement` (one idea per screen set very large, soft full-bleed colour fields, one recurring drawn shape; owns the grid, header, footer and hero type).
 - **Secondary:** `warm-local-service`.
-- **Lent traits:** `practical-strip`, `hours-card`.
-- **Why:** the signals `calm`, `serious`, `educational` fit swiss-grid-minimal and `local-service`, `conversion-first` fit warm-local-service; this is candidate 3 of 5 tied at score 5. The top candidate (`data-and-proof+warm-local-service`) was not taken because its grammar is "each section makes one claim and proves it" with figures and comparison tables, and this brief has no proof, is a regulated health niche, and its constraints forbid comparing with other centres: the evidence grammar would be empty or invented. `warm-local-service` as primary (candidates 4 and 5) was set aside because its hero wants honest photos of the real place and people, and a prospect page with only Commons stock (`few-assets`) cannot provide them; the Swiss grid lets type and space carry the page.
-- **Twist from the requirement:** the 50-minute session. One section lays the session out as a measured horizontal ruler on the grid (0 to 50, minute ticks), with the stages of the visit hanging from it in order (listen, explore, treat, exercises for home) and the line "el mismo fisioterapeuta de principio a fin". The ruler shows the length of the session only; it assigns no minutes to each stage (the brief does not give them).
-- **Planned deviations:** a filled, rectangular primary button (2 px radius at most) instead of the Swiss outline button, because `conversion-first` needs one obvious action on every screen; a sticky header with the action and the phone (warm-local-service header) instead of the Swiss header with no background; one colour field for the closing call to action (Swiss prefers space over colour bands), so the ending is unmistakable.
+- **Lent traits:** `hours-card` (compact card with opening hours, today highlighted, next to the address and the action).
+- **Why:** `calm-statement` matches all six signals and the assumed `balanced` impact (+2), and it is the one grammar in the catalog built to be striking without photographs, which is exactly what the owner missed in the first version ("correct but not striking") and what a prospect page with no customer assets needs. The picker ties `calm-statement+data-and-proof` and `calm-statement+warm-local-service` at 11.5. The first was not taken: its traits (`stat-strip`, `comparison-table`) need figures and comparisons, and this brief has no proof and its legal constraints forbid comparing with other centres. `warm-local-service` lends what a local clinic really needs: the hours next to the action. Only one trait is borrowed (`hours-card`, not `practical-strip`), so the practical facts sit in one calm two-column block between statements, as the primary's grammar asks, and the page does not drift back to the earlier version's composition (`swiss-grid-minimal+warm-local-service`, split hero, practical strip).
+- **Twist from the requirement:** "el mismo fisioterapeuta de principio a fin" (`offer[1].description`). The drawn line is that thread: it starts in the hero joining the words "principio" and "fin", runs through the page and ends in the closing band under the button. In the "how a visit works" section it passes through the four parts of the first visit that the brief names (entrevista, exploración, plan por escrito, primera sesión) and ends in "un plan de ejercicios para casa". It shows order only, never minutes or results.
+- **Planned deviations:** a sticky light header with the name, the phone and the button (allowed by the sheet because the brief is `conversion-first`); two or three illustrative stock photos placed large and alone (the sheet allows them) so that at least half of the sections carry a visual; the line-drawing effect is CSS (`stroke-dashoffset` with a scroll-driven animation under `@supports` and `prefers-reduced-motion: no-preference`), not one of the motion primitives, since the motion layer has no line primitive (without support the line is simply drawn).
 
-Sections: 1. Header (sticky); 2. Hero (`#inicio`); 3. Practical strip (`#datos`); 4. Qué tratamos (`#tratamos`); 5. Una sesión, 50 minutos (`#sesion`); 6. La primera visita (`#primera-visita`); 7. Precios (`#precios`); 8. Preguntas (`#preguntas`); 9. Horario y contacto (`#contacto`); 10. Cierre (`#reserva`); 11. Footer.
+Sections: 1. Header (sticky); 2. Hero `#inicio`; 3. Practical `#cuando`; 4. Problem `#lo-tuyo`; 5. Who we see `#que-tratamos`; 6. How a visit works `#primera-visita`; 7. The same person `#quien`; 8. Prices `#precios`; 9. Questions `#dudas`; 10. Closing `#reserva`; 11. Footer.
 
 Rules the page follows while the business is a prospect:
 
@@ -41,31 +41,32 @@ No sources are recorded.
 
 Values chosen for the business, not read from it. Confirm each one with the business.
 
-| Field              | Value                                              | Reason                                                                                   |
-| ------------------ | -------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| business.name      | Fisioterapia Ribera                                | Prospecto ficticio para la primera prueba real de landings de prospecto (2026-11-03).    |
-| business.city      | Zaragoza                                           | Ciudad elegida para la prueba.                                                           |
-| business.country   | ES                                                 | Mercado de la prueba.                                                                    |
-| offer[0].name      | Primera valoración                                 | Servicio típico de una clínica de fisioterapia; ficticio.                                |
-| offer[0].price     | 45 €                                               | Precio ficticio, en el rango habitual.                                                   |
-| offer[1].name      | Sesión de fisioterapia                             | Servicio típico; ficticio.                                                               |
-| offer[1].price     | 40 €                                               | Precio ficticio, en el rango habitual.                                                   |
-| offer[2].name      | Bono de 5 sesiones                                 | Servicio típico; ficticio.                                                               |
-| offer[2].price     | 180 €                                              | Precio ficticio, en el rango habitual.                                                   |
-| goal.primary.url   | https://reservas.example.com/fisioterapia-ribera   | Reserva de ejemplo en example.com.                                                       |
-| contact.phone      | +34 976 000 000                                    | Teléfono de ejemplo; se marca como dato de ejemplo en la página.                         |
-| contact.email      | hola@example.com                                   | Dominio reservado example.com.                                                           |
-| contact.address    | Calle de Ejemplo 12, 50000 Zaragoza                | Dirección de ejemplo.                                                                    |
-| contact.hours      | Lunes a viernes de 8:00 a 14:00 y de 16:00 a 21:00 | Horario típico de una clínica de barrio; ficticio.                                       |
-| audience.awareness | problem-aware                                      | Quien tiene dolor sabe lo que le pasa pero no si un fisio es la solución ni cuál elegir. |
-| seo.primaryKeyword | fisioterapeuta en Zaragoza                         | Búsqueda típica de este servicio.                                                        |
+| Field              | Value                                              | Reason                                                                                                               |
+| ------------------ | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| business.name      | Fisioterapia Ribera                                | Prospecto ficticio para la primera prueba real de landings de prospecto (2026-11-03).                                |
+| business.city      | Zaragoza                                           | Ciudad elegida para la prueba.                                                                                       |
+| business.country   | ES                                                 | Mercado de la prueba.                                                                                                |
+| offer[0].name      | Primera valoración                                 | Servicio típico de una clínica de fisioterapia; ficticio.                                                            |
+| offer[0].price     | 45 €                                               | Precio ficticio, en el rango habitual.                                                                               |
+| offer[1].name      | Sesión de fisioterapia                             | Servicio típico; ficticio.                                                                                           |
+| offer[1].price     | 40 €                                               | Precio ficticio, en el rango habitual.                                                                               |
+| offer[2].name      | Bono de 5 sesiones                                 | Servicio típico; ficticio.                                                                                           |
+| offer[2].price     | 180 €                                              | Precio ficticio, en el rango habitual.                                                                               |
+| goal.primary.url   | https://reservas.example.com/fisioterapia-ribera   | Reserva de ejemplo en example.com.                                                                                   |
+| contact.phone      | +34 976 000 000                                    | Teléfono de ejemplo; se marca como dato de ejemplo en la página.                                                     |
+| contact.email      | hola@example.com                                   | Dominio reservado example.com.                                                                                       |
+| contact.address    | Calle de Ejemplo 12, 50000 Zaragoza                | Dirección de ejemplo.                                                                                                |
+| contact.hours      | Lunes a viernes de 8:00 a 14:00 y de 16:00 a 21:00 | Horario típico de una clínica de barrio; ficticio.                                                                   |
+| audience.awareness | problem-aware                                      | Quien tiene dolor sabe lo que le pasa pero no si un fisio es la solución ni cuál elegir.                             |
+| seo.primaryKeyword | fisioterapeuta en Zaragoza                         | Búsqueda típica de este servicio.                                                                                    |
+| brand.impact       | balanced                                           | Rebuild after the owner found the first version correct but not striking; balanced is the default level, to confirm. |
 
 ## To go live
 
 The page cannot be published as the business's site until all of this exists:
 
 1. The business's own assets (logo, photos, colors, fonts) with the owner and written permission, recorded in `brief.json` `assets`.
-2. Its consent to AI images, if you want any (`brand.aiImages`). Without it the page keeps archive images only.
+2. Its consent to AI images, if you want any (`brand.aiImages`). Without it the page keeps stock and archive images only.
 3. Legal holder data: name, tax id, address, email and the privacy contact (`legal.holder`, `legal.privacyContact`); markets not set yet (`legal.markets`). The legal pages are built from them; nothing is invented.
 4. A domain the business controls (`deploy.domain`) and a hosting target.
 5. Mark the prospect as a customer: `node scripts/prospect.mjs sold --site fisioterapia-ribera`. This removes the notice and the `noindex` on the next build.

@@ -1,26 +1,32 @@
 {
   "images": [
     {
-      "file": "hero-tratamiento-pierna.jpg",
-      "title": "File:Leg treatment in physiatry closeup. Physiotherapist working examining treating.jpg",
-      "sourcePage": "https://commons.wikimedia.org/wiki/File:Leg_treatment_in_physiatry_closeup._Physiotherapist_working_examining_treating.jpg",
-      "author": "Shixart1985",
-      "license": "CC BY 2.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "file": "manos-espalda.jpg",
+      "title": "Massage, handling, therapies",
+      "sourcePage": "https://pixabay.com/photos/massage-handling-therapies-back-2441746/",
+      "author": "Milius007",
+      "authorUrl": "https://pixabay.com/users/Milius007-5730651/",
+      "license": "Pixabay Content License",
+      "licenseUrl": "https://pixabay.com/service/license-summary/",
       "credit": true,
-      "retrievedAt": "2026-11-04T19:53:13.259Z",
-      "note": "Illustrative stock: captioned as illustrative, never presented as the clinic, its team or its patients. Cropped with object-position to the hands on the thigh; the branded socks and the blurred background person fall outside the crop."
+      "source": "pixabay",
+      "pixabayId": 2441746,
+      "retrievedAt": "2026-11-06T21:51:37.164Z",
+      "note": "Illustrative: a therapist's hands on a shoulder blade, no face; captioned Foto ilustrativa."
     },
     {
-      "file": "tratamos-rodilla.jpg",
-      "title": "File:The fastest route is acute with JBER Hospital Acute Care Clinic 151014-F-WT808-026.jpg",
-      "sourcePage": "https://commons.wikimedia.org/wiki/File:The_fastest_route_is_acute_with_JBER_Hospital_Acute_Care_Clinic_151014-F-WT808-026.jpg",
-      "author": "Airman 1st Class Christopher Morales",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "credit": false,
-      "retrievedAt": "2026-11-04T19:59:05.011Z",
-      "note": "Illustrative stock: a knee during a strap exercise, no face or brand. Captioned as illustrative; crop with object-position toward the left so the uniform sleeve at the right edge stays out."
+      "file": "sala-tratamiento.jpg",
+      "title": "Treatment room, clinic, doctor",
+      "sourcePage": "https://pixabay.com/photos/treatment-room-clinic-doctor-548143/",
+      "author": "DanielCubas",
+      "authorUrl": "https://pixabay.com/users/DanielCubas-604351/",
+      "license": "Pixabay Content License",
+      "licenseUrl": "https://pixabay.com/service/license-summary/",
+      "credit": true,
+      "source": "pixabay",
+      "pixabayId": 548143,
+      "retrievedAt": "2026-11-06T21:51:54.937Z",
+      "note": "Illustrative empty treatment room, not the clinic's premises; captioned Foto ilustrativa."
     }
   ]
 }

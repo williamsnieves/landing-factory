@@ -1,0 +1,36 @@
+---
+// The same person (#quien), the Testimony stage with no proof available: the business's own facts in a statement band
+// on the rose tint field. No names, no faces, no photo presented as the team. The thread turns once here, unbroken.
+import Thread from '../ui/Thread.astro';
+import { samePerson } from '../../content/site';
+---
+
+<section
+  id="quien"
+  class="bg-field-tint relative overflow-clip"
+  aria-labelledby="quien-title"
+>
+  <Thread
+    class="text-primary h-24 w-full md:h-36"
+    viewBox="0 0 1440 200"
+    preserveAspectRatio="none"
+    d="M1440 -10 C1260 40 1120 40 980 70 C860 96 820 170 900 180 C980 190 990 100 900 92 C760 80 420 150 -20 120"
+  />
+  <div class="mx-auto flex min-h-[70svh] max-w-7xl flex-col justify-center px-4 pt-10 pb-28 md:px-8 md:pb-44 xl:px-16">
+    <h2
+      id="quien-title"
+      data-reveal
+      data-reveal-y="48"
+      class="font-display text-ink max-w-[13em] text-5xl leading-[1.04] font-normal tracking-[-0.02em] text-balance"
+    >
+      {samePerson.statement}
+    </h2>
+    <p
+      data-reveal
+      data-reveal-delay="0.15"
+      class="text-ink mt-10 max-w-xl text-lg leading-relaxed md:ml-[33%]"
+    >
+      {samePerson.text}
+    </p>
+  </div>
+</section>

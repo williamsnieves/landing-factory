@@ -1,20 +1,55 @@
 ---
-// Not-found page: the build emits dist/404.html, which static hosts serve with status 404.
+// Not-found page: the build emits dist/404.html, which static hosts serve with status 404. Same header and footer as
+// the home page, the thread loose on the sand field, and links home and to the one action. Always noindex.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import SiteHeader from '../components/sections/SiteHeader.astro';
-import NotFound from '../components/sections/NotFound.astro';
-import SiteFooter from '../components/sections/SiteFooter.astro';
-import { meta, notFound } from '../data/site';
+import Header from '../components/sections/Header.astro';
+import Footer from '../components/sections/Footer.astro';
+import CtaButton from '../components/ui/CtaButton.astro';
+import FontPreload from '../components/ui/FontPreload.astro';
+import Thread from '../components/ui/Thread.astro';
+import { notFound, skipLabel } from '../content/site';
 ---
 
 <BaseLayout
   title={notFound.title}
   description={notFound.description}
   lang="es"
-  skipLabel={meta.skipLabel}
+  skipLabel={skipLabel}
   noindex
 >
-  <SiteHeader slot="header" base="/" />
-  <NotFound />
-  <SiteFooter slot="footer" />
+  <FontPreload slot="head" />
+  <Header slot="header" />
+  <section
+    id="no-encontrada"
+    class="bg-field-sand relative overflow-clip"
+    aria-labelledby="no-encontrada-title"
+  >
+    <div class="mx-auto flex min-h-[70svh] max-w-7xl flex-col justify-center px-4 pt-24 pb-10 md:px-8 md:pt-32 xl:px-16">
+      <h1
+        id="no-encontrada-title"
+        class="font-display text-ink max-w-[10em] text-5xl leading-[1.04] font-normal tracking-[-0.02em] text-balance"
+      >
+        {notFound.heading}
+      </h1>
+      <p class="text-ink mt-10 max-w-xl text-lg leading-relaxed">
+        {notFound.text}
+      </p>
+      <div class="mt-10 flex flex-wrap items-center gap-x-8 gap-y-5">
+        <CtaButton />
+        <a
+          href="/"
+          class="text-primary hover:text-primary-hover decoration-primary/40 hover:decoration-primary text-base font-semibold underline decoration-2 underline-offset-4 transition-colors duration-200"
+        >
+          {notFound.homeLabel}
+        </a>
+      </div>
+    </div>
+    <Thread
+      class="text-primary h-28 w-full md:h-40"
+      viewBox="0 0 1440 200"
+      preserveAspectRatio="none"
+      d="M-20 60 C240 40 380 150 620 140 C820 132 900 60 1040 70 C1160 80 1180 150 1110 160"
+    />
+  </section>
+  <Footer slot="footer" />
 </BaseLayout>
