@@ -1,6 +1,6 @@
 # Proposal: fisioterapia-ribera
 
-Status: **proposed**. Waiting for approval at the checkpoint (`scripts/new-landing.sh fisioterapia-ribera --brief sites/fisioterapia-ribera/brief.json --resume --auto`).
+Status: **approved**. Approved by the owner at the checkpoint (2026-11-06), resumed with `--resume --auto`.
 
 ## Brief
 
@@ -179,7 +179,7 @@ Online shop, cart, payments, backend forms, lead forms (a prospect cannot give a
 4. Assumed: `brand.impact` balanced (in the brief's `assumed`: "rebuild after the owner found the first version correct but not striking"). If the owner wants more, `bold` is also in `calm-statement`'s impact list: bigger type and deeper colour fields, same grammar. (confirm at the checkpoint)
 5. Assumed: `seo.primaryKeyword` "fisioterapeuta en Zaragoza" (in the brief's `assumed`). (confirm at the checkpoint)
 6. Copy framework PASTOR instead of the tied top candidate PAS (reasons in the Copy plan). (confirm at the checkpoint)
-7. Image sources: the brief notes say "Imágenes solo de Commons", but this run was started with `--sources pixabay,commons`, and Pixabay became a source after the brief was written (2026-11-04). Assumed: the command line is the owner's latest choice, so Pixabay is searched first and Commons is the fallback (both allowed for a prospect landing). If the owner wants Commons only, say so at the checkpoint. (confirm at the checkpoint)
+7. Image sources: the brief notes say "Imágenes solo de Commons", but this run was started with `--sources pixabay,commons`, and Pixabay became a source after the brief was written (2026-11-04). Assumed: the command line is the owner's latest choice, so Pixabay is searched first and Commons is the fallback (both allowed for a prospect landing). Confirmed by the owner at the checkpoint (2026-11-06): Pixabay first, Commons as fallback; the brief notes now say so.
 8. Regulated health niche (`legal.regulated`, `legal.constraints`): no promise of cure or results, no comparison with other centres, no medical advice. The page describes the service plainly (what the first visit includes, how long a session lasts, who treats you) and the questions section answers objections by describing the service, sending anything clinical to the first assessment or a phone call. No reviews, ratings, testimonials, awards, certifications or years-of-experience figures. "Colegiados" is used only because the brief states it.
 9. No proof available (`proof` empty): the Testimony stage uses the business's own facts.
 10. Legal requirements unknown: the brief names no market (`legal.markets` empty), so no legal notice or privacy policy pages are built; the page has no form, cookies or trackers. This is not legal advice.

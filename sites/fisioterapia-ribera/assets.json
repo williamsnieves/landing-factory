@@ -1,3 +1,32 @@
 {
-  "images": []
+  "images": [
+    {
+      "file": "manos-espalda.jpg",
+      "title": "Massage, handling, therapies",
+      "sourcePage": "https://pixabay.com/photos/massage-handling-therapies-back-2441746/",
+      "author": "Milius007",
+      "authorUrl": "https://pixabay.com/users/Milius007-5730651/",
+      "license": "Pixabay Content License",
+      "licenseUrl": "https://pixabay.com/service/license-summary/",
+      "credit": true,
+      "source": "pixabay",
+      "pixabayId": 2441746,
+      "retrievedAt": "2026-11-06T21:51:37.164Z",
+      "note": "Illustrative: a therapist's hands on a shoulder blade, no face; captioned Foto ilustrativa."
+    },
+    {
+      "file": "sala-tratamiento.jpg",
+      "title": "Treatment room, clinic, doctor",
+      "sourcePage": "https://pixabay.com/photos/treatment-room-clinic-doctor-548143/",
+      "author": "DanielCubas",
+      "authorUrl": "https://pixabay.com/users/DanielCubas-604351/",
+      "license": "Pixabay Content License",
+      "licenseUrl": "https://pixabay.com/service/license-summary/",
+      "credit": true,
+      "source": "pixabay",
+      "pixabayId": 548143,
+      "retrievedAt": "2026-11-06T21:51:54.937Z",
+      "note": "Illustrative empty treatment room, not the clinic's premises; captioned Foto ilustrativa."
+    }
+  ]
 }

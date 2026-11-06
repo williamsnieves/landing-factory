@@ -1,0 +1,57 @@
+---
+// Closing (#reserva), the ending: a statement band on the deep wine field that repeats the one action (in its inverted
+// form) with the phone as the alternative. The thread comes in from the left edge and ends under the button.
+import CtaButton from '../ui/CtaButton.astro';
+import SampleNote from '../ui/SampleNote.astro';
+import Thread from '../ui/Thread.astro';
+import { closing, contact, sampleNotes } from '../../content/site';
+---
+
+<section
+  id="reserva"
+  class="bg-field-deep relative overflow-clip"
+  aria-labelledby="reserva-title"
+>
+  <div class="mx-auto flex min-h-[80svh] max-w-7xl flex-col justify-center px-4 py-28 md:px-8 md:py-40 xl:px-16">
+    <h2
+      id="reserva-title"
+      data-reveal
+      data-reveal-y="48"
+      class="font-display text-on-deep max-w-[10em] text-5xl leading-[1.04] font-normal tracking-[-0.02em] text-balance"
+    >
+      {closing.statement}
+    </h2>
+    <p
+      data-reveal
+      data-reveal-delay="0.15"
+      class="text-on-deep-soft mt-10 max-w-xl text-lg leading-relaxed"
+    >
+      {closing.text}
+    </p>
+    <div class="mt-12 flex flex-col items-start gap-8">
+      <div class="relative inline-flex flex-col">
+        <CtaButton variant="inverse" />
+        <Thread
+          class="text-field-clay h-16 w-full overflow-visible"
+          viewBox="0 0 320 64"
+          d="M-1400 40 C-1000 30 -700 60 -380 52 C-120 46 60 58 120 40 C150 30 158 22 160 12"
+          knots={[{ x: 160, y: 12 }]}
+          knotRadius={5}
+          knotsInLineColour
+        />
+      </div>
+      <div>
+        <p class="text-on-deep-soft text-base">
+          {closing.callPrefix}{' '}
+          <a
+            href={contact.phoneHref}
+            class="text-on-deep decoration-on-deep/40 hover:decoration-on-deep font-semibold whitespace-nowrap underline decoration-2 underline-offset-4 focus-visible:outline-on-deep"
+          >
+            {contact.phone}
+          </a>
+        </p>
+        <SampleNote text={sampleNotes.phone} tone="deep" class="mt-2" />
+      </div>
+    </div>
+  </div>
+</section>

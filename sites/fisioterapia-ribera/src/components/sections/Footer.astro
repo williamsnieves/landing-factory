@@ -1,0 +1,72 @@
+---
+// Minimal footer on the paper ground (calm-statement allows minimal or columns): the name and one line of contact,
+// then the sample-data note and the photo credits from src/data/credits.json (written by scripts/credits.mjs; never
+// edited by hand). Address and hours live in the practical block (#cuando), so they are not repeated here.
+import credits from '../../data/credits.json';
+import SampleNote from '../ui/SampleNote.astro';
+import { business, contact, footer, sampleNotes } from '../../content/site';
+
+interface Credit {
+  author: string;
+  license: string;
+  url: string;
+}
+
+const photoCredits = (credits as Credit[]).filter(
+  (credit) => !credit.license.startsWith('Photos provided by'),
+);
+const providers = (credits as Credit[]).filter((credit) =>
+  credit.license.startsWith('Photos provided by'),
+);
+---
+
+<footer class="bg-paper text-ink">
+  <div class="mx-auto max-w-7xl px-4 pt-24 pb-12 md:px-8 md:pt-32 xl:px-16">
+    <div class="border-line flex flex-col gap-6 border-t pt-10 md:flex-row md:items-baseline md:justify-between">
+      <div>
+        <p class="font-display text-2xl leading-tight">{business.name}</p>
+        <p class="text-ink-soft mt-2 text-sm">{footer.tagline}</p>
+      </div>
+      <p class="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+        <a
+          href={contact.phoneHref}
+          class="text-primary hover:text-primary-hover underline decoration-2 underline-offset-4"
+        >
+          {contact.phone}
+        </a>
+        <a
+          href={contact.emailHref}
+          class="text-primary hover:text-primary-hover underline decoration-2 underline-offset-4"
+        >
+          {contact.email}
+        </a>
+      </p>
+    </div>
+    <SampleNote text={sampleNotes.footer} class="mt-8 max-w-2xl" />
+    <p class="text-ink-soft mt-6 text-xs leading-relaxed">
+      {footer.creditsIntro}{' '}
+      {photoCredits.map((credit, index) => (
+        <>
+          <a
+            href={credit.url}
+            class="hover:text-ink underline underline-offset-2"
+            rel="noopener"
+          >
+            {credit.author}
+          </a>
+          {` (${credit.license})`}
+          {index < photoCredits.length - 1 ? ', ' : '. '}
+        </>
+      ))}
+      {providers.map((provider) => (
+        <a
+          href={provider.url}
+          class="hover:text-ink underline underline-offset-2"
+          rel="noopener"
+        >
+          {provider.license}
+        </a>
+      ))}
+    </p>
+  </div>
+</footer>

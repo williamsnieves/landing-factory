@@ -1,0 +1,105 @@
+{
+  "site": "fisioterapia-ribera",
+  "version": 1,
+  "page": "/",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "features": {
+    "sectionCount": 9,
+    "cols1Share": 0.67,
+    "cols2Share": 0.33,
+    "cols3Share": 0,
+    "splitRatio": 0.91,
+    "fullBleedShare": 0,
+    "imageRadius": 32,
+    "buttonRadius": 18,
+    "buttonShape": "rect",
+    "headingScale": 8.4,
+    "headingAlign": "left",
+    "headingCase": 0,
+    "eyebrowShare": 0,
+    "wordsPerScreen": 55,
+    "footerType": "minimal",
+    "mediaPerScreen": 0.2,
+    "rotatedShare": 0,
+    "overlapShare": 0,
+    "stickyCount": 1
+  },
+  "sections": [
+    {
+      "id": "inicio",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "cuando",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "lo-tuyo",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "que-tratamos",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "primera-visita",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "quien",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "precios",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "dudas",
+      "cols": 2,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "reserva",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    }
+  ],
+  "mobile": {
+    "screens": 12.51,
+    "wordsPerScreen": 50,
+    "sectionCount": 9
+  },
+  "hashes": [
+    "692613174e0e2b33",
+    "6166665826743939",
+    "69661302807c1c1c",
+    "694e8f6906996667",
+    "697e3f3f37c0a441",
+    "694e5d3355452626",
+    "6986856668661e1c",
+    "692607cc30a0182c",
+    "796a3330c4336767",
+    "595f195a18a04c82",
+    "69a8858880800000",
+    "c98e91808420790c"
+  ]
+}

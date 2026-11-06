@@ -1,0 +1,36 @@
+---
+// The one action of the page, "Pide tu primera valoración": the same filled rect button everywhere it appears.
+// `inverse` is its form on the deep closing field (on-deep fill, field-deep label), where the primary fill would be
+// too dark to read as a button.
+import { primaryAction } from '../../content/site';
+
+interface Props {
+  variant?: 'primary' | 'inverse';
+  size?: 'default' | 'compact';
+  class?: string;
+}
+
+const {
+  variant = 'primary',
+  size = 'default',
+  class: className = '',
+} = Astro.props;
+const colors =
+  variant === 'inverse'
+    ? 'bg-on-deep text-field-deep hover:bg-paper focus-visible:outline-on-deep'
+    : 'bg-primary text-primary-contrast hover:bg-primary-hover';
+const sizing =
+  size === 'compact' ? 'min-h-11 px-4 text-sm' : 'min-h-14 px-6 text-base';
+---
+
+<a
+  href={primaryAction.href}
+  class:list={[
+    'rounded-button inline-flex items-center justify-center text-center leading-tight font-semibold transition-colors duration-200',
+    colors,
+    sizing,
+    className,
+  ]}
+>
+  {primaryAction.label}
+</a>

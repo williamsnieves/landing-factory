@@ -1,0 +1,49 @@
+---
+// Who we see (#que-tratamos), the Amplify stage: the three everyday situations of the brief, described plainly, beside
+// one large illustrative photo placed alone (hands at work, no face, captioned "Foto ilustrativa").
+import { Picture } from 'astro:assets';
+import photo from '../../assets/images/manos-espalda.jpg';
+import { whoWeSee } from '../../content/site';
+---
+
+<section
+  id="que-tratamos"
+  class="bg-paper"
+  aria-labelledby="que-tratamos-title"
+>
+  <div class="mx-auto grid max-w-7xl gap-14 px-4 py-28 md:grid-cols-12 md:gap-8 md:px-8 md:py-44 xl:px-16">
+    <figure class="md:col-span-6">
+      <Picture
+        src={photo}
+        alt={whoWeSee.photoAlt}
+        widths={[480, 800, 1200]}
+        sizes="(min-width: 768px) 48vw, 100vw"
+        formats={['avif', 'webp']}
+        class="rounded-image aspect-[4/5] w-full object-cover object-[35%_50%] md:aspect-[5/6]"
+        loading="lazy"
+      />
+      <figcaption class="text-ink-soft mt-3 text-xs">
+        {whoWeSee.caption}
+      </figcaption>
+    </figure>
+    <div class="md:col-span-6 md:pl-4 lg:pl-0">
+      {/* Six columns at lg and up: "atendemos." at the 4xl statement size needs about 540 px. */}
+      <h2
+        id="que-tratamos-title"
+        class="font-display text-ink text-4xl leading-[1.05] font-normal tracking-[-0.02em]"
+      >
+        {whoWeSee.heading}
+      </h2>
+      <div class="mt-12 grid gap-10 md:mt-16">
+        {whoWeSee.items.map((item, index) => (
+          <div data-reveal data-reveal-delay={(index * 0.1).toFixed(1)}>
+            <h3 class="text-ink text-lg leading-snug font-semibold">
+              {item.lead}
+            </h3>
+            <p class="text-ink mt-2 text-base leading-relaxed">{item.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

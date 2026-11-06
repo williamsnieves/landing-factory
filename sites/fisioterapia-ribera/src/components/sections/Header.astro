@@ -1,0 +1,29 @@
+---
+// Sticky light header: the name, the phone as a quiet text link and the one action. On phones the button stays out of
+// the bar (it does not fit next to the name at 375 px) and the hero carries it on the first screen.
+import CtaButton from '../ui/CtaButton.astro';
+import { business, callAction, header } from '../../content/site';
+---
+
+<header class="bg-paper sticky top-0 z-40">
+  <div class="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-4 px-4 py-2 md:min-h-18 md:px-8 xl:px-16">
+    <a
+      href="/"
+      aria-label={header.homeLabel}
+      class="font-display text-ink text-lg leading-none font-medium"
+    >
+      {business.name}
+    </a>
+    <div class="flex items-center gap-5 md:gap-8">
+      <a
+        href={callAction.href}
+        class="text-primary hover:text-primary-hover decoration-primary/40 hover:decoration-primary text-sm font-semibold underline decoration-2 underline-offset-4 transition-colors duration-200"
+      >
+        {header.callLabel}
+      </a>
+      <span class="hidden sm:block">
+        <CtaButton size="compact" />
+      </span>
+    </div>
+  </div>
+</header>

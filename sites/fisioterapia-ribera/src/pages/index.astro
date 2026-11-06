@@ -1,17 +1,43 @@
 ---
+// Home page of Fisioterapia Ribera: it only composes the layout and the sections (copy in src/content/site.ts).
+// No noindex here: src/data/prospect.json makes BaseLayout add it while the page is a prospect proposal.
 import BaseLayout from '../layouts/BaseLayout.astro';
-
-const title = 'fisioterapia-ribera';
-const description = 'This site is under construction.';
-const lang = 'es';
-const message = 'This site is under construction.';
+import Motion from '../components/motion/Motion.astro';
+import FontPreload from '../components/ui/FontPreload.astro';
+import Header from '../components/sections/Header.astro';
+import Hero from '../components/sections/Hero.astro';
+import Practical from '../components/sections/Practical.astro';
+import Problem from '../components/sections/Problem.astro';
+import WhoWeSee from '../components/sections/WhoWeSee.astro';
+import FirstVisit from '../components/sections/FirstVisit.astro';
+import SamePerson from '../components/sections/SamePerson.astro';
+import Prices from '../components/sections/Prices.astro';
+import Questions from '../components/sections/Questions.astro';
+import Closing from '../components/sections/Closing.astro';
+import Footer from '../components/sections/Footer.astro';
+import { seo, skipLabel } from '../content/site';
+import { jsonLd, ogImage } from '../data/seo';
 ---
 
-<BaseLayout title={title} description={description} lang={lang} noindex>
-  <section class="mx-auto max-w-3xl px-6 py-32 md:py-48">
-    <h1 class="font-display text-3xl leading-tight tracking-tight text-balance">
-      {title}
-    </h1>
-    <p class="text-ink-soft mt-6 text-lg">{message}</p>
-  </section>
+<BaseLayout
+  title={seo.title}
+  description={seo.description}
+  lang="es"
+  jsonLd={jsonLd}
+  ogImage={ogImage}
+  skipLabel={skipLabel}
+>
+  <FontPreload slot="head" />
+  <Motion slot="head" />
+  <Header slot="header" />
+  <Hero />
+  <Practical />
+  <Problem />
+  <WhoWeSee />
+  <FirstVisit />
+  <SamePerson />
+  <Prices />
+  <Questions />
+  <Closing />
+  <Footer slot="footer" />
 </BaseLayout>

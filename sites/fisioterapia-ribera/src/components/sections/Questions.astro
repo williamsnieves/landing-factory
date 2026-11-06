@@ -1,0 +1,71 @@
+---
+// Questions (#dudas), the Response stage: plain answers to the three objections of the brief with native <details>,
+// describing the service and never giving medical advice. Beside them, one illustrative photo of an empty treatment
+// room, captioned "Foto ilustrativa" (it is not the clinic's room). From 768 px the heading and the photo stay in
+// view (sticky) while the answers scroll beside them; an open answer can make that column taller.
+import { Picture } from 'astro:assets';
+import photo from '../../assets/images/sala-tratamiento.jpg';
+import { questions } from '../../content/site';
+---
+
+<section id="dudas" class="bg-paper" aria-labelledby="dudas-title">
+  <div class="mx-auto grid max-w-7xl gap-14 px-4 pt-8 pb-28 md:grid-cols-12 md:gap-8 md:px-8 md:pb-44 xl:px-16">
+    <div class="md:col-span-6 md:sticky md:top-28 md:self-start">
+      <h2
+        id="dudas-title"
+        class="font-display text-ink max-w-[9em] text-4xl leading-[1.05] font-normal tracking-[-0.02em]"
+      >
+        {questions.heading}
+      </h2>
+      <figure class="mt-12 md:mt-16">
+        <Picture
+          src={photo}
+          alt={questions.photoAlt}
+          widths={[480, 800, 1100]}
+          sizes="(min-width: 768px) 38vw, 100vw"
+          formats={['avif', 'webp']}
+          class="rounded-image aspect-[4/3] w-full object-cover object-[60%_60%]"
+          loading="lazy"
+        />
+        <figcaption class="text-ink-soft mt-3 text-xs">
+          {questions.caption}
+        </figcaption>
+      </figure>
+    </div>
+    <div class="grid content-start gap-3 md:col-span-6 md:pt-4">
+      {questions.items.map((item, index) => (
+        <details
+          class="group bg-field-sand rounded-md"
+          name="dudas"
+          open={index === 0}
+        >
+          <summary class="text-ink flex min-h-16 cursor-pointer list-none items-center justify-between gap-6 px-6 py-5 text-xl leading-snug [&::-webkit-details-marker]:hidden">
+            <span>{item.question}</span>
+            <span
+              class="text-primary relative size-4 shrink-0"
+              aria-hidden="true"
+            >
+              <span class="bg-primary absolute top-1/2 left-0 h-[3px] w-4 -translate-y-1/2" />
+              <span class="bg-primary absolute top-0 left-1/2 h-4 w-[3px] -translate-x-1/2 transition-transform duration-200 group-open:rotate-90" />
+            </span>
+          </summary>
+          <div class="px-6 pb-6">
+            <p class="text-ink max-w-[52ch] text-base leading-relaxed">
+              {item.answer}
+            </p>
+            {item.link && (
+              <p class="mt-4">
+                <a
+                  href={item.link.href}
+                  class="text-primary hover:text-primary-hover decoration-primary/40 hover:decoration-primary text-base font-semibold underline decoration-2 underline-offset-4"
+                >
+                  {item.link.label}
+                </a>
+              </p>
+            )}
+          </div>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>

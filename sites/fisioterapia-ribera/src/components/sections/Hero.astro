@@ -1,0 +1,69 @@
+---
+// Hero (#inicio), the signature moment: the very large h1 on the sand field and one drawn line in the primary colour
+// that leaves "principio", loops once and arrives under "fin", then (from 768 px) runs on down and off the bottom
+// edge. The SVG is sized in em inside the h1, so it follows the type at every width (100 viewBox units = 1em).
+// The line draws once on load with CSS; without JavaScript and under reduced motion it is simply drawn.
+import CtaButton from '../ui/CtaButton.astro';
+import { callAction, hero } from '../../content/site';
+
+const [first, second, third, fourth] = hero.lines;
+---
+
+<section
+  id="inicio"
+  class="bg-field-sand relative overflow-clip"
+  aria-labelledby="inicio-title"
+>
+  <div class="mx-auto flex min-h-[calc(100svh-4rem)] max-w-7xl flex-col justify-center px-4 pt-14 pb-24 md:px-8 md:pt-20 md:pb-32 xl:px-16">
+    <h1
+      id="inicio-title"
+      class="font-display text-ink text-5xl leading-[1.04] font-normal tracking-[-0.02em] whitespace-nowrap md:text-6xl"
+    >
+      <span class="block">{first}</span>
+      <span class="block">{second}</span>
+      <span class="relative block w-max whitespace-nowrap">
+        <span class="block">{third}</span>
+        <span class="block">{fourth}</span>
+        <svg
+          class="text-primary pointer-events-none absolute top-0 left-0 h-[3em] w-[7em] overflow-visible"
+          viewBox="0 0 700 300"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path
+            class="thread thread-load"
+            pathLength="1"
+            stroke-width="4.5"
+            d="M135 116 C300 124 440 108 540 116 C640 124 682 196 612 222 C550 244 522 188 568 176 C620 164 640 234 556 242 C470 250 320 226 260 224 C200 222 150 226 128 222"
+          ></path>
+          <path
+            class="thread thread-load-late hidden md:inline"
+            pathLength="1"
+            stroke-width="4.5"
+            d="M128 222 C88 220 66 262 76 322 C92 430 110 700 100 1200"
+          ></path>
+          <circle
+            class="thread-knot knot-load"
+            cx="128"
+            cy="222"
+            r="7"
+          ></circle>
+        </svg>
+      </span>
+    </h1>
+    <div class="mt-12 md:mt-24 md:grid md:grid-cols-12 md:gap-8">
+      <div class="md:col-span-7 md:col-start-6 lg:col-span-5 lg:col-start-7">
+        <p class="text-ink text-lg leading-relaxed">{hero.text}</p>
+        <div class="mt-8 flex flex-wrap items-center gap-x-8 gap-y-5">
+          <CtaButton />
+          <a
+            href={callAction.href}
+            class="text-primary hover:text-primary-hover decoration-primary/40 hover:decoration-primary text-base font-semibold underline decoration-2 underline-offset-4 transition-colors duration-200"
+          >
+            {callAction.label}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

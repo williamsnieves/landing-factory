@@ -1,0 +1,48 @@
+---
+// Prices (#precios), the Offer stage: the three options of the brief side by side in calm columns on the paper ground
+// (not cards in a grid). The first visit is highlighted by a tone step and carries the button, because it is the first
+// step and includes the first session, not because of its price. Prices are sample data: one quiet note below them.
+import CtaButton from '../ui/CtaButton.astro';
+import SampleNote from '../ui/SampleNote.astro';
+import { prices, sampleNotes } from '../../content/site';
+---
+
+<section id="precios" class="bg-paper" aria-labelledby="precios-title">
+  <div class="mx-auto max-w-7xl px-4 py-28 md:px-8 md:py-44 xl:px-16">
+    <h2
+      id="precios-title"
+      class="font-display text-ink text-4xl leading-[1.05] font-normal tracking-[-0.02em]"
+    >
+      {prices.heading}
+    </h2>
+    <ul class="mt-14 grid gap-4 md:mt-20 md:grid-cols-3 md:gap-6">
+      {prices.offers.map((offer, index) => (
+        <li
+          data-reveal
+          data-reveal-delay={(index * 0.1).toFixed(1)}
+          class:list={[
+            'flex flex-col rounded-lg px-6 py-8 md:px-8 md:py-10',
+            offer.highlighted ? 'bg-field-sand' : 'bg-paper',
+          ]}
+        >
+          <h3 class="text-ink text-lg leading-snug font-semibold">
+            {offer.name}
+          </h3>
+          <p class="font-display text-ink mt-3 text-2xl tabular-nums">
+            {offer.price}
+          </p>
+          <p class="text-ink mt-4 text-base leading-relaxed">
+            {offer.description}
+          </p>
+          {offer.highlighted && (
+            <div class="mt-auto pt-8">
+              <p class="text-ink-soft text-sm">{prices.firstStepNote}</p>
+              <CtaButton class="mt-4 w-full" />
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
+    <SampleNote text={sampleNotes.prices} class="mt-6 md:px-8" />
+  </div>
+</section>

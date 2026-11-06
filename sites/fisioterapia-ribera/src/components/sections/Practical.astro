@@ -1,0 +1,57 @@
+---
+// Practical block (#cuando): where, when and how to book, within the second screen. Two calm columns on the paper
+// ground: the address, phone and email on the left, the hours card and the action on the right. The contact data and
+// the hours of this prospect are sample data, so each group carries its own quiet note beside it.
+import CtaButton from '../ui/CtaButton.astro';
+import HoursCard from '../ui/HoursCard.astro';
+import SampleNote from '../ui/SampleNote.astro';
+import { contact, practical, sampleNotes } from '../../content/site';
+---
+
+<section id="cuando" class="bg-paper" aria-labelledby="cuando-title">
+  <div class="mx-auto grid max-w-7xl gap-14 px-4 py-24 md:grid-cols-12 md:gap-8 md:px-8 md:py-36 xl:px-16">
+    <div class="md:col-span-6">
+      <h2
+        id="cuando-title"
+        class="font-display text-ink text-4xl leading-[1.05] font-normal tracking-[-0.02em]"
+      >
+        {practical.heading}
+      </h2>
+      <dl class="mt-10 grid gap-7 md:mt-14">
+        <div>
+          <dt class="text-ink-soft text-sm">{practical.addressLabel}</dt>
+          <dd class="text-ink mt-1 text-xl">{contact.address}</dd>
+        </div>
+        <div>
+          <dt class="text-ink-soft text-sm">{practical.phoneLabel}</dt>
+          <dd class="mt-1 text-xl">
+            <a
+              href={contact.phoneHref}
+              class="text-primary hover:text-primary-hover decoration-primary/40 hover:decoration-primary underline decoration-2 underline-offset-4 transition-colors duration-200"
+            >
+              {contact.phone}
+            </a>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-ink-soft text-sm">{practical.emailLabel}</dt>
+          <dd class="mt-1 text-xl">
+            <a
+              href={contact.emailHref}
+              class="text-primary hover:text-primary-hover decoration-primary/40 hover:decoration-primary underline decoration-2 underline-offset-4 transition-colors duration-200"
+            >
+              {contact.email}
+            </a>
+          </dd>
+        </div>
+      </dl>
+      <SampleNote text={sampleNotes.contact} class="mt-6" />
+    </div>
+    <div class="md:col-span-6 lg:col-span-5 lg:col-start-8">
+      <HoursCard />
+      <SampleNote text={sampleNotes.hours} class="mt-3" />
+      <p class="text-ink mt-10 max-w-md text-base">{practical.bookText}</p>
+      <CtaButton class="mt-6" />
+    </div>
+  </div>
+</section>

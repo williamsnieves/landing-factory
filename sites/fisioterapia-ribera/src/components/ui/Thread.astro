@@ -1,0 +1,52 @@
+---
+// One segment of the page's thread: a decorative inline SVG line that draws itself with the scroll where the browser
+// supports scroll-driven animations (and is simply drawn elsewhere, without JavaScript and under reduced motion).
+// The colour comes from the parent's text colour (`text-primary`, or `text-field-clay` on the deep field).
+interface Props {
+  /** Path data in viewBox units. */
+  d: string;
+  viewBox: string;
+  /** Knots (accent dots) on the line, in viewBox units. */
+  knots?: { x: number; y: number }[];
+  /** Knot radius in viewBox units. */
+  knotRadius?: number;
+  class?: string;
+  /** How the SVG fits its box (`none` stretches a band-wide line). */
+  preserveAspectRatio?: string;
+  /** Draw the knots in the line's colour instead of the ochre accent (on the deep field). */
+  knotsInLineColour?: boolean;
+}
+
+const {
+  d,
+  viewBox,
+  knots = [],
+  knotRadius = 6,
+  knotsInLineColour = false,
+  class: className = '',
+  preserveAspectRatio,
+} = Astro.props;
+---
+
+<svg
+  class:list={['thread-track pointer-events-none block', className]}
+  viewBox={viewBox}
+  preserveAspectRatio={preserveAspectRatio}
+  aria-hidden="true"
+  focusable="false"
+>
+  <path
+    class="thread thread-scroll"
+    pathLength="1"
+    vector-effect="non-scaling-stroke"
+    d={d}
+  ></path>
+  {knots.map((knot) => (
+    <circle
+      class:list={[knotsInLineColour ? 'fill-current' : 'thread-knot']}
+      cx={knot.x}
+      cy={knot.y}
+      r={knotRadius}
+    />
+  ))}
+</svg>

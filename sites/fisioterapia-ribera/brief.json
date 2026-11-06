@@ -1,9 +1,7 @@
 {
   "version": 1,
   "language": "es",
-  "languages": [
-    "es"
-  ],
+  "languages": ["es"],
   "prospect": {
     "status": "prospect",
     "sources": []
@@ -51,12 +49,7 @@
       "url": "tel:+34976000000"
     }
   },
-  "tone": [
-    "cercano",
-    "profesional",
-    "tranquilo",
-    "claro"
-  ],
+  "tone": ["cercano", "profesional", "tranquilo", "claro"],
   "contact": {
     "phone": "+34 976 000 000",
     "email": "hola@example.com",
@@ -74,9 +67,7 @@
       "fisioterapia deportiva Zaragoza",
       "rehabilitación tras operación de rodilla"
     ],
-    "serviceArea": [
-      "Zaragoza"
-    ],
+    "serviceArea": ["Zaragoza"],
     "schemaType": "MedicalClinic"
   },
   "deploy": {
@@ -152,7 +143,7 @@
       "reason": "Rebuild after the owner found the first version correct but not striking; balanced is the default level, to confirm."
     }
   ],
-  "notes": "Primera ejecución real del flujo de prospecto (prospect.mjs, aviso, noindex, kit de ventas) con un negocio ficticio: no hay fuentes públicas reales, así que cada dato está en assumed y sources queda vacío. Sin proof: no inventar testimonios, valoraciones ni cifras. Nicho sanitario regulado: nada de promesas de curación o resultados. Sin mercado legal: sin titular no se construyen páginas legales. Imágenes solo de Commons.",
+  "notes": "Primera ejecución real del flujo de prospecto (prospect.mjs, aviso, noindex, kit de ventas) con un negocio ficticio: no hay fuentes públicas reales, así que cada dato está en assumed y sources queda vacío. Sin proof: no inventar testimonios, valoraciones ni cifras. Nicho sanitario regulado: nada de promesas de curación o resultados. Sin mercado legal: sin titular no se construyen páginas legales. Imágenes: Pixabay primero y Commons de respaldo (decisión del propietario, 2026-11-06, al reconstruir con calm-statement).",
   "brand": {
     "impact": "balanced"
   }

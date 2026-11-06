@@ -1,3 +1,5 @@
+@import '@fontsource-variable/lora/wght.css';
+@import '@fontsource-variable/nunito-sans/wght.css';
 @import 'tailwindcss';
 @import './tokens.css';
 
@@ -28,6 +30,66 @@
 .js-motion [data-reveal] {
   opacity: 0;
   transform: translate3d(0, 2rem, 0);
+}
+
+/* The thread -------------------------------------------------------------
+ * One drawn line in the primary colour runs through the page (the signature moment). Every path carries
+ * pathLength="1", so a dash of 1 is the whole line. Its resting state is fully drawn: that is what shows without
+ * JavaScript (the drawing is CSS only) and under reduced motion. The hero line draws once on load; the later segments
+ * draw with the scroll where scroll-driven animations exist, and are simply drawn elsewhere.
+ */
+.thread {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.thread-track .thread {
+  stroke-width: 3.5;
+}
+.thread-knot {
+  fill: var(--color-accent);
+}
+@keyframes thread-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes knot-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .thread-load {
+    stroke-dasharray: 1;
+    animation: thread-draw var(--duration-draw) var(--ease-draw) 0.35s both;
+  }
+  .thread-load-late {
+    stroke-dasharray: 1;
+    animation: thread-draw 1100ms var(--ease-draw) 1.85s both;
+  }
+  .knot-load {
+    animation: knot-in 400ms ease-out 1.8s both;
+  }
+  /* The timeline is named on the <svg> (a CSS box) and read by its paths, which have no box of their own. */
+  @supports (animation-timeline: view()) {
+    .thread-track {
+      view-timeline-name: --thread;
+    }
+    .thread-scroll {
+      stroke-dasharray: 1;
+      animation: thread-draw linear both;
+      animation-timeline: --thread;
+      animation-range: entry 10% cover 55%;
+    }
+  }
 }
 
 /* Lenis recommended base styles */
