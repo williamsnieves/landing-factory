@@ -1,7 +1,9 @@
 {
   "version": 1,
   "language": "es",
-  "languages": ["es"],
+  "languages": [
+    "es"
+  ],
   "prospect": {
     "status": "prospect",
     "sources": []
@@ -49,7 +51,12 @@
       "url": "tel:+34976000000"
     }
   },
-  "tone": ["cercano", "profesional", "tranquilo", "claro"],
+  "tone": [
+    "cercano",
+    "profesional",
+    "tranquilo",
+    "claro"
+  ],
   "contact": {
     "phone": "+34 976 000 000",
     "email": "hola@example.com",
@@ -67,17 +74,27 @@
       "fisioterapia deportiva Zaragoza",
       "rehabilitación tras operación de rodilla"
     ],
-    "serviceArea": ["Zaragoza"],
+    "serviceArea": [
+      "Zaragoza"
+    ],
     "schemaType": "MedicalClinic"
   },
-  "deploy": { "target": "cloudflare-pages" },
+  "deploy": {
+    "target": "cloudflare-pages"
+  },
   "assumed": [
     {
       "field": "business.name",
       "reason": "Prospecto ficticio para la primera prueba real de landings de prospecto (2026-11-03)."
     },
-    { "field": "business.city", "reason": "Ciudad elegida para la prueba." },
-    { "field": "business.country", "reason": "Mercado de la prueba." },
+    {
+      "field": "business.city",
+      "reason": "Ciudad elegida para la prueba."
+    },
+    {
+      "field": "business.country",
+      "reason": "Mercado de la prueba."
+    },
     {
       "field": "offer[0].name",
       "reason": "Servicio típico de una clínica de fisioterapia; ficticio."
@@ -86,12 +103,18 @@
       "field": "offer[0].price",
       "reason": "Precio ficticio, en el rango habitual."
     },
-    { "field": "offer[1].name", "reason": "Servicio típico; ficticio." },
+    {
+      "field": "offer[1].name",
+      "reason": "Servicio típico; ficticio."
+    },
     {
       "field": "offer[1].price",
       "reason": "Precio ficticio, en el rango habitual."
     },
-    { "field": "offer[2].name", "reason": "Servicio típico; ficticio." },
+    {
+      "field": "offer[2].name",
+      "reason": "Servicio típico; ficticio."
+    },
     {
       "field": "offer[2].price",
       "reason": "Precio ficticio, en el rango habitual."
@@ -104,8 +127,14 @@
       "field": "contact.phone",
       "reason": "Teléfono de ejemplo; se marca como dato de ejemplo en la página."
     },
-    { "field": "contact.email", "reason": "Dominio reservado example.com." },
-    { "field": "contact.address", "reason": "Dirección de ejemplo." },
+    {
+      "field": "contact.email",
+      "reason": "Dominio reservado example.com."
+    },
+    {
+      "field": "contact.address",
+      "reason": "Dirección de ejemplo."
+    },
     {
       "field": "contact.hours",
       "reason": "Horario típico de una clínica de barrio; ficticio."
@@ -117,7 +146,14 @@
     {
       "field": "seo.primaryKeyword",
       "reason": "Búsqueda típica de este servicio."
+    },
+    {
+      "field": "brand.impact",
+      "reason": "Rebuild after the owner found the first version correct but not striking; balanced is the default level, to confirm."
     }
   ],
-  "notes": "Primera ejecución real del flujo de prospecto (prospect.mjs, aviso, noindex, kit de ventas) con un negocio ficticio: no hay fuentes públicas reales, así que cada dato está en assumed y sources queda vacío. Sin proof: no inventar testimonios, valoraciones ni cifras. Nicho sanitario regulado: nada de promesas de curación o resultados. Sin mercado legal: sin titular no se construyen páginas legales. Imágenes solo de Commons."
+  "notes": "Primera ejecución real del flujo de prospecto (prospect.mjs, aviso, noindex, kit de ventas) con un negocio ficticio: no hay fuentes públicas reales, así que cada dato está en assumed y sources queda vacío. Sin proof: no inventar testimonios, valoraciones ni cifras. Nicho sanitario regulado: nada de promesas de curación o resultados. Sin mercado legal: sin titular no se construyen páginas legales. Imágenes solo de Commons.",
+  "brand": {
+    "impact": "balanced"
+  }
 }

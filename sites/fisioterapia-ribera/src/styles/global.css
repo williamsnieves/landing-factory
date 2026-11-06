@@ -1,5 +1,4 @@
 @import 'tailwindcss';
-@import '@fontsource-variable/atkinson-hyperlegible-next/wght.css';
 @import './tokens.css';
 
 @layer base {
@@ -8,18 +7,6 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-text-size-adjust: 100%;
-    /* Anchored sections land below the sticky header. */
-    scroll-padding-top: 5.5rem;
-  }
-  h1,
-  h2,
-  h3 {
-    text-wrap: balance;
-  }
-  p,
-  li,
-  dd {
-    text-wrap: pretty;
   }
   body {
     margin: 0;
@@ -30,28 +17,6 @@
   :focus-visible {
     outline: 3px solid var(--color-primary);
     outline-offset: 3px;
-  }
-}
-
-/* Page grid (MASTER.md section 6): one outer margin and one twelve-column grid for every section. */
-@utility wrap {
-  margin-inline: auto;
-  width: 100%;
-  max-width: 80rem;
-  padding-inline: 1rem;
-  @media (width >= 48rem) {
-    padding-inline: 2rem;
-  }
-  @media (width >= 90rem) {
-    padding-inline: 3rem;
-  }
-}
-@utility grid-12 {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  column-gap: 1rem;
-  @media (width >= 48rem) {
-    column-gap: 1.5rem;
   }
 }
 
