@@ -22,6 +22,7 @@ import { parseArgs } from 'node:util';
 import {
   FORM_FIELDS,
   FORM_PURPOSES,
+  brevoActionProblem,
   briefLocales,
   formatErrors,
   validateBrief,
@@ -89,21 +90,39 @@ export function localePages(locales, defaultLocale, pages) {
  * What the brief's `forms` say about the data the page collects, for the privacy policy:
  * `{ provider, providers, purposes, fields }`, or `null` when the brief has no form (older files keep `forms: true`).
  * A web3forms form without an access key falls back to WhatsApp, so it counts as a WhatsApp form here too.
+ * A Brevo newsletter form (with a valid action URL) adds `brevo` to `providers` and a `newsletter` record
+ * `{ fields, actionOrigins }`; its fields and purpose stay out of the top-level `purposes` and `fields`, which
+ * describe the web3forms and WhatsApp paragraphs. `actionOrigins` feed the CSP `form-action` of astro.config.mjs.
  */
 export function formsProcessing(brief) {
-  const forms = (Array.isArray(brief.forms) ? brief.forms : []).filter(
+  const all = (Array.isArray(brief.forms) ? brief.forms : []).filter(
     (form) => form && typeof form === 'object',
   );
-  if (!forms.length) return null;
+  // A Brevo form without a valid action URL is not rendered, so it collects nothing and the policy does not name Brevo.
+  const brevo = all.filter(
+    (form) =>
+      form.provider === 'brevo' &&
+      !blank(form.action) &&
+      brevoActionProblem(form.action) === null,
+  );
+  const forms = all.filter((form) => form.provider !== 'brevo');
+  if (!forms.length && !brevo.length) return null;
   const providerOf = (form) =>
     form.provider === 'web3forms' && blank(form.accessKey)
       ? 'whatsapp'
       : text(form.provider);
-  const providers = [...new Set(forms.map(providerOf))].sort();
+  const providers = [
+    ...new Set([...forms.map(providerOf), ...(brevo.length ? ['brevo'] : [])]),
+  ].sort();
   const pick = (order, values) => order.filter((v) => values.includes(v));
   return {
-    provider: providers.includes('web3forms') ? 'web3forms' : 'whatsapp',
+    provider: providers.includes('web3forms')
+      ? 'web3forms'
+      : providers.includes('brevo')
+        ? 'brevo'
+        : 'whatsapp',
     providers,
+    // The web3forms and WhatsApp forms; the newsletter is recorded apart (src/components/legal/texts.ts).
     purposes: pick(
       FORM_PURPOSES,
       forms.map((f) => f.purpose),
@@ -112,6 +131,20 @@ export function formsProcessing(brief) {
       FORM_FIELDS,
       forms.flatMap((f) => f.fields ?? []),
     ),
+    ...(brevo.length
+      ? {
+          newsletter: {
+            fields: pick(
+              FORM_FIELDS,
+              brevo.flatMap((f) => f.fields ?? []),
+            ),
+            // The exact origin of each action (the CSP's form-action), sorted and unique.
+            actionOrigins: [
+              ...new Set(brevo.map((f) => new URL(f.action).origin)),
+            ].sort(),
+          },
+        }
+      : {}),
   };
 }
 

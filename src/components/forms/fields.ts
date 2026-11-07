@@ -7,6 +7,7 @@ export const FORM_PURPOSES = [
   'contact',
   'callback',
   'quote',
+  'newsletter',
 ] as const;
 export const FORM_FIELDS = [
   'name',
@@ -19,7 +20,7 @@ export const FORM_FIELDS = [
   'message',
   'preferredTime',
 ] as const;
-export const FORM_PROVIDERS = ['web3forms', 'whatsapp'] as const;
+export const FORM_PROVIDERS = ['web3forms', 'whatsapp', 'brevo'] as const;
 
 export type FormPurpose = (typeof FORM_PURPOSES)[number];
 export type FormField = (typeof FORM_FIELDS)[number];
@@ -34,6 +35,57 @@ export interface LeadFormConfig {
   provider: FormProvider;
   /** Web3Forms access key (public by design). Without it a web3forms form falls back to WhatsApp. */
   accessKey?: string;
+  /** Brevo sign-up form action (`https://<id>.sibforms.com/serve/...`), copied from the customer's embed code. */
+  action?: string;
+}
+
+/**
+ * Brevo sign-up form (add-newsletter). These names come from Brevo's generated embed codes, which have no official
+ * reference page: confirm them against the customer's generated code at the first real sign-up (design.md) before a
+ * landing ships a newsletter. They live here only, so a fix is one edit.
+ */
+export const BREVO_FIELD_NAMES = {
+  email: 'EMAIL',
+  /** Sent only when the brief's newsletter form has the `name` field. */
+  firstName: 'FIRSTNAME',
+  /** Consent checkbox: required, unchecked, value `1`. */
+  optIn: 'OPT_IN',
+  /** Honeypot: visually hidden, a bot fills it, Brevo drops the submission. */
+  honeypot: 'email_address_check',
+  locale: 'locale',
+  htmlType: 'html_type',
+} as const;
+export const BREVO_HTML_TYPE = 'simple';
+export const BREVO_OPT_IN_VALUE = '1';
+
+/**
+ * The form action of a Brevo sign-up form as a normalized URL, or `null` when it is empty. Throws for anything that is
+ * not an https URL on a `*.sibforms.com` host (at least one label before it) with a path under `/serve/`: the brief
+ * validator refuses the same values (scripts/lib/brief-schema.mjs). Parsed, never a substring test.
+ */
+export function brevoActionUrl(action?: string): URL | null {
+  const raw = action?.trim();
+  if (!raw) return null;
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    throw new Error(`Brevo form action is not a URL: ${raw}`);
+  }
+  const host = url.hostname.toLowerCase();
+  const suffix = '.sibforms.com';
+  if (
+    url.protocol !== 'https:' ||
+    url.username ||
+    url.password ||
+    !host.endsWith(suffix) ||
+    host.length <= suffix.length ||
+    !url.pathname.startsWith('/serve/')
+  )
+    throw new Error(
+      `Brevo form action must be https on a *.sibforms.com host with a path under /serve/: ${url.origin}${url.pathname}`,
+    );
+  return url;
 }
 
 /** The only host a web3forms form posts to (https://docs.web3forms.com). */
@@ -129,6 +181,12 @@ export interface FormTexts {
   whatsappFallbackNote: string;
   whatsappLink: string;
   thanks: { title: string; text: string; back: string };
+  newsletter: {
+    submit: string;
+    /** The double opt-in note shown under the button. */
+    doubleOptIn: string;
+    consent: { before: string; link: string; after: string };
+  };
 }
 
 const EN: FormTexts = {
@@ -161,18 +219,21 @@ const EN: FormTexts = {
     contact: 'Send message',
     callback: 'Request a call back',
     quote: 'Request a quote',
+    newsletter: 'Subscribe',
   },
   subject: {
     valuation: (b) => `${b}: new valuation request`,
     contact: (b) => `${b}: new message`,
     callback: (b) => `${b}: new call back request`,
     quote: (b) => `${b}: new quote request`,
+    newsletter: (b) => `${b}: new subscriber`,
   },
   greeting: {
     valuation: 'Hello, I would like to request a valuation.',
     contact: 'Hello, I would like to get in touch.',
     callback: 'Hello, please call me back.',
     quote: 'Hello, I would like to request a quote.',
+    newsletter: 'Hello, I would like to subscribe to the newsletter.',
   },
   whatsappSubmit: 'Continue on WhatsApp',
   consent: {
@@ -194,6 +255,16 @@ const EN: FormTexts = {
     title: 'Thank you',
     text: 'We received your request and will get back to you soon.',
     back: 'Back to the home page',
+  },
+  newsletter: {
+    submit: 'Subscribe',
+    doubleOptIn:
+      'We will send you an email to confirm your subscription. Every email has a link to unsubscribe.',
+    consent: {
+      before: 'I have read the ',
+      link: 'privacy policy',
+      after: ' and agree to receive the newsletter by email.',
+    },
   },
 };
 
@@ -227,18 +298,21 @@ const ES: FormTexts = {
     contact: 'Enviar mensaje',
     callback: 'Pedir que me llamen',
     quote: 'Pedir presupuesto',
+    newsletter: 'Suscribirme',
   },
   subject: {
     valuation: (b) => `${b}: nueva solicitud de valoración`,
     contact: (b) => `${b}: nuevo mensaje`,
     callback: (b) => `${b}: nueva solicitud de llamada`,
     quote: (b) => `${b}: nueva solicitud de presupuesto`,
+    newsletter: (b) => `${b}: nueva suscripción`,
   },
   greeting: {
     valuation: 'Hola, quisiera solicitar una valoración.',
     contact: 'Hola, quisiera ponerme en contacto.',
     callback: 'Hola, por favor llámame.',
     quote: 'Hola, quisiera pedir un presupuesto.',
+    newsletter: 'Hola, quisiera suscribirme al boletín.',
   },
   whatsappSubmit: 'Continuar en WhatsApp',
   consent: {
@@ -260,6 +334,16 @@ const ES: FormTexts = {
     title: 'Gracias',
     text: 'Hemos recibido tu solicitud y te responderemos pronto.',
     back: 'Volver al inicio',
+  },
+  newsletter: {
+    submit: 'Suscribirme',
+    doubleOptIn:
+      'Te enviaremos un correo para confirmar tu suscripción. Cada correo incluye un enlace para darte de baja.',
+    consent: {
+      before: 'He leído la ',
+      link: 'política de privacidad',
+      after: ' y acepto recibir el boletín por correo electrónico.',
+    },
   },
 };
 

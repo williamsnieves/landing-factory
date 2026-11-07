@@ -44,6 +44,7 @@ const EXPECTED_FILES = [
   'public/robots.txt',
   'site.config.json',
   'src/components/forms/LeadForm.astro',
+  'src/components/forms/NewsletterForm.astro',
   'src/components/forms/ThankYou.astro',
   'src/components/forms/client.ts',
   'src/components/forms/fields.ts',

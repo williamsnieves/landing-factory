@@ -65,7 +65,13 @@ export const SCHEMA_TYPES = [
   'Event',
 ];
 /** Lead forms (design: openspec/changes/add-lead-forms/design.md). Closed vocabularies; extend the lists here. */
-export const FORM_PURPOSES = ['valuation', 'contact', 'callback', 'quote'];
+export const FORM_PURPOSES = [
+  'valuation',
+  'contact',
+  'callback',
+  'quote',
+  'newsletter',
+];
 export const FORM_FIELDS = [
   'name',
   'email',
@@ -77,7 +83,9 @@ export const FORM_FIELDS = [
   'message',
   'preferredTime',
 ];
-export const FORM_PROVIDERS = ['web3forms', 'whatsapp'];
+export const FORM_PROVIDERS = ['web3forms', 'whatsapp', 'brevo'];
+/** A brevo (newsletter) form posts to the customer's own Brevo sign-up form; it carries only these fields (add-newsletter). */
+export const BREVO_FIELDS = ['email', 'name'];
 export const FORM_MAX = 3;
 /** Prospect landings (design: openspec/changes/add-prospect-landings/design.md): a page built for a business that has not bought yet. */
 export const PROSPECT_STATUSES = ['prospect', 'sold'];
@@ -265,6 +273,7 @@ export const SCHEMA = obj({
       fields: list(str({ enum: FORM_FIELDS })),
       provider: str({ required: true, enum: FORM_PROVIDERS }),
       accessKey: str({ format: 'uuid' }),
+      action: str({ format: 'brevo-action' }),
     }),
     FORM_MAX,
   ),
@@ -391,10 +400,44 @@ const PORTRAIT_CONSENT = /^brand\.ownerPortrait$/;
 /** A form's access key is the customer's own account key: never a value chosen for them (also covers `forms` and `forms[i]`). */
 /** Proof is the customer's own evidence: never a value chosen for them (also covers `proof`, `proof[i]` and their fields). */
 const PROOF_KEY = /^proof(\[\d+\](\.\w+)?)?$/;
-const FORM_KEY = /^forms(\[\d+\](\.accessKey)?)?$/;
+const FORM_KEY = /^forms(\[\d+\](\.(accessKey|action))?)?$/;
+
+/** The summary shows a Brevo action URL by its host only. */
+function brevoSummary(action) {
+  if (!isFilled(action)) return 'no action URL (the form is not shown)';
+  try {
+    return `action on ${new URL(action).hostname}`;
+  } catch {
+    return 'action URL set';
+  }
+}
 
 /** Each check returns an error text (what was expected) or null. `ctx` carries baseDir and patternsDir. */
+/** Brevo sign-up form action: https, a host with at least one label before `.sibforms.com`, a path under `/serve/`. Parsed, never a substring test. */
+export function brevoActionProblem(v) {
+  let url;
+  try {
+    url = new URL(v);
+  } catch {
+    return 'expected the form action URL from the Brevo embed code, such as https://<id>.sibforms.com/serve/<form>';
+  }
+  const host = url.hostname.toLowerCase();
+  const suffix = '.sibforms.com';
+  if (
+    url.protocol !== 'https:' ||
+    url.username ||
+    url.password ||
+    !host.endsWith(suffix) ||
+    host.length <= suffix.length ||
+    host.startsWith('.') ||
+    !url.pathname.startsWith('/serve/')
+  )
+    return 'expected an https URL on a *.sibforms.com host with a path starting /serve/ (copy the form action from the Brevo embed code)';
+  return null;
+}
+
 const FORMATS = {
+  'brevo-action': (v) => brevoActionProblem(v),
   language: (v) =>
     /^[a-z]{2,3}(-[A-Za-z0-9]+)*$/.test(v)
       ? null
@@ -638,6 +681,38 @@ export function validateBrief(
             `forms[${index}].accessKey`,
             'only a web3forms form has an access key; remove it or change the provider',
           );
+        const provider = String(form.provider ?? '').trim();
+        const purpose = String(form.purpose ?? '').trim();
+        if (provider === 'brevo') {
+          if (purpose && purpose !== 'newsletter')
+            fail(
+              `forms[${index}].purpose`,
+              'a brevo form is a newsletter sign-up; set purpose to "newsletter"',
+            );
+          (Array.isArray(form.fields) ? form.fields : []).forEach((f, i) => {
+            if (!BREVO_FIELDS.includes(f))
+              fail(
+                `forms[${index}].fields[${i}]`,
+                `a brevo newsletter form takes only ${BREVO_FIELDS.join(' and ')}, not "${f}"`,
+              );
+          });
+          if (String(form.accessKey ?? '').trim())
+            fail(
+              `forms[${index}].accessKey`,
+              'a brevo form has no access key; it posts to the action URL',
+            );
+        } else {
+          if (purpose === 'newsletter')
+            fail(
+              `forms[${index}].provider`,
+              'a newsletter form needs the brevo provider',
+            );
+          if (String(form.action ?? '').trim())
+            fail(
+              `forms[${index}].action`,
+              'only a brevo form has an action URL; remove it or change the provider',
+            );
+        }
       });
       if (!hasMarkets(brief) || brief.legal?.processing?.forms !== true)
         fail(
@@ -684,7 +759,7 @@ export function validateBrief(
         if (FORM_KEY.test(field))
           return fail(
             path,
-            `a form access key cannot be assumed ("${field}"): it is the customer's own Web3Forms key; leave accessKey empty until they have one (the form falls back to WhatsApp)`,
+            `a form access key cannot be assumed ("${field}"): it is the customer's own Web3Forms key or Brevo form; leave accessKey or action empty until they have one (a Web3Forms form falls back to WhatsApp, a newsletter form is not rendered)`,
           );
         if (!parsePath(field))
           return fail(
@@ -1008,6 +1083,12 @@ export const MISSING_FIELDS = [
     'forms-key',
   ],
   [
+    'forms[0].action',
+    false,
+    'What is the action URL of your Brevo sign-up form? Create the form in Brevo with "Double confirmation" on, open Share > HTML embed code and copy the form action (https://<id>.sibforms.com/serve/...). Never guessed. Without it the newsletter form is not shown.',
+    'forms-action',
+  ],
+  [
     'seo.primaryKeyword',
     false,
     'What would a customer type into Google to find you? One phrase; it goes in the title and the main heading.',
@@ -1098,6 +1179,7 @@ export function missingFields(brief) {
     ({ path, when }) =>
       (when !== 'markets' || hasMarkets(brief)) &&
       when !== 'forms-key' &&
+      when !== 'forms-action' &&
       (when !== 'personal-brand' || isPersonalBrand(brief)) &&
       (when !== 'local' || isLocalBusiness(brief)) &&
       (when !== 'address' || isFilled(brief?.contact?.address)) &&
@@ -1114,6 +1196,20 @@ export function missingFields(brief) {
             },
           ]
         : [],
+  );
+  // One question per brevo form that still has no action URL.
+  keys.push(
+    ...(Array.isArray(brief?.forms) ? brief.forms : []).flatMap(
+      (form, index) =>
+        form?.provider === 'brevo' && !isFilled(form.action)
+          ? [
+              {
+                ...MISSING_FIELDS.find((f) => f.when === 'forms-action'),
+                path: `forms[${index}].action`,
+              },
+            ]
+          : [],
+    ),
   );
   for (const k of keys) delete k.when;
   if (isProspect(brief)) {
@@ -1234,7 +1330,9 @@ export function summarizeBrief(brief) {
       ? 'access key set'
       : form.provider === 'web3forms'
         ? 'no access key (falls back to WhatsApp)'
-        : '';
+        : form.provider === 'brevo'
+          ? brevoSummary(form.action)
+          : '';
     lines.push(
       `Form ${index + 1}: ${form.id} (${form.purpose}), ${form.provider}, fields ${(form.fields ?? []).join(', ') || 'none'}${key ? `, ${key}` : ''}`,
     );

@@ -63,7 +63,7 @@
       "descriptionMin": 70,
       "descriptionMax": 160
     },
-    "forms": { "providers": ["api.web3forms.com"] }
+    "forms": { "providers": ["api.web3forms.com", "*.sibforms.com"] }
   },
   "legal": {
     "essentialCookies": ["__cf_bm", "cf_clearance"],

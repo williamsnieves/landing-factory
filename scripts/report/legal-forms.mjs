@@ -9,7 +9,7 @@ import { LEGAL_PATHS } from './legal-rules.mjs';
 import { cap, makeItem } from './items.mjs';
 
 /** Default allowed hosts of `report.forms.providers`. */
-export const DEFAULT_FORM_PROVIDERS = ['api.web3forms.com'];
+export const DEFAULT_FORM_PROVIDERS = ['api.web3forms.com', '*.sibforms.com'];
 
 /** Fields that identify a person: an email or phone input, or a name, address or postcode control. */
 const PERSONAL_NAME =
@@ -25,8 +25,24 @@ function maskRaw(html) {
     .replace(/<(script|style)\b[\s\S]*?<\/\1\s*>/gi, blankOut);
 }
 
-/** The name a privacy policy uses for a provider host: `api.web3forms.com` -> `web3forms`. */
+/**
+ * Is `host` (a parsed URL hostname) allowed by a `report.forms.providers` entry? An entry is an exact host, or
+ * `*.<domain>`: any host with one or more labels before `.<domain>`. `*.sibforms.com` matches `a.sibforms.com` and
+ * `a.b.sibforms.com`, never `sibforms.com` itself nor `sibforms.com.evil.example`. Compared on the host, never a substring.
+ */
+export function hostAllowed(host, entries) {
+  const h = host.toLowerCase();
+  return entries.some((entry) => {
+    const e = entry.toLowerCase();
+    if (!e.startsWith('*.')) return h === e;
+    const suffix = e.slice(1); // ".sibforms.com"
+    return h.endsWith(suffix) && h.length > suffix.length;
+  });
+}
+
+/** The name a privacy policy uses for a provider host: `api.web3forms.com` -> `web3forms`; `*.sibforms.com` -> `brevo`. */
 export const providerBrand = (host) => {
+  if (/^([^.]+\.)+sibforms\.com$/i.test(host)) return 'brevo';
   const parts = host.toLowerCase().split('.');
   return parts.length >= 2 ? parts[parts.length - 2] : parts[0];
 };
@@ -143,7 +159,7 @@ export function formsLegalItem({ model, providers, siteCommand }) {
       if (target.type === 'external') {
         const host = new URL(target.url).hostname.toLowerCase();
         brand = providerBrand(host);
-        if (!allowed.includes(host))
+        if (!hostAllowed(host, allowed))
           failures.push(
             `${at} posts to ${host}, which is not in report.forms.providers (${allowed.join(', ') || 'none'})`,
           );

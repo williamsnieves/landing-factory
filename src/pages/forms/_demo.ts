@@ -7,6 +7,9 @@ import type { LegalData } from '../../components/legal/texts';
 /** Demo only. Not a real access key. */
 export const DEMO_ACCESS_KEY = '00000000-0000-4000-8000-000000000000';
 
+/** Demo only. A made-up Brevo sign-up form on a made-up subdomain: tests and QA never post to it. */
+export const DEMO_BREVO_ACTION = 'https://demo-example.sibforms.com/serve/DEMO';
+
 export const DEMO_BUSINESS = 'Demo Estates';
 /** A fake number (reserved for fiction). */
 export const DEMO_WHATSAPP = '+34 600 000 000';
@@ -24,6 +27,13 @@ export const DEMO_FORMS: LeadFormConfig[] = [
     purpose: 'callback',
     fields: ['name', 'phone', 'preferredTime'],
     provider: 'whatsapp',
+  },
+  {
+    id: 'newsletter',
+    purpose: 'newsletter',
+    fields: ['email', 'name'],
+    provider: 'brevo',
+    action: DEMO_BREVO_ACTION,
   },
 ];
 
@@ -47,7 +57,7 @@ export const DEMO_LEGAL: LegalData = {
     analytics: 'none',
     forms: {
       provider: 'web3forms',
-      providers: ['web3forms', 'whatsapp'],
+      providers: ['brevo', 'web3forms', 'whatsapp'],
       purposes: ['valuation', 'callback'],
       fields: [
         'name',
@@ -58,6 +68,10 @@ export const DEMO_LEGAL: LegalData = {
         'message',
         'preferredTime',
       ],
+      newsletter: {
+        fields: ['name', 'email'],
+        actionOrigins: ['https://demo-example.sibforms.com'],
+      },
     },
     embeds: [],
   },

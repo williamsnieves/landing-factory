@@ -46,6 +46,10 @@ const {
   class: className,
 } = Astro.props;
 
+if (form.provider === 'brevo')
+  throw new Error(
+    `<LeadForm id="${form.id}">: a brevo (newsletter) form is rendered by <NewsletterForm />.`,
+  );
 const t = formTexts(locale);
 const provider = effectiveProvider(form);
 const fallback = provider !== form.provider;
