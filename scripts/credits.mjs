@@ -58,8 +58,29 @@ export const AI_REQUIRED_FIELDS = [
 
 export const isAi = (entry) => entry?.source === 'ai';
 
-/** Entries that are neither the customer's nor AI-generated: the stock photos with a source page. */
-const isStock = (entry) => !isCustomer(entry) && !isAi(entry);
+/** Fields of an entry with source "osm" (the static map of scripts/static-map.mjs; the tiles are OpenStreetMap data, ODbL). */
+export const OSM_REQUIRED_FIELDS = [
+  'file',
+  'title',
+  'license',
+  'attribution',
+  'url',
+  'geo',
+  'createdAt',
+  'credit',
+];
+
+export const isOsm = (entry) => entry?.source === 'osm';
+
+/** The footer credit of a landing with an OpenStreetMap map. */
+export const OSM_CREDIT = {
+  author: 'OpenStreetMap contributors',
+  license: 'Map data © OpenStreetMap contributors',
+  url: 'https://www.openstreetmap.org/copyright',
+};
+
+/** Entries that are neither the customer's, AI-generated nor a map: the stock photos with a source page. */
+const isStock = (entry) => !isCustomer(entry) && !isAi(entry) && !isOsm(entry);
 
 /** Throws when a manifest entry lacks a field the credits need. */
 export function validateManifest(manifest, label = 'assets.json') {
@@ -70,7 +91,9 @@ export function validateManifest(manifest, label = 'assets.json') {
       ? CUSTOMER_REQUIRED_FIELDS
       : isAi(entry)
         ? AI_REQUIRED_FIELDS
-        : REQUIRED_FIELDS) {
+        : isOsm(entry)
+          ? OSM_REQUIRED_FIELDS
+          : REQUIRED_FIELDS) {
       if (entry?.[field] === undefined || entry[field] === '')
         throw new Error(
           `${label}: image #${index + 1} (${entry?.file ?? 'no file'}) has no "${field}"`,
@@ -145,7 +168,10 @@ export function creditList(entries) {
     license: `Photos provided by ${provider.name}`,
     url: provider.url,
   }));
-  return [...stock, ...customer, ...providers];
+  const maps = entries.some((entry) => isOsm(entry) && entry.credit)
+    ? [OSM_CREDIT]
+    : [];
+  return [...stock, ...customer, ...providers, ...maps];
 }
 
 export function renderCreditsJson(entries) {
@@ -257,6 +283,29 @@ export function renderAiSection(entries) {
   )}`;
 }
 
+/** The "Maps" part: one row per OpenStreetMap map, or '' when there are none. */
+export function renderMapsSection(entries) {
+  const maps = entries.filter(isOsm);
+  if (!maps.length) return '';
+  const rows = maps.map((entry) => [
+    `\`${entry.file}\``,
+    entry.attribution,
+    `${entry.license}, ${entry.url}`,
+    `${entry.geo.lat}, ${entry.geo.lng}, zoom ${entry.zoom ?? 16}`,
+    String(entry.createdAt).slice(0, 10),
+  ]);
+  return `### Maps\n\nMap data from OpenStreetMap, composed into a static image at build time (\`node scripts/static-map.mjs\`); visitors never request a tile. The attribution is shown next to the map.\n\n${markdownTable(
+    [
+      'Asset(s) in `src/assets/images/`',
+      'Attribution',
+      'License',
+      'Location',
+      'Date',
+    ],
+    rows,
+  )}`;
+}
+
 const APPENDED_INTRO = `## Photographs
 
 Photographs come from Wikimedia Commons (renditions served by \`upload.wikimedia.org\`, or crops of them), from The Met's Open Access collection (public domain; the museum's credit line is kept) or from the stock sites Pixabay and Pexels (downloaded once and served from this site). Authors and licenses were read from the Commons file metadata or the museum's record. The table below is generated from \`assets.json\` by \`node scripts/credits.mjs --site <slug>\`; edit the manifest, not the table. Photos under a license that requires attribution are credited in the page footer.`;
@@ -269,12 +318,14 @@ export function renderCreditsFile(existing, entries) {
   const stock = entries.filter(isStock);
   const customer = renderCustomerSection(entries);
   const ai = renderAiSection(entries);
-  // Customer files and AI images get their own parts; a manifest of only those has no stock photo table.
+  const maps = renderMapsSection(entries);
+  // Customer files, AI images and maps get their own parts; a manifest of only those has no stock photo table.
   const body = [
-    stock.length || (!customer && !ai) ? renderPhotoTable(stock) : '',
+    stock.length || (!customer && !ai && !maps) ? renderPhotoTable(stock) : '',
     renderProviderLines(entries),
     customer,
     ai,
+    maps,
   ]
     .filter(Boolean)
     .join('\n\n');

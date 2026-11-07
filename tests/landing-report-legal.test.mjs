@@ -241,6 +241,34 @@ test('a privacy-enhanced video embed does not fail legal-cookies; a plain YouTub
   assert.equal(statusOf(second.report, 'legal-cookies'), 'fail');
 });
 
+test('the OpenStreetMap embed is gated behind the click placeholder (warn) and fails when loaded directly', async () => {
+  assert.equal(
+    classifyHost('https://www.openstreetmap.org/export/embed.html?bbox=1')
+      ?.category,
+    'embed',
+  );
+  const s = site();
+  addToBody(
+    s,
+    '<div data-consent-src="https://www.openstreetmap.org/export/embed.html?bbox=-0.9%2C41.6%2C-0.8%2C41.7&amp;marker=41.65%2C-0.88"></div>' +
+      '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>',
+  );
+  const gated = itemOf((await run(s)).report, 'legal-cookies');
+  assert.equal(gated.status, 'warn');
+  assert.ok(
+    gated.evidence.some(
+      (e) => /inert until consent/.test(e) && e.includes('openstreetmap.org'),
+    ),
+  );
+  addToBody(
+    s,
+    '<iframe src="https://www.openstreetmap.org/export/embed.html?bbox=1" title="Map"></iframe>',
+  );
+  const direct = itemOf((await run(s)).report, 'legal-cookies');
+  assert.equal(direct.status, 'fail');
+  assert.ok(direct.evidence.some((e) => e.includes('openstreetmap.org')));
+});
+
 test('a QA record with _ga at first load fails; values never appear in the report', async () => {
   const s = site();
   writeQa(

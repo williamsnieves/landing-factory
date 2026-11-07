@@ -5,6 +5,7 @@
       "entry": [
         "src/scenes/*.ts",
         "src/components/forms/client.ts",
+        "src/components/maps/client.ts",
         "scripts/**/*.mjs",
         "tests/**/*.mjs"
       ],
@@ -20,13 +21,15 @@
       "entry": [
         "src/i18n/urls.ts",
         "src/scenes/*.ts",
-        "src/components/forms/client.ts"
+        "src/components/forms/client.ts",
+        "src/components/maps/client.ts"
       ],
       "project": ["src/**/*.{astro,ts,tsx,css}"],
       "ignore": [
         "src/components/three/**",
         "src/components/legal/**",
-        "src/components/forms/**"
+        "src/components/forms/**",
+        "src/components/maps/**"
       ]
     }
   }

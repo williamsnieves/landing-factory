@@ -87,12 +87,14 @@ export function exportedKnipConfig() {
       'src/i18n/urls.ts',
       'src/scenes/*.ts',
       'src/components/forms/client.ts',
+      'src/components/maps/client.ts',
     ],
     project: ['src/**/*.{astro,ts,tsx,css}', 'scripts/**/*.mjs'],
     ignore: [
       'src/components/three/**',
       'src/components/legal/**',
       'src/components/forms/**',
+      'src/components/maps/**',
     ],
     ignoreDependencies: ['eslint-plugin-jsx-a11y'],
   };

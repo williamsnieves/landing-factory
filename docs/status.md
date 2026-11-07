@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-11-06 (since 2026-11-03: fix-test-run-findings PR #53 and archive #54; the first real prospect test, fisioterapia-ribera, PR #55; add-stock-images PR #56 and archive #57 with the first real Pixabay run; add-calm-statement-archetype PR #58, archived in #60; the fisioterapia-ribera rebuild on `calm-statement`, PR #60, which the owner liked; fix-prospect-run-findings, the open change). Start with "Resume here" and its "What is left".
+Read this first in a new or compacted session. Last updated: 2026-11-07 (fix-prospect-run-findings PR #61 merged and archived; add-maps open. Before that, since 2026-11-03: fix-test-run-findings PR #53 and archive #54; the first real prospect test, fisioterapia-ribera, PR #55; add-stock-images PR #56 and archive #57 with the first real Pixabay run; add-calm-statement-archetype PR #58, archived in #60; the fisioterapia-ribera rebuild on `calm-statement`, PR #60, which the owner liked). Start with "Resume here" and its "What is left".
 
 ## Working agreements
 
@@ -61,7 +61,9 @@ Read this first in a new or compacted session. Last updated: 2026-11-06 (since 2
 
 ## Resume here (2026-11-03)
 
-**Where we are.** `main` has everything up to PR #60 (the fisioterapia-ribera rebuild, which also archived `add-calm-statement-archetype`). The open change is `fix-prospect-run-findings` (branch `change/fix-prospect-run-findings`); after its merge, archive it as the first commit of the next branch.
+**Where we are.** `main` has everything up to PR #61 (`fix-prospect-run-findings`), archived as the first commit of `change/add-maps`. The open change is `add-maps`; after its merge, archive it as the first commit of the next branch.
+
+**add-maps (open, owner decision 2026-11-07: OpenStreetMap).** `contact.geo` (`lat`, `lng`, `zoom`) and `contact.mapInteractive` in the brief (coordinates read by a person from openstreetmap.org, never geocoded; sourced or assumed on a prospect); `scripts/static-map.mjs render --site <slug>` composes a map image at build time from at most 16 OSM tiles (default 1024x512, one at a time, 7-day cache, identifying User-Agent) and records it in `assets.json` (`source: "osm"`, ODbL, attribution); the optional `maps` layer (`<LocationMap />`: image, marker in the primary colour, visible attribution, "Get directions" links to Google Maps, Apple Maps and OpenStreetMap, optional interactive OSM embed loaded only on click); `check-landing` `map-attribution`; credits; the report classifies `openstreetmap.org` as an embed; the privacy policy names OpenStreetMap when the interactive map is on. `tile.openstreetmap.org` is in the session's allowed hosts (owner). Guide `docs/maps.md`; demo page `/maps/` (Plaza del Pilar, Zaragoza; 8 real tiles fetched).
 
 **fisioterapia-ribera rebuild (2026-11-06, PR #60).** Same prospect brief, `brand.impact: balanced` (assumed), images Pixabay first and Commons as fallback (owner, at the checkpoint). Blend `calm-statement+warm-local-service` (`hours-card`), hero `illustration`: a very large `h1` ("Tu fisioterapeuta en Zaragoza, de principio a fin.") with an inline SVG thread from "principio" to "fin" that returns in five sections; wine `#7a2e3f` on sand and clay fields, Lora and Nunito Sans; two illustrative Pixabay photos; PASTOR copy. Proposal $2.01 (4 min), build $14.51 (about 35 min); QA, `check-landing` and both reports passed, CI green on the first run. One warning kept as a deviation: `archetype-target` fullBleedShare 0. **Owner verdict: liked it a lot** (the first version was "correct but not striking"). The run again skipped the sales kit, and the kit was not Prettier-formatted: both are fixed in `fix-prospect-run-findings`.
 
@@ -99,10 +101,10 @@ Owner verdict: correct but not striking. Causes: no references, a quiet archetyp
 **What is left (2026-11-06).**
 
 Next, in order (the owner chose them on 2026-11-04 and 2026-11-05):
-A. Archive `fix-prospect-run-findings` after its merge (first commit of the next branch).
+A. Archive `add-maps` after its merge (first commit of the next branch). A first landing with a real map (for example fisioterapia-ribera with assumed coordinates) can follow in a site change.
 B. Done 2026-11-06: the fisioterapia-ribera rebuild (PR #60) and the prospect-run findings (`fix-prospect-run-findings`).
 C. Older sites without a visual in the hero (casavela, festival-electronica fail `visual-assets`): fix in their next revision.
-D. Ideas the owner raised, not started: maps (a static map image or click-to-load embed, an `add-maps` change), a newsletter provider in the forms layer (MailerLite or Brevo, EU data), and content from outside sources at build time (Google Sheets or a git-based CMS; a CMS is out of scope today).
+D. Ideas the owner raised, not started: a newsletter provider in the forms layer (MailerLite or Brevo, EU data), and content from outside sources at build time (Google Sheets or a git-based CMS; a CMS is out of scope today).
 
 Owner, on tupathdigital:
 1. Enable Cloudflare Web Analytics in the Pages project (Workers & Pages > tupathdigital > Metrics), if not done; the CSP and the privacy policy already allow and name it. Store visits and sales come from Etsy and Gumroad stats (UTM on the store links).
