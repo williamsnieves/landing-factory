@@ -1,0 +1,158 @@
+---
+/**
+ * The location of a business (docs/maps.md): a static OpenStreetMap image composed at build time by
+ * `node scripts/static-map.mjs`, a marker drawn in HTML and CSS at its centre, the visible attribution linked to the
+ * OpenStreetMap copyright page (ODbL), the address and "Get directions" links to Google Maps, Apple Maps and
+ * OpenStreetMap. Plain links: nothing is requested from any of them until the visitor clicks. The page makes no
+ * third-party request.
+ * With `interactive` a link-button swaps the image for the OpenStreetMap embed, only after a click (client.ts; the embed
+ * URL waits in `data-consent-src`, which the landing report reads as a consent-gated embed). Without JavaScript the
+ * button is a link to openstreetmap.org. The privacy policy names OpenStreetMap then (scripts/legal.mjs).
+ */
+import { Image } from 'astro:assets';
+import {
+  OSM_COPYRIGHT_URL,
+  directionsLinks,
+  embedUrl,
+  openUrl,
+  type Geo,
+} from './geo';
+import { mapTexts } from './texts';
+
+interface Props {
+  /** The imported map image (`import map from '../assets/images/map.webp'`). */
+  image: ImageMetadata;
+  /** `contact.geo` of the brief; the image is centred on it. */
+  geo: Geo;
+  /** The street address shown under the map and named in the alt text. */
+  address: string;
+  /** Optional name of the place (the business), shown above the address. */
+  label?: string;
+  /** Multi-locale sites: the locale of the page (default: Astro.currentLocale, else English). */
+  locale?: string;
+  /** Offer the click-to-load OpenStreetMap embed (`contact.mapInteractive`). */
+  interactive?: boolean;
+  /** `lazy` unless the map is the first thing on the page. */
+  loading?: 'lazy' | 'eager';
+  class?: string;
+}
+
+const {
+  image,
+  geo,
+  address,
+  label,
+  locale = Astro.currentLocale ?? 'en',
+  interactive = false,
+  loading = 'lazy',
+  class: className,
+} = Astro.props;
+
+const t = mapTexts(locale);
+const links = directionsLinks(geo);
+const linkClass =
+  'border-line bg-paper text-ink hover:border-primary inline-flex min-h-11 items-center rounded-pill border px-5 py-2 text-sm font-medium';
+---
+
+<figure data-location-map class:list={['grid gap-4', className]}>
+  <div
+    data-map-frame
+    class="border-line bg-surface relative overflow-hidden rounded-lg border"
+  >
+    <Image
+      src={image}
+      alt={t.alt(address)}
+      loading={loading}
+      class="block h-auto w-full"
+    />
+    <span class="map-marker" aria-hidden="true"></span>
+  </div>
+  <figcaption class="grid gap-3 text-sm">
+    {label && <p class="font-medium">{label}</p>}
+    <address class="text-ink-soft not-italic">{address}</address>
+    <p class="text-ink-soft text-xs">
+      <a
+        href={OSM_COPYRIGHT_URL}
+        class="underline underline-offset-4"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {t.attribution}
+      </a>
+    </p>
+    <div>
+      <p class="mb-2 font-medium">{t.directionsHeading}</p>
+      <ul class="flex flex-wrap gap-3">
+        <li>
+          <a
+            href={links.google}
+            class={linkClass}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t.google}
+          </a>
+        </li>
+        <li>
+          <a
+            href={links.apple}
+            class={linkClass}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t.apple}
+          </a>
+        </li>
+        <li>
+          <a
+            href={links.osm}
+            class={linkClass}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t.osm}
+          </a>
+        </li>
+      </ul>
+    </div>
+    {interactive && (
+      <div data-map-consent class="grid gap-2">
+        <a
+          href={openUrl(geo)}
+          data-map-load
+          data-consent-src={embedUrl(geo, image.width, image.height)}
+          data-embed-title={t.embedTitle(address)}
+          class="bg-primary text-primary-contrast rounded-pill inline-flex min-h-11 w-fit items-center px-6 py-2 text-sm font-medium"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {t.loadInteractive}
+        </a>
+        <p class="text-ink-soft text-xs">{t.loadNote}</p>
+      </div>
+    )}
+  </figcaption>
+</figure>
+
+<script>
+  import './client.ts';
+</script>
+
+<style>
+  /* The marker is the one drawn thing on the map: the site's primary color, at the centre of the image. */
+  .map-marker {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 1.25rem;
+    height: 1.25rem;
+    transform: translate(-50%, -50%);
+    border-radius: 999px;
+    background: var(--color-primary);
+    box-shadow:
+      0 0 0 4px var(--color-primary-contrast),
+      0 0 0 10px color-mix(in srgb, var(--color-primary) 28%, transparent),
+      0 2px 10px rgb(0 0 0 / 0.35);
+    pointer-events: none;
+  }
+</style>

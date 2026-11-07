@@ -263,3 +263,43 @@ test('the generator is wired: npm script, allow list, and the process runs', () 
   assert.equal(run.status, 1, run.stderr);
   assert.match(run.stderr, /out of date/);
 });
+
+test('an interactive map names OpenStreetMap in the embeds, once and in the page language; the static map does not', () => {
+  const brief = fixture();
+  brief.contact.geo = { lat: 41.6563, lng: -0.8784 };
+  // The static image makes no request: nothing to name.
+  const plain = legalData(brief).data.processing.embeds;
+  assert.ok(!plain.some((e) => /OpenStreetMap/.test(e)));
+  brief.contact.mapInteractive = true;
+  const { data } = legalData(brief);
+  const mine = data.processing.embeds.filter((e) => /OpenStreetMap/.test(e));
+  assert.equal(mine.length, 1);
+  assert.match(mine[0], /OpenStreetMap Foundation|Fundación OpenStreetMap/);
+  assert.match(mine[0], /United Kingdom|Reino Unido/);
+  assert.match(mine[0], /click|clic/);
+  brief.language = 'en';
+  assert.match(
+    legalData(brief).data.processing.embeds.at(-1),
+    /United Kingdom; the map loads only after you click/,
+  );
+  // Already named by the customer: not added twice.
+  brief.legal.processing.embeds = ['OpenStreetMap map'];
+  assert.equal(
+    legalData(brief).data.processing.embeds.filter((e) =>
+      /OpenStreetMap/.test(e),
+    ).length,
+    1,
+  );
+});
+
+test('--write puts the interactive map in legal.json, and --check goes stale when the flag changes', () => {
+  const brief = fixture();
+  brief.contact.mapInteractive = true;
+  const f = factory(brief);
+  assert.equal(cli(f, ['--site', f.slug, '--write']).code, 0);
+  assert.ok(f.read().processing.embeds.some((e) => /OpenStreetMap/.test(e)));
+  assert.equal(cli(f, ['--site', f.slug, '--check']).code, 0);
+  brief.contact.mapInteractive = false;
+  f.setBrief(brief);
+  assert.equal(cli(f, ['--site', f.slug, '--check']).code, 1);
+});

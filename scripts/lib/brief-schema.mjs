@@ -92,6 +92,7 @@ export const PROSPECT_FACT_FIELDS = [
   'contact.email',
   'contact.phone',
   'contact.address',
+  'contact.geo',
   'contact.hours',
   'contact.social[]',
   'offer[].name',
@@ -100,6 +101,10 @@ export const PROSPECT_FACT_FIELDS = [
   'proof[].text',
   'goal.primary.url',
 ];
+/** Map coordinates (design: openspec/changes/add-maps/design.md): the static OpenStreetMap image of scripts/static-map.mjs. */
+export const GEO_ZOOM_MIN = 12;
+export const GEO_ZOOM_MAX = 18;
+export const GEO_ZOOM_DEFAULT = 16;
 export const SEO_MAX_TEXT = 120;
 export const SEO_MAX_LIST = 10;
 export const DEPLOY_TARGETS = [
@@ -118,6 +123,8 @@ const list = (items, maxItems) => ({
   ...(maxItems ? { maxItems } : {}),
 });
 const obj = (props) => ({ type: 'object', props });
+/** A finite number between `min` and `max`; an empty string (the skeleton) reads as not given. */
+const num = (extra = {}) => ({ type: 'number', ...extra });
 
 /** The shape of a brief. `required` strings must be non-empty; `format` names a check in FORMATS. */
 export const SCHEMA = obj({
@@ -171,6 +178,14 @@ export const SCHEMA = obj({
     email: str({ format: 'email' }),
     phone: str({ format: 'phone' }),
     address: str(),
+    // Coordinates of the place for the static map (scripts/static-map.mjs). Read by a person from openstreetmap.org; never geocoded.
+    geo: obj({
+      lat: num({ min: -90, max: 90 }),
+      lng: num({ min: -180, max: 180 }),
+      zoom: num({ min: GEO_ZOOM_MIN, max: GEO_ZOOM_MAX, integer: true }),
+    }),
+    // Offer the click-to-load OpenStreetMap embed next to the static image (default false).
+    mapInteractive: { type: 'boolean' },
     hours: str(),
     social: list(
       obj({
@@ -485,6 +500,15 @@ export function validateBrief(
         if (typeof value !== 'boolean')
           fail(path, `expected true or false, got ${describe(value)}`);
         return;
+      case 'number':
+        if (value === '') return; // the skeleton's empty value
+        if (typeof value !== 'number' || !Number.isFinite(value))
+          fail(path, `expected a number, got ${describe(value)}`);
+        else if (node.integer && !Number.isInteger(value))
+          fail(path, `expected a whole number, got ${value}`);
+        else if (value < node.min || value > node.max)
+          fail(path, `expected ${node.min} to ${node.max}, got ${value}`);
+        return;
       case 'string': {
         if (typeof value !== 'string') {
           fail(path, `expected a string, got ${describe(value)}`);
@@ -576,6 +600,17 @@ export function validateBrief(
           'languages',
           `must include the default language "${defaultLanguage}" (the "language" field); add it, or change "language"`,
         );
+    }
+    const geo = brief.contact?.geo;
+    if (geo && typeof geo === 'object' && !Array.isArray(geo)) {
+      const given = (key) => geo[key] !== undefined && geo[key] !== '';
+      if (given('lat') !== given('lng'))
+        fail(
+          given('lat') ? 'contact.geo.lng' : 'contact.geo.lat',
+          'required with the other coordinate; give both latitude and longitude, or neither',
+        );
+      else if (!given('lat') && given('zoom'))
+        fail('contact.geo.lat', 'required when contact.geo.zoom is set');
     }
     if (text('goal.secondary.url') && !text('goal.secondary.label'))
       fail('goal.secondary.label', 'required when goal.secondary.url is set');
@@ -917,6 +952,12 @@ export const MISSING_FIELDS = [
   ['contact.email', false, 'Which email should the page show?'],
   ['contact.phone', false, 'Which phone number should the page show?'],
   ['contact.address', false, 'Is there a street address to show?'],
+  [
+    'contact.geo',
+    false,
+    'What are the coordinates of the place (right-click it in openstreetmap.org and read latitude and longitude)? Never guessed or looked up for you.',
+    'address',
+  ],
   ['contact.hours', false, 'What are the opening hours or response times?'],
   ['contact.social', false, 'Which social profiles should be linked?'],
   [
@@ -1059,6 +1100,7 @@ export function missingFields(brief) {
       when !== 'forms-key' &&
       (when !== 'personal-brand' || isPersonalBrand(brief)) &&
       (when !== 'local' || isLocalBusiness(brief)) &&
+      (when !== 'address' || isFilled(brief?.contact?.address)) &&
       !isFilled(getPath(brief, path)),
   ).map(({ when, ...field }) => field);
   // One question per web3forms form that still has no access key (the path names the form).
@@ -1149,6 +1191,12 @@ export function summarizeBrief(brief) {
   field('Tone', 'tone');
   for (const key of ['email', 'phone', 'address', 'hours'])
     field(`Contact ${key}`, `contact.${key}`);
+  const geo = brief.contact?.geo;
+  if (isFilled(geo?.lat) && isFilled(geo?.lng))
+    lines.push(
+      `Contact geo: ${mark('contact.geo', `${geo.lat}, ${geo.lng}, zoom ${geo.zoom || GEO_ZOOM_DEFAULT}`)}`,
+    );
+  if (brief.contact?.mapInteractive) lines.push('Interactive map: yes');
   (brief.contact?.social ?? []).forEach((s) =>
     lines.push(`Social: ${s.network} ${s.url}`),
   );

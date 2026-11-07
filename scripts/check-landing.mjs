@@ -39,6 +39,10 @@
 //                      section (the hero) has none. A visual is an img, a picture, a video, a [data-scene] poster or an inline
 //                      svg with a viewBox at least 96 units wide (icons do not count), or a role="img" illustration with an aria-label. Warning visual-assets-sparse: fewer than
 //                      half of the sections in <main> carry one (see docs/images.md)
+//   map-attribution    (only when assets.json has an entry with source "osm", or a built page has a [data-location-map]) a built page
+//                      that shows the map (the [data-location-map] figure or the map image) without a visible link to
+//                      https://www.openstreetmap.org/copyright naming OpenStreetMap, or a map on a page with no osm entry in
+//                      assets.json (see docs/maps.md)
 //   copy-match         (--refs) 8 words in a row of the built page text also appear in a reference page
 //
 // Warnings (never failures): archetype-target, the built layout signature is outside the ranges of the primary
@@ -82,6 +86,7 @@ import {
 import { LEGAL_PATHS } from './report/legal-rules.mjs';
 import { pageScripts, scanDarkPatterns } from './lib/dark-patterns.mjs';
 import {
+  closest,
   elementChildren,
   findAll,
   parseTree,
@@ -2092,6 +2097,97 @@ export function checkVisualAssets(siteDir) {
 }
 
 // --------------------------------------------------------------------------------------------------
+// Rule: a map from OpenStreetMap carries its attribution (design: add-maps)
+
+export const OSM_COPYRIGHT_URL = 'https://www.openstreetmap.org/copyright';
+const isOsmEntry = (entry) => entry?.source === 'osm';
+
+const hiddenNode = (node) =>
+  'hidden' in (node.attrs ?? {}) ||
+  node.attrs?.['aria-hidden'] === 'true' ||
+  /display\s*:\s*none|visibility\s*:\s*hidden/i.test(node.attrs?.style ?? '') ||
+  /(^|\s)(sr-only|hidden)(\s|$)/.test(node.attrs?.class ?? '');
+
+/** The built pages (not 404.html) as [{ page, html }]; [] without a build. */
+function builtHtml(siteDir) {
+  const dist = join(siteDir, 'dist');
+  if (!existsSync(dist) || !statSync(dist).isDirectory()) return [];
+  return walk(
+    dist,
+    (path) => path.endsWith('.html') && basename(path) !== '404.html',
+  )
+    .sort()
+    .map((path) => ({
+      page: `/${posix(relative(dist, path))}`,
+      html: readFileSync(path, 'utf8'),
+    }));
+}
+
+/** Does the page show a map: a [data-location-map] element, or an img of one of the osm files? */
+function mapNodes(tree, files) {
+  const stems = files.map((file) => {
+    const dot = file.lastIndexOf('.');
+    return [file.slice(0, dot), file.slice(dot)];
+  });
+  return findAll(tree, (node) => {
+    if ('data-location-map' in (node.attrs ?? {})) return true;
+    if (node.name !== 'img') return false;
+    const src = String(node.attrs.src ?? '');
+    return stems.some(([stem, ext]) =>
+      new RegExp(
+        `(^|/)${escapeRegExp(stem)}(\\.[\\w-]+)?${escapeRegExp(ext)}(\\?|$)`,
+      ).test(src),
+    );
+  });
+}
+
+export const mapUsed = (siteDir, manifest) =>
+  manifest.images.some(isOsmEntry) ||
+  builtHtml(siteDir).some(({ html }) => /\bdata-location-map\b/.test(html));
+
+export function checkMapAttribution(siteDir, manifest) {
+  const failures = [];
+  const entries = manifest.images.filter(isOsmEntry);
+  for (const { page, html } of builtHtml(siteDir)) {
+    const tree = parseTree(html);
+    if (
+      !mapNodes(
+        tree,
+        entries.map((e) => e.file),
+      ).length
+    )
+      continue;
+    if (!entries.length)
+      failures.push(
+        failure(
+          'map-attribution',
+          page,
+          `${page} shows a map but assets.json has no entry with source "osm"; render it with: node scripts/static-map.mjs render --site ${basename(siteDir)}`,
+        ),
+      );
+    const credited = findAll(
+      tree,
+      (node) =>
+        node.name === 'a' &&
+        String(node.attrs.href ?? '').replace(/\/$/, '') ===
+          OSM_COPYRIGHT_URL &&
+        /openstreetmap/i.test(textOf(node)) &&
+        !hiddenNode(node) &&
+        !closest(node, hiddenNode),
+    );
+    if (!credited.length)
+      failures.push(
+        failure(
+          'map-attribution',
+          page,
+          `${page} shows the OpenStreetMap map without a visible attribution: a link to ${OSM_COPYRIGHT_URL} whose text names OpenStreetMap ("© OpenStreetMap contributors") must sit next to the map (ODbL)`,
+        ),
+      );
+  }
+  return failures;
+}
+
+// --------------------------------------------------------------------------------------------------
 // Orchestration
 
 export async function runChecks({
@@ -2131,6 +2227,9 @@ export async function runChecks({
     ['copy-claims', () => copyClaims.failures],
     ['dark-patterns', () => darkPatterns.failures],
     ['visual-assets', () => visualAssets.failures],
+    ...(mapUsed(siteDir, manifest)
+      ? [['map-attribution', () => checkMapAttribution(siteDir, manifest)]]
+      : []),
     ...(readI18nConfig(siteDir) ? [['i18n', () => checkI18n(siteDir)]] : []),
     ...(manifest.images.some(isAi)
       ? [['ai-provenance', () => checkAiProvenance(siteDir, manifest)]]

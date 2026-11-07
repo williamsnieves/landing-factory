@@ -14,6 +14,8 @@ import { after, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import {
   AI_REQUIRED_FIELDS,
+  OSM_CREDIT,
+  OSM_REQUIRED_FIELDS,
   creditList,
   groupBySource,
   main,
@@ -560,4 +562,80 @@ test('CREDITS.md with stock providers passes prettier --check', () => {
     { cwd: ROOT, encoding: 'utf8' },
   );
   assert.equal(result.status, 0, result.stdout + result.stderr);
+});
+
+const osmEntry = (extra = {}) => ({
+  file: 'map.webp',
+  title: 'Map of Plaza del Pilar, Zaragoza',
+  source: 'osm',
+  license: 'ODbL 1.0',
+  attribution: '© OpenStreetMap contributors',
+  url: 'https://www.openstreetmap.org/copyright',
+  geo: { lat: 41.6563, lng: -0.8784 },
+  zoom: 16,
+  tiles: 12,
+  createdAt: '2026-11-07T10:00:00.000Z',
+  credit: true,
+  ...extra,
+});
+
+test('an OpenStreetMap entry needs its own fields and none of the stock ones', () => {
+  validateManifest({ images: [osmEntry()] });
+  for (const field of OSM_REQUIRED_FIELDS) {
+    const entry = osmEntry();
+    delete entry[field];
+    assert.throws(
+      () => validateManifest({ images: [entry] }),
+      new RegExp(`has no "${field}"`),
+      field,
+    );
+  }
+});
+
+test('a map gets a Maps section and one footer line; stock-only output is unchanged', () => {
+  const root = freshRoot();
+  syncCredits({ slug: 'demo', root });
+  const stockCredits = read(root, 'CREDITS.md');
+  const stockJson = JSON.parse(read(root, 'src/data/credits.json'));
+  assert.ok(!stockCredits.includes('### Maps'));
+
+  const manifestPath = join(root, 'sites/demo/assets.json');
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+  manifest.images.push(osmEntry());
+  writeFileSync(manifestPath, JSON.stringify(manifest));
+  syncCredits({ slug: 'demo', root });
+  const credits = read(root, 'CREDITS.md');
+  const section = credits.slice(credits.indexOf('### Maps'));
+  assert.match(
+    section,
+    /\| `map\.webp`\s+\| © OpenStreetMap contributors\s+\|/,
+  );
+  assert.match(
+    section,
+    /ODbL 1\.0, https:\/\/www\.openstreetmap\.org\/copyright/,
+  );
+  assert.match(section, /41\.6563, -0\.8784, zoom 16/);
+  assert.ok(
+    credits.indexOf('### Maps') < credits.indexOf('<!-- credits:end -->'),
+  );
+  // The photo table is untouched (the map is not a photo) and the footer list gains exactly one line.
+  assert.deepEqual(JSON.parse(read(root, 'src/data/credits.json')), [
+    ...stockJson,
+    OSM_CREDIT,
+  ]);
+  assert.equal(OSM_CREDIT.license, 'Map data © OpenStreetMap contributors');
+  assert.equal(
+    syncCredits({ slug: 'demo', root, check: true }).stale.length,
+    0,
+  );
+  // credit: false adds no footer line; two maps still add one.
+  assert.deepEqual(creditList([osmEntry({ credit: false })]), []);
+  assert.equal(
+    creditList([osmEntry(), osmEntry({ file: 'map-2.webp' })]).length,
+    1,
+  );
+  // Only a map: no stock table, a valid block.
+  const only = renderCreditsFile('# Credits\n', [osmEntry()]);
+  assert.ok(!only.includes('No photographs are used yet.'));
+  assert.ok(only.includes('### Maps'));
 });

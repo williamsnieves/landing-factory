@@ -922,8 +922,10 @@ test('the exported lint configuration is for one site: eslint config copied, kni
   assert.ok(knip.entry.includes('src/i18n/urls.ts'));
   assert.ok(knip.entry.includes('src/scenes/*.ts'));
   assert.ok(knip.entry.includes('src/components/forms/client.ts'));
+  assert.ok(knip.entry.includes('src/components/maps/client.ts'));
   assert.ok(knip.ignore.includes('src/components/three/**'));
   assert.ok(knip.ignore.includes('src/components/forms/**'));
+  assert.ok(knip.ignore.includes('src/components/maps/**'));
   const pkg = JSON.parse(readFileSync(join(out, 'package.json'), 'utf8'));
   assert.equal(pkg.scripts.lint, 'npm run lint:code && npm run lint:unused');
   assert.equal(pkg.devDependencies['typescript-eslint'], '8.72.1');

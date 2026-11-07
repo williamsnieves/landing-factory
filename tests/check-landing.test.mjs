@@ -1516,3 +1516,86 @@ test('images-credited, credits-in-sync and prospect accept Pixabay and Pexels en
   assert.deepEqual(await failuresOf(root, 'uncredited-image'), []);
   assert.deepEqual(await failuresOf(root, 'prospect'), []);
 });
+
+// --- map-attribution (design: add-maps) --------------------------------------------------------------------
+
+const MAP_FIGURE = (caption) =>
+  `<figure data-location-map><img src="/_astro/map.AbC123.webp" alt="Map of Calle Alameda 12" />${caption}</figure>`;
+const OSM_LINK =
+  '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>';
+const OSM_ENTRY = {
+  file: 'map.webp',
+  title: 'Map of Calle Alameda 12',
+  source: 'osm',
+  license: 'ODbL 1.0',
+  attribution: '© OpenStreetMap contributors',
+  url: 'https://www.openstreetmap.org/copyright',
+  geo: { lat: 41.6563, lng: -0.8784 },
+  zoom: 16,
+  tiles: 12,
+  createdAt: '2026-11-07T10:00:00.000Z',
+  credit: true,
+};
+function mapRoot(html, withEntry = true) {
+  return visualRoot(visualPage(html), (root) => {
+    if (!withEntry) return;
+    edit(site(root, 'assets.json'), (text) => {
+      const manifest = JSON.parse(text);
+      manifest.images.push(OSM_ENTRY);
+      return JSON.stringify(manifest);
+    });
+  });
+}
+
+test('map-attribution: a site without a map is not checked', async () => {
+  const root = visualRoot(visualPage(plainSection(1)));
+  const result = await runChecks({ slug: 'good', root });
+  assert.ok(!result.failures.some((f) => f.rule === 'map-attribution'));
+});
+
+test('map-attribution: a map with the visible attribution linked to the copyright page passes', async () => {
+  const root = mapRoot(MAP_FIGURE(`<figcaption>${OSM_LINK}</figcaption>`));
+  assert.deepEqual(await failuresOf(root, 'map-attribution'), []);
+});
+
+test('map-attribution: the map without the attribution fails naming the page', async () => {
+  const root = mapRoot(MAP_FIGURE(''));
+  const failures = await failuresOf(root, 'map-attribution');
+  assert.equal(failures.length, 1);
+  assert.equal(failures[0].item, '/index.html');
+  assert.match(failures[0].message, /openstreetmap\.org\/copyright/);
+});
+
+test('map-attribution: a hidden, unlinked or mislinked attribution does not count', async () => {
+  for (const caption of [
+    `<figcaption hidden>${OSM_LINK}</figcaption>`,
+    `<figcaption class="sr-only">${OSM_LINK}</figcaption>`,
+    '<figcaption>© OpenStreetMap contributors</figcaption>',
+    '<figcaption><a href="https://example.com/">© OpenStreetMap contributors</a></figcaption>',
+    '<figcaption><a href="https://www.openstreetmap.org/copyright"></a></figcaption>',
+  ]) {
+    const failures = await failuresOf(
+      mapRoot(MAP_FIGURE(caption)),
+      'map-attribution',
+    );
+    assert.equal(failures.length, 1, caption);
+  }
+});
+
+test('map-attribution: a map on a page with no osm entry in assets.json fails', async () => {
+  const root = mapRoot(MAP_FIGURE(`<p>${OSM_LINK}</p>`), false);
+  const failures = await failuresOf(root, 'map-attribution');
+  assert.equal(failures.length, 1);
+  assert.match(failures[0].message, /no entry with source "osm"/);
+});
+
+test('map-attribution: a page without the map is not asked for the attribution', async () => {
+  const root = visualRoot(visualPage(plainSection(1)), (r) =>
+    edit(site(r, 'assets.json'), (text) => {
+      const manifest = JSON.parse(text);
+      manifest.images.push(OSM_ENTRY);
+      return JSON.stringify(manifest);
+    }),
+  );
+  assert.deepEqual(await failuresOf(root, 'map-attribution'), []);
+});

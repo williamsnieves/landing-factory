@@ -90,6 +90,8 @@ export const BUILTIN_HOSTS = [
   { host: 'google.com', path: '/maps', category: 'embed' },
   { host: 'maps.google.com', category: 'embed' },
   { host: 'maps.googleapis.com', category: 'embed' },
+  // The interactive OpenStreetMap map (docs/maps.md): only behind the click placeholder (`data-consent-src`).
+  { host: 'openstreetmap.org', category: 'embed' },
   // Fonts and CDNs: no cookie, but the host receives the visitor's IP address
   { host: 'fonts.googleapis.com', category: 'cdn' },
   { host: 'fonts.gstatic.com', category: 'cdn' },

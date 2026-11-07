@@ -115,6 +115,15 @@ export function formsProcessing(brief) {
   };
 }
 
+/**
+ * The embed entry for the interactive OpenStreetMap map (docs/maps.md). The static map image makes no request, so only
+ * `contact.mapInteractive: true` adds it: the OpenStreetMap Foundation receives the visitor's IP address after a click.
+ */
+export const OSM_EMBED = {
+  en: 'OpenStreetMap (OpenStreetMap Foundation, United Kingdom; the map loads only after you click, and then receives your IP address)',
+  es: 'OpenStreetMap (Fundación OpenStreetMap, Reino Unido; el mapa solo se carga al hacer clic y entonces recibe su dirección IP)',
+};
+
 /** External hosts the built pages load without waiting for consent, sorted. Empty when there is no build. */
 export function builtHosts(distDir) {
   if (!existsSync(join(distDir, 'index.html'))) return null;
@@ -146,6 +155,13 @@ export function legalData(brief, { thirdPartyHosts = [] } = {}) {
     forms: formsProcessing(brief) ?? legal.processing?.forms === true,
     embeds: (legal.processing?.embeds ?? []).map(text).filter(Boolean),
   };
+  if (
+    brief.contact?.mapInteractive === true &&
+    !processing.embeds.some((e) => /openstreetmap/i.test(e))
+  )
+    processing.embeds.push(
+      OSM_EMBED[templateLanguage(brief.language).language] ?? OSM_EMBED.en,
+    );
   const pending = [];
   for (const field of rules.holder)
     if (blank(holder[field])) pending.push(`holder.${field}`);

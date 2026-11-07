@@ -1,0 +1,38 @@
+---
+// Demo of the maps layer (docs/maps.md): the static map of a public square with the click-to-load interactive map.
+// `noindex`, out of the sitemap. The image is a render of OpenStreetMap tiles (© OpenStreetMap contributors, ODbL 1.0;
+// `node scripts/static-map.mjs render --lat 41.6563 --lng=-0.8784 --out src/assets/images/map-demo.webp --width 768
+// --height 384`), committed like any other image. Delete this folder and the image in a real landing.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import LocationMap from '../../components/maps/LocationMap.astro';
+import demoMap from '../../assets/images/map-demo.webp';
+---
+
+<BaseLayout
+  title="Maps demo"
+  description="Demo page of the maps layer: a static OpenStreetMap image with a marker, an attribution and directions links."
+  noindex
+>
+  <section class="mx-auto max-w-3xl px-6 pt-24 pb-12">
+    <p class="text-ink-soft mb-4 text-sm tracking-widest uppercase">Maps</p>
+    <h1 class="font-display text-3xl leading-tight text-balance">
+      Find the place without a third-party request.
+    </h1>
+    <p class="text-ink-soft mt-6 text-lg">
+      The map is an image made at build time from OpenStreetMap data. Nothing is
+      requested from any map service until you choose to load the interactive
+      map.
+    </p>
+  </section>
+
+  <section class="mx-auto max-w-3xl px-6 pb-24">
+    <LocationMap
+      image={demoMap}
+      geo={{ lat: 41.6563, lng: -0.8784, zoom: 16 }}
+      address="Plaza del Pilar, Zaragoza"
+      label="Demo location"
+      locale="en"
+      interactive
+    />
+  </section>
+</BaseLayout>
