@@ -129,6 +129,29 @@ export function headerItems({
   return items;
 }
 
+/** Static item: a path pattern repeated in dist/_headers (Cloudflare Pages may apply only one of the blocks). */
+export function duplicatePathsItem(rules) {
+  const byPattern = new Map();
+  for (const rule of rules) {
+    if (!byPattern.has(rule.pattern)) byPattern.set(rule.pattern, []);
+    byPattern.get(rule.pattern).push(rule.line);
+  }
+  const duplicates = [...byPattern].filter(([, lines]) => lines.length > 1);
+  return makeItem({
+    id: 'headers-duplicate-paths',
+    area: 'security',
+    owasp: 'A02',
+    status: duplicates.length ? 'warn' : 'pass',
+    title: duplicates.length
+      ? 'dist/_headers repeats a path pattern: Cloudflare Pages may apply only one of the blocks'
+      : 'Every path pattern of dist/_headers appears once',
+    evidence: duplicates.map(
+      ([pattern, lines]) => `${pattern} on lines ${lines.join(', ')}`,
+    ),
+    fix: 'Merge the blocks of the same path pattern into one block in public/_headers (or in the integration that writes it): Cloudflare Pages may apply only one of them and drop the rest of the headers.',
+  });
+}
+
 /** The static view: headers of the home page from dist/_headers, or null when the file is absent. */
 export function staticHeaderItems(model) {
   if (!model.headersRules) {
@@ -146,8 +169,20 @@ export function staticHeaderItems(model) {
       ...headerItems({ headers: {}, pages: [], source: 'dist/_headers' }).slice(
         1,
       ),
+      makeItem({
+        id: 'headers-duplicate-paths',
+        area: 'security',
+        owasp: 'A02',
+        status: 'na',
+        title: 'No dist/_headers to check for repeated path patterns',
+        evidence: ['dist/_headers: MISSING'],
+        fix: '',
+      }),
     ];
   }
   const home = headersForPath(model.headersRules, '/');
-  return headerItems({ headers: home, pages: [], source: 'dist/_headers' });
+  return [
+    ...headerItems({ headers: home, pages: [], source: 'dist/_headers' }),
+    duplicatePathsItem(model.headersRules),
+  ];
 }

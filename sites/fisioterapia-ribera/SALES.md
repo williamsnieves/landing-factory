@@ -22,7 +22,15 @@ Chosen from `node scripts/pick-archetypes.mjs --site fisioterapia-ribera` (signa
 - **Lent traits:** `hours-card` (compact card with opening hours, today highlighted, next to the address and the action).
 - **Why:** `calm-statement` matches all six signals and the assumed `balanced` impact (+2), and it is the one grammar in the catalog built to be striking without photographs, which is exactly what the owner missed in the first version ("correct but not striking") and what a prospect page with no customer assets needs. The picker ties `calm-statement+data-and-proof` and `calm-statement+warm-local-service` at 11.5. The first was not taken: its traits (`stat-strip`, `comparison-table`) need figures and comparisons, and this brief has no proof and its legal constraints forbid comparing with other centres. `warm-local-service` lends what a local clinic really needs: the hours next to the action. Only one trait is borrowed (`hours-card`, not `practical-strip`), so the practical facts sit in one calm two-column block between statements, as the primary's grammar asks, and the page does not drift back to the earlier version's composition (`swiss-grid-minimal+warm-local-service`, split hero, practical strip).
 - **Twist from the requirement:** "el mismo fisioterapeuta de principio a fin" (`offer[1].description`). The drawn line is that thread: it starts in the hero joining the words "principio" and "fin", runs through the page and ends in the closing band under the button. In the "how a visit works" section it passes through the four parts of the first visit that the brief names (entrevista, exploración, plan por escrito, primera sesión) and ends in "un plan de ejercicios para casa". It shows order only, never minutes or results.
-- **Planned deviations:** a sticky light header with the name, the phone and the button (allowed by the sheet because the brief is `conversion-first`); two or three illustrative stock photos placed large and alone (the sheet allows them) so that at least half of the sections carry a visual; the line-drawing effect is CSS (`stroke-dashoffset` with a scroll-driven animation under `@supports` and `prefers-reduced-motion: no-preference`), not one of the motion primitives, since the motion layer has no line primitive (without support the line is simply drawn).
+
+Final design (what the build recorded):
+
+- Archetype: calm-statement+warm-local-service
+- Primary color: #7a2e3f
+- Display font: Lora
+- Body font: Nunito Sans
+- Hero: illustration
+- Signature moment: built as planned. The hero `h1` "Tu fisioterapeuta en Zaragoza, de principio a fin." on the sand field, with an inline SVG line (sized in em inside the `h1`) that underlines "principio", loops once and ends under "fin" with an ochre knot. It draws once on load with CSS `stroke-dashoffset`; under reduced motion and without JavaScript it is drawn and static. From 768 px a second segment runs off the bottom of the hero; on phones it is hidden so it does not cross the paragraph. The thread returns in sections 3, 5 (through four knots, vertical on phones), 6 and 9, where it ends under the inverted button, and on the 404.
 
 Sections: 1. Header (sticky); 2. Hero `#inicio`; 3. Practical `#cuando`; 4. Problem `#lo-tuyo`; 5. Who we see `#que-tratamos`; 6. How a visit works `#primera-visita`; 7. The same person `#quien`; 8. Prices `#precios`; 9. Questions `#dudas`; 10. Closing `#reserva`; 11. Footer.
 
@@ -30,7 +38,7 @@ Rules the page follows while the business is a prospect:
 
 - Every page is `noindex`, the sitemap is empty and the server sends `X-Robots-Tag: noindex`.
 - Every page shows a notice saying it is a design proposal and not the official website.
-- No logo, photo, color or font of the business is used: the images come from Wikimedia Commons or The Met and the palette and fonts are chosen from the niche.
+- No logo, photo, color or font of the business is used: the images come from Pixabay and the palette and fonts are chosen from the niche.
 - No AI images, no legal holder, no forms: nobody has agreed to any of them.
 
 ## Facts and sources

@@ -637,3 +637,33 @@ test('a resume on a site with directions and no choice is refused, then allowed 
   assert.equal(allowed.status, 0, allowed.stderr);
   rmSync(file);
 });
+
+// --- fix-prospect-run-findings: the sales kit after an auto run ------------------------------------------
+
+test('an auto run that passed writes SALES.md for a prospect brief and not for a customer brief', () => {
+  const prospectSlug = `${briefSlug}-prospect`;
+  const prospectBrief = join(ROOT, 'tests/fixtures/prospect/brief.json');
+  const first = run([prospectSlug, '--brief', prospectBrief, '--dry-run'], {
+    STUB_RESULT: 'dry-run-done',
+  });
+  assert.equal(first.status, 0, first.stdout + first.stderr);
+  const kit = join(factoryRoot, 'sites', prospectSlug, 'SALES.md');
+  assert.ok(!existsSync(kit));
+  const done = run([prospectSlug, '--resume', '--auto'], {
+    STUB_RESULT: 'passed',
+  });
+  assert.equal(done.status, 0, done.stdout + done.stderr);
+  assert.ok(existsSync(kit));
+  assert.match(readFileSync(kit, 'utf8'), /^# Sales kit: /);
+
+  // without --auto, or with a customer brief, no kit is written
+  rmSync(kit);
+  const manual = run([prospectSlug, '--resume'], { STUB_RESULT: 'passed' });
+  assert.equal(manual.status, 0, manual.stdout + manual.stderr);
+  assert.ok(!existsSync(kit));
+  const customer = run([briefSlug, '--resume', '--auto'], {
+    STUB_RESULT: 'passed',
+  });
+  assert.equal(customer.status, 0, customer.stdout + customer.stderr);
+  assert.ok(!existsSync(join(factoryRoot, 'sites', briefSlug, 'SALES.md')));
+});

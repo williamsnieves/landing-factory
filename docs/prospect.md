@@ -61,10 +61,10 @@ For `sold` the rule checks that `prospect.json` says `sold` and that no page sti
 
 ## The sales kit
 
-`node scripts/prospect.mjs kit --site <slug>` writes `sites/<slug>/SALES.md` from the brief, `PROPOSAL.md`, `RUN.md` and `revisions.json`. Running it again overwrites the file. It has fixed headings:
+`node scripts/prospect.mjs kit --site <slug>` writes `sites/<slug>/SALES.md` from the brief, `PROPOSAL.md`, `RUN.md` and `revisions.json`. Running it again overwrites the file; the output is formatted with the repository's Prettier, so `prettier --check` passes. `scripts/new-landing.sh` runs it after an auto run that ends `Result: passed`, so a run that skipped the skill's last step still gets its kit. It has fixed headings:
 
 - **Summary**: the business, the build result and `Preview: <from the pull request comment>` (the script cannot know the URL; CI prints it in the sticky comment).
-- **What was built**: the archetype blend and the sections, and the rules the page follows.
+- **What was built**: the archetype blend of the proposal (without its planned deviations), the final design the build recorded (archetype, primary color, fonts and hero from `design-system/<slug>/MASTER.md`, the signature moment from `RUN.md`; "not recorded" when missing), the sections, and the rules the page follows (the image sources are those of `assets.json`).
 - **Facts and sources**: a table with field, value, source URL and retrieval date. Re-check it before you show the page.
 - **Assumed**: values chosen for the business, with the reason.
 - **To go live**: the business's assets with permission, its consent to AI images, the legal holder data, a domain, `prospect.mjs sold`, a revision round and `/landing-handoff`.

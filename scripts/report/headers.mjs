@@ -3,15 +3,16 @@
 /**
  * Parse the `_headers` format: a path pattern on an unindented line, then indented
  * `Name: value` lines (and `! Name` to detach a header). Comments start with `#`.
- * Returns [{ pattern, headers: [{ name, value, detach }] }].
+ * Returns [{ pattern, line (1-based line of the pattern), headers: [{ name, value, detach }] }].
  */
 export function parseHeadersFile(text) {
   const rules = [];
   let current = null;
-  for (const raw of String(text).split(/\r?\n/)) {
+  const lines = String(text).split(/\r?\n/);
+  for (const [index, raw] of lines.entries()) {
     if (!raw.trim() || raw.trim().startsWith('#')) continue;
     if (/^\S/.test(raw)) {
-      current = { pattern: raw.trim(), headers: [] };
+      current = { pattern: raw.trim(), line: index + 1, headers: [] };
       rules.push(current);
       continue;
     }

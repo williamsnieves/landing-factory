@@ -243,11 +243,23 @@ function measureInPage() {
     },
   );
   const imageRadii = images.map(radiusOf);
+  // The layout's skip link sits off-screen until focused: it is not a call to action, so it is left out.
+  const pageWidth = Math.max(document.documentElement.scrollWidth, vw);
+  const offPage = (b) => b.x + b.w <= 0 || b.y + b.h <= 0 || b.x >= pageWidth;
+  const firstFocusable = document.body.querySelector(
+    'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])',
+  );
+  const isSkipLink = (el) => {
+    if (el !== firstFocusable || !el.matches('a[href^="#"]')) return false;
+    const r = el.getBoundingClientRect();
+    return r.bottom <= 0 || r.top >= vh || r.right <= 0 || r.left >= vw;
+  };
   const buttons = [
     ...document.querySelectorAll('a, button, [role="button"]'),
   ].filter((el) => {
     if (!shown(el)) return false;
     const b = box(el);
+    if (offPage(b) || isSkipLink(el)) return false;
     const text = (el.textContent ?? '').trim();
     if (!text || text.length > 40 || b.h < 28 || b.h > 90) return false;
     const cs = getComputedStyle(el);

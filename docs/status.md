@@ -1,6 +1,6 @@
 # Project status
 
-Read this first in a new or compacted session. Last updated: 2026-11-05 (since 2026-11-03: fix-test-run-findings PR #53 and archive #54; the first real prospect test, fisioterapia-ribera, PR #55; add-stock-images PR #56 and archive #57 with the first real Pixabay run; add-calm-statement-archetype PR #58, merged and **not archived yet**). Start with "Resume here" and its "What is left".
+Read this first in a new or compacted session. Last updated: 2026-11-06 (since 2026-11-03: fix-test-run-findings PR #53 and archive #54; the first real prospect test, fisioterapia-ribera, PR #55; add-stock-images PR #56 and archive #57 with the first real Pixabay run; add-calm-statement-archetype PR #58, archived in #60; the fisioterapia-ribera rebuild on `calm-statement`, PR #60, which the owner liked; fix-prospect-run-findings, the open change). Start with "Resume here" and its "What is left".
 
 ## Working agreements
 
@@ -61,7 +61,11 @@ Read this first in a new or compacted session. Last updated: 2026-11-05 (since 2
 
 ## Resume here (2026-11-03)
 
-**Where we are.** `main` has everything up to PR #58 (`add-calm-statement-archetype`), merged on 2026-11-05 and **not archived yet**: the first commit of the next branch archives it (`openspec archive add-calm-statement-archetype --yes`), as the working agreements say. No branch or pull request is open besides this status update.
+**Where we are.** `main` has everything up to PR #60 (the fisioterapia-ribera rebuild, which also archived `add-calm-statement-archetype`). The open change is `fix-prospect-run-findings` (branch `change/fix-prospect-run-findings`); after its merge, archive it as the first commit of the next branch.
+
+**fisioterapia-ribera rebuild (2026-11-06, PR #60).** Same prospect brief, `brand.impact: balanced` (assumed), images Pixabay first and Commons as fallback (owner, at the checkpoint). Blend `calm-statement+warm-local-service` (`hours-card`), hero `illustration`: a very large `h1` ("Tu fisioterapeuta en Zaragoza, de principio a fin.") with an inline SVG thread from "principio" to "fin" that returns in five sections; wine `#7a2e3f` on sand and clay fields, Lora and Nunito Sans; two illustrative Pixabay photos; PASTOR copy. Proposal $2.01 (4 min), build $14.51 (about 35 min); QA, `check-landing` and both reports passed, CI green on the first run. One warning kept as a deviation: `archetype-target` fullBleedShare 0. **Owner verdict: liked it a lot** (the first version was "correct but not striking"). The run again skipped the sales kit, and the kit was not Prettier-formatted: both are fixed in `fix-prospect-run-findings`.
+
+**fix-prospect-run-findings (open).** `new-landing.sh` writes the sales kit after every passed prospect auto run; the kit is Prettier-formatted, describes the final design (landing-meta of MASTER.md and the RUN.md signature moment line, no planned deviations) and names the image sources used; `layout-signature` leaves off-screen links (the skip link) out of the button measures; the static report warns on a repeated path pattern in `dist/_headers` (`headers-duplicate-paths`).
 
 **What add-calm-statement-archetype brought (PR #58).**
 - A 12th archetype, `calm-statement`: calm but striking pages without photographs (one oversized statement per screen, soft full-bleed colour fields, one recurring drawn line or shape, slow reveals). It lends `statement-band` and `line-art-thread`.
@@ -92,12 +96,12 @@ Owner verdict: correct but not striking. Causes: no references, a quiet archetyp
 
 **How a tupathdigital change goes now:** a revision round in the factory (`npm run revise -- tupathdigital --feedback <file>`, or a direct site change on a factory branch for small things), then `node scripts/sync-export.mjs --site tupathdigital --into <clone of the private repository>`, a branch and a pull request there (its CI gives the preview), merge, production. The favicon went this way (williamsnieves/tupathdigital#1). A revision round now also runs the conversion audit and the `copy-claims` and `dark-patterns` rules.
 
-**What is left (2026-11-05).**
+**What is left (2026-11-06).**
 
 Next, in order (the owner chose them on 2026-11-04 and 2026-11-05):
-A. Archive `add-calm-statement-archetype` (first commit of the next branch).
-B. Rebuild fisioterapia-ribera with the new archetype and Pixabay photos to compare with the version the owner found flat (same brief; set `brand.impact`, `balanced` by default; stop at the proposal for review).
-C. A small follow-up change for the prospect-run findings: run the sales kit for prospect briefs in `new-landing.sh`, ignore the skip link in `layout-signature`, warn on duplicated path blocks in `dist/_headers` in the static report, and write the final design (not the planned deviations) in `SALES.md`.
+A. Archive `fix-prospect-run-findings` after its merge (first commit of the next branch).
+B. Done 2026-11-06: the fisioterapia-ribera rebuild (PR #60) and the prospect-run findings (`fix-prospect-run-findings`).
+C. Older sites without a visual in the hero (casavela, festival-electronica fail `visual-assets`): fix in their next revision.
 D. Ideas the owner raised, not started: maps (a static map image or click-to-load embed, an `add-maps` change), a newsletter provider in the forms layer (MailerLite or Brevo, EU data), and content from outside sources at build time (Google Sheets or a git-based CMS; a CMS is out of scope today).
 
 Owner, on tupathdigital:

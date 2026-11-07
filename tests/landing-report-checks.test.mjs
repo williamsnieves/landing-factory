@@ -113,6 +113,38 @@ for (const [line, label] of [
   });
 }
 
+test('_headers parser records the line of each block', () => {
+  const rules = parseHeadersFile('# c\n/*\n  A: 1\n\n/x\n  B: 2\n/*\n  C: 3\n');
+  assert.deepEqual(
+    rules.map((r) => [r.pattern, r.line]),
+    [
+      ['/*', 2],
+      ['/x', 5],
+      ['/*', 7],
+    ],
+  );
+});
+
+test('a repeated path pattern in _headers warns, names the lines and does not fail the verdict', async () => {
+  const { report, code } = await reportAfter((s) =>
+    s.write(HEADERS, `${s.read(HEADERS)}\n/*\n  X-Extra: 1\n`),
+  );
+  const item = itemOf(report, 'headers-duplicate-paths');
+  assert.equal(item.status, 'warn');
+  assert.equal(item.owasp, 'A02');
+  assert.equal(item.area, 'security');
+  assert.match(item.evidence.join('\n'), /^\/\* on lines \d+, \d+/);
+  assert.match(item.fix, /Merge/);
+  assert.equal(code, 0);
+});
+
+test('one block per path pattern passes, and no _headers is not applicable', async () => {
+  const one = await reportAfter(() => {});
+  assert.equal(statusOf(one.report, 'headers-duplicate-paths'), 'pass');
+  const none = await reportAfter((s) => s.remove(HEADERS));
+  assert.equal(statusOf(none.report, 'headers-duplicate-paths'), 'na');
+});
+
 test('a missing _headers file fails the baseline', async () => {
   const { report, code } = await reportAfter((s) => s.remove(HEADERS));
   assert.equal(code, 1);

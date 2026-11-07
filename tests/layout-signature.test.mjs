@@ -58,6 +58,9 @@ const VARIANTS = {
   cols3: { cols: 3 },
   rotate: { rotate: 5 },
   fcols: { footer: 'columns' },
+  textSkip: { buttonShape: 'text', skipLink: true },
+  textPlain: { buttonShape: 'text' },
+  pillSkip: { skipLink: true },
   upper: { upper: true },
   brutalist: {
     radius: 0,
@@ -152,6 +155,19 @@ test('archetype range problems and target warnings', () => {
 
 // --------------------------------------------------------------------------------------------------
 // Measuring (browser)
+
+test('an off-screen skip link is not a button', { skip }, async () => {
+  const skipped = (await signatureOf('textSkip')).features;
+  assert.equal(skipped.buttonShape, 'text');
+  assert.equal(skipped.buttonRadius, 0);
+  const plain = (await signatureOf('textPlain')).features;
+  assert.equal(plain.buttonShape, 'text');
+  // a page with a real button and a skip link measures like the same page without the skip link
+  const withSkip = (await signatureOf('pillSkip')).features;
+  const base = (await signatureOf('base')).features;
+  assert.equal(withSkip.buttonShape, base.buttonShape);
+  assert.equal(withSkip.buttonRadius, base.buttonRadius);
+});
 
 test('the base page reads as the shared grammar', { skip }, async () => {
   const { features, hashes, mobile, page } = await signatureOf('base');
