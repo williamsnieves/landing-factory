@@ -99,20 +99,43 @@ function seoFiles() {
 
 // Lead forms (docs/forms.md): a site whose legal data (src/data/legal.json, written from the brief by
 // scripts/legal.mjs) says a form posts to Web3Forms opens that origin, and only that one, in form-action and
-// connect-src. These directives also restrict forms to 'self' and the provider. A site without such a form (and
-// the starter, which has no legal.json) gains nothing: no directive is added. public/_headers carries no CSP
-// beyond frame-ancestors, so it does not change.
+// connect-src. A site with a Brevo newsletter form opens the exact origin of each form action
+// (https://<id>.sibforms.com, no wildcard) in form-action only: the form is a plain POST, nothing is fetched.
+// These directives also restrict forms to 'self' and the provider. A site without such a form (and the starter,
+// which has no legal.json) gains nothing: no directive is added. public/_headers carries no CSP beyond
+// frame-ancestors, so it does not change.
 function formDirectives() {
   try {
     const file = fileURLToPath(
       new URL('./src/data/legal.json', import.meta.url),
     );
     const forms = JSON.parse(readFileSync(file, 'utf8')).processing?.forms;
-    if (forms?.providers?.includes('web3forms'))
-      return [
-        "form-action 'self' https://api.web3forms.com",
-        "connect-src 'self' https://api.web3forms.com",
-      ];
+    const web3forms = forms?.providers?.includes('web3forms');
+    // Only a well-formed https origin on sibforms.com is ever written into the policy.
+    const brevo = (forms?.newsletter?.actionOrigins ?? []).filter((origin) => {
+      try {
+        const url = new URL(origin);
+        return (
+          url.protocol === 'https:' &&
+          url.origin === origin &&
+          url.hostname.endsWith('.sibforms.com') &&
+          url.hostname.length > '.sibforms.com'.length
+        );
+      } catch {
+        return false;
+      }
+    });
+    const formAction = [
+      "'self'",
+      ...(web3forms ? ['https://api.web3forms.com'] : []),
+      ...brevo,
+    ];
+    return [
+      ...(web3forms || brevo.length
+        ? [`form-action ${formAction.join(' ')}`]
+        : []),
+      ...(web3forms ? ["connect-src 'self' https://api.web3forms.com"] : []),
+    ];
   } catch {
     // no legal data: the site has no form
   }

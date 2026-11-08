@@ -1,16 +1,17 @@
 ---
-// Demo of the lead forms layer (docs/forms.md): one web3forms form and one WhatsApp form. `noindex`, out of the
+// Demo of the lead forms layer (docs/forms.md): one web3forms form, one WhatsApp form and one Brevo newsletter form. `noindex`, out of the
 // sitemap. The access key and the holder are fixtures (see _demo.ts); delete this folder in a real landing.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import LeadForm from '../../components/forms/LeadForm.astro';
+import NewsletterForm from '../../components/forms/NewsletterForm.astro';
 import { DEMO_BUSINESS, DEMO_FORMS, DEMO_LEGAL, DEMO_WHATSAPP } from './_demo';
 
-const [valuation, callback] = DEMO_FORMS;
+const [valuation, callback, newsletter] = DEMO_FORMS;
 ---
 
 <BaseLayout
   title="Lead forms demo"
-  description="Demo page of the lead forms layer: a Web3Forms valuation form and a WhatsApp call back form."
+  description="Demo page of the lead forms layer: a Web3Forms valuation form, a WhatsApp call back form and a Brevo newsletter form."
   noindex
 >
   <section class="mx-auto max-w-2xl px-6 pt-24 pb-12">
@@ -38,7 +39,7 @@ const [valuation, callback] = DEMO_FORMS;
     />
   </section>
 
-  <section class="mx-auto max-w-2xl px-6 pb-24">
+  <section class="mx-auto max-w-2xl px-6 pb-12">
     <h2 class="font-display mb-6 text-2xl">Call me back</h2>
     <LeadForm
       form={callback}
@@ -46,5 +47,15 @@ const [valuation, callback] = DEMO_FORMS;
       businessName={DEMO_BUSINESS}
       whatsapp={DEMO_WHATSAPP}
     />
+  </section>
+
+  <section class="mx-auto max-w-2xl px-6 pb-24">
+    <h2 class="font-display mb-6 text-2xl">Newsletter</h2>
+    <p class="text-ink-soft mb-6">
+      A plain HTML form that posts to the customer's own Brevo sign-up form. The
+      action below is a made-up address; nothing loads from Brevo until a
+      visitor submits.
+    </p>
+    <NewsletterForm form={newsletter} legal={DEMO_LEGAL} />
   </section>
 </BaseLayout>

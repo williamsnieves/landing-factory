@@ -41,12 +41,15 @@ export interface LegalData {
 
 /** What the brief's `forms` section records for the privacy policy (written by scripts/legal.mjs). */
 export interface FormsProcessing {
-  /** The provider that really carries the data: `web3forms` when any form posts to it, else `whatsapp`. */
-  provider: 'web3forms' | 'whatsapp';
+  /** The provider that really carries the data: `web3forms` when any form posts to it, else `brevo`, else `whatsapp`. */
+  provider: 'web3forms' | 'whatsapp' | 'brevo';
   /** Every provider the forms use, sorted. */
-  providers: ('web3forms' | 'whatsapp')[];
+  providers: ('web3forms' | 'whatsapp' | 'brevo')[];
+  /** Purposes and fields of the web3forms and WhatsApp forms (the newsletter has its own record below). */
   purposes: string[];
   fields: string[];
+  /** Present when a Brevo newsletter form is rendered: what it sends and the exact origins its forms post to. */
+  newsletter?: { fields: string[]; actionOrigins: string[] };
 }
 
 export interface Texts {
@@ -96,6 +99,8 @@ interface FormsWords {
   and: string;
   web3forms: (fields: string, purposes: string) => string;
   whatsapp: (fields: string) => string;
+  /** The newsletter sign-up through Brevo; `withName` when the form also asks for a first name. */
+  brevo: (withName: boolean) => string;
 }
 
 const list = (items: string[], and: string): string =>
@@ -120,10 +125,13 @@ const EN_FORMS: FormsWords = {
     contact: 'answer your message',
     callback: 'call you back',
     quote: 'prepare your quote',
+    newsletter: 'send you the newsletter',
   },
   and: 'and',
   web3forms: (fields, purposes) =>
     `The forms on this website are sent through Web3Forms, a service of Web3Creative (Kerala, India), which acts as a processor on behalf of the holder. When you submit a form, your browser sends what you entered (${fields}) and your IP address to Web3Forms servers in the United States, which is an international transfer of personal data. Web3Forms forwards the message by email to the holder and does not store submissions; its server logs with personal data are deleted about every two months. We use these data to ${purposes}, and we keep your request as long as needed to answer it.`,
+  brevo: (withName) =>
+    `The newsletter sign-up on this website is handled by Brevo (Sendinblue SAS, France), which acts as a processor on behalf of the holder and stores the data in the European Union. Nothing is sent to Brevo until you submit the form. When you do, your browser sends your email address${withName ? ' and, if you enter it, your first name' : ''}, your consent and the date of it, and your IP address to Brevo. We use these data to send you the newsletter. Brevo first sends you an email to confirm your subscription (double opt-in), and you are subscribed only after you confirm. Every email contains a link to unsubscribe at any time. We keep your data until you unsubscribe.`,
   whatsapp: (fields) =>
     `If you choose to write to us on WhatsApp, the form prepares a message with what you entered (${fields}) and opens WhatsApp. Nothing is sent until you send the message there, and WhatsApp (Meta) processes it under its own terms and privacy policy.`,
 };
@@ -145,10 +153,13 @@ const ES_FORMS: FormsWords = {
     contact: 'responder a tu mensaje',
     callback: 'devolverte la llamada',
     quote: 'preparar tu presupuesto',
+    newsletter: 'enviarte el boletín',
   },
   and: 'y',
   web3forms: (fields, purposes) =>
     `Los formularios de este sitio web se envían a través de Web3Forms, un servicio de Web3Creative (Kerala, India), que actúa como encargado del tratamiento por cuenta del titular. Al enviar un formulario, tu navegador envía lo que has escrito (${fields}) y tu dirección IP a los servidores de Web3Forms en Estados Unidos, lo que supone una transferencia internacional de datos personales. Web3Forms reenvía el mensaje por correo electrónico al titular y no almacena los envíos; sus registros de servidor con datos personales se eliminan aproximadamente cada dos meses. Usamos estos datos para ${purposes}, y conservamos tu solicitud el tiempo necesario para responderla.`,
+  brevo: (withName) =>
+    `El formulario de suscripción al boletín de este sitio web lo gestiona Brevo (Sendinblue SAS, Francia), que actúa como encargado del tratamiento por cuenta del titular y almacena los datos en la Unión Europea. No se envía nada a Brevo hasta que envías el formulario. Al hacerlo, tu navegador envía a Brevo tu correo electrónico${withName ? ' y, si lo escribes, tu nombre' : ''}, tu consentimiento y la fecha del mismo, y tu dirección IP. Usamos estos datos para enviarte el boletín. Brevo te envía primero un correo para confirmar tu suscripción (doble confirmación) y solo quedas suscrito cuando la confirmas. Cada correo incluye un enlace para darte de baja en cualquier momento. Conservamos tus datos hasta que te des de baja.`,
   whatsapp: (fields) =>
     `Si eliges escribirnos por WhatsApp, el formulario prepara un mensaje con lo que has escrito (${fields}) y abre WhatsApp. No se envía nada hasta que envías el mensaje allí, y WhatsApp (Meta) lo trata según sus propios términos y política de privacidad.`,
 };
@@ -168,6 +179,9 @@ function formsParagraphs(words: FormsWords, forms: FormsProcessing): string[] {
   return [
     ...(forms.providers.includes('web3forms')
       ? [words.web3forms(fields, purposes)]
+      : []),
+    ...(forms.providers.includes('brevo')
+      ? [words.brevo(forms.newsletter?.fields.includes('name') ?? false)]
       : []),
     ...(forms.providers.includes('whatsapp') ? [words.whatsapp(fields)] : []),
   ];

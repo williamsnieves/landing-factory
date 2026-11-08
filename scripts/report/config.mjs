@@ -21,7 +21,7 @@ export const REPORT_DEFAULTS = Object.freeze({
   // SEO text limits in characters (the seo area warns outside them).
   seo: { titleMin: 30, titleMax: 60, descriptionMin: 70, descriptionMax: 160 },
   // Lead forms: the hosts a form that collects personal data may post to (the legal-forms item).
-  forms: { providers: ['api.web3forms.com'] },
+  forms: { providers: ['api.web3forms.com', '*.sibforms.com'] },
 });
 
 const isObject = (v) =>
@@ -115,13 +115,14 @@ export function validateReportConfig(config) {
       forms.providers.forEach((host, index) => {
         if (
           typeof host !== 'string' ||
-          !/^(?=.{1,253}$)([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/i.test(
+          // A `*.` is allowed only as the leading prefix (it matches one or more labels, see hostAllowed).
+          !/^(?=.{1,253}$)(\*\.)?([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/i.test(
             host,
           )
         )
           err(
             `forms.providers[${index}]`,
-            'must be a host name such as "api.web3forms.com" (no protocol, no path)',
+            'must be a host name such as "api.web3forms.com", or "*.example.com" for any subdomain (no protocol, no path)',
           );
       });
   }

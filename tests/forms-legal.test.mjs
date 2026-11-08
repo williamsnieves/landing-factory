@@ -7,7 +7,11 @@ import { join, resolve } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-import { FORM_FIELDS, FORM_PURPOSES } from '../scripts/lib/brief-schema.mjs';
+import {
+  FORM_FIELDS,
+  FORM_PROVIDERS,
+  FORM_PURPOSES,
+} from '../scripts/lib/brief-schema.mjs';
 import { formsProcessing, legalData } from '../scripts/legal.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -108,12 +112,14 @@ test('the closed lists of the component match the brief schema', () => {
     ].map((m) => m[1]);
   assert.deepEqual(list('FORM_FIELDS'), FORM_FIELDS);
   assert.deepEqual(list('FORM_PURPOSES'), FORM_PURPOSES);
+  assert.deepEqual(list('FORM_PROVIDERS'), FORM_PROVIDERS);
 });
 
 test('the legal and form components keep the not-legal-advice line', () => {
   for (const file of [
     'src/components/legal/PrivacyPolicy.astro',
     'src/components/forms/LeadForm.astro',
+    'src/components/forms/NewsletterForm.astro',
   ]) {
     assert.match(
       readFileSync(join(ROOT, file), 'utf8'),
@@ -121,4 +127,82 @@ test('the legal and form components keep the not-legal-advice line', () => {
       file,
     );
   }
+});
+
+// Newsletter through Brevo (add-newsletter, task 3.1).
+const ACTION = 'https://abc123.sibforms.com/serve/MUIFAxyz';
+const newsletter = {
+  id: 'newsletter',
+  purpose: 'newsletter',
+  fields: ['email', 'name'],
+  provider: 'brevo',
+  action: ACTION,
+};
+
+test('a Brevo newsletter form is recorded apart, with the exact action origin', () => {
+  const b = brief();
+  b.legal.processing.forms = true;
+  b.forms = [newsletter];
+  assert.deepEqual(legalData(b).data.processing.forms, {
+    provider: 'brevo',
+    providers: ['brevo'],
+    purposes: [],
+    fields: [],
+    newsletter: {
+      fields: ['name', 'email'],
+      actionOrigins: ['https://abc123.sibforms.com'],
+    },
+  });
+  b.forms = [valuation, newsletter, { ...newsletter, id: 'n2' }];
+  const forms = formsProcessing(b);
+  assert.deepEqual(forms.providers, ['brevo', 'web3forms']);
+  assert.equal(forms.provider, 'web3forms');
+  assert.deepEqual(forms.purposes, ['valuation']);
+  assert.deepEqual(forms.newsletter.actionOrigins, [
+    'https://abc123.sibforms.com',
+  ]);
+});
+
+test('a Brevo form without a valid action is not rendered, so it is not recorded', () => {
+  const b = brief();
+  b.legal.processing.forms = true;
+  for (const action of ['', 'https://example.com/serve/x', 'nope'])
+    for (const forms of [
+      [{ ...newsletter, action }],
+      [valuation, { ...newsletter, action }],
+    ]) {
+      b.forms = forms;
+      const result = formsProcessing(b);
+      assert.ok(!result || !result.providers.includes('brevo'), action);
+      assert.ok(!result || !result.newsletter);
+    }
+});
+
+function legalDataFor(forms, language) {
+  const b = brief();
+  b.legal.processing.forms = true;
+  b.forms = forms;
+  b.language = language;
+  return legalData(b).data;
+}
+
+test('the privacy texts name Brevo, the data, purpose, double opt-in, unsubscribe and retention in English and Spanish', async () => {
+  const texts = readFileSync(
+    join(ROOT, 'src/components/legal/texts.ts'),
+    'utf8',
+  );
+  for (const needle of [
+    'Brevo (Sendinblue SAS, France)',
+    'European Union',
+    'double opt-in',
+    'unsubscribe',
+    'until you unsubscribe',
+    'Brevo (Sendinblue SAS, Francia)',
+    'Unión Europea',
+    'doble confirmación',
+    'darte de baja',
+    'hasta que te des de baja',
+  ])
+    assert.ok(texts.includes(needle), needle);
+  assert.ok(legalDataFor([newsletter], 'en').processing.forms.newsletter);
 });

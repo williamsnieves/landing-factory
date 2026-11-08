@@ -1,6 +1,6 @@
 # Lead forms
 
-A landing is static, so the factory has no server to receive a form. Lead forms go through a hosted form service, **Web3Forms** (the first provider), or, as a fallback that needs no account, through a **prefilled WhatsApp message**. This guide covers the brief, the component, the checks and the manual steps. Design: `openspec/changes/add-lead-forms/design.md`.
+A landing is static, so the factory has no server to receive a form. Lead forms go through a hosted form service, **Web3Forms** (the first provider), or, as a fallback that needs no account, through a **prefilled WhatsApp message**. A newsletter sign-up posts to the customer's own **Brevo** form (see "Newsletter with Brevo"). This guide covers the brief, the component, the checks and the manual steps. Design: `openspec/changes/add-lead-forms/design.md`.
 
 **The forms, the privacy text and the checks support compliance and are not legal advice.** A lawyer must review the privacy policy before a landing that collects leads goes live in production.
 
@@ -45,17 +45,39 @@ Run `npm run qa -- --site <slug>` and `npm run report -- --site <slug>`. `legal-
 
 | Outcome | When                                                                                                                                                                                                                                                                                  |
 | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| fail    | no required consent checkbox (the honeypot does not count); the consent label links no privacy page of the site; the form posts to a host outside `report.forms.providers` or over plain HTTP; the privacy page does not name the provider (Web3Forms, WhatsApp); a Web3Forms form has no `access_key` |
+| fail    | no required consent checkbox (the honeypot does not count); the consent label links no privacy page of the site; the form posts to a host outside `report.forms.providers` or over plain HTTP; the privacy page does not name the provider (Web3Forms, Brevo, WhatsApp); a Web3Forms form has no `access_key` |
 | warn    | a WhatsApp fallback replaced a Web3Forms form (no access key yet)                                                                                                                                                                                                                     |
 | na      | no forms, or no form collects personal data                                                                                                                                                                                                                                           |
 | pass    | every such form has consent, an allowed https provider and a policy that names it                                                                                                                                                                                                     |
 
-`report.forms.providers` in `qa.config.json` (default `["api.web3forms.com"]`, validated) lists the hosts a form may post to; never add a host to get a pass. The A06 `forms` item still warns about any form posting to a third party and points here.
+`report.forms.providers` in `qa.config.json` (default `["api.web3forms.com", "*.sibforms.com"]`, validated) lists the hosts a form may post to; an entry is an exact host or `*.<domain>` (any subdomain, matched on the parsed host: `*.sibforms.com` matches `abc.sibforms.com`, not `sibforms.com` nor `sibforms.com.evil.example`; the `*.` is allowed only as a prefix); never add a host to get a pass. The A06 `forms` item still warns about any form posting to a third party and points here.
+
+## Newsletter with Brevo
+
+A landing that wants an audience (news, offers, a launch list) shows `<NewsletterForm />`. The owner chose Brevo (2026-11-07): a French company (Sendinblue SAS) with servers in the EU, a free plan of 300 emails a day, double opt-in built into its sign-up forms, and campaigns sent from its own dashboard. Design: `openspec/changes/add-newsletter/design.md`.
+
+**Brief.** One `forms[]` entry with `purpose: "newsletter"`, `provider: "brevo"`, `fields` limited to `email` and `name`, and `action`: the `https` URL the customer's Brevo sign-up form posts to. The validator parses it: https, a host with at least one label before `.sibforms.com`, a path starting `/serve/`. The action is the customer's own form, so it can never be listed in `assumed`; `brief missing` asks for it and `summary` shows only its host. Like every form it needs `legal.markets` and `legal.processing.forms: true`. A prospect brief has no forms.
+
+**Setup (the customer or the owner does this in Brevo).**
+
+1. Create a sign-up form (Contacts > Forms) and turn **Double confirmation** on: Brevo then sends the confirmation email, and the contact is added only after the click. In Spain (LSSI and GDPR) this is the evidence of the visitor's consent. The factory cannot check this setting; the page and the privacy policy state it.
+2. Open Share > HTML embed code and copy the `action` of the `<form>` tag (`https://<id>.sibforms.com/serve/...`). Put it in the brief as `forms[].action`.
+3. Send campaigns from Brevo's dashboard. Every email must carry the unsubscribe link (Brevo adds it).
+
+**Component.** `NewsletterForm.astro` renders a plain `<form method="post">` to the action: no Brevo script, no stylesheet, no reCAPTCHA and no request to Brevo at page load; the browser posts only when the visitor submits, and Brevo answers with its own confirmation page. Fields: `EMAIL`, an optional `FIRSTNAME` (only when `name` is in `fields`), a required, unchecked `OPT_IN` checkbox (value `1`) whose label links the privacy page, a visually hidden honeypot `email_address_check`, and hidden `locale` and `html_type` (`simple`). The note under the button says the visitor will get an email to confirm. Without an action URL the component renders nothing. The names live in one place (`fields.ts`, `BREVO_FIELD_NAMES`); they come from Brevo's generated embed codes, which have no official reference page.
+
+**CSP.** `legal.json` records `processing.forms.newsletter.actionOrigins`; `astro.config.mjs` adds exactly those origins (`https://<id>.sibforms.com`, no wildcard) to `form-action`, and nothing to `connect-src`. A site without a Brevo form gains nothing.
+
+**Legal.** The privacy policy names Brevo (Sendinblue SAS, France; data stored in the EU), what is sent (email, optional first name, the consent and its date, the IP address), why (the newsletter), the double opt-in, the unsubscribe link in every email and that the data is kept until the subscriber unsubscribes. Not legal advice.
+
+**Starter demo.** `/forms/` shows the newsletter form with a made-up action (`https://demo-example.sibforms.com/serve/DEMO`). Tests and QA never post to it.
+
+**Still owed after merge.** The first real sign-up with the owner's Brevo account: check the field names against the generated embed code, that the confirmation email arrives and that the contact lands in the list (like the first real Web3Forms submission, `docs/status.md`).
 
 ## Tests
 
-Tests and CI never call Web3Forms. `tests/forms-site.test.mjs` scaffolds a Spanish site, builds it with a local fake endpoint (`FORMS_TEST_ENDPOINT`, read by the fixture page) and drives it in Chromium with and without JavaScript; the CSP part intercepts `api.web3forms.com` in the browser. Unit tests: `forms-brief`, `forms-layer`, `forms-csp`, `forms-legal`, `landing-report-forms`.
+Tests and CI never call Web3Forms. `tests/forms-site.test.mjs` scaffolds a Spanish site, builds it with a local fake endpoint (`FORMS_TEST_ENDPOINT`, read by the fixture page) and drives it in Chromium with and without JavaScript; the CSP part intercepts `api.web3forms.com` in the browser. Unit tests: `forms-brief`, `forms-layer`, `forms-csp`, `forms-legal`, `forms-newsletter` (markup of the Brevo form, no request at load, CSP origin), `landing-report-forms`.
 
 ## Out of scope
 
-Our own backend or serverless function, storing submissions, a CRM, file uploads, a captcha, double opt-in, analytics on submissions, and providers other than Web3Forms and WhatsApp (the provider list is a closed vocabulary that can grow).
+Our own backend or serverless function, storing submissions, a CRM, file uploads, a captcha, analytics on submissions, sending newsletter campaigns, Brevo's API or JavaScript, and providers other than Web3Forms, Brevo and WhatsApp (the provider list is a closed vocabulary that can grow).

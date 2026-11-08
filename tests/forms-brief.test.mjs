@@ -55,7 +55,7 @@ test('an empty brief and an older brief without forms stay valid', () => {
 test('unknown keys, purposes, fields, providers and a bad key fail; at most 3 forms', () => {
   const form = {
     ...valuation(),
-    purpose: 'newsletter',
+    purpose: 'survey',
     provider: 'formspree',
     accessKey: 'not-a-uuid',
     fields: ['name', 'budget'],
@@ -152,4 +152,106 @@ test('the CLI validates and summarizes a brief with a form', () => {
     });
   assert.match(run('summary').stdout, /Form 1: valuation/);
   assert.equal(run('missing').status, 0);
+});
+
+// Newsletter through Brevo (add-newsletter, tasks 1.1).
+const ACTION = 'https://abc123.sibforms.com/serve/MUIFAxyz';
+const newsletter = (extra = {}) => ({
+  id: 'newsletter',
+  purpose: 'newsletter',
+  fields: ['email', 'name'],
+  provider: 'brevo',
+  action: ACTION,
+  ...extra,
+});
+
+test('a valid brevo newsletter form validates and the summary shows only the host', () => {
+  const brief = withForms([newsletter()]);
+  assert.deepEqual(errorsOf(brief), []);
+  const summary = summarizeBrief(brief);
+  assert.match(
+    summary,
+    /Form 1: newsletter \(newsletter\), brevo, fields email, name, action on abc123\.sibforms\.com/,
+  );
+  assert.ok(!summary.includes('MUIFAxyz'));
+});
+
+test('the brevo action must be https on a subdomain of sibforms.com under /serve/', () => {
+  const bad = [
+    'https://example.com/serve/abc',
+    'http://abc.sibforms.com/serve/abc',
+    'https://sibforms.com/serve/abc',
+    'https://.sibforms.com/serve/abc',
+    'https://sibforms.com.evil.example/serve/abc',
+    'https://evil.example/?x=.sibforms.com/serve/',
+    'https://abc.sibforms.com/other/abc',
+    'https://abc.sibforms.com.evil.example/serve/abc',
+    'https://user@abc.sibforms.com/serve/abc',
+    'not a url',
+  ];
+  for (const action of bad) {
+    const errors = errorsOf(withForms([newsletter({ action })]));
+    assert.deepEqual(paths(errors), ['forms[0].action'], action);
+  }
+  for (const action of [
+    'https://a.b.sibforms.com/serve/x?y=1',
+    'https://ABC.sibforms.com/serve/x',
+  ])
+    assert.deepEqual(errorsOf(withForms([newsletter({ action })])), [], action);
+});
+
+test('brevo requires the newsletter purpose, email and name fields only and no access key', () => {
+  const errors = errorsOf(
+    withForms([
+      newsletter({
+        purpose: 'contact',
+        fields: ['email', 'phone'],
+        accessKey: KEY,
+      }),
+    ]),
+  );
+  assert.deepEqual(paths(errors).sort(), [
+    'forms[0].accessKey',
+    'forms[0].fields[1]',
+    'forms[0].purpose',
+  ]);
+});
+
+test('a newsletter purpose needs brevo and only brevo has an action', () => {
+  const a = errorsOf(withForms([{ ...valuation(), purpose: 'newsletter' }]));
+  assert.deepEqual(paths(a), ['forms[0].provider']);
+  const b = errorsOf(withForms([{ ...valuation(), action: ACTION }]));
+  assert.deepEqual(paths(b), ['forms[0].action']);
+});
+
+test('the brevo action can never be listed in assumed', () => {
+  for (const field of ['forms[0].action', 'forms[0]']) {
+    const brief = withForms([newsletter()]);
+    brief.assumed.push({ field, reason: 'invented' });
+    const errors = errorsOf(brief);
+    assert.deepEqual(paths(errors), [
+      `assumed[${brief.assumed.length - 1}].field`,
+    ]);
+    assert.match(errors[0].message, /cannot be assumed/);
+  }
+});
+
+test('missing asks for the action of each brevo form without one', () => {
+  const brief = withForms([
+    newsletter({ action: '' }),
+    { ...valuation(), id: 'two', accessKey: '' },
+  ]);
+  const found = missingFields(brief)
+    .map((m) => m.path)
+    .filter((p) => p.startsWith('forms'));
+  assert.deepEqual(found, ['forms[1].accessKey', 'forms[0].action']);
+  assert.match(
+    summarizeBrief(brief),
+    /no action URL \(the form is not shown\)/,
+  );
+  assert.ok(
+    !missingFields(withForms([newsletter()])).some((m) =>
+      m.path.startsWith('forms'),
+    ),
+  );
 });

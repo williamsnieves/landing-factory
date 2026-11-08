@@ -11,6 +11,7 @@ import {
   validateReportConfig,
   REPORT_DEFAULTS,
 } from '../scripts/report/config.mjs';
+import { hostAllowed } from '../scripts/report/legal-forms.mjs';
 import { itemOf, makeSite, runReport } from './report-fixture.mjs';
 
 const sites = [];
@@ -180,7 +181,10 @@ test('a WhatsApp form needs the policy to name WhatsApp', async () => {
 });
 
 test('report.forms.providers: defaults, a custom host, and validation', async () => {
-  assert.deepEqual(REPORT_DEFAULTS.forms.providers, ['api.web3forms.com']);
+  assert.deepEqual(REPORT_DEFAULTS.forms.providers, [
+    'api.web3forms.com',
+    '*.sibforms.com',
+  ]);
   assert.deepEqual(validateReportConfig(resolveReportConfig({})), []);
   assert.throws(
     () => resolveReportConfig({ forms: { providers: ['https://x.example/'] } }),
@@ -198,11 +202,109 @@ test('report.forms.providers: defaults, a custom host, and validation', async ()
   const real = JSON.parse(
     readFileSync(join(import.meta.dirname, '..', 'qa.config.json'), 'utf8'),
   );
-  assert.deepEqual(real.report.forms.providers, ['api.web3forms.com']);
+  assert.deepEqual(real.report.forms.providers, [
+    'api.web3forms.com',
+    '*.sibforms.com',
+  ]);
 });
 
 test('--skip legal removes the item', async () => {
   const s = setup(form());
   const r = await runReport(s, [...ONLY, '--skip', 'legal']);
   assert.equal(itemOf(r.report, 'legal-forms'), undefined);
+});
+
+// Newsletter through Brevo (add-newsletter, task 3.2).
+const BREVO_POLICY = POLICY(
+  'The newsletter is handled by Brevo (Sendinblue SAS, France).',
+);
+const brevoForm = ({
+  action = 'https://abc123.sibforms.com/serve/MUIFAxyz',
+  box = consent(),
+} = {}) =>
+  `<form method="post" action="${action}" data-form-provider="brevo"><label for="b">Email</label><input id="b" type="email" name="EMAIL" required>${box}<button type="submit">Subscribe</button></form>`;
+
+test('hostAllowed matches a leading *. on the parsed host only', () => {
+  const list = ['api.web3forms.com', '*.sibforms.com'];
+  for (const host of [
+    'abc.sibforms.com',
+    'a.b.sibforms.com',
+    'ABC.SibForms.com',
+    'api.web3forms.com',
+  ])
+    assert.equal(hostAllowed(host, list), true, host);
+  for (const host of [
+    'sibforms.com',
+    'sibforms.com.evil.example',
+    'evilsibforms.com',
+    'abc.sibforms.com.evil.example',
+    'web3forms.com',
+    'x.api.web3forms.com',
+  ])
+    assert.equal(hostAllowed(host, list), false, host);
+});
+
+test('a Brevo form with consent, a policy that names Brevo and a *.sibforms.com host passes', async () => {
+  const { item } = await legalForms(
+    setup(brevoForm(), { policy: BREVO_POLICY }),
+  );
+  assert.equal(item.status, 'pass', JSON.stringify(item));
+});
+
+test('a Brevo form fails on a look-alike host, plain http, no consent and a policy that does not name Brevo', async () => {
+  const look = await legalForms(
+    setup(brevoForm({ action: 'https://sibforms.com.evil.example/serve/x' }), {
+      policy: BREVO_POLICY,
+    }),
+  );
+  assert.equal(look.item.status, 'fail');
+  assert.match(
+    look.item.evidence.join('\n'),
+    /sibforms\.com\.evil\.example.*not in report\.forms\.providers/,
+  );
+  const bare = await legalForms(
+    setup(brevoForm({ action: 'https://sibforms.com/serve/x' }), {
+      policy: BREVO_POLICY,
+    }),
+  );
+  assert.equal(bare.item.status, 'fail');
+  const http = await legalForms(
+    setup(brevoForm({ action: 'http://abc123.sibforms.com/serve/x' }), {
+      policy: BREVO_POLICY,
+    }),
+  );
+  assert.equal(http.item.status, 'fail');
+  assert.match(http.item.evidence.join('\n'), /plain HTTP/);
+  const noBox = await legalForms(
+    setup(brevoForm({ box: '' }), { policy: BREVO_POLICY }),
+  );
+  assert.equal(noBox.item.status, 'fail');
+  assert.match(noBox.item.evidence.join('\n'), /no required consent checkbox/);
+  const unnamed = await legalForms(
+    setup(brevoForm(), { policy: POLICY('Nothing about newsletters.') }),
+  );
+  assert.equal(unnamed.item.status, 'fail');
+  assert.match(unnamed.item.evidence.join('\n'), /brevo.*does not name it/);
+});
+
+test('report config accepts *. only as a leading prefix', () => {
+  assert.deepEqual(
+    validateReportConfig(
+      resolveReportConfig({ forms: { providers: ['*.sibforms.com'] } }),
+    ),
+    [],
+  );
+  for (const bad of [
+    'a.*.com',
+    '*sibforms.com',
+    '*.',
+    '**.sibforms.com',
+    'sibforms.*',
+    '*.com.*',
+  ])
+    assert.throws(
+      () => resolveReportConfig({ forms: { providers: [bad] } }),
+      /report\.forms\.providers\[0\]/,
+      bad,
+    );
 });
