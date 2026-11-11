@@ -9,14 +9,14 @@ The catalog SHALL include a `chaptered-atlas` archetype for release, launch and 
 
 #### Scenario: Product launch with references
 - **WHEN** a brief's signals are `bold`, `product-showcase` and `storytelling` with a `bold` impact and `--refs shopify-editions`
-- **THEN** `pick-archetypes` ranks `chaptered-atlas` first
+- **THEN** `chaptered-atlas` is the primary of the best archetype blend (a reference-led `custom` outcome may still rank above every blend, as for any clear reference)
 
 ### Requirement: Developer console archetype
 The catalog SHALL include a `dev-console` archetype for AI, software and developer pages: monospaced metadata with optional key hints, a humanist sans for titles, a light ground with one accent, an index or changelog list as the hero, a fixed identity column and one original motif drawn in code. It SHALL deliver the `quiet` and `balanced` impact levels and lend `mono-meta-rows` and `generative-dot-field`.
 
 #### Scenario: Technical product without photos
 - **WHEN** a brief's signals are `technical`, `product-showcase`, `few-assets` and `calm` with a `balanced` impact and `--refs claude-dev`
-- **THEN** `pick-archetypes` ranks `dev-console` first
+- **THEN** `dev-console` is the primary of the best archetype blend (a reference-led `custom` outcome may still rank above every blend)
 
 #### Scenario: Existing local business brief
 - **WHEN** the picker runs for fisioterapia-ribera's signals

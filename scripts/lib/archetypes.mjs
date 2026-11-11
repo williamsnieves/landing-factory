@@ -68,6 +68,10 @@ export const TRAITS = [
   'logo-strip-under-hero',
   'statement-band',
   'line-art-thread',
+  'self-map-hero',
+  'chapter-color-fields',
+  'mono-meta-rows',
+  'generative-dot-field',
 ];
 
 /** How striking a page looks, apart from the tone of its copy. A sheet lists the levels its grammar can deliver. */

@@ -99,6 +99,10 @@ A trait has one owner sheet (which defines it). A secondary archetype lends one 
 | `logo-strip-under-hero` | product-led-saas         |
 | `statement-band`        | calm-statement           |
 | `line-art-thread`       | calm-statement           |
+| `self-map-hero`         | chaptered-atlas          |
+| `chapter-color-fields`  | chaptered-atlas          |
+| `mono-meta-rows`        | dev-console              |
+| `generative-dot-field`  | dev-console              |
 
 ## Blends
 
@@ -146,17 +150,19 @@ The header of `scripts/layout-signature.mjs` documents how each one is measured.
 
 ## Catalog
 
-| Archetype                                               | In one line                                                                                                                                                   |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [bento-product-showcase](bento-product-showcase.md)     | A tile grid of mixed sizes that presents a product or a service line as a set of feature tiles, with product shots and short claims.                          |
-| [brutalist-raw](brutalist-raw.md)                       | Raw, structural pages: hard edges, visible grid lines, monospaced labels, dense blocks and text links instead of buttons. Honest and loud without decoration. |
-| [calm-statement](calm-statement.md)                     | Calm but striking without photographs: one idea per screen set very large in generous space, soft full-bleed colour fields and one drawn shape that recurs.   |
-| [collage-scrapbook](collage-scrapbook.md)               | Playful and handmade: overlapping, slightly rotated photos, paper textures, handwritten accents and stickers, arranged like a scrapbook page.                 |
-| [data-and-proof](data-and-proof.md)                     | Evidence first: figures, small charts drawn in CSS or SVG, comparison tables and clear claims with their sources.                                             |
-| [editorial-magazine](editorial-magazine.md)             | Reads like a magazine feature: multi-column text, drop caps, pull quotes, captions and a strong masthead, with photographs set among the words.               |
-| [horizontal-chapter-story](horizontal-chapter-story.md) | A story told in chapters. One pinned section scrolls a horizontal track of panels, with a chapter index and full-screen moments between them.                 |
-| [immersive-scene](immersive-scene.md)                   | Full-bleed media or a 3D scene fills the screen with minimal chrome; short chaptered overlays carry the story over it.                                        |
-| [product-led-saas](product-led-saas.md)                 | A software product page: a short two-tone headline over a framed interface, quiet customer marks, then alternating feature modules with one visual each.      |
-| [swiss-grid-minimal](swiss-grid-minimal.md)             | A strict twelve-column grid, flush-left text, small type contrast, no rounded corners and a lot of white. Order and restraint carry the page.                 |
-| [typographic-poster](typographic-poster.md)             | Type is the image. Huge display lettering, tight cropping and bold color fields carry the page, with few or no photographs.                                   |
-| [warm-local-service](warm-local-service.md)             | Friendly and practical: what, where, when and how to reach us come first; warm photos, hours, a map and one obvious action.                                   |
+| Archetype                                               | In one line                                                                                                                                                    |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [bento-product-showcase](bento-product-showcase.md)     | A tile grid of mixed sizes that presents a product or a service line as a set of feature tiles, with product shots and short claims.                           |
+| [brutalist-raw](brutalist-raw.md)                       | Raw, structural pages: hard edges, visible grid lines, monospaced labels, dense blocks and text links instead of buttons. Honest and loud without decoration.  |
+| [calm-statement](calm-statement.md)                     | Calm but striking without photographs: one idea per screen set very large in generous space, soft full-bleed colour fields and one drawn shape that recurs.    |
+| [chaptered-atlas](chaptered-atlas.md)                   | A release or launch page that maps itself in the first screen, with one saturated colour field per chapter, a giant vertical word and a fixed chapter rail.    |
+| [collage-scrapbook](collage-scrapbook.md)               | Playful and handmade: overlapping, slightly rotated photos, paper textures, handwritten accents and stickers, arranged like a scrapbook page.                  |
+| [data-and-proof](data-and-proof.md)                     | Evidence first: figures, small charts drawn in CSS or SVG, comparison tables and clear claims with their sources.                                              |
+| [dev-console](dev-console.md)                           | The developer-tool look: monospaced metadata, a humanist sans, a warm light ground, an index list as the hero and a generative dot field as the closing scene. |
+| [editorial-magazine](editorial-magazine.md)             | Reads like a magazine feature: multi-column text, drop caps, pull quotes, captions and a strong masthead, with photographs set among the words.                |
+| [horizontal-chapter-story](horizontal-chapter-story.md) | A story told in chapters. One pinned section scrolls a horizontal track of panels, with a chapter index and full-screen moments between them.                  |
+| [immersive-scene](immersive-scene.md)                   | Full-bleed media or a 3D scene fills the screen with minimal chrome; short chaptered overlays carry the story over it.                                         |
+| [product-led-saas](product-led-saas.md)                 | A software product page: a short two-tone headline over a framed interface, quiet customer marks, then alternating feature modules with one visual each.       |
+| [swiss-grid-minimal](swiss-grid-minimal.md)             | A strict twelve-column grid, flush-left text, small type contrast, no rounded corners and a lot of white. Order and restraint carry the page.                  |
+| [typographic-poster](typographic-poster.md)             | Type is the image. Huge display lettering, tight cropping and bold color fields carry the page, with few or no photographs.                                    |
+| [warm-local-service](warm-local-service.md)             | Friendly and practical: what, where, when and how to reach us come first; warm photos, hours, a map and one obvious action.                                    |

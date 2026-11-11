@@ -458,3 +458,74 @@ test('the CLI names the impact level and whether it was assumed', async () => {
     assumed: false,
   });
 });
+
+// ------------------------------------------------------------------------------------------------
+// Reference archetypes: add-reference-archetypes
+
+// With rich real reference sheets the reference-led `custom` outcome can outscore every archetype
+// (CUSTOM_WEIGHT x evidence); the archetype ranking, which the blend fills, is what these scenarios check.
+const firstArchetype = (result) =>
+  result.blends.find((b) => b.primary !== 'custom');
+
+function realRefRoot(slug, signals, impact, refs) {
+  const root = freshRoot();
+  for (const ref of refs)
+    cpSync(
+      join(ROOT, 'patterns', `${ref}.md`),
+      join(root, 'patterns', `${ref}.md`),
+    );
+  const dir = addSite(root, slug, { signals });
+  if (impact)
+    writeFileSync(
+      join(dir, 'brief.json'),
+      JSON.stringify({ brand: { impact } }),
+    );
+  return root;
+}
+
+test('the two reference sheets of the creative references yield the new traits', () => {
+  assert.deepEqual(
+    readRefSheet(ROOT, 'shopify-editions').traits.filter((t) =>
+      ['self-map-hero', 'chapter-color-fields'].includes(t),
+    ),
+    ['chapter-color-fields', 'self-map-hero'],
+  );
+  assert.deepEqual(
+    readRefSheet(ROOT, 'claude-dev').traits.filter((t) =>
+      ['mono-meta-rows', 'generative-dot-field'].includes(t),
+    ),
+    ['generative-dot-field', 'mono-meta-rows'],
+  );
+});
+
+test('a bold product launch with the creative release reference ranks chaptered-atlas first', () => {
+  const root = realRefRoot(
+    'launch',
+    'bold, product-showcase, storytelling',
+    'bold',
+    ['shopify-editions'],
+  );
+  const r = pickBlends({ root, slug: 'launch', refs: ['shopify-editions'] });
+  assert.equal(firstArchetype(r).primary, 'chaptered-atlas');
+});
+
+test('a technical, few-assets, calm product with the developer-blog reference ranks dev-console first', () => {
+  const root = realRefRoot(
+    'devtool',
+    'technical, product-showcase, few-assets, calm',
+    'balanced',
+    ['claude-dev'],
+  );
+  const r = pickBlends({ root, slug: 'devtool', refs: ['claude-dev'] });
+  assert.equal(firstArchetype(r).primary, 'dev-console');
+});
+
+test('the fisioterapia-ribera signals keep calm-statement first and neither new archetype outranks it', () => {
+  const root = freshRoot();
+  impactSite(root);
+  const r = pickBlends({ root, slug: 'clinic' });
+  assert.equal(r.blends[0].primary, 'calm-statement');
+  const calm = lone(r, 'calm-statement').score;
+  for (const name of ['chaptered-atlas', 'dev-console'])
+    assert.ok(lone(r, name).score < calm, name);
+});
