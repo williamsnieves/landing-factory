@@ -10,8 +10,9 @@
 // files it changed and never commits or pushes: a person (or the landing-handoff skill) pushes a branch and opens
 // a pull request in that repository.
 //
-// A site with .pages.yml (Pages CMS, see scripts/cms.mjs) keeps its CMS paths: files there are never added,
-// changed or deleted in the clone; a difference is listed as `kept (managed by the CMS)`.
+// A site with .pages.yml (Pages CMS, see scripts/cms.mjs) keeps its CMS paths: a file the clone has there is
+// never changed or deleted, and a difference is listed as `kept (managed by the CMS)`; a CMS path the clone has
+// never had (nothing at that file or folder) is added once (`first copy for the CMS`).
 //
 // Refused (exit 1, nothing written): no EXPORTED.json, a transferred site, a clone whose origin is not the recorded
 // repository, a clone that is not a work tree root or has uncommitted changes. Exit 2: bad usage, a missing site,
@@ -97,8 +98,9 @@ const sameBytes = (a, b) => readFileSync(a).equals(readFileSync(b));
 /**
  * What mirroring `scratch` into `clone` does: { added, changed, deleted, kept, packageChanged }. Pure reading;
  * `scratch` holds the fresh export (without a lockfile), `clone` is clean. Files under `cmsPaths` belong to the
- * clone (the CMS edits them there): they are never added, changed or deleted, and a difference between the
- * site's own files (`siteDir`) and the clone's is listed in `cmsKept`.
+ * clone (the CMS edits them there): one the clone has is never changed or deleted, and a difference between the
+ * site's own files (`siteDir`) and the clone's is listed in `cmsKept`; the files of a CMS path the clone has never
+ * had (nothing at that file or folder) are added once and listed in `cmsSeeded` too.
  */
 export function planMirror(scratch, clone, cmsPaths = [], siteDir = null) {
   const fresh = new Map(
@@ -133,12 +135,22 @@ export function planMirror(scratch, clone, cmsPaths = [], siteDir = null) {
     deleted: [],
     kept: [],
     cmsKept: [],
+    cmsSeeded: [],
     packageChanged: false,
   };
+  const seedPaths = cmsPaths.filter((p) => !existsSync(join(clone, p)));
   for (const [rel, abs] of [...fresh].sort(([a], [b]) => (a < b ? -1 : 1))) {
     if (ignored.has(rel)) continue;
     const target = join(clone, rel);
-    if (isCmsPath(rel, cmsPaths)) continue;
+    if (isCmsPath(rel, cmsPaths)) {
+      // A CMS path the clone has never had (nothing at that file or folder) cannot have been edited there: the
+      // first sync adds its files once. Once the path exists, the CMS owns it, deletions included.
+      if (isCmsPath(rel, seedPaths)) {
+        plan.added.push(rel);
+        plan.cmsSeeded.push(rel);
+      }
+      continue;
+    }
     if (!tracked.has(rel) && !existsSync(target)) plan.added.push(rel);
     else if (!sameBytes(abs, target)) {
       if (
@@ -164,8 +176,10 @@ export function planMirror(scratch, clone, cmsPaths = [], siteDir = null) {
       [join(siteDir, rel), join(scratch, rel)].some(
         (other) => existsSync(other) && sameContent(other, join(clone, rel)),
       );
+    const seeded = new Set(plan.cmsSeeded);
     for (const rel of new Set([...mine, ...live]))
-      if (!live.has(rel) || !mine.has(rel) || !matches(rel))
+      if (seeded.has(rel)) continue;
+      else if (!live.has(rel) || !mine.has(rel) || !matches(rel))
         plan.cmsKept.push(rel);
     plan.cmsKept.sort();
   }
@@ -324,7 +338,13 @@ export function main(argv, io = console, env = process.env) {
     io.log(
       `sync-export${values['dry-run'] ? ' (dry run)' : ''}: sites/${slug} -> ${clone}`,
     );
-    for (const rel of mirror.added) io.log(`  added    ${rel}`);
+    const seeded = new Set(mirror.cmsSeeded);
+    for (const rel of mirror.added)
+      io.log(
+        seeded.has(rel)
+          ? `  added    ${rel} (first copy for the CMS)`
+          : `  added    ${rel}`,
+      );
     for (const rel of mirror.changed) io.log(`  changed  ${rel}`);
     if (lockfile === 'regenerated') io.log('  changed  package-lock.json');
     for (const rel of mirror.deleted) io.log(`  deleted  ${rel}`);

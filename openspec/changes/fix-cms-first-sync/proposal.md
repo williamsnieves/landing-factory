@@ -6,7 +6,7 @@ The first sync of `personal-brand` after it moved to content collections (2026-1
 
 ## What Changes
 
-- **Sync seeds missing CMS files.** A file under a CMS path that exists in the factory but not in the clone is added, and listed as `added (first copy for the CMS)`.
+- **Sync seeds CMS paths the clone never had.** When nothing exists in the clone at a CMS path (the file of a `file` entry, the folder of a `collection`), sync adds the factory's files there once, each listed as `added <file> (first copy for the CMS)`. Once the path exists the CMS owns it: a file deleted through the CMS is not added back.
 - **Everything else is unchanged.** A file the clone already has is never changed or deleted, and a difference in content is still listed as `kept (managed by the CMS)` with the pull command. A file that exists only in the clone is kept and listed.
 - **Docs.** `docs/cms.md` and CLAUDE.md "Git CMS" say so.
 
@@ -20,7 +20,7 @@ The first sync of `personal-brand` after it moved to content collections (2026-1
 
 - **Code:** `scripts/sync-export.mjs`.
 - **Tests:**
-  - a first sync into a clone without the CMS files adds them;
+  - a first sync into a clone without the CMS path adds its files, and a file deleted afterwards through the CMS is not added back;
   - a later sync keeps an edited file;
   - a file that exists only in the clone stays.
 - **No site changes.**
