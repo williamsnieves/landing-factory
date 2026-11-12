@@ -8,11 +8,11 @@
 // files under the CMS paths from a clone of the site's repository into sites/<slug>/ (add, change, delete inside
 // those paths only) so the factory starts from what is live; it never commits. LANDING_FACTORY_ROOT=<dir> moves
 // the factory root, and --root does the same, both for tests only.
+import { execFileSync } from 'node:child_process';
 import {
   copyFileSync,
   existsSync,
   mkdirSync,
-  readFileSync,
   readdirSync,
   rmSync,
   rmdirSync,
@@ -32,6 +32,7 @@ import {
   cmsFiles,
   hasCmsConfig,
   readCmsConfig,
+  sameContent,
 } from './lib/cms-config.mjs';
 import { SLUG_PATTERN } from './lib/sites.mjs';
 
@@ -98,8 +99,6 @@ function parse(argv, env) {
   return { command, values };
 }
 
-const sameBytes = (a, b) => readFileSync(a).equals(readFileSync(b));
-
 const underOrEqual = (rel, p) => rel === p || rel.startsWith(`${p}/`);
 
 /**
@@ -112,10 +111,36 @@ export function planPull(siteDir, clone, paths) {
   const plan = { added: [], changed: [], deleted: [] };
   for (const rel of live)
     if (!mine.has(rel)) plan.added.push(rel);
-    else if (!sameBytes(join(clone, rel), join(siteDir, rel)))
+    else if (!sameContent(join(clone, rel), join(siteDir, rel)))
       plan.changed.push(rel);
   for (const rel of mine) if (!live.has(rel)) plan.deleted.push(rel);
   return plan;
+}
+
+/** Format the files pull wrote with the factory's Prettier and its .prettierrc.json (json and yaml only). */
+function formatPulled(files) {
+  const targets = files.filter((f) => /\.(json|ya?ml)$/i.test(f));
+  if (!targets.length) return;
+  const bin = join(
+    CODE_ROOT,
+    'node_modules',
+    'prettier',
+    'bin',
+    'prettier.cjs',
+  );
+  execFileSync(
+    process.execPath,
+    [
+      bin,
+      '--write',
+      '--log-level',
+      'warn',
+      '--config',
+      join(CODE_ROOT, '.prettierrc.json'),
+      ...targets,
+    ],
+    { cwd: CODE_ROOT, stdio: ['ignore', 'pipe', 'pipe'] },
+  );
 }
 
 function removeEmptyDirs(stop, rel) {
@@ -190,12 +215,16 @@ function runPull(root, slug, from, dryRun, io) {
     io.log('Nothing was written.');
     return 0;
   }
+  const written = [];
   for (const rel of [...plan.added, ...plan.changed]) {
     if (!cmsPaths.some((p) => underOrEqual(rel, p))) continue;
     const target = join(siteDir, rel);
     mkdirSync(dirname(target), { recursive: true });
     copyFileSync(join(clone, rel), target);
+    written.push(target);
   }
+  // The CMS owns the formatting in the repository; the factory's format:check wants its own.
+  formatPulled(written);
   for (const rel of plan.deleted) {
     rmSync(join(siteDir, rel), { force: true });
     removeEmptyDirs(siteDir, rel);

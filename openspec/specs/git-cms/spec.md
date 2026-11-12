@@ -1,7 +1,7 @@
 # git-cms Specification
 
 ## Purpose
-TBD - created by archiving change add-git-cms. Update Purpose after archive.
+Routine content edits on an exported landing without code: editable content in Astro content collections with schemas, a checked Pages CMS configuration (`.pages.yml`), and a pull command that brings the content edited in the repository back into the factory.
 
 ## Requirements
 

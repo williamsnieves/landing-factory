@@ -3,7 +3,9 @@
 // scripts/cms.mjs, scripts/export.mjs and scripts/sync-export.mjs; never copied into an exported repository,
 // because it needs the `yaml` package. Pure reading, no network.
 import { existsSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { extname, join } from 'node:path';
+
+import { isDeepStrictEqual } from 'node:util';
 
 import { parse } from 'yaml';
 
@@ -175,4 +177,32 @@ export function cmsFiles(base, paths) {
         found.add(`${p}/${file.rel}`);
   }
   return [...found].sort();
+}
+
+/**
+ * True when two CMS files hold the same content. The CMS owns the formatting of its files, so JSON and YAML are
+ * compared as parsed values (JSON.parse with deep equality, the `yaml` parser); any other file, or one that does
+ * not parse, is compared by bytes.
+ */
+export function sameContent(a, b) {
+  const x = readFileSync(a);
+  const y = readFileSync(b);
+  if (x.equals(y)) return true;
+  const ext = extname(a).toLowerCase();
+  if (ext !== extname(b).toLowerCase()) return false;
+  try {
+    if (ext === '.json')
+      return isDeepStrictEqual(
+        JSON.parse(x.toString('utf8')),
+        JSON.parse(y.toString('utf8')),
+      );
+    if (ext === '.yaml' || ext === '.yml')
+      return isDeepStrictEqual(
+        parse(x.toString('utf8')),
+        parse(y.toString('utf8')),
+      );
+  } catch {
+    // does not parse: the bytes differ
+  }
+  return false;
 }
