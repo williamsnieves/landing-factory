@@ -20,4 +20,4 @@
 ## 4. Docs and checks
 
 - [x] 4.1 `docs/cms.md` (what can be edited, collections with schemas, the `.pages.yml` rules, setup in Pages CMS, how a save reaches production, pull before a revision round, first real edit owed); CLAUDE.md ("Git CMS", "Scope discipline", "Revising a landing", commands table), `docs/revise.md`, `docs/handoff.md`, `docs/status.md`.
-- [ ] 4.2 `npx prettier --check .`, `npm run lint`, `npm run check`, `npm run check:sites`, `npm run validate:patterns`, `npm run validate:archetypes`, `npm test`, `npm run qa`, `openspec validate --all --strict`.
+- [x] 4.2 `npx prettier --check .`, `npm run lint`, `npm run check`, `npm run check:sites`, `npm run validate:patterns`, `npm run validate:archetypes`, `npm test`, `npm run qa`, `openspec validate --all --strict`.
