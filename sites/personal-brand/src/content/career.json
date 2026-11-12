@@ -1,0 +1,212 @@
+{
+  "jobs": [
+    {
+      "employer": "Glintt Global",
+      "role": {
+        "en": "Senior Software Engineer",
+        "es": "Senior Software Engineer"
+      },
+      "place": { "en": "Madrid (remote)", "es": "Madrid (remoto)" },
+      "dates": {
+        "en": "May 2025 to present",
+        "es": "May 2025 a la actualidad"
+      },
+      "bullets": {
+        "en": [
+          "Working with Orange on internal platforms: key modules for Billing, Consents and Provisioning, while modernizing the architecture.",
+          "Pioneering AI-driven workflows and automation: an AI testing harness, a Java BFF subagent and a LangChain and Grafana AI observability agent.",
+          "Better observability across Grafana and Kubernetes, plus tech talks on Spec-Driven Development."
+        ],
+        "es": [
+          "Trabajo con Orange en plataformas internas: módulos clave de Billing, Consents y Provisioning, a la vez que modernizo la arquitectura.",
+          "Pionero en flujos de trabajo y automatización con IA: un harness de testing con IA, un subagente BFF en Java y un agente de observabilidad con IA con LangChain y Grafana.",
+          "Mejor observabilidad con Grafana y Kubernetes, y charlas técnicas sobre Spec-Driven Development."
+        ]
+      },
+      "stack": [
+        "TDD",
+        "AI",
+        "React",
+        "Claude Code",
+        "Google Cloud",
+        "Java",
+        "LangChain",
+        "Kubernetes",
+        "OpenCode",
+        "Spec-Driven Development",
+        "Astro"
+      ],
+      "stackEs": [
+        "TDD",
+        "IA",
+        "React",
+        "Claude Code",
+        "Google Cloud",
+        "Java",
+        "LangChain",
+        "Kubernetes",
+        "OpenCode",
+        "Spec-Driven Development",
+        "Astro"
+      ],
+      "tone": "3"
+    },
+    {
+      "employer": "EF",
+      "role": {
+        "en": "Senior Software Engineer",
+        "es": "Senior Software Engineer"
+      },
+      "place": { "en": "Madrid", "es": "Madrid" },
+      "dates": { "en": "Jul 2023 to Feb 2025", "es": "Jul 2023 a Feb 2025" },
+      "bullets": {
+        "en": [
+          "Modernized the booking system for Private and Group Lessons (scheduling, teacher search, calendar optimization) for millions of students worldwide.",
+          "Led the migration of core applications to a new UI system for B2C and B2B customers, including lesson progress tracking and the homepage.",
+          "Infrastructure and backend on the side: Terraform, BFF endpoints and feature-flag rollouts."
+        ],
+        "es": [
+          "Modernicé el sistema de reservas de clases privadas y grupales (agenda, búsqueda de profesores, optimización del calendario) para millones de estudiantes en todo el mundo.",
+          "Lideré la migración de las aplicaciones principales a un nuevo sistema de UI para clientes B2C y B2B, con el seguimiento del progreso de las clases y la home incluidos.",
+          "Infraestructura y backend en paralelo: Terraform, endpoints BFF y despliegues con feature flags."
+        ]
+      },
+      "stack": [
+        "Next 14",
+        "React 18",
+        "Tailwind 4",
+        "Storybook",
+        "Jest",
+        "React Testing Library",
+        "SWR",
+        "GitHub Actions",
+        "Terraform",
+        "pnpm workspaces",
+        "Turborepo",
+        "Playwright",
+        "Scrum",
+        "Kanban"
+      ],
+      "tone": "5"
+    },
+    {
+      "employer": "Cardo Health",
+      "role": { "en": "Software Engineer", "es": "Software Engineer" },
+      "place": { "en": "Barcelona", "es": "Barcelona" },
+      "dates": { "en": "Sep 2022 to Apr 2023", "es": "Sep 2022 a Abr 2023" },
+      "bullets": {
+        "en": [
+          "Features for the patient (mobile) and clinician (desktop) platforms, with usability and accessibility in healthcare in mind.",
+          "Launched the MVP of the Cardo Health app for Prosperia, payment history included."
+        ],
+        "es": [
+          "Funcionalidades para las plataformas de pacientes (móvil) y de clínicos (escritorio), cuidando la usabilidad y la accesibilidad en salud.",
+          "Lanzamiento del MVP de la app de Cardo Health para Prosperia, con historial de pagos."
+        ]
+      },
+      "stack": [
+        "Next 12",
+        "React 18",
+        "Tailwind 3",
+        "Storybook",
+        "Material UI",
+        "Native UI",
+        "React Native",
+        "Jest",
+        "React Testing Library",
+        "SWR",
+        "Node.js",
+        "Fastify",
+        "Strapi",
+        "Vite",
+        "GitHub Actions",
+        "Playwright"
+      ],
+      "tone": "3"
+    },
+    {
+      "employer": "Instaply",
+      "role": {
+        "en": "Frontend Lead Engineer",
+        "es": "Frontend Lead Engineer"
+      },
+      "place": { "en": "Barcelona", "es": "Barcelona" },
+      "dates": { "en": "Feb 2020 to Sep 2022", "es": "Feb 2020 a Sep 2022" },
+      "bullets": {
+        "en": [
+          "Led the frontend team: new features and legacy modernization, a GraphQL server upgrade and new UI components.",
+          "Testing with Cypress, Jest and Selenium, payments inside conversations, an admin panel migrated to React and the Airbnb JavaScript style guide across projects."
+        ],
+        "es": [
+          "Lideré el equipo de frontend: funcionalidades nuevas y modernización de código heredado, actualización del servidor GraphQL y nuevos componentes de UI.",
+          "Testing con Cypress, Jest y Selenium, pagos dentro de las conversaciones, panel de administración migrado a React y la guía de estilo JavaScript de Airbnb en todos los proyectos."
+        ]
+      },
+      "stack": [
+        "React 16",
+        "GraphQL",
+        "Express",
+        "MUI",
+        "Socket.io",
+        "Redux",
+        "Redux-Observable",
+        "Koa",
+        "CircleCI",
+        "Webpack",
+        "Selenium"
+      ],
+      "tone": "5"
+    },
+    {
+      "employer": "I-Surance GmbH",
+      "role": {
+        "en": "Frontend Lead Developer",
+        "es": "Frontend Lead Developer"
+      },
+      "place": { "en": "Barcelona", "es": "Barcelona" },
+      "dates": { "en": "Aug 2018 to Sep 2020", "es": "Ago 2018 a Sep 2020" },
+      "bullets": { "en": [], "es": [] },
+      "stack": [
+        "React",
+        "Emotion",
+        "Styled Components",
+        "Webpack",
+        "Axios",
+        "Cypress",
+        "Bitbucket Pipelines",
+        "AWS S3",
+        "CloudFront",
+        "Route 53"
+      ],
+      "tone": "3"
+    }
+  ],
+  "earlier": [
+    {
+      "employer": "Interiorvista",
+      "role": {
+        "en": "Lead Frontend developer",
+        "es": "Lead Frontend developer"
+      },
+      "dates": { "en": "Mar 2017 to Jul 2018", "es": "Mar 2017 a Jul 2018" }
+    },
+    {
+      "employer": "Foticos",
+      "role": { "en": "Frontend developer", "es": "Desarrollador frontend" },
+      "dates": { "en": "Apr 2016 to Mar 2017", "es": "Abr 2016 a Mar 2017" }
+    },
+    {
+      "employer": "Nyx",
+      "role": { "en": "Frontend developer", "es": "Desarrollador frontend" },
+      "dates": { "en": "Sep 2015 to Jun 2016", "es": "Sep 2015 a Jun 2016" }
+    },
+    {
+      "employer": "Teravision",
+      "role": {
+        "en": "Node.js backend developer",
+        "es": "Desarrollador backend con Node.js"
+      },
+      "dates": { "en": "Jan 2015", "es": "Ene 2015" }
+    }
+  ]
+}

@@ -1,5 +1,6 @@
-// One interface for the page copy of every locale (src/content/en.ts, src/content/es.ts). Facts (employers, dates,
-// stacks, names of skills) are the same in both; the sentences around them are written for each language.
+// One interface for the page copy of every locale. The labels, headings and prose live in src/content/en.ts and es.ts
+// (PageCopy); the career (path.jobs, path.earlier) and the skill groups (skills.groups) are CMS-editable JSON files,
+// src/content/career.json and skills.json, validated by src/content.config.ts and merged into Content by getContent().
 
 export interface JobContent {
   employer: string;
@@ -91,3 +92,9 @@ export interface Content {
   };
   footer: { tagline: string };
 }
+
+/** What en.ts and es.ts hold: Content without the lists that come from the CMS-editable JSON files. */
+export type PageCopy = Omit<Content, 'path' | 'skills'> & {
+  path: Omit<Content['path'], 'jobs' | 'earlier'>;
+  skills: Omit<Content['skills'], 'groups'>;
+};
