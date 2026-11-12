@@ -58,6 +58,7 @@ Read this first in a new or compacted session. Last updated: 2026-11-11 (add-new
 | add-copy-frameworks (our `copy-frameworks` skill and `pick-copy-framework.mjs`, Copy plan in the proposal, brief `proof` and `audience.awareness`, the `copy-claims` rule of `check-landing`, vendored `copywriting`; guide `docs/copy.md`) | Merged (PR #48), archived on `change/add-neuromarketing-review` |
 | add-neuromarketing-review (our `conversion-psychology` skill with evidence levels, Conversion plan, `conversion-audit.mjs` and one review round before the polish, the `dark-patterns` rule, vendored `cro` and `marketing-psychology`; guide `docs/conversion.md`) | Merged (PR #49), archived in PR #50 (with a status update) |
 | Test landing `sites/turnio` (fictional SaaS, Spanish, `product-led-saas`; first real run of the Copy plan, the Conversion plan, the conversion review, `copy-claims` and `dark-patterns`) | Merged (PR #51; a site change, nothing to archive). Preview https://change-turnio-test.turnio.pages.dev ; details in "Resume here" and `docs/customer-runs.md` |
+| `sites/personal-brand` content moved to Astro content collections (`src/content/career.json`, `skills.json`, `src/content.config.ts`) and a `.pages.yml` for Pages CMS (branch `change/personal-brand-cms`) | Built and checked here; sync into its repository pending (then the first real edit through app.pagescms.org) |
 
 ## Resume here (2026-11-03)
 

@@ -1,0 +1,108 @@
+{
+  "groups": [
+    {
+      "title": { "en": "AI tools", "es": "Herramientas de IA" },
+      "size": "wide",
+      "tone": "ai",
+      "items": [
+        "Claude",
+        "Codex",
+        "Cursor",
+        "OpenCode",
+        "Ollama",
+        "DeepSeek",
+        "Kimi",
+        "GLM",
+        "Hermes",
+        "GPT",
+        "V0"
+      ]
+    },
+    {
+      "title": { "en": "Frameworks", "es": "Frameworks" },
+      "size": "narrow",
+      "items": [
+        "Express",
+        "Next",
+        "Nest",
+        "Fastify",
+        "Astro",
+        "FastAPI",
+        "Svelte",
+        "Vue",
+        "Angular",
+        "React Native"
+      ]
+    },
+    {
+      "title": { "en": "Frontend", "es": "Frontend" },
+      "size": "narrow",
+      "items": [
+        "HTML",
+        "CSS",
+        "TypeScript",
+        "JavaScript",
+        "React",
+        "Redux",
+        "GraphQL",
+        "RxJS",
+        "Tailwind",
+        "Playwright",
+        "Jest",
+        "React Testing Library",
+        "SWR",
+        "React Query"
+      ]
+    },
+    {
+      "title": { "en": "Principles", "es": "Principios" },
+      "size": "wide",
+      "items": [
+        "SOLID",
+        "CQS",
+        "DRY",
+        "Clean Architecture",
+        "POLA",
+        "YAGNI",
+        "Hexagonal"
+      ]
+    },
+    {
+      "title": { "en": "Workflow", "es": "Flujo de trabajo" },
+      "size": "wide",
+      "items": [
+        "GitHub",
+        "Bitbucket",
+        "Jira",
+        "Scrum",
+        "GitHub Actions",
+        "CircleCI",
+        "Vercel",
+        "Netlify",
+        "AWS",
+        "Terraform",
+        "Google Cloud",
+        "Kubernetes",
+        "Grafana"
+      ]
+    },
+    {
+      "title": { "en": "Soft skills", "es": "Habilidades blandas" },
+      "size": "narrow",
+      "items": [
+        "Perseverance",
+        "Continuous improvement",
+        "Collaboration in cross-functional teams",
+        "Communication with developers, product managers and stakeholders",
+        "Proactive problem solving"
+      ],
+      "itemsEs": [
+        "Perseverancia",
+        "Mejora continua",
+        "Colaboración en equipos multidisciplinares",
+        "Comunicación con desarrolladores, product managers y stakeholders",
+        "Resolución proactiva de problemas"
+      ]
+    }
+  ]
+}

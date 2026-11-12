@@ -1,0 +1,127 @@
+# Pages CMS configuration (app.pagescms.org). Edits the two JSON files under src/content/; each save is a commit
+# that the repository's CI checks before it deploys. See docs/cms.md in landing-factory. Labels are in Spanish for
+# the owner; the keys are the ones src/content.config.ts validates.
+content:
+  - name: career
+    label: Trayectoria
+    type: file
+    path: src/content/career.json
+    format: json
+    fields:
+      - name: jobs
+        label: Puestos
+        type: object
+        list: true
+        fields:
+          - name: employer
+            label: Empresa
+            type: string
+            required: true
+          - name: role
+            label: Cargo
+            type: object
+            fields:
+              - { name: en, label: Inglés, type: string, required: true }
+              - { name: es, label: Español, type: string, required: true }
+          - name: place
+            label: Lugar
+            type: object
+            fields:
+              - { name: en, label: Inglés, type: string, required: true }
+              - { name: es, label: Español, type: string, required: true }
+          - name: dates
+            label: Fechas
+            type: object
+            fields:
+              - { name: en, label: Inglés, type: string, required: true }
+              - { name: es, label: Español, type: string, required: true }
+          - name: bullets
+            label: Logros
+            description: Mismo número de frases en inglés y en español.
+            type: object
+            fields:
+              - { name: en, label: Inglés, type: text, list: true }
+              - { name: es, label: Español, type: text, list: true }
+          - name: stack
+            label: Tecnologías
+            description: Lista común a los dos idiomas.
+            type: string
+            list: true
+            required: true
+          - name: stackEs
+            label: Tecnologías (solo español)
+            description: Rellenar solo si la lista en español es distinta de la anterior (por ejemplo "IA" en lugar de "AI").
+            type: string
+            list: true
+          - name: tone
+            label: Color de la tarjeta
+            type: select
+            required: true
+            options:
+              values:
+                - { value: '3', label: Campo de color 3 }
+                - { value: '5', label: Campo de color 5 }
+      - name: earlier
+        label: Puestos anteriores
+        type: object
+        list: true
+        fields:
+          - name: employer
+            label: Empresa
+            type: string
+            required: true
+          - name: role
+            label: Cargo
+            type: object
+            fields:
+              - { name: en, label: Inglés, type: string, required: true }
+              - { name: es, label: Español, type: string, required: true }
+          - name: dates
+            label: Fechas
+            type: object
+            fields:
+              - { name: en, label: Inglés, type: string, required: true }
+              - { name: es, label: Español, type: string, required: true }
+  - name: skills
+    label: Habilidades
+    type: file
+    path: src/content/skills.json
+    format: json
+    fields:
+      - name: groups
+        label: Grupos de habilidades
+        type: object
+        list: true
+        fields:
+          - name: title
+            label: Título
+            type: object
+            fields:
+              - { name: en, label: Inglés, type: string, required: true }
+              - { name: es, label: Español, type: string, required: true }
+          - name: size
+            label: Ancho del bloque
+            type: select
+            required: true
+            options:
+              values:
+                - { value: wide, label: Ancho (7 de 12 columnas) }
+                - { value: narrow, label: Estrecho (5 de 12 columnas) }
+          - name: tone
+            label: Campo de color
+            description: Solo el bloque de herramientas de IA usa el azul profundo.
+            type: select
+            options:
+              values:
+                - { value: ai, label: Azul profundo (IA) }
+          - name: items
+            label: Elementos
+            description: Lista común a los dos idiomas.
+            type: string
+            list: true
+            required: true
+          - name: itemsEs
+            label: Elementos (solo español)
+            description: Rellenar solo si la lista en español es distinta, con el mismo número de elementos.
+            type: string
+            list: true
