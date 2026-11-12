@@ -45,6 +45,10 @@ While a landing is managed, the factory is the source of truth, except for the C
 - Run the pull before a revision round that touches content, and before a sync when sync listed kept files.
 - A revision round never edits CMS content: a feedback item that only changes it is classified `cms` and listed in `REVISION.md` under "Edit in the CMS".
 
+## Formatting
+
+The CMS owns the formatting of its files in the repository: Pages CMS writes JSON with `JSON.stringify(value, null, 2)` (no final newline) and YAML with the `yaml` package, which Prettier would rewrite, so the exported `.prettierignore` lists every CMS path (a file as `/<path>`, a collection as `/<path>/`) and `format:check` never fails after a save. In the factory the files follow the factory's Prettier: `cms.mjs pull` formats what it writes (JSON and YAML, the factory's `.prettierrc.json`). Because of that, `sync-export.mjs` and `pull` compare CMS files by parsed value (JSON and YAML), not by bytes, and fall back to bytes when a file does not parse: formatting alone is never a difference.
+
 ## Still owed
 
 The first real edit through app.pagescms.org on a repository with a `.pages.yml`: install the app, edit one entry, see the commit, the CI run and the deploy. Existing sites (`personal-brand`, `tupathdigital`) move their lists to collections in their own site changes. Out of scope: uploads, other CMSs, self-hosting Pages CMS, a pull request per edit, generating `.pages.yml` from the schemas, `/new-landing` writing collections.

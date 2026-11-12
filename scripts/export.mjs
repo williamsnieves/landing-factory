@@ -71,6 +71,18 @@ node_modules/
 /.pages.yml
 `;
 
+/**
+ * The exported .prettierignore. The CMS owns the formatting of its files in the repository (Pages CMS writes
+ * JSON with JSON.stringify and YAML with the yaml package, which Prettier would rewrite), so each CMS path is
+ * listed: a file as /<path>, a collection as /<path>/. Unchanged for a site without .pages.yml.
+ */
+export function prettierIgnoreFor(cmsEntries = []) {
+  const lines = cmsEntries.map((e) =>
+    e.type === 'collection' ? `/${e.path}/` : `/${e.path}`,
+  );
+  return `${PRETTIERIGNORE}${lines.map((l) => `${l}\n`).join('')}`;
+}
+
 const HELP = `Usage: npm run export -- --site <slug> --out <dir> [options]
 
 Writes a standalone repository with the site at its root: the site, the factory scripts QA, the landing report
@@ -270,7 +282,10 @@ export function planExport({ root, slug, withBrief }) {
       content: `${JSON.stringify(exportedKnipConfig(), null, 2)}\n`,
     },
     { to: '.gitignore', content: GITIGNORE },
-    { to: '.prettierignore', content: PRETTIERIGNORE },
+    {
+      to: '.prettierignore',
+      content: prettierIgnoreFor(cms.paths),
+    },
     {
       to: '.github/workflows/ci.yml',
       content: readTemplate('ci.yml'),

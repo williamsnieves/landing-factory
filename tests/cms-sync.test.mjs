@@ -288,6 +288,61 @@ test('a site without .pages.yml exports no CMS file', () => {
   assert.equal(existsSync(join(out, '.pages.yml')), false);
 });
 
+const PRETTIER_BIN = join(ROOT, 'node_modules/prettier/bin/prettier.cjs');
+const prettierCheck = (cwd, ...files) => {
+  try {
+    execFileSync(process.execPath, [PRETTIER_BIN, '--check', ...files], {
+      cwd,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    return true;
+  } catch {
+    return false;
+  }
+};
+// What Pages CMS writes: JSON.stringify(value, null, 2), no final newline.
+const cmsJson = (value) => JSON.stringify(value, null, 2);
+
+test('export lists the CMS paths in .prettierignore, so a file saved by the CMS passes format:check', () => {
+  const factory = makeFactory();
+  put(
+    factory.site,
+    'src/content.config.ts',
+    `${CONTENT_CONFIG}// src/content/site.json\n`,
+  );
+  put(factory.site, 'src/content/jobs/a.json', '{"title":"A"}\n');
+  put(factory.site, 'src/content/site.json', '{"a":1}\n');
+  put(
+    factory.site,
+    '.pages.yml',
+    `${PAGES_YML}  - name: site\n    label: Site\n    type: file\n    path: src/content/site.json\n    format: json\n`,
+  );
+  const out = fresh('out');
+  exportTo(factory, out);
+  const ignore = readFileSync(join(out, '.prettierignore'), 'utf8');
+  assert.match(ignore, /^\/src\/content\/jobs\/$/m);
+  assert.match(ignore, /^\/src\/content\/site\.json$/m);
+  const file = join(out, 'src/content/jobs/a.json');
+  writeFileSync(file, cmsJson({ title: 'A', tags: ['x', 'y'] }));
+  writeFileSync(join(out, 'src/content/site.json'), cmsJson({ a: [1, 2] }));
+  assert.equal(
+    prettierCheck(out, 'src/content/jobs/a.json', 'src/content/site.json'),
+    true,
+  );
+  // without the ignore entry the same file fails the check (the problem this change fixes)
+  writeFileSync(join(out, '.prettierignore'), 'package-lock.json\n');
+  assert.equal(prettierCheck(out, 'src/content/jobs/a.json'), false);
+});
+
+test('a site without .pages.yml gets the unchanged .prettierignore', () => {
+  const out = fresh('out');
+  exportTo(makeFactory(), out);
+  assert.equal(
+    readFileSync(join(out, '.prettierignore'), 'utf8'),
+    'package-lock.json\ndist/\n.astro/\nnode_modules/\n/qa/\n/docs/factory/\n/.pages.yml\n',
+  );
+});
+
 // --- sync ------------------------------------------------------------------------------------------------
 
 test('sync keeps an edit made through the CMS, lists it and names the pull command', () => {
@@ -371,6 +426,57 @@ test('a path removed from .pages.yml in the factory is no longer protected', () 
   assert.match(r.out, /kept \(managed by the CMS\): src\/content\/site\.json/);
 });
 
+test('sync lists no kept file when the CMS file has the same values in another formatting', () => {
+  const m = cmsManaged();
+  put(m.clone, 'src/content/jobs/a.json', cmsJson({ title: 'A' }));
+  commitIn(m.clone);
+  const r = sync(m);
+  assert.equal(r.code, 0, r.out + r.err);
+  assert.doesNotMatch(r.out, /managed by the CMS/);
+  assert.equal(
+    readFileSync(join(m.clone, 'src/content/jobs/a.json'), 'utf8'),
+    cmsJson({ title: 'A' }),
+  );
+});
+
+test('sync keeps a CMS file whose value differs, and compares unparsable files by bytes', () => {
+  const m = cmsManaged();
+  put(m.clone, 'src/content/jobs/a.json', cmsJson({ title: 'Other' }));
+  put(m.clone, 'src/content/jobs/b.json', '{ not json');
+  commitIn(m.clone);
+  const r = sync(m);
+  assert.equal(r.code, 0, r.out + r.err);
+  assert.match(
+    r.out,
+    /kept \(managed by the CMS\): src\/content\/jobs\/a\.json/,
+  );
+  assert.match(
+    r.out,
+    /kept \(managed by the CMS\): src\/content\/jobs\/b\.json/,
+  );
+});
+
+test('sync compares YAML CMS files by value', () => {
+  const factory = makeFactory();
+  put(factory.site, 'src/content.config.ts', '// src/content/site.yml\n');
+  put(factory.site, 'src/content/site.yml', 'title: A\nlist: [1, 2]\n');
+  put(
+    factory.site,
+    '.pages.yml',
+    'content:\n  - name: site\n    type: file\n    path: src/content/site.yml\n    format: yaml\n',
+  );
+  const m = managedFrom(factory);
+  put(m.clone, 'src/content/site.yml', 'list:\n  - 1\n  - 2\ntitle: A\n');
+  commitIn(m.clone);
+  let r = sync(m);
+  assert.equal(r.code, 0, r.out + r.err);
+  assert.doesNotMatch(r.out, /managed by the CMS/);
+  put(m.clone, 'src/content/site.yml', 'list:\n  - 1\ntitle: A\n');
+  commitIn(m.clone);
+  r = sync(m);
+  assert.match(r.out, /kept \(managed by the CMS\): src\/content\/site\.yml/);
+});
+
 // --- pull ------------------------------------------------------------------------------------------------
 
 test('pull copies an added job, a changed one and a deletion, only inside the CMS paths', () => {
@@ -399,9 +505,11 @@ test('pull copies an added job, a changed one and a deletion, only inside the CM
     readdirSync(join(m.factory.site, 'src/content/jobs')).sort(),
     ['a.json', 'c.json'],
   );
-  assert.equal(
-    readFileSync(join(m.factory.site, 'src/content/jobs/a.json'), 'utf8'),
-    '{"title":"A2"}\n',
+  assert.deepEqual(
+    JSON.parse(
+      readFileSync(join(m.factory.site, 'src/content/jobs/a.json'), 'utf8'),
+    ),
+    { title: 'A2' },
   );
   assert.equal(
     readFileSync(join(m.factory.site, 'src/components/Hero.astro'), 'utf8'),
@@ -411,6 +519,43 @@ test('pull copies an added job, a changed one and a deletion, only inside the CM
   assert.equal(status(m.clone), '');
   // a second pull finds nothing to do
   assert.match(pull(m).out, /0 file\(s\) changed/);
+});
+
+test('pull formats what it writes with the factory Prettier and keeps the values', () => {
+  const m = cmsManaged();
+  put(
+    m.clone,
+    'src/content/jobs/c.json',
+    cmsJson({ title: 'C', tags: ['x', 'y'] }),
+  );
+  put(m.clone, 'src/content/jobs/a.json', cmsJson({ title: 'A2' }));
+  commitIn(m.clone);
+  const r = pull(m);
+  assert.equal(r.code, 0, r.out + r.err);
+  const jobs = join(m.factory.site, 'src/content/jobs');
+  assert.equal(
+    prettierCheck(ROOT, join(jobs, 'c.json'), join(jobs, 'a.json')),
+    true,
+  );
+  assert.deepEqual(JSON.parse(readFileSync(join(jobs, 'c.json'), 'utf8')), {
+    title: 'C',
+    tags: ['x', 'y'],
+  });
+  // pulling again finds nothing to do: the formatting alone is no change
+  const again = pull(m);
+  assert.match(again.out, /0 file\(s\) changed/);
+});
+
+test('pull --dry-run writes nothing for an unformatted file', () => {
+  const m = cmsManaged();
+  put(m.clone, 'src/content/jobs/c.json', cmsJson({ title: 'C' }));
+  commitIn(m.clone);
+  const r = pull(m, ['--dry-run']);
+  assert.equal(r.code, 0, r.out + r.err);
+  assert.equal(
+    existsSync(join(m.factory.site, 'src/content/jobs/c.json')),
+    false,
+  );
 });
 
 test('pull --dry-run writes nothing; a pulled factory then syncs without a hint', () => {

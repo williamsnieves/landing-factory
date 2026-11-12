@@ -41,7 +41,12 @@ import {
   checkClone,
   requireManagedRecord,
 } from './lib/clone-check.mjs';
-import { cmsFiles, cmsPathsOf, isCmsPath } from './lib/cms-config.mjs';
+import {
+  cmsFiles,
+  cmsPathsOf,
+  isCmsPath,
+  sameContent,
+} from './lib/cms-config.mjs';
 import { SLUG_PATTERN } from './lib/sites.mjs';
 import { walkFiles } from './report/fs-util.mjs';
 
@@ -157,7 +162,7 @@ export function planMirror(scratch, clone, cmsPaths = [], siteDir = null) {
     const live = new Set(cmsFiles(clone, cmsPaths));
     const matches = (rel) =>
       [join(siteDir, rel), join(scratch, rel)].some(
-        (other) => existsSync(other) && sameBytes(other, join(clone, rel)),
+        (other) => existsSync(other) && sameContent(other, join(clone, rel)),
       );
     for (const rel of new Set([...mine, ...live]))
       if (!live.has(rel) || !mine.has(rel) || !matches(rel))
