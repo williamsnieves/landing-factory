@@ -31,6 +31,7 @@ import {
   singleSiteGuide,
 } from './export/readme.mjs';
 import { ConfigError, resolveConfig } from './deploy/config.mjs';
+import { readCmsConfig } from './lib/cms-config.mjs';
 import { SLUG_PATTERN } from './lib/sites.mjs';
 import { LAYERS, unusedLayers } from './site-layers.mjs';
 import { scanTree } from './report/source-scan.mjs';
@@ -67,6 +68,7 @@ dist/
 node_modules/
 /qa/
 /docs/factory/
+/.pages.yml
 `;
 
 const HELP = `Usage: npm run export -- --site <slug> --out <dir> [options]
@@ -152,6 +154,16 @@ export function planExport({ root, slug, withBrief }) {
   if (!existsSync(join(siteDir, 'package.json')))
     throw new UsageError(
       `No site "${slug}": sites/${slug}/package.json not found`,
+    );
+
+  // The Pages CMS configuration is checked first: an unsafe one (uploads, actions, paths outside src/content/)
+  // never leaves the factory. It is factory-side only (it needs `yaml`), never part of the script closure.
+  const cms = readCmsConfig(siteDir);
+  if (cms.problems.length)
+    throw new CheckError(
+      `sites/${slug}/.pages.yml is not valid (node scripts/cms.mjs check --site ${slug}); nothing was written:\n${cms.problems
+        .map((p) => `  ${p}`)
+        .join('\n')}`,
     );
 
   // A layer the site holds without using it never leaves the factory (design Decision 6).

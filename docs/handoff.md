@@ -76,6 +76,10 @@ When in doubt the owner sends a screenshot of the registrar's name server screen
 
 An exported repository does not follow later factory changes by itself, neither a revised landing nor a new workflow step or a fixed script. While the landing is managed (not transferred), the factory is the source of truth and `node scripts/sync-export.mjs --site <slug> --into <clone>` carries everything into a clone of the repository: it re-exports the site into a scratch folder, mirrors the result into the clone (add, change, delete), keeps `.git`, ignored paths, the lockfile unless `package.json` changed and the README unless only its export line differs, prints the files, and never commits or pushes. Then check with `npm ci`, `npm run lint` and `npm run build`, push a branch and open a pull request; the repository's CI gives the preview. Details and refusals: `docs/revise.md`. Changes made directly in the repository are overwritten by the next sync. A transferred landing is no longer synced.
 
+## Content editing with Pages CMS
+
+A site with a `.pages.yml` gets one more section in the owner's checklist: install the Pages CMS GitHub App on that repository only, open it at app.pagescms.org, invite editors by email, and know that each save is a commit on the production branch that CI checks before it deploys. Sync keeps the CMS-managed files; `node scripts/cms.mjs pull` brings them back into the factory. See `docs/cms.md`.
+
 ## Transfer
 
 When the customer takes the project, `node scripts/handoff.mjs transfer-plan --site <slug> --to <github-owner>` prints the checklist: the owner transfers the repository on GitHub (the Claude GitHub App cannot), the customer creates their host project and adds their own secrets by name, starts the first run, and the domain moves; the owner then removes his host project, secrets and DNS records. `node scripts/transfer.mjs record --site <slug> --to <github-owner>` writes `transferredTo`, `transferredAt` and the new repository URL into `EXPORTED.json`, after which revisions and syncs are refused. See `docs/revise.md`.

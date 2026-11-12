@@ -521,3 +521,23 @@ test('settings allow the read-only handoff script and the npm script exists', ()
   const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
   assert.equal(pkg.scripts.handoff, 'node scripts/handoff.mjs');
 });
+
+// --- plan: Pages CMS ---------------------------------------------------------------------------------------
+
+test('plan: a site with .pages.yml gets the Pages CMS steps; one without has none', () => {
+  const withCms = factory();
+  put(withCms.dir, '.pages.yml', 'content: []\n');
+  const r = plan(withCms.root);
+  assert.equal(r.code, 0, r.all);
+  assert.match(r.out, /## Content editing \(Pages CMS\)/);
+  assert.match(r.out, /Pages CMS GitHub App.*`me\/acme` only/);
+  assert.match(r.out, /app\.pagescms\.org/);
+  assert.match(r.out, /Invite each editor by email/);
+  assert.match(r.out, /commit on the production branch \(`main`\)/);
+  assert.match(r.out, /a bad edit never goes live/);
+  assert.match(r.out, /cms\.mjs pull --site acme --from <clone>/);
+
+  const without = plan(factory().root);
+  assert.equal(without.code, 0, without.all);
+  assert.doesNotMatch(without.out, /Pages CMS|pagescms|Content editing/);
+});

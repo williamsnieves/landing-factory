@@ -28,6 +28,7 @@ import {
   normalizeRepoUrl,
   readExportRecord,
 } from './lib/export-record.mjs';
+import { hasCmsConfig } from './lib/cms-config.mjs';
 import { SLUG_PATTERN, isSiteDir } from './lib/sites.mjs';
 import { unusedLayers } from './site-layers.mjs';
 
@@ -69,7 +70,13 @@ export function checkSite(root, slug, { visibility } = {}) {
   const problems = [];
   const warnings = [];
   const problem = (id, message) => problems.push({ id, message });
-  const facts = { slug, config: null, siteUrl: null, briefDomain: '' };
+  const facts = {
+    slug,
+    config: null,
+    siteUrl: null,
+    briefDomain: '',
+    cms: false,
+  };
 
   if (!existsSync(siteDir) || !isSiteDir(siteDir)) {
     problem(
@@ -78,6 +85,8 @@ export function checkSite(root, slug, { visibility } = {}) {
     );
     return { site: slug, problems, warnings, facts };
   }
+
+  facts.cms = hasCmsConfig(siteDir);
 
   if (existsSync(join(siteDir, 'EXPORTED.json')))
     problem(
@@ -347,6 +356,19 @@ export function renderPlan(
     '- Do not delete anything before the new site answers on the domain.',
     '',
   );
+  if (result.facts.cms)
+    lines.push(
+      '## Content editing (Pages CMS)',
+      '',
+      'This landing has a `.pages.yml`, so its owner or customer can edit the content it lists without code (guide: `docs/cms.md`).',
+      '',
+      `- Install the **Pages CMS GitHub App** (app.pagescms.org) on the repository \`${repo}\` only: **GitHub > Settings > Applications > Pages CMS > Repository access > Only select repositories**. It can write to every repository it can reach, so never give it all of them.`,
+      '- Open the repository at app.pagescms.org and check that the collections of `.pages.yml` appear.',
+      '- Invite each editor by email from Pages CMS; a customer needs no GitHub account.',
+      `- Every save in Pages CMS is a commit on the production branch (\`${section.productionBranch}\`). The repository's CI checks it (types, build, QA, report) before it deploys: the build fails on a wrong value, so a bad edit never goes live and the previous version stays up.`,
+      `- Before the next revision round or sync in the factory, run \`node scripts/cms.mjs pull --site ${slug} --from <clone>\` (sync never overwrites these files).`,
+      '',
+    );
   return lines.join('\n').trimEnd();
 }
 
