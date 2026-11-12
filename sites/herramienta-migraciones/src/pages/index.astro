@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Motion from '../components/motion/Motion.astro';
+import SiteHeader from '../components/sections/SiteHeader.astro';
+import Hero from '../components/sections/Hero.astro';
+import PorQue from '../components/sections/PorQue.astro';
+import Instalar from '../components/sections/Instalar.astro';
+import Como from '../components/sections/Como.astro';
+import Principios from '../components/sections/Principios.astro';
+import Docs from '../components/sections/Docs.astro';
+import Comunidad from '../components/sections/Comunidad.astro';
+import Cierre from '../components/sections/Cierre.astro';
+import SiteFooter from '../components/sections/SiteFooter.astro';
+import { seo, ui } from '../content/site';
+import { jsonLd } from '../data/seo';
+---
+
+<BaseLayout
+  title={seo.title}
+  description={seo.description}
+  lang="es"
+  jsonLd={jsonLd}
+  skipLabel={ui.skipToContent}
+>
+  <Motion slot="head" />
+  <SiteHeader slot="header" />
+  <Hero />
+  <PorQue />
+  <Instalar />
+  <Como />
+  <Principios />
+  <Docs />
+  <Comunidad />
+  <Cierre />
+  <SiteFooter slot="footer" />
+</BaseLayout>

@@ -1,0 +1,103 @@
+---
+/**
+ * The hero's self-map (chaptered-atlas `self-map-hero`), drawn as a migration chain: four nodes stepping down like
+ * strata, each one a link to its section. Geometry is computed here; colours come from the tokens.
+ */
+import type { ChainNode } from '../../content/site';
+
+interface Props {
+  nodes: ChainNode[];
+  title: string;
+  caption: string;
+}
+const { nodes, title, caption } = Astro.props;
+
+const STEP_X = 22;
+const STEP_Y = 48;
+const START_X = 14;
+const START_Y = 22;
+const points = nodes.map((node, index) => ({
+  ...node,
+  x: START_X + index * STEP_X,
+  y: START_Y + index * STEP_Y,
+}));
+// Stepped connector: down from one node, then across to the next (a stratum edge).
+const path = points
+  .slice(1)
+  .map((point, index) => {
+    const previous = points[index];
+    return `M${previous.x} ${previous.y + 7}V${point.y}H${point.x - 7}`;
+  })
+  .join('');
+const height = START_Y + (nodes.length - 1) * STEP_Y + 26;
+---
+
+<nav aria-label={title} class="chain w-full max-w-[22.5rem]">
+  <svg
+    viewBox={`0 0 300 ${height}`}
+    class="block h-auto w-full overflow-visible"
+  >
+    <path
+      d={path}
+      fill="none"
+      class="stroke-dot"
+      stroke-width="1.25"
+      aria-hidden="true"
+    ></path>
+    {points.map((point, index) => (
+      <a href={point.href} aria-label={`${point.id}: ${point.label}`}>
+        <rect
+          class="chain-hit"
+          x={point.x - 12}
+          y={point.y - 19}
+          width={286 - point.x}
+          height="40"
+          fill="transparent"
+        />
+        <circle
+          cx={point.x}
+          cy={point.y}
+          r="6.5"
+          class={
+            index === 0
+              ? 'fill-primary stroke-primary'
+              : 'fill-paper stroke-dot'
+          }
+          stroke-width="1.5"
+        />
+        <text
+          x={point.x + 18}
+          y={point.y - 1}
+          class="chain-id fill-ink font-mono"
+          font-size="12.5"
+        >
+          {point.id}
+        </text>
+        <text
+          x={point.x + 18}
+          y={point.y + 14}
+          class="fill-ink-muted font-sans"
+          font-size="11.5"
+        >
+          {point.label}
+        </text>
+      </a>
+    ))}
+  </svg>
+  <p class="text-ink-muted mt-3 text-xs">{caption}</p>
+</nav>
+
+<style>
+  .chain a {
+    outline: none;
+  }
+  .chain a:hover .chain-id,
+  .chain a:focus-visible .chain-id {
+    fill: var(--color-primary);
+    text-decoration: underline;
+  }
+  .chain a:focus-visible .chain-hit {
+    stroke: var(--color-primary);
+    stroke-width: 2;
+  }
+</style>

@@ -1,0 +1,171 @@
+---
+/**
+ * The closing generative dot field (dev-console `generative-dot-field`): loose clusters and arcs of dots, generated at
+ * build time with a seeded PRNG. Four groups drift slowly in CSS while the field is on screen (a small observer sets
+ * data-dots-active) and stay still off screen, without JavaScript and under reduced motion.
+ */
+import { arcDots, clusterDots, seeded, type Dot } from './dots';
+
+interface Props {
+  label: string;
+}
+const { label } = Astro.props;
+
+const random = seeded(20261112);
+const R: [number, number] = [1.1, 2.6];
+const groups: { name: string; dots: Dot[] }[] = [
+  {
+    name: 'a',
+    dots: [
+      ...clusterDots(
+        random,
+        { cx: 180, cy: 210, rx: 150, ry: 90, count: 70 },
+        R,
+      ),
+      ...arcDots(
+        random,
+        {
+          cx: 420,
+          cy: 470,
+          radius: 300,
+          from: 3.6,
+          to: 4.75,
+          count: 46,
+          jitter: 8,
+        },
+        R,
+      ),
+    ],
+  },
+  {
+    name: 'b',
+    dots: [
+      ...clusterDots(
+        random,
+        { cx: 560, cy: 140, rx: 120, ry: 70, count: 60 },
+        R,
+      ),
+      ...clusterDots(
+        random,
+        { cx: 700, cy: 300, rx: 90, ry: 60, count: 38 },
+        R,
+      ),
+    ],
+  },
+  {
+    name: 'c',
+    dots: [
+      ...arcDots(
+        random,
+        {
+          cx: 980,
+          cy: -60,
+          radius: 330,
+          from: 0.55,
+          to: 2.55,
+          count: 60,
+          jitter: 10,
+        },
+        R,
+      ),
+      ...clusterDots(
+        random,
+        { cx: 960, cy: 200, rx: 110, ry: 80, count: 56 },
+        R,
+      ),
+    ],
+  },
+  {
+    name: 'd',
+    dots: [
+      ...clusterDots(
+        random,
+        { cx: 1270, cy: 150, rx: 140, ry: 90, count: 64 },
+        R,
+      ),
+      ...arcDots(
+        random,
+        {
+          cx: 1260,
+          cy: 520,
+          radius: 260,
+          from: 3.8,
+          to: 5.4,
+          count: 40,
+          jitter: 7,
+        },
+        R,
+      ),
+    ],
+  },
+];
+---
+
+<div class="dot-field" data-dot-field>
+  <svg
+    viewBox="0 0 1440 400"
+    preserveAspectRatio="xMidYMid slice"
+    role="img"
+    aria-label={label}
+    class="block h-64 w-full sm:h-auto"
+  >
+    <title>{label}</title>
+    {groups.map((group) => (
+      <g class={`drift drift-${group.name} fill-dot`}>
+        {group.dots.map((dot) => (
+          <circle cx={dot.x} cy={dot.y} r={dot.r} />
+        ))}
+      </g>
+    ))}
+  </svg>
+</div>
+
+<!-- Global (class names unique to this component) so the hundreds of circles carry no scope attribute. -->
+<style is:global>
+  .dot-field .drift {
+    animation: dot-drift 26s var(--ease-in-out) infinite alternate;
+    animation-play-state: paused;
+  }
+  .dot-field .drift-b {
+    animation-duration: 31s;
+    animation-delay: -6s;
+  }
+  .dot-field .drift-c {
+    animation-duration: 23s;
+    animation-delay: -11s;
+    animation-direction: alternate-reverse;
+  }
+  .dot-field .drift-d {
+    animation-duration: 35s;
+    animation-delay: -3s;
+  }
+  .dot-field[data-dots-active] .drift {
+    animation-play-state: running;
+  }
+  @keyframes dot-drift {
+    from {
+      transform: translate3d(-6px, 3px, 0);
+    }
+    to {
+      transform: translate3d(8px, -5px, 0);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .dot-field .drift {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  // Run the drift only while the field is on screen; reduced motion keeps it still (the CSS removes the animation).
+  const fields = document.querySelectorAll<HTMLElement>('[data-dot-field]');
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        entry.target.toggleAttribute('data-dots-active', entry.isIntersecting);
+      }
+    });
+    fields.forEach((field) => observer.observe(field));
+  }
+</script>

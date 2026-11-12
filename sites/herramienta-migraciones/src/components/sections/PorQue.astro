@@ -1,0 +1,30 @@
+---
+/** Por qué (`#por-que`, PAS: agitate, kept plain): three hairline rows naming the pains, and the drift drawing. */
+import SectionFrame from '../ui/SectionFrame.astro';
+import MetaRow from '../ui/MetaRow.astro';
+import DriftDiagram from '../art/DriftDiagram.astro';
+import { environments, porQue } from '../../content/site';
+---
+
+<SectionFrame
+  id={porQue.id}
+  migration={porQue.migration}
+  title={porQue.title}
+  lead={porQue.lead}
+>
+  <div slot="aside" data-reveal data-reveal-y="10" data-reveal-delay="0.1">
+    <DriftDiagram label={porQue.diagramLabel} environments={environments} />
+  </div>
+  <ul>
+    {porQue.rows.map((row, index) => (
+      <MetaRow
+        code={row.key}
+        title={row.title}
+        text={row.text}
+        detail={row.detail}
+        as="h3"
+        delay={index * 0.06}
+      />
+    ))}
+  </ul>
+</SectionFrame>

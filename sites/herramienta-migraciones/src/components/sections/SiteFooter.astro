@@ -1,0 +1,73 @@
+---
+/** Footer: name and license on the left; on the right one line of in-page links, the demo notice and photo credits. */
+import StrataMark from '../ui/StrataMark.astro';
+import credits from '../../data/credits.json';
+import { brand, footer, ui } from '../../content/site';
+
+interface Props {
+  /** Prefix for in-page links: '' on the home page, '/' on other pages. */
+  base?: string;
+}
+const { base = '' } = Astro.props;
+
+interface Credit {
+  author: string;
+  license: string;
+  url: string;
+}
+const photoCredits = credits as Credit[];
+// One line of in-page links (a minimal footer, which dev-console allows): the columns of the content module, in order.
+const links: readonly { label: string; href: string }[] =
+  footer.columns.flatMap(
+    (column): readonly { label: string; href: string }[] => column.links,
+  );
+---
+
+<footer class="bg-panel text-ink-soft">
+  <div class="mx-auto grid max-w-[77.5rem] gap-x-12 gap-y-10 px-5 py-14 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:px-12 lg:py-16">
+    <div>
+      <p class="text-ink font-mono inline-flex items-center gap-2.5 text-base tracking-[-0.02em]">
+        <StrataMark class="size-6" />
+        <span>{brand.command}</span>
+      </p>
+      <p class="mt-4 max-w-[34ch] text-sm">{footer.summary}</p>
+      <p class="font-mono text-ink-muted mt-2 text-xs">
+        {brand.version} · {brand.license}
+      </p>
+    </div>
+    <div class="flex flex-col gap-y-6">
+      <nav aria-label={ui.footerNavLabel}>
+        <ul class="flex flex-wrap gap-x-6">
+          {links.map((link) => (
+            <li>
+              <a
+                href={`${base}${link.href}`}
+                class="hover:text-primary inline-flex min-h-10 items-center text-sm underline decoration-dot decoration-1 underline-offset-4 transition-colors duration-(--duration-fast)"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <div class="text-xs">
+        <p class="bg-primary-soft text-ink px-3 py-2">{footer.demoNotice}</p>
+        {photoCredits.length > 0 && (
+          <ul class="mt-4">
+            <li class="font-mono text-ink-muted text-2xs uppercase">
+              {footer.creditsLabel}
+            </li>
+            {photoCredits.map((credit) => (
+              <li>
+                <a href={credit.url} class="underline underline-offset-4">
+                  {credit.author}
+                </a>
+                , {credit.license}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  </div>
+</footer>

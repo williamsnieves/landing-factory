@@ -1,0 +1,131 @@
+---
+/**
+ * Índice (hero, `#indice`): a sticky identity column on the left (CSS sticky, not a pin) with `estrato` in large mono,
+ * the h1, the first paragraph and the two actions; on the right the migration-chain self-map, the featured latest
+ * release and eight hairline release rows. Stacks below 1024 px.
+ */
+import ChainMap from '../art/ChainMap.astro';
+import InstallButton from '../ui/InstallButton.astro';
+import DemoLink from '../ui/DemoLink.astro';
+import MetaRow from '../ui/MetaRow.astro';
+import MigrationLabel from '../ui/MigrationLabel.astro';
+import RichText from '../ui/RichText.astro';
+import {
+  actions,
+  brand,
+  chain,
+  featuredRelease,
+  hero,
+  releases,
+} from '../../content/site';
+---
+
+<section
+  id={hero.id}
+  aria-labelledby="indice-titulo"
+  class="mx-auto grid max-w-[77.5rem] gap-x-12 gap-y-16 px-5 pt-14 pb-24 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:px-12 lg:pt-20 lg:pb-36"
+>
+  <div class="lg:sticky lg:top-10 lg:self-start">
+    <div class="mb-8" data-reveal data-reveal-y="10">
+      <MigrationLabel id={`índice · ${brand.version}`} />
+    </div>
+    <h1
+      id="indice-titulo"
+      class="text-ink text-4xl leading-none font-normal"
+      data-reveal
+      data-reveal-y="10"
+    >
+      <span class="font-display block tracking-[-0.02em]">{brand.command}</span>
+      <span class="mt-8 block max-w-[22ch] text-2xl leading-tight tracking-[-0.01em] text-balance">
+        {hero.headline}
+      </span>
+    </h1>
+    <p
+      class="text-ink-soft mt-5 max-w-[44ch] text-base"
+      data-reveal
+      data-reveal-y="10"
+      data-reveal-delay="0.1"
+    >
+      {hero.intro}
+    </p>
+    <p
+      class="font-mono text-ink-muted mt-4 text-xs"
+      data-reveal
+      data-reveal-y="10"
+      data-reveal-delay="0.15"
+    >
+      {hero.databases}
+    </p>
+    <div
+      class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3"
+      data-reveal
+      data-reveal-y="10"
+      data-reveal-delay="0.2"
+    >
+      <InstallButton
+        href={actions.install.href}
+        label={actions.install.label}
+      />
+      <DemoLink label={actions.github.label} tag={actions.github.tag} />
+    </div>
+  </div>
+
+  <div class="min-w-0">
+    <div data-reveal data-reveal-y="10" data-reveal-delay="0.1">
+      <ChainMap
+        nodes={chain}
+        title={hero.chainTitle}
+        caption={hero.chainCaption}
+      />
+    </div>
+
+    <h2
+      class="font-mono text-ink-muted mt-16 text-xs"
+      data-reveal
+      data-reveal-y="10"
+      data-reveal-delay="0.15"
+    >
+      {hero.historyTitle}
+    </h2>
+
+    <article
+      class="bg-primary-soft mt-4 grid gap-x-6 gap-y-3 rounded-sm p-5 sm:grid-cols-[5.5rem_minmax(0,1fr)] sm:p-6"
+      aria-labelledby="version-destacada"
+      data-reveal
+      data-reveal-y="10"
+      data-reveal-delay="0.2"
+    >
+      <p class="font-mono flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs sm:flex-col">
+        <span class="text-primary">{featuredRelease.version}</span>
+        <time datetime={featuredRelease.date} class="text-ink-muted">
+          {featuredRelease.date}
+        </time>
+      </p>
+      <div class="min-w-0">
+        <p class="font-mono text-ink-muted text-2xs uppercase tracking-[0.06em]">
+          {featuredRelease.tag}
+        </p>
+        <h3
+          id="version-destacada"
+          class="text-ink mt-2 text-lg leading-snug font-normal"
+        >
+          {featuredRelease.title}
+        </h3>
+        <p class="text-ink-soft mt-2 text-sm">
+          <RichText text={featuredRelease.detail} />
+        </p>
+      </div>
+    </article>
+
+    <ol class="mt-6" aria-label={hero.historyTitle}>
+      {releases.map((release, index) => (
+        <MetaRow
+          code={release.version}
+          title={release.title}
+          detail={release.date}
+          delay={0.25 + index * 0.05}
+        />
+      ))}
+    </ol>
+  </div>
+</section>

@@ -1,0 +1,44 @@
+---
+/** Cómo funciona (`#como`): four command rows, the stepped layers drawing and one sample migration file. */
+import SectionFrame from '../ui/SectionFrame.astro';
+import MetaRow from '../ui/MetaRow.astro';
+import LayersDiagram from '../art/LayersDiagram.astro';
+import { como } from '../../content/site';
+---
+
+<SectionFrame
+  id={como.id}
+  migration={como.migration}
+  title={como.title}
+  lead={como.lead}
+>
+  <div slot="aside" data-reveal data-reveal-y="10" data-reveal-delay="0.1">
+    <LayersDiagram label={como.diagramLabel} />
+  </div>
+  <ol>
+    {como.steps.map((step, index) => (
+      <MetaRow
+        code={step.key}
+        title={step.title}
+        text={step.text}
+        detail={step.detail}
+        keyWidth="wide"
+        as="h3"
+        delay={index * 0.06}
+      />
+    ))}
+  </ol>
+  <figure class="mt-12" data-reveal data-reveal-y="10">
+    <figcaption class="font-mono text-ink-muted flex flex-wrap justify-between gap-x-4 text-xs">
+      <span>{como.fileName}</span>
+      <span>{como.fileLabel}</span>
+    </figcaption>
+    <pre class="sql-file font-mono bg-surface border-line text-ink mt-3 border p-5 text-sm leading-relaxed whitespace-pre-wrap"><code>{como.file}</code></pre>
+  </figure>
+</SectionFrame>
+
+<style>
+  .sql-file {
+    font-variant-ligatures: none;
+  }
+</style>

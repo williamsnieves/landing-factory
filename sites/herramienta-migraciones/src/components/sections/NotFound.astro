@@ -1,0 +1,34 @@
+---
+/** 404 body: a migration id that does not exist, one sentence, links home and to the install section. */
+import MigrationLabel from '../ui/MigrationLabel.astro';
+import InstallButton from '../ui/InstallButton.astro';
+import { notFound } from '../../content/site';
+---
+
+<section
+  aria-labelledby="no-encontrada-titulo"
+  class="mx-auto grid max-w-[77.5rem] gap-x-12 gap-y-8 px-5 py-24 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:px-12 lg:py-40"
+>
+  <MigrationLabel id={notFound.migration} />
+  <div class="min-w-0">
+    <h1
+      id="no-encontrada-titulo"
+      class="text-ink text-3xl leading-tight font-normal tracking-[-0.01em] text-balance"
+    >
+      {notFound.title}
+    </h1>
+    <p class="text-ink-soft mt-5 max-w-[52ch] text-base">{notFound.text}</p>
+    <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+      <InstallButton
+        href={notFound.install.href}
+        label={notFound.install.label}
+      />
+      <a
+        href={notFound.home.href}
+        class="text-ink-soft hover:text-primary inline-flex min-h-11 items-center text-sm underline decoration-dot decoration-1 underline-offset-4"
+      >
+        {notFound.home.label}
+      </a>
+    </div>
+  </div>
+</section>

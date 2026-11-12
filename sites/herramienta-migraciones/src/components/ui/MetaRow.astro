@@ -1,0 +1,58 @@
+---
+/**
+ * One mono-meta row: mono key on the left, sans title (and an optional line of text), mono detail on the right edge,
+ * separated from its neighbours only by a hairline. Used by the release history, the pains, the steps, the
+ * principles, the documentation index and the community list.
+ */
+import RichText from './RichText.astro';
+
+interface Props {
+  code: string;
+  title: string;
+  text?: string;
+  detail: string;
+  /** Width of the key column from sm up. */
+  keyWidth?: 'narrow' | 'wide';
+  /** Heading level of the title when the row is a titled item (h3), or plain text. */
+  as?: 'h3' | 'p';
+  delay?: number;
+}
+const {
+  code,
+  title,
+  text,
+  detail,
+  keyWidth = 'narrow',
+  as: Title = 'p',
+  delay = 0,
+} = Astro.props;
+---
+
+<li
+  class:list={[
+    'border-line grid grid-cols-[minmax(0,1fr)_auto] gap-x-6 gap-y-1 border-t py-4 last:border-b',
+    keyWidth === 'wide'
+      ? 'sm:grid-cols-[11rem_minmax(0,1fr)_auto]'
+      : 'sm:grid-cols-[5.5rem_minmax(0,1fr)_auto]',
+  ]}
+  data-reveal
+  data-reveal-y="10"
+  data-reveal-delay={delay ? String(delay) : undefined}
+>
+  <p class="font-mono text-ink-muted col-span-2 pt-0.5 text-xs sm:col-span-1">
+    {code}
+  </p>
+  <div class="min-w-0">
+    <Title class="text-ink text-base leading-snug font-normal">
+      <RichText text={title} />
+    </Title>
+    {text && (
+      <p class="text-ink-soft mt-1 text-sm leading-normal">
+        <RichText text={text} />
+      </p>
+    )}
+  </div>
+  <p class="font-mono text-ink-muted pt-0.5 text-right text-xs break-all sm:min-w-20 sm:break-normal">
+    {detail}
+  </p>
+</li>

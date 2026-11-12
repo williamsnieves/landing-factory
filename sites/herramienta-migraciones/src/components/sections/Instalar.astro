@@ -1,0 +1,75 @@
+---
+/**
+ * Instalación (`#instalar`, the signature moment): three install methods as mono command rows, then the large
+ * terminal session across the content width (and, from 1024 px, under both columns of the frame).
+ */
+import MigrationLabel from '../ui/MigrationLabel.astro';
+import Terminal from '../ui/Terminal.astro';
+import { instalar } from '../../content/site';
+---
+
+<section
+  id={instalar.id}
+  aria-labelledby="instalar-titulo"
+  class="mx-auto max-w-[77.5rem] scroll-mt-6 px-5 py-24 sm:px-8 lg:px-12 lg:py-36"
+>
+  <div class="grid gap-x-12 gap-y-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+    <div data-reveal data-reveal-y="10">
+      <MigrationLabel id={instalar.migration} />
+    </div>
+    <div class="min-w-0">
+      <h2
+        id="instalar-titulo"
+        class="text-ink text-xl leading-tight font-normal tracking-[-0.01em]"
+        data-reveal
+        data-reveal-y="10"
+      >
+        {instalar.title}
+      </h2>
+      <p
+        class="text-ink-soft mt-4 max-w-[60ch] text-base"
+        data-reveal
+        data-reveal-y="10"
+        data-reveal-delay="0.05"
+      >
+        {instalar.lead}
+      </p>
+      <ul class="mt-10">
+        {instalar.methods.map((method, index) => (
+          <li
+            class="border-line grid gap-x-6 gap-y-2 border-t py-4 last:border-b sm:grid-cols-[7rem_minmax(0,1fr)_auto] sm:items-baseline"
+            data-reveal
+            data-reveal-y="10"
+            data-reveal-delay={String(0.08 + index * 0.06)}
+          >
+            <h3 class="text-ink text-base font-normal">{method.name}</h3>
+            <code class="install-command font-mono bg-surface text-ink block px-3 py-2 text-sm">
+              <span class="text-ink-muted select-none" aria-hidden="true">
+                ${' '}
+              </span>
+              {method.command}
+            </code>
+            <span class="font-mono text-ink-muted text-xs sm:text-right">
+              {method.note}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+
+  <div class="mt-16 lg:mt-20">
+    <Terminal
+      title={instalar.terminalTitle}
+      caption={instalar.terminalCaption}
+      label={instalar.terminalLabel}
+      lines={instalar.terminal}
+    />
+  </div>
+</section>
+
+<style>
+  .install-command {
+    overflow-wrap: anywhere;
+  }
+</style>

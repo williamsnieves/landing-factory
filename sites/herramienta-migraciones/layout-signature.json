@@ -1,0 +1,97 @@
+{
+  "site": "herramienta-migraciones",
+  "version": 1,
+  "page": "/",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "features": {
+    "sectionCount": 8,
+    "cols1Share": 0.25,
+    "cols2Share": 0,
+    "cols3Share": 0.75,
+    "splitRatio": 0,
+    "fullBleedShare": 0,
+    "imageRadius": 0,
+    "buttonRadius": 2,
+    "buttonShape": "rect",
+    "headingScale": 3.3,
+    "headingAlign": "left",
+    "headingCase": 0,
+    "eyebrowShare": 1,
+    "wordsPerScreen": 103,
+    "footerType": "minimal",
+    "mediaPerScreen": 0,
+    "rotatedShare": 0,
+    "overlapShare": 0,
+    "stickyCount": 6
+  },
+  "sections": [
+    {
+      "id": "indice",
+      "cols": 3,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": "por-que",
+      "cols": 4,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": "instalar",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": "como",
+      "cols": 3,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": "principios",
+      "cols": 3,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": "docs",
+      "cols": 3,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": "comunidad",
+      "cols": 3,
+      "fullBleed": false,
+      "eyebrow": true
+    },
+    {
+      "id": "cierre",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": true
+    }
+  ],
+  "mobile": {
+    "screens": 14.38,
+    "wordsPerScreen": 67,
+    "sectionCount": 8
+  },
+  "hashes": [
+    "454a696c2747478f",
+    "276763b04a4f6707",
+    "6f10184e4d058423",
+    "1b0b0b032b03a049",
+    "4667670707480c18",
+    "00504a0f0f0f0f04",
+    "4304484e0d0d0d0f",
+    "4610084a6f4f0d0f",
+    "0030464e58245040",
+    "4e582450438a4b47"
+  ]
+}

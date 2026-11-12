@@ -1,0 +1,23 @@
+---
+/**
+ * A link that does not exist yet (PROPOSAL.md, Decision 2): styled as the secondary text link, but a span with
+ * aria-disabled and a mono "demo" tag. No href is invented for the fictional repository.
+ */
+interface Props {
+  label: string;
+  tag?: string;
+}
+const { label, tag = 'demo' } = Astro.props;
+---
+
+<span
+  class="text-ink-soft inline-flex min-h-11 cursor-not-allowed items-center gap-2 text-sm"
+  aria-disabled="true"
+>
+  <span class="decoration-dot underline decoration-1 underline-offset-4">
+    {label}
+  </span>
+  <span class="bg-primary-soft text-ink font-mono rounded-xs px-1.5 py-0.5 text-2xs uppercase tracking-[0.06em]">
+    {tag}
+  </span>
+</span>
