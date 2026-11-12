@@ -29,6 +29,9 @@ The skill classifies every feedback item and then edits only `sites/<slug>/` and
 | `style`   | A token or spacing change inside the design system                      | `tokens.css` and `MASTER.md` change together               |
 | `restyle` | Another palette family or font family on the same layout                | Stops with `needs-restyle`; applied with `--restyle`       |
 | `rebuild` | A different archetype, hero, layout or page structure                   | The round stops: nothing is edited                         |
+| `cms`     | Content under a CMS path of `.pages.yml` (a new job, a product edit)    | Not edited: listed in `REVISION.md` under "Edit in the CMS" |
+
+`cms` items exist only on a site with `.pages.yml` (see `docs/cms.md`): the live copy of that content is in the repository, so the round leaves it to the editor and names the file. Other items in the same feedback are handled as usual. Pull the live content first (`node scripts/cms.mjs pull --site <slug> --from <clone>`) when the round touches content next to it.
 
 Then it runs, in order: QA (`npm run qa -- --site <slug>`, up to `--max-attempts` fix rounds), the static report, `layout-signature --write`, `check-landing`, the layer check and lint. It never commits, pushes, deploys or syncs.
 
@@ -69,6 +72,8 @@ node scripts/sync-export.mjs --site <slug> --into <clone> [--brief | --no-brief]
 Kept as they are in the clone: `.git` and git-ignored paths; `package-lock.json` unless `package.json` changed (then it is regenerated with `npm install --package-lock-only`, or skipped with `--no-lockfile` when offline); `README.md` when only its export line (date and factory commit) differs.
 
 It refuses (exit 1, nothing written): a site without `EXPORTED.json`, a transferred site, a clone whose `origin` is not the recorded repository (compared after normalizing `https`, `ssh` and `.git`, ignoring credentials), a path that is not a work tree root, and a clone with uncommitted changes. Whether `brief.json` travels comes from the record (`noBrief`, written by `npm run export -- --record`). A record from before that field (`personal-brand`) needs `--brief` or `--no-brief` (exit 2 otherwise).
+
+For a site with `.pages.yml` the files under its CMS paths are never added, changed or deleted in the clone: a difference is listed as `kept (managed by the CMS)` with the pull command (`node scripts/cms.mjs pull --site <slug> --from <clone>`, see `docs/cms.md`). `.pages.yml` itself syncs normally.
 
 Then, in the clone: `npm ci && npm run lint && npm run build`, push a branch such as `revise/<n>` and open a pull request. That repository's CI gives the customer's preview URL. Merging it deploys to production.
 

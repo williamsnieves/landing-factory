@@ -13,6 +13,7 @@ export const SITE_FILES = [
   'site.config.json',
   'assets.json',
   'CREDITS.md',
+  '.pages.yml', // the Pages CMS configuration; Pages CMS reads it at the repository root
 ];
 /** Folders of the site that travel whole. */
 export const SITE_DIRS = ['src', 'public', 'assets'];

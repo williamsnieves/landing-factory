@@ -10,6 +10,7 @@ export const ITEM_KINDS = [
   'style',
   'restyle',
   'rebuild',
+  'cms',
 ];
 export const MAX_FEEDBACK = 4000;
 export const MAX_SUMMARY = 300;

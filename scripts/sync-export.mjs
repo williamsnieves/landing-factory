@@ -10,6 +10,9 @@
 // files it changed and never commits or pushes: a person (or the landing-handoff skill) pushes a branch and opens
 // a pull request in that repository.
 //
+// A site with .pages.yml (Pages CMS, see scripts/cms.mjs) keeps its CMS paths: files there are never added,
+// changed or deleted in the clone; a difference is listed as `kept (managed by the CMS)`.
+//
 // Refused (exit 1, nothing written): no EXPORTED.json, a transferred site, a clone whose origin is not the recorded
 // repository, a clone that is not a work tree root or has uncommitted changes. Exit 2: bad usage, a missing site,
 // a record without `noBrief` and neither --brief nor --no-brief. LANDING_FACTORY_ROOT=<dir> moves the factory root
@@ -23,7 +26,6 @@ import {
   mkdtempSync,
   readFileSync,
   readdirSync,
-  realpathSync,
   rmSync,
   rmdirSync,
   statSync,
@@ -35,10 +37,11 @@ import { parseArgs } from 'node:util';
 
 import { formatOutput, planExport, writeEntries } from './export.mjs';
 import {
-  isTransferred,
-  normalizeRepoUrl,
-  readExportRecord,
-} from './lib/export-record.mjs';
+  Refused,
+  checkClone,
+  requireManagedRecord,
+} from './lib/clone-check.mjs';
+import { cmsFiles, cmsPathsOf, isCmsPath } from './lib/cms-config.mjs';
 import { SLUG_PATTERN } from './lib/sites.mjs';
 import { walkFiles } from './report/fs-util.mjs';
 
@@ -49,7 +52,7 @@ const defaultRoot = () =>
     : CODE_ROOT;
 
 class UsageError extends Error {}
-export class Refused extends Error {}
+export { Refused, checkClone };
 
 const HELP = `Usage: node scripts/sync-export.mjs --site <slug> --into <clone> [options]
 
@@ -84,52 +87,15 @@ const readmeCore = (text) =>
     'exported from landing-factory',
   );
 
-/** Throws Refused unless <clone> is the root of a clean work tree whose origin is the recorded repository. */
-export function checkClone(clone, record) {
-  if (!existsSync(clone) || !statSync(clone).isDirectory())
-    throw new Refused(`--into ${clone} is not a folder`);
-  let top;
-  try {
-    top = git(clone, ['rev-parse', '--show-toplevel']).trim();
-  } catch {
-    throw new Refused(`${clone} is not a git work tree`);
-  }
-  if (realpathSync(top) !== realpathSync(clone))
-    throw new Refused(
-      `${clone} is not the root of its work tree (the root is ${top}); pass the root of the clone`,
-    );
-  const wanted = normalizeRepoUrl(record.repository);
-  if (!wanted)
-    throw new Refused(
-      `EXPORTED.json has no usable repository URL (${JSON.stringify(record.repository ?? null)})`,
-    );
-  let origin = '';
-  try {
-    origin = git(clone, ['config', '--get', 'remote.origin.url']).trim();
-  } catch {
-    // no origin: handled below
-  }
-  if (!origin)
-    throw new Refused(
-      `${clone} has no origin remote; expected ${record.repository}`,
-    );
-  if (normalizeRepoUrl(origin) !== wanted)
-    throw new Refused(
-      `the origin of ${clone} is ${normalizeRepoUrl(origin) ?? 'not a repository location'} but EXPORTED.json records ${wanted}; use a clone of the recorded repository`,
-    );
-  if (git(clone, ['status', '--porcelain']).trim())
-    throw new Refused(
-      `${clone} has uncommitted changes; commit, stash or discard them first`,
-    );
-}
-
 const sameBytes = (a, b) => readFileSync(a).equals(readFileSync(b));
 
 /**
  * What mirroring `scratch` into `clone` does: { added, changed, deleted, kept, packageChanged }. Pure reading;
- * `scratch` holds the fresh export (without a lockfile), `clone` is clean.
+ * `scratch` holds the fresh export (without a lockfile), `clone` is clean. Files under `cmsPaths` belong to the
+ * clone (the CMS edits them there): they are never added, changed or deleted, and a difference between the
+ * site's own files (`siteDir`) and the clone's is listed in `cmsKept`.
  */
-export function planMirror(scratch, clone) {
+export function planMirror(scratch, clone, cmsPaths = [], siteDir = null) {
   const fresh = new Map(
     walkFiles(scratch, { skipDirs: [] }).map((f) => [f.rel, f.abs]),
   );
@@ -161,11 +127,13 @@ export function planMirror(scratch, clone) {
     changed: [],
     deleted: [],
     kept: [],
+    cmsKept: [],
     packageChanged: false,
   };
   for (const [rel, abs] of [...fresh].sort(([a], [b]) => (a < b ? -1 : 1))) {
     if (ignored.has(rel)) continue;
     const target = join(clone, rel);
+    if (isCmsPath(rel, cmsPaths)) continue;
     if (!tracked.has(rel) && !existsSync(target)) plan.added.push(rel);
     else if (!sameBytes(abs, target)) {
       if (
@@ -180,7 +148,21 @@ export function planMirror(scratch, clone) {
   }
   for (const rel of [...tracked].sort()) {
     if (fresh.has(rel) || rel === 'package-lock.json') continue;
-    plan.deleted.push(rel);
+    if (!isCmsPath(rel, cmsPaths)) plan.deleted.push(rel);
+  }
+  if (cmsPaths.length && siteDir) {
+    // The clone's copy matches when it equals the site's own file or the formatted copy of the export (the first
+    // export is formatted, a pull copies the CMS's own layout); anything else, or a file on one side only, is listed.
+    const mine = new Set(cmsFiles(siteDir, cmsPaths));
+    const live = new Set(cmsFiles(clone, cmsPaths));
+    const matches = (rel) =>
+      [join(siteDir, rel), join(scratch, rel)].some(
+        (other) => existsSync(other) && sameBytes(other, join(clone, rel)),
+      );
+    for (const rel of new Set([...mine, ...live]))
+      if (!live.has(rel) || !mine.has(rel) || !matches(rel))
+        plan.cmsKept.push(rel);
+    plan.cmsKept.sort();
   }
   return plan;
 }
@@ -274,20 +256,11 @@ export function main(argv, io = console, env = process.env) {
       throw new UsageError(
         `No site "${slug}": sites/${slug}/package.json not found`,
       );
-    let record;
-    try {
-      record = readExportRecord(root, slug);
-    } catch (error) {
-      throw new Refused(error.message);
-    }
-    if (!record)
-      throw new Refused(
-        `sites/${slug} is not exported (no EXPORTED.json): there is no repository to sync into; export it first (docs/handoff.md)`,
-      );
-    if (isTransferred(record))
-      throw new Refused(
-        `sites/${slug} was transferred to ${record.transferredTo}; the factory does nothing more with it`,
-      );
+    const record = requireManagedRecord(
+      root,
+      slug,
+      'there is no repository to sync into; export it first (docs/handoff.md)',
+    );
     checkClone(clone, record);
 
     let withBrief;
@@ -310,7 +283,8 @@ export function main(argv, io = console, env = process.env) {
       throw new Refused(`the export failed: ${error.message}`);
     }
     // planExport's README and workflow come from the same factory; the lockfile is the clone's own.
-    const mirror = planMirror(scratch, clone);
+    const siteDir = join(root, 'sites', slug);
+    const mirror = planMirror(scratch, clone, cmsPathsOf(siteDir), siteDir);
 
     let lockfile = null;
     if (mirror.packageChanged) {
@@ -350,6 +324,12 @@ export function main(argv, io = console, env = process.env) {
     if (lockfile === 'regenerated') io.log('  changed  package-lock.json');
     for (const rel of mirror.deleted) io.log(`  deleted  ${rel}`);
     for (const note of mirror.kept) io.log(`  kept     ${note}`);
+    for (const rel of mirror.cmsKept)
+      io.log(`  kept (managed by the CMS): ${rel}`);
+    if (mirror.cmsKept.length)
+      io.log(
+        `hint: the CMS content of the repository differs from the factory; bring it in with: node scripts/cms.mjs pull --site ${slug} --from ${clone}`,
+      );
     if (lockfile && lockfile !== 'regenerated')
       io.log(`  lockfile package-lock.json ${lockfile}`);
     else if (!mirror.packageChanged)
