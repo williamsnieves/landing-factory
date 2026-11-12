@@ -1,0 +1,7 @@
+{
+  "target": "cloudflare",
+  "cloudflare": {
+    "pagesProject": "herramienta-migraciones",
+    "productionBranch": "main"
+  }
+}

@@ -1,0 +1,22 @@
+---
+// Shown at the top of <main> on every page of a prospect landing (a page built for a business that has not bought
+// anything yet): it says the page is a design proposal and not the business's official website. BaseLayout renders
+// it when src/data/prospect.json (node scripts/prospect.mjs write) says "prospect". No JavaScript, not dismissible.
+import { prospectNotice } from './texts';
+
+interface Props {
+  /** The business the page was prepared for. */
+  business: string;
+  /** Page language tag (`es`, `en-GB`); English when there is no text for it. */
+  locale?: string;
+}
+const { business, locale } = Astro.props;
+---
+
+<p
+  role="note"
+  data-prospect-notice
+  class="bg-ink text-paper px-6 py-3 text-center text-sm"
+>
+  {prospectNotice(business, locale)}
+</p>

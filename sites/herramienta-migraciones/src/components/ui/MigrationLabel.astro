@@ -1,0 +1,20 @@
+---
+/** The mono migration id that opens a section (`0002_principios`), with an optional status after it. */
+interface Props {
+  id: string;
+  status?: string;
+}
+const { id, status } = Astro.props;
+---
+
+<p class="font-mono text-ink-muted flex flex-wrap items-center gap-x-3 text-xs">
+  <span class="text-primary" aria-hidden="true">
+    ▸
+  </span>
+  <span class="tracking-[0.08em]">{id}</span>
+  {status && (
+    <span class="border-line text-ink-soft border px-1.5 text-2xs uppercase tracking-[0.06em]">
+      {status}
+    </span>
+  )}
+</p>

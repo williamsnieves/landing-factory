@@ -1,0 +1,30 @@
+---
+/** Comunidad (`#comunidad`): four rows (contribute, discussions, code of conduct, license) beside a dot cluster. */
+import SectionFrame from '../ui/SectionFrame.astro';
+import MetaRow from '../ui/MetaRow.astro';
+import DotCluster from '../art/DotCluster.astro';
+import { comunidad } from '../../content/site';
+---
+
+<SectionFrame
+  id={comunidad.id}
+  migration={comunidad.migration}
+  title={comunidad.title}
+  lead={comunidad.lead}
+>
+  <div slot="aside" data-reveal data-reveal-y="10" data-reveal-delay="0.1">
+    <DotCluster label={comunidad.diagramLabel} />
+  </div>
+  <ul>
+    {comunidad.rows.map((row, index) => (
+      <MetaRow
+        code={row.key}
+        title={row.title}
+        text={row.text}
+        detail={row.detail}
+        as="h3"
+        delay={index * 0.05}
+      />
+    ))}
+  </ul>
+</SectionFrame>

@@ -1,0 +1,20 @@
+---
+/** The one solid action: near-black rectangle with a 2 px radius, to the install section. */
+interface Props {
+  href: string;
+  label: string;
+  size?: 'sm' | 'md';
+}
+const { href, label, size = 'md' } = Astro.props;
+---
+
+<a
+  href={href}
+  class:list={[
+    'bg-ink text-paper hover:bg-ink-hover font-mono inline-flex items-center gap-2 rounded-xs transition-colors duration-(--duration-fast) ease-(--ease-out)',
+    size === 'sm' ? 'min-h-10 px-4 text-xs' : 'min-h-11 px-5 text-sm',
+  ]}
+>
+  <span aria-hidden="true">$</span>
+  <span>{label}</span>
+</a>

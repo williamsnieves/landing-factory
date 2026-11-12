@@ -1,0 +1,54 @@
+---
+/**
+ * The dev-console two-column frame every section after the hero reuses: the migration id and an optional drawing in
+ * the left third, the heading, lead and content in the right two thirds. One column below 1024 px.
+ */
+import MigrationLabel from './MigrationLabel.astro';
+import RichText from './RichText.astro';
+
+interface Props {
+  id: string;
+  migration: string;
+  status?: string;
+  title: string;
+  lead?: string;
+}
+const { id, migration, status, title, lead } = Astro.props;
+const headingId = `${id}-titulo`;
+---
+
+<section
+  id={id}
+  aria-labelledby={headingId}
+  class="mx-auto grid max-w-[77.5rem] scroll-mt-6 gap-x-12 gap-y-8 px-5 py-24 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:px-12 lg:py-36"
+>
+  <div class="flex flex-col gap-10 lg:sticky lg:top-10 lg:self-start">
+    <div data-reveal data-reveal-y="10">
+      <MigrationLabel id={migration} status={status} />
+    </div>
+    <slot name="aside" />
+  </div>
+  <div class="min-w-0">
+    <h2
+      id={headingId}
+      class="text-ink text-xl leading-tight font-normal tracking-[-0.01em] text-balance"
+      data-reveal
+      data-reveal-y="10"
+    >
+      {title}
+    </h2>
+    {lead && (
+      <p
+        class="text-ink-soft mt-4 max-w-[60ch] text-base"
+        data-reveal
+        data-reveal-y="10"
+        data-reveal-delay="0.05"
+      >
+        <RichText text={lead} />
+      </p>
+    )}
+    <div class="mt-10">
+      <slot />
+    </div>
+  </div>
+</section>

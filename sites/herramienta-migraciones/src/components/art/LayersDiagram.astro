@@ -1,0 +1,48 @@
+---
+/** Cómo funciona: four migrations stacked as stepped strata; the newest, on top, is in the accent. */
+interface Props {
+  label: string;
+}
+const { label } = Astro.props;
+const layers = ['0001', '0002', '0003', '0004'].map((id, index) => ({
+  id,
+  x: 8 + index * 18,
+  y: 132 - index * 34,
+  width: 224 - index * 36,
+  top: index === 3,
+}));
+---
+
+<svg
+  viewBox="0 0 240 166"
+  role="img"
+  aria-label={label}
+  class="block h-auto w-full max-w-[17.5rem]"
+>
+  <title>{label}</title>
+  {layers.map((layer) => (
+    <g data-layer>
+      <rect
+        x={layer.x}
+        y={layer.y}
+        width={layer.width}
+        height="26"
+        class={layer.top ? 'fill-primary' : 'fill-panel stroke-dot'}
+        stroke-width="1"
+      />
+      <text
+        x={layer.x + 10}
+        y={layer.y + 17}
+        font-size="11"
+        class={
+          layer.top
+            ? 'fill-primary-contrast font-mono'
+            : 'fill-ink-muted font-mono'
+        }
+      >
+        {layer.id}
+      </text>
+    </g>
+  ))}
+  <path d="M8 162H232" class="stroke-ink" stroke-width="1.5"></path>
+</svg>

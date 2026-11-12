@@ -1,0 +1,53 @@
+---
+/** Header: strata mark and `estrato` in mono, four mono navigation items, one solid "Instalar" action. */
+import StrataMark from '../ui/StrataMark.astro';
+import InstallButton from '../ui/InstallButton.astro';
+import { actions, brand, nav, ui } from '../../content/site';
+
+interface Props {
+  /** Prefix for in-page links: '' on the home page, '/' on other pages. */
+  base?: string;
+}
+const { base = '' } = Astro.props;
+const homeHref = base || '#indice';
+---
+
+<header class="border-line border-b">
+  <div class="mx-auto flex max-w-[77.5rem] flex-wrap items-center justify-between gap-x-8 gap-y-3 px-5 py-4 sm:px-8 lg:px-12">
+    <a
+      href={homeHref}
+      class="text-ink font-mono inline-flex min-h-11 items-center gap-2.5 text-base tracking-[-0.02em]"
+      aria-label={ui.homeLabel}
+    >
+      <StrataMark class="size-6" />
+      <span>{brand.command}</span>
+    </a>
+    <nav
+      aria-label={ui.navLabel}
+      class="order-3 w-full sm:order-none sm:w-auto"
+    >
+      <ul class="flex flex-wrap gap-x-5 gap-y-1 sm:gap-x-8">
+        {nav.map((item) => (
+          <li
+            class:list={[
+              // On phones the solid "Instalar" button beside the mark already covers this item.
+              item.href === actions.install.href && 'max-sm:hidden',
+            ]}
+          >
+            <a
+              href={`${base}${item.href}`}
+              class="font-mono text-ink-muted hover:text-ink inline-flex min-h-11 items-center text-xs uppercase tracking-[0.06em] transition-colors duration-(--duration-fast)"
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <InstallButton
+      href={`${base}${actions.install.href}`}
+      label={actions.install.label}
+      size="sm"
+    />
+  </div>
+</header>

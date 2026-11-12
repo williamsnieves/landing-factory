@@ -1,0 +1,56 @@
+---
+/** Por qué: three environments whose schemas drifted apart, drawn as stacks with a different number of strata. */
+interface Props {
+  label: string;
+  environments: readonly string[];
+}
+const { label, environments } = Astro.props;
+// Layers per environment and which one differs from the others (the drift).
+const stacks = [
+  { layers: 4, odd: 3 },
+  { layers: 3, odd: -1 },
+  { layers: 5, odd: 4 },
+];
+const COLUMN = 88;
+---
+
+<svg
+  viewBox="0 0 264 176"
+  role="img"
+  aria-label={label}
+  class="block h-auto w-full max-w-[17.5rem]"
+>
+  <title>{label}</title>
+  {stacks.map((stack, column) => (
+    <g>
+      {Array.from({ length: stack.layers }, (_, row) => (
+        <rect
+          x={column * COLUMN + 6 + (row % 2) * 4}
+          y={128 - row * 22}
+          width={70 - (row % 2) * 8}
+          height="16"
+          class={
+            row === stack.odd
+              ? 'fill-primary-soft stroke-primary'
+              : 'fill-panel stroke-dot'
+          }
+          stroke-width="1"
+          stroke-dasharray={row === stack.odd ? '3 2' : undefined}
+        />
+      ))}
+      <path
+        d={`M${column * COLUMN + 4} 150H${column * COLUMN + 80}`}
+        class="stroke-ink"
+        stroke-width="1.25"
+      />
+      <text
+        x={column * COLUMN + 4}
+        y="168"
+        font-size="10.5"
+        class="fill-ink-muted font-mono"
+      >
+        {environments[column]}
+      </text>
+    </g>
+  ))}
+</svg>

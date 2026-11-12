@@ -1,0 +1,26 @@
+---
+/** Principios (`#principios`, the trust stage without proof): six mono-meta rows of design decisions. */
+import SectionFrame from '../ui/SectionFrame.astro';
+import MetaRow from '../ui/MetaRow.astro';
+import { principios } from '../../content/site';
+---
+
+<SectionFrame
+  id={principios.id}
+  migration={principios.migration}
+  title={principios.title}
+  lead={principios.lead}
+>
+  <ol>
+    {principios.rows.map((row, index) => (
+      <MetaRow
+        code={row.key}
+        title={row.title}
+        text={row.text}
+        detail={row.detail}
+        as="h3"
+        delay={index * 0.05}
+      />
+    ))}
+  </ol>
+</SectionFrame>

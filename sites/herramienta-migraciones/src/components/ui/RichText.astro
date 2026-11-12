@@ -1,0 +1,22 @@
+---
+/**
+ * Renders a copy string where `backticked` parts are commands, files or ids: those become <code> in the mono face
+ * (ligatures off); the rest stays plain text.
+ */
+interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+const parts = text
+  .split('`')
+  .map((value, index) => ({ value, code: index % 2 === 1 }))
+  .filter((part) => part.value.length > 0);
+---
+
+{parts.map((part) =>
+  part.code ? (
+    <code class="font-mono whitespace-nowrap">{part.value}</code>
+  ) : (
+    part.value
+  ),
+)}
