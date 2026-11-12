@@ -227,6 +227,22 @@ export const REF_RULES = [
     traits: ['logo-strip-under-hero'],
   },
   {
+    re: /network diagram|hub diagram|index-as-hero|map of everything/,
+    traits: ['self-map-hero'],
+  },
+  {
+    re: /chapter[^.]{0,80}(own|saturated)[^.]{0,30}colou?r field/,
+    traits: ['chapter-color-fields'],
+  },
+  {
+    re: /mono(spaced)? metadata|hairline-separated rows|file listing/,
+    traits: ['mono-meta-rows'],
+  },
+  {
+    re: /dots? (field|scene|cluster)|field of (grey )?dots/,
+    traits: ['generative-dot-field'],
+  },
+  {
     re: /conversion|primary action|call to action/,
     signals: ['conversion-first'],
   },
