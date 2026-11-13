@@ -1,7 +1,10 @@
 {
   "groups": [
     {
-      "title": { "en": "AI tools", "es": "Herramientas de IA" },
+      "title": {
+        "en": "AI tools",
+        "es": "Herramientas de IA"
+      },
       "size": "wide",
       "tone": "ai",
       "items": [
@@ -15,11 +18,14 @@
         "GLM",
         "Hermes",
         "GPT",
-        "V0"
+        "n8n"
       ]
     },
     {
-      "title": { "en": "Frameworks", "es": "Frameworks" },
+      "title": {
+        "en": "Frameworks",
+        "es": "Frameworks"
+      },
       "size": "narrow",
       "items": [
         "Express",
@@ -35,7 +41,10 @@
       ]
     },
     {
-      "title": { "en": "Frontend", "es": "Frontend" },
+      "title": {
+        "en": "Frontend",
+        "es": "Frontend"
+      },
       "size": "narrow",
       "items": [
         "HTML",
@@ -55,7 +64,10 @@
       ]
     },
     {
-      "title": { "en": "Principles", "es": "Principios" },
+      "title": {
+        "en": "Principles",
+        "es": "Principios"
+      },
       "size": "wide",
       "items": [
         "SOLID",
@@ -68,7 +80,10 @@
       ]
     },
     {
-      "title": { "en": "Workflow", "es": "Flujo de trabajo" },
+      "title": {
+        "en": "Workflow",
+        "es": "Flujo de trabajo"
+      },
       "size": "wide",
       "items": [
         "GitHub",
@@ -87,7 +102,10 @@
       ]
     },
     {
-      "title": { "en": "Soft skills", "es": "Habilidades blandas" },
+      "title": {
+        "en": "Soft skills",
+        "es": "Habilidades blandas"
+      },
       "size": "narrow",
       "items": [
         "Perseverance",
