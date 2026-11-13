@@ -7,6 +7,7 @@ import { after, test } from 'node:test';
 
 import { main } from '../scripts/cms.mjs';
 import {
+  cmsOwnsOffer,
   isCmsPath,
   mentionsPath,
   readCmsConfig,
@@ -263,4 +264,28 @@ test('revisions.json accepts the cms kind', () => {
   assert.deepEqual(validateRevisions({ version: 1, rounds: [round] }), []);
   round.items[1].kind = 'cmss';
   assert.equal(validateRevisions({ version: 1, rounds: [round] }).length, 1);
+});
+
+test('cmsOwnsOffer: true only for a valid configuration with an entry named offer', () => {
+  const offer = VALID.replace('name: jobs', 'name: offer');
+  assert.equal(cmsOwnsOffer(site({ yml: offer }).dir), true);
+  assert.equal(cmsOwnsOffer(site().dir), false);
+  // invalid (path missing from content.config.ts) with the entry: still false
+  assert.equal(
+    cmsOwnsOffer(site({ yml: offer, config: 'export const x = 1;\n' }).dir),
+    false,
+  );
+  assert.equal(cmsOwnsOffer(site({ yml: null }).dir), false);
+  assert.equal(cmsOwnsOffer(site({ yml: ': : not yaml [' }).dir), false);
+});
+
+test('cms check prints that the CMS owns the offer only when it does', () => {
+  const owns = check(
+    site({ yml: VALID.replace('name: jobs', 'name: offer') }).root,
+  );
+  assert.equal(owns.code, 0, owns.err);
+  assert.match(owns.out, /CMS owns the brief's offer/);
+  const plain = check(site().root);
+  assert.equal(plain.code, 0);
+  assert.doesNotMatch(plain.out, /owns the brief/);
 });

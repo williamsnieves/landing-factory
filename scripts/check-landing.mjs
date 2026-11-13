@@ -18,6 +18,8 @@
 //   brief-facts        (only when sites/<slug>/brief.json exists) a non-assumed fact of the brief (business name, primary
 //                      call-to-action URL, contact email and phone, each product name and price) is missing from the
 //                      built dist/index.html, or an element holding a customer fact also says "ejemplo"/"example"/"sample"
+//                      (warning brief-facts-cms-offer: when the site's valid .pages.yml has an entry named "offer" the CMS owns the
+//                      products, so product names and prices are not required; the other facts still are)
 //   ai-provenance      (only when assets.json has entries with source "ai") an AI entry lacks a provenance field (generator,
 //                      model, prompt, createdAt, terms, ...) or its image file, the brief does not allow AI images
 //                      (brand.aiImages is not "allowed"), the built dist/index.html has no visible element marked
@@ -55,6 +57,7 @@ import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
+import { cmsOwnsOffer } from './lib/cms-config.mjs';
 import { reexecWithEnvProxy } from './lib/proxy.mjs';
 import { AI_REQUIRED_FIELDS, isAi, syncCredits } from './credits.mjs';
 import {
@@ -949,7 +952,7 @@ const phoneRegExp = (phone) =>
   );
 
 /** Every non-assumed, non-empty fact of a brief the page must carry: [{ path, kind, value }]. */
-export function briefFacts(brief) {
+export function briefFacts(brief, { skipOffer = false } = {}) {
   const facts = [];
   const add = (path, kind) => {
     const value = getPath(brief, path);
@@ -961,10 +964,11 @@ export function briefFacts(brief) {
   add('goal.primary.url', 'url');
   add('contact.email', 'email');
   add('contact.phone', 'phone');
-  (Array.isArray(brief.offer) ? brief.offer : []).forEach((_, index) => {
-    add(`offer[${index}].name`, 'text');
-    add(`offer[${index}].price`, 'price');
-  });
+  if (!skipOffer)
+    (Array.isArray(brief.offer) ? brief.offer : []).forEach((_, index) => {
+      add(`offer[${index}].name`, 'text');
+      add(`offer[${index}].price`, 'price');
+    });
   return facts;
 }
 
@@ -1063,6 +1067,7 @@ export function checkBriefFacts(
   siteDir,
   root = ROOT,
   sampleWords = ['ejemplo', 'example', 'sample'],
+  { skipOffer = false } = {},
 ) {
   const briefPath = join(siteDir, 'brief.json');
   if (!existsSync(briefPath)) return [];
@@ -1113,7 +1118,7 @@ export function checkBriefFacts(
   const lines = text.split('\n').map(squash);
   const sample = sampleWords.length ? sampleRegExp(sampleWords) : null;
   const failures = [];
-  for (const fact of briefFacts(brief)) {
+  for (const fact of briefFacts(brief, { skipOffer })) {
     if (!factPresent(fact, text, hrefs)) {
       const looked =
         fact.kind === 'price'
@@ -2205,6 +2210,8 @@ export async function runChecks({
   const copyClaims = checkCopyClaims(siteDir);
   const darkPatterns = checkDarkPatterns(siteDir);
   const visualAssets = checkVisualAssets(siteDir);
+  const cmsManagedOffer =
+    existsSync(join(siteDir, 'brief.json')) && cmsOwnsOffer(siteDir);
 
   const results = [
     ['images-credited', () => checkUncredited(siteDir, manifest)],
@@ -2246,6 +2253,7 @@ export async function runChecks({
                 siteDir,
                 root,
                 loadConfig(join(root, 'qa.config.json')).brief.sampleWords,
+                { skipOffer: cmsManagedOffer },
               ),
           ],
         ]
@@ -2273,6 +2281,15 @@ export async function runChecks({
       ...copyClaims.warnings,
       ...darkPatterns.warnings,
       ...visualAssets.warnings,
+      ...(cmsManagedOffer
+        ? [
+            {
+              rule: 'brief-facts-cms-offer',
+              message:
+                'the offer is managed by the CMS (.pages.yml entry "offer"); product names and prices of brief.json are its starting record and are not checked',
+            },
+          ]
+        : []),
     ],
   };
 }
@@ -2311,7 +2328,9 @@ Final check of sites/<slug>/ after site QA passes. Fails, naming the item, when:
                     alternates missing, not reciprocal or without x-default, a broken language switcher, config, dictionary and
                     brief locales that disagree, or a page showing the UI strings of another locale (src/i18n/ui.ts)
   brief-facts       (only with sites/<slug>/brief.json) a non-assumed brief fact (business name, primary CTA URL, email, phone,
-                    product names and prices) is missing from dist/index.html, or sits in an element that says "ejemplo"/"example"/"sample"
+                    product names and prices) is missing from dist/index.html, or sits in an element that says "ejemplo"/"example"/"sample";
+                    with a CMS entry named "offer" in a valid .pages.yml the products are skipped and the warning
+                    brief-facts-cms-offer is printed
   ai-provenance     (only when assets.json has AI images) an AI entry without generator, model, prompt, date or terms, or without its
                     file; a brief that does not allow AI images; no visible data-ai-disclosure element on dist/index.html;
                     a prompt that breaks the AI image prompt policy; a subject other than "owner"; an owner portrait without

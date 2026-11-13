@@ -30,6 +30,7 @@ import {
 import {
   CMS_FILE,
   cmsFiles,
+  cmsOwnsOffer,
   hasCmsConfig,
   readCmsConfig,
   sameContent,
@@ -48,7 +49,8 @@ const HELP = `Usage: node scripts/cms.mjs <check|pull> --site <slug> [options]
 
 check  Validate sites/<slug>/.pages.yml (the Pages CMS configuration). Fails when an entry's type is not
        collection or file, a path is outside src/content/ or missing, a format is not json or yaml, a path is not
-       referenced in src/content.config.ts, or a media or actions key is present.
+       referenced in src/content.config.ts, or a media or actions key is present. An entry named "offer" means the
+       CMS owns the brief's offer (the final check then skips product names and prices).
 pull   Copy the files under the CMS paths from a clone of the site's repository into sites/<slug>/: files are
        added, changed and deleted inside those paths only, and listed. It never commits. Run it before a
        revision round or a sync when someone edited content through the CMS.
@@ -174,6 +176,7 @@ function runCheck(root, slug, io) {
     `cms check: ${slug}: valid, ${paths.length} entr${paths.length === 1 ? 'y' : 'ies'}.`,
   );
   for (const e of paths) io.log(`  ${e.type} ${e.path} (${e.format})`);
+  if (cmsOwnsOffer(siteDir)) io.log("CMS owns the brief's offer");
   return 0;
 }
 

@@ -1599,3 +1599,77 @@ test('map-attribution: a page without the map is not asked for the attribution',
   );
   assert.deepEqual(await failuresOf(root, 'map-attribution'), []);
 });
+
+// --- brief-facts and the CMS-managed offer (cms-managed-offer) --------------------------------------
+
+/** Give the fixture site a .pages.yml (and the content it points to); `entries` are the content[] names. */
+const withCms = (root, { entries = ['offer'], valid = true } = {}) => {
+  mkdirSync(site(root, 'src/content/offer'), { recursive: true });
+  writeFileSync(site(root, 'src/content/offer/a.json'), '{}\n');
+  writeFileSync(
+    site(root, 'src/content.config.ts'),
+    "export const c = { loader: glob({ base: './src/content/offer' }) };\n",
+  );
+  const body = entries
+    .map(
+      (name) =>
+        `  - name: ${name}\n    type: collection\n    path: src/content/offer\n    format: json\n`,
+    )
+    .join('');
+  // A second entry on the same path makes the configuration invalid (path listed twice).
+  const extra = valid
+    ? ''
+    : '  - name: dup\n    type: collection\n    path: src/content/offer\n    format: json\n';
+  writeFileSync(site(root, '.pages.yml'), `content:\n${body}${extra}`);
+};
+const noPrice = goodPage.replace('59,00 €', 'consultar');
+const cmsWarning = (result) =>
+  result.warnings.filter((w) => w.rule === 'brief-facts-cms-offer');
+
+test('brief-facts: an offer entry in a valid .pages.yml skips products and warns once', async () => {
+  const root = briefRoot();
+  withCms(root);
+  withDist(root, noPrice.replace('Curso Orden en 5 días', 'Curso'));
+  const result = await runChecks({ slug: 'good', root });
+  assert.deepEqual(
+    result.failures.filter((f) => f.rule === 'brief-facts'),
+    [],
+  );
+  assert.equal(cmsWarning(result).length, 1);
+  assert.match(cmsWarning(result)[0].message, /managed by the CMS/);
+});
+
+test('brief-facts: without the offer entry the missing price still fails and there is no warning', async () => {
+  const root = briefRoot();
+  withCms(root, { entries: ['jobs'] });
+  withDist(root, noPrice);
+  const result = await runChecks({ slug: 'good', root });
+  assert.deepEqual(
+    result.failures.filter((f) => f.rule === 'brief-facts').map((f) => f.item),
+    ['offer[1].price'],
+  );
+  assert.equal(cmsWarning(result).length, 0);
+});
+
+test('brief-facts: with the offer entry the business name is still required', async () => {
+  const root = briefRoot();
+  withCms(root);
+  withDist(root, noPrice.replace('Taller Plantilla', 'Otro nombre'));
+  const result = await runChecks({ slug: 'good', root });
+  assert.deepEqual(
+    result.failures.filter((f) => f.rule === 'brief-facts').map((f) => f.item),
+    ['business.name'],
+  );
+});
+
+test('brief-facts: an invalid .pages.yml with an offer entry skips nothing', async () => {
+  const root = briefRoot();
+  withCms(root, { valid: false });
+  withDist(root, noPrice);
+  const result = await runChecks({ slug: 'good', root });
+  assert.deepEqual(
+    result.failures.filter((f) => f.rule === 'brief-facts').map((f) => f.item),
+    ['offer[1].price'],
+  );
+  assert.equal(cmsWarning(result).length, 0);
+});
