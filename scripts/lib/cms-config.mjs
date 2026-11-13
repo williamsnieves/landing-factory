@@ -161,6 +161,19 @@ export function readCmsConfig(siteDir) {
 export const cmsPathsOf = (siteDir) =>
   readCmsConfig(siteDir).paths.map((entry) => entry.path);
 
+/**
+ * True when the CMS manages the site's products: `.pages.yml` exists, passes the CMS check with no problem and
+ * has a `content[]` entry named `offer`. The brief's `offer` is then only the starting record. Never throws.
+ */
+export function cmsOwnsOffer(siteDir) {
+  try {
+    const { exists, paths, problems } = readCmsConfig(siteDir);
+    return exists && !problems.length && paths.some((e) => e.name === 'offer');
+  } catch {
+    return false;
+  }
+}
+
 /** True when `rel` (a path inside the repository) is one of the CMS paths or lies under a collection folder. */
 export const isCmsPath = (rel, paths) =>
   paths.some((p) => rel === p || rel.startsWith(`${p}/`));
