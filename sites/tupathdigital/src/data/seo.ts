@@ -1,11 +1,11 @@
 /**
  * Page text and structured data (schema.org JSON-LD) for the home page. Every value comes from brief.json or the
- * catalog: names, URLs, prices and currency of the owner's listings. No reviews, ratings or availability claims
+ * catalog (src/content/offer.json): names, URLs, prices and currency of the owner's listings. No reviews, ratings or availability claims
  * (the brief has none), and no discount (the codes ended).
  */
 import { getImage } from 'astro:assets';
 import brief from '../../brief.json';
-import { BUSINESS, SOCIAL, brandMark, shelves } from './catalog';
+import { BUSINESS, SOCIAL, brandMark, getCatalog } from './catalog';
 import share from '../assets/images/gumroad-heoolh.png';
 
 export const homeTitle = 'tupathdigital: AI products, 3D assets and wallpapers';
@@ -18,8 +18,6 @@ export async function shareImageUrl(site: URL) {
   return new URL(image.src, site).href;
 }
 
-const priceOf = (value: string) => Number(value.replace(',', '.')).toFixed(2);
-
 /** The JSON-LD graph of the home page. `site` is the absolute origin (astro.config.mjs `site`). */
 export async function homeJsonLd(site: URL) {
   const origin = site.href.replace(/\/$/, '');
@@ -28,29 +26,26 @@ export async function homeJsonLd(site: URL) {
     format: 'webp',
     width: 512,
   });
+  const { shelves } = await getCatalog();
   const products = await Promise.all(
     shelves
       .flatMap((shelf) => shelf.items)
       .map(async (item) => {
-        const image = await getImage({
-          src: item.cover,
-          format: 'webp',
-          width: 800,
-        });
+        // A product added in the CMS may have no cover yet: its structured data then has no image.
+        const image = item.cover
+          ? await getImage({ src: item.cover, format: 'webp', width: 800 })
+          : null;
         return {
           '@type': 'Product',
           name: item.stores[0].title,
-          image: `${origin}${image.src}`,
+          ...(image && { image: `${origin}${image.src}` }),
           brand: { '@type': 'Brand', name: BUSINESS },
-          offers: item.stores.map((store) => {
-            const offer = brief.offer.find((o) => o.url === store.url);
-            return {
-              '@type': 'Offer',
-              url: store.url,
-              price: priceOf(offer?.price ?? ''),
-              priceCurrency: offer?.currency ?? 'USD',
-            };
-          }),
+          offers: item.stores.map((store) => ({
+            '@type': 'Offer',
+            url: store.url,
+            price: store.amount,
+            priceCurrency: 'USD',
+          })),
         };
       }),
   );

@@ -47,3 +47,14 @@ A site that offers content to a CMS SHALL keep that content in JSON or YAML file
 #### Scenario: Pull of a file saved by the CMS
 - **WHEN** the clone holds a CMS file in the formatting Pages CMS writes
 - **THEN** the pulled file in `sites/<slug>/` passes `prettier --check` and holds the same values
+
+### Requirement: CMS ownership of the offer
+A `content[]` entry named `offer` in a valid `.pages.yml` SHALL declare that the CMS manages the site's products, so the brief's `offer` is only the starting record. `cms.mjs check` SHALL print the brief sections the CMS owns.
+
+#### Scenario: Check output
+- **WHEN** `cms.mjs check --site <slug>` runs on a valid `.pages.yml` with an entry named `offer`
+- **THEN** it exits 0 and prints that the CMS owns the brief's `offer`
+
+#### Scenario: No offer entry
+- **WHEN** a valid `.pages.yml` has no entry named `offer`
+- **THEN** the check prints no ownership line and the final check treats the offer as before

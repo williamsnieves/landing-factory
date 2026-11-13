@@ -132,6 +132,17 @@ When a brief exists, the final check SHALL fail if a non-assumed fact of the bri
 - **WHEN** the brief's primary URL is `https://app.example/signup?plan=free` and the page only links `https://app.example/signup?plan=pro`
 - **THEN** the final check fails naming `goal.primary.url`
 
+### Requirement: Brief facts with a CMS-managed offer
+When the site's `.pages.yml` passes the CMS check and has a `content[]` entry named `offer`, the final check SHALL NOT require the brief's product names and prices, SHALL print the warning `brief-facts-cms-offer` and SHALL still check the other brief facts.
+
+#### Scenario: Offer managed by the CMS
+- **WHEN** the site's valid `.pages.yml` has an entry named `offer` and the owner removed a product of the brief through the CMS
+- **THEN** the final check does not fail on that product, prints `brief-facts-cms-offer`, and still fails if the business name is missing
+
+#### Scenario: Invalid CMS configuration
+- **WHEN** the site's `.pages.yml` has an entry named `offer` but fails the CMS check
+- **THEN** the product names and prices are still required
+
 ### Requirement: Legal pages from the brief
 When the brief names a market, generation SHALL add the legal pages that market requires, rendered from the brief's legal data in the page language, and link them from every page's footer; a missing required value SHALL render a visible pending-review marker instead of an invented value.
 

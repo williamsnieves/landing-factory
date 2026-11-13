@@ -4,8 +4,10 @@ import {
   PRIMARY_HREF,
   SECONDARY,
   SECONDARY_HREF,
-  productCount,
+  getCatalog,
 } from '../../data/catalog';
+
+const { productCount } = await getCatalog();
 ---
 
 <section class="closing section-pad" aria-labelledby="closing-title">
