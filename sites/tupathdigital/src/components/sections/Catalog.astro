@@ -1,6 +1,8 @@
 ---
-import { productCount, shelves } from '../../data/catalog';
+import { getCatalog } from '../../data/catalog';
 import ProductTile from './ProductTile.astro';
+
+const { productCount, shelves } = await getCatalog();
 
 /* Filter pills are radio inputs: they work without JavaScript. */
 const filters = [

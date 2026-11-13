@@ -1,0 +1,151 @@
+# Pages CMS configuration (app.pagescms.org). Edits the two JSON files under src/content/; each save is a commit
+# that the repository's CI checks before it deploys. See docs/cms.md in landing-factory. Labels are in Spanish for
+# the owner; the keys are the ones src/content.config.ts validates. The entry named "offer" tells the factory that
+# the CMS owns the products (brief.json's offer stays as the starting record).
+content:
+  - name: offer
+    label: Productos
+    type: file
+    path: src/content/offer.json
+    format: json
+    fields:
+      - name: shelves
+        label: Estantes
+        description: 'Los grupos del catálogo (los filtros de la página).'
+        type: object
+        list: true
+        fields:
+          - name: id
+            label: Identificador
+            description: 'Solo minúsculas, números y guiones (por ejemplo wallpapers). Los productos usan este valor en «Estante».'
+            type: string
+            required: true
+          - name: name
+            label: Nombre
+            type: string
+            required: true
+          - name: blurb
+            label: Descripción corta
+            description: 'Una frase que aparece bajo el nombre del estante.'
+            type: text
+            required: true
+      - name: products
+        label: Productos
+        type: object
+        list: true
+        fields:
+          - name: id
+            label: Identificador
+            description: 'Único, solo minúsculas, números y guiones.'
+            type: string
+            required: true
+          - name: shelf
+            label: Estante
+            description: 'El identificador de uno de los estantes de arriba.'
+            type: string
+            required: true
+          - name: cover
+            label: Portada
+            description: 'Déjala vacía si el producto aún no tiene portada: se muestra una tarjeta con el título. Las portadas nuevas llegan a través de la fábrica; después se añade aquí su nombre de archivo.'
+            type: select
+            # New covers come through the factory (the file goes to src/assets/images/); then its file name is added here.
+            options:
+              values:
+                - { value: gumroad-heoolh.png, label: gumroad-heoolh.png }
+                - { value: gumroad-ufvyu.png, label: gumroad-ufvyu.png }
+                - { value: etsy-4510744982.jpg, label: etsy-4510744982.jpg }
+                - { value: etsy-1888381994.jpg, label: etsy-1888381994.jpg }
+                - { value: gumroad-frbcf.png, label: gumroad-frbcf.png }
+                - { value: gumroad-xfoqn.png, label: gumroad-xfoqn.png }
+                - { value: etsy-4428727624.jpg, label: etsy-4428727624.jpg }
+                - { value: etsy-4426604786.jpg, label: etsy-4426604786.jpg }
+                - { value: etsy-4443144664.jpg, label: etsy-4443144664.jpg }
+                - { value: etsy-4448900410.jpg, label: etsy-4448900410.jpg }
+                - { value: etsy-4442926542.jpg, label: etsy-4442926542.jpg }
+                - { value: etsy-4423955365.jpg, label: etsy-4423955365.jpg }
+                - { value: etsy-4316616449.jpg, label: etsy-4316616449.jpg }
+                - { value: etsy-4338601085.jpg, label: etsy-4338601085.jpg }
+                - { value: etsy-4349241344.jpg, label: etsy-4349241344.jpg }
+                - { value: etsy-4298208749.jpg, label: etsy-4298208749.jpg }
+                - { value: etsy-4297967816.jpg, label: etsy-4297967816.jpg }
+          - name: alt
+            label: Texto alternativo de la portada
+            description: 'Qué se ve en la portada (obligatorio si hay portada).'
+            type: text
+          - name: tags
+            label: Etiquetas
+            description: 'Formatos y datos del anuncio, por ejemplo PDF o 450 prompts.'
+            type: string
+            list: true
+          - name: stores
+            label: Tiendas
+            description: 'Un anuncio por tienda; el primero da el título de la tarjeta.'
+            type: object
+            list: true
+            required: true
+            fields:
+              - name: store
+                label: Tienda
+                type: select
+                required: true
+                options:
+                  values:
+                    - { value: Etsy, label: Etsy }
+                    - { value: Gumroad, label: Gumroad }
+              - name: title
+                label: Título del anuncio
+                description: 'Tal como aparece en la tienda.'
+                type: string
+                required: true
+              - name: price
+                label: Precio (USD)
+                description: 'Solo el número con punto decimal, por ejemplo 4.10.'
+                type: string
+                required: true
+              - name: url
+                label: Enlace del anuncio
+                description: 'Debe empezar por https:// y ser de etsy.com o gumroad.com.'
+                type: string
+                required: true
+  - name: coupons
+    label: Cupones
+    type: file
+    path: src/content/coupons.json
+    format: json
+    fields:
+      - name: coupons
+        label: Cupones
+        description: 'Un cupón caducado (fecha de fin anterior a la de la publicación) no se muestra. Sin cupones activos, la página no tiene sección de cupones.'
+        type: object
+        list: true
+        fields:
+          - name: code
+            label: Código
+            description: 'Letras mayúsculas y números, de 3 a 32 caracteres.'
+            type: string
+            required: true
+          - name: discount
+            label: Descuento
+            description: 'Texto corto, por ejemplo «30% off».'
+            type: string
+            required: true
+          - name: store
+            label: Tienda
+            type: select
+            required: true
+            options:
+              values:
+                - { value: Etsy, label: Etsy }
+                - { value: Gumroad, label: Gumroad }
+                - { value: Both, label: Las dos }
+          - name: endsOn
+            label: Válido hasta
+            description: 'Último día en que se puede usar el cupón.'
+            type: date
+            required: true
+            options:
+              format: yyyy-MM-dd
+          - name: note
+            label: Nota
+            description: 'Opcional, una frase corta (máximo 120 caracteres).'
+            type: string

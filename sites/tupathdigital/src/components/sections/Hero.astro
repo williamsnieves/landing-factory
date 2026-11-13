@@ -10,9 +10,10 @@ import {
   PRIMARY_HREF,
   SECONDARY,
   SECONDARY_HREF,
-  lowestPrice,
-  productCount,
+  getCatalog,
 } from '../../data/catalog';
+
+const { lowestPrice, productCount } = await getCatalog();
 
 const facts = [
   'Instant download',

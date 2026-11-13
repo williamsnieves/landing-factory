@@ -1,5 +1,7 @@
 ---
-import { productCount, shelves, storeCount } from '../../data/catalog';
+import { getCatalog } from '../../data/catalog';
+
+const { productCount, shelves, storeCount } = await getCatalog();
 
 const figures = [
   {

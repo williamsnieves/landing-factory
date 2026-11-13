@@ -1,0 +1,141 @@
+---
+import { getActiveCoupons } from '../../data/catalog';
+
+// Coupons come from src/content/coupons.json (Pages CMS). An expired one is dropped at build time, and with none
+// left this component renders nothing: the page has no coupon section at all.
+const coupons = await getActiveCoupons();
+
+/** "2026-12-31" written as a date for people: "31 December 2026". Plain date, no countdown. */
+const dateText = (iso: string) =>
+  new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+const where = (store: string) =>
+  store === 'Both' ? 'Etsy and Gumroad' : store;
+---
+
+{coupons.length > 0 && (
+  <section
+    id="coupons"
+    class="coupons section-pad"
+    aria-labelledby="coupons-title"
+  >
+    <div class="wrap">
+      <div class="intro" data-reveal>
+        <p class="eyebrow">Discount codes</p>
+        <h2 id="coupons-title" class="h2">
+          Codes for <em class="hl">your order</em>
+        </h2>
+        <p class="lead">
+          Enter the code at checkout in the store named on the card.
+        </p>
+      </div>
+      <ul class="list">
+        {coupons.map((c) => (
+          <li class="card item">
+            <p class="discount">{c.discount}</p>
+            <p class="code">
+              <span class="label">Code</span>
+              <code>{c.code}</code>
+            </p>
+            <p class="meta">
+              <span>On {where(c.store)}</span>
+              <span>
+                Valid until{' '}
+                <time datetime={c.endsOn}>{dateText(c.endsOn)}</time>
+              </span>
+            </p>
+            {c.note && <p class="note">{c.note}</p>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+)}
+
+<style>
+  .coupons {
+    padding-bottom: 0;
+  }
+  .intro {
+    max-width: 40rem;
+  }
+  .list {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+    margin: 2rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 640px) {
+    .list {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1024px) {
+    .list {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+  }
+  .item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding: 1.25rem 1.25rem 1.5rem;
+  }
+  .discount {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+  .code {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    margin: 0;
+  }
+  .label {
+    color: var(--color-ink-soft);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  code {
+    padding: 0.4rem 0.8rem;
+    border: 1px dashed var(--color-accent);
+    border-radius: var(--radius-sm);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-size: var(--text-base);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    user-select: all;
+    overflow-wrap: anywhere;
+  }
+  .meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin: 0;
+    color: var(--color-ink-soft);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+  }
+  .note {
+    margin: 0;
+    color: var(--color-ink-soft);
+    font-size: var(--text-sm);
+    line-height: 1.45;
+  }
+</style>
