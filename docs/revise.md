@@ -73,7 +73,7 @@ Kept as they are in the clone: `.git` and git-ignored paths; `package-lock.json`
 
 It refuses (exit 1, nothing written): a site without `EXPORTED.json`, a transferred site, a clone whose `origin` is not the recorded repository (compared after normalizing `https`, `ssh` and `.git`, ignoring credentials), a path that is not a work tree root, and a clone with uncommitted changes. Whether `brief.json` travels comes from the record (`noBrief`, written by `npm run export -- --record`). A record from before that field (`personal-brand`) needs `--brief` or `--no-brief` (exit 2 otherwise).
 
-For a site with `.pages.yml` the files under its CMS paths are never added, changed or deleted in the clone: a difference is listed as `kept (managed by the CMS)` with the pull command (`node scripts/cms.mjs pull --site <slug> --from <clone>`, see `docs/cms.md`). `.pages.yml` itself syncs normally.
+For a site with `.pages.yml` the files under its CMS paths are never added, changed or deleted in the clone: a difference is listed as `kept (managed by the CMS)` with the pull command (`node scripts/cms.mjs pull --site <slug> --from <clone>`, see `docs/cms.md`). `.pages.yml` itself syncs normally. The one exception is the first sync after a site moves to the CMS: a CMS path the clone has never had (nothing at that file or folder) is added once, listed as `added <file> (first copy for the CMS)`; from then on the CMS owns it, deletions included.
 
 Then, in the clone: `npm ci && npm run lint && npm run build`, push a branch such as `revise/<n>` and open a pull request. That repository's CI gives the customer's preview URL. Merging it deploys to production.
 

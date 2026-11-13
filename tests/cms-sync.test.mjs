@@ -391,6 +391,42 @@ test('sync does not add, change or delete under a CMS path', () => {
   assert.equal(git(m.clone, 'rev-parse', 'HEAD'), head);
 });
 
+test('the first sync after a site moves to the CMS adds the CMS files once', () => {
+  // exported before the CMS existed: the clone has no content folder and no .pages.yml
+  const m = managedFrom(makeFactory());
+  put(m.factory.site, 'src/content.config.ts', CONTENT_CONFIG);
+  put(m.factory.site, 'src/content/jobs/a.json', '{"title":"A"}\n');
+  put(m.factory.site, 'src/content/jobs/b.json', '{"title":"B"}\n');
+  put(m.factory.site, '.pages.yml', PAGES_YML);
+  const r = sync(m);
+  assert.equal(r.code, 0, r.out + r.err);
+  for (const f of ['a', 'b'])
+    assert.match(
+      r.out,
+      new RegExp(
+        `added +src/content/jobs/${f}\\.json \\(first copy for the CMS\\)`,
+      ),
+    );
+  assert.match(r.out, /added +\.pages\.yml/);
+  assert.doesNotMatch(r.out, /managed by the CMS/);
+  assert.deepEqual(readdirSync(join(m.clone, 'src/content/jobs')).sort(), [
+    'a.json',
+    'b.json',
+  ]);
+  // once the folder exists the CMS owns it: a deletion made there is not undone by the next sync
+  commitIn(m.clone, 'first sync');
+  rmSync(join(m.clone, 'src/content/jobs/b.json'));
+  commitIn(m.clone, 'deleted in the CMS');
+  const again = sync(m);
+  assert.equal(again.code, 0, again.out + again.err);
+  assert.doesNotMatch(again.out, /first copy for the CMS/);
+  assert.match(
+    again.out,
+    /kept \(managed by the CMS\): src\/content\/jobs\/b\.json/,
+  );
+  assert.deepEqual(readdirSync(join(m.clone, 'src/content/jobs')), ['a.json']);
+});
+
 test('sync with CMS files identical on both sides prints no hint and syncs .pages.yml itself', () => {
   const m = cmsManaged();
   const clean = sync(m);
@@ -423,7 +459,11 @@ test('a path removed from .pages.yml in the factory is no longer protected', () 
   const r = sync(m);
   assert.equal(r.code, 0, r.out + r.err);
   assert.match(r.out, /changed +src\/content\/jobs\/a\.json/);
-  assert.match(r.out, /kept \(managed by the CMS\): src\/content\/site\.json/);
+  // a CMS path the clone never had is added once
+  assert.match(
+    r.out,
+    /added +src\/content\/site\.json \(first copy for the CMS\)/,
+  );
 });
 
 test('sync lists no kept file when the CMS file has the same values in another formatting', () => {
