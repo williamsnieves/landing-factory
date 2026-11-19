@@ -1,3 +1,16 @@
 {
-  "coupons": []
+  "coupons": [
+    {
+      "code": "BLACKFRIDAY2026",
+      "discount": "50%",
+      "store": "Etsy",
+      "endsOn": "2026-11-30"
+    },
+    {
+      "code": "5HD3J76",
+      "discount": "50%",
+      "store": "Gumroad",
+      "endsOn": "2026-11-30"
+    }
+  ]
 }
