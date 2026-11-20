@@ -23,6 +23,7 @@ import {
   worstScores,
 } from './qa/lighthouse.mjs';
 import { WEBGL_ARGS, runSceneChecks, sceneNames } from './qa/scene-checks.mjs';
+import { runVideoChecks, videoCount } from './qa/video-checks.mjs';
 import { renderMarkdown } from './qa/report.mjs';
 import { resolveImpeccableTarget, resolveQaPaths } from './qa/site.mjs';
 import {
@@ -38,6 +39,7 @@ const CHECKS = [
   'reduced-motion',
   'reveal-end-state',
   'scenes',
+  'video',
   'lighthouse',
   'impeccable',
 ];
@@ -171,6 +173,7 @@ async function main() {
       reducedMotion: null,
       revealEndState: null,
       scenes: null,
+      video: null,
       privacy: null,
       lighthouse: null,
       pageErrors: [],
@@ -182,7 +185,8 @@ async function main() {
     if (
       !skip.has('layout') ||
       !skip.has('reduced-motion') ||
-      !skip.has('scenes')
+      !skip.has('scenes') ||
+      !skip.has('video')
     ) {
       const browser = await chromium.launch({
         ...(envChrome ? { executablePath: envChrome } : {}),
@@ -401,6 +405,21 @@ async function main() {
                 failures,
               })),
             };
+          }
+        }
+        if (!skip.has('video') && !report.loadError) {
+          // Pages with a looping clip ([data-video]) get the video checks.
+          const html = await fetch(report.url).then((r) => r.text());
+          if (videoCount(html)) {
+            log(`video ${p.path}: ${videoCount(html)} clip(s)`);
+            report.video = await runVideoChecks({
+              browser,
+              url: report.url,
+              path: p.path,
+              html,
+              config,
+              failures,
+            });
           }
         }
       }

@@ -56,6 +56,11 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
+      # The video tests encode clips with the system ffmpeg; without it they skip. CI never downloads or encodes a
+      # landing's video (encoded files are committed), only the tests do.
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
       - name: Unit and fixture tests
         run: npm test
 

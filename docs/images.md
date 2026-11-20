@@ -17,6 +17,8 @@ Every image need is filled in this order (`/new-landing` and `/revise-landing` f
 
 `scripts/new-landing.sh --sources` picks the archives to search: the default is `pixabay,commons`, and `--sources commons,met` keeps working. Every photo is downloaded once, committed with the site and served from the landing itself, so there is no third-party host at view time, no cookie and no change to the Content-Security-Policy. Each file is recorded in `sites/<slug>/assets.json` and credited by `node scripts/credits.mjs --site <slug>`.
 
+Video has its own sources, encoder and checks: see `docs/video.md` (Pixabay video through `find-images.mjs --source pixabay-video`, and files the customer or the owner supplies through `scripts/video.mjs`).
+
 ## Pixabay (automatic)
 
 ```bash

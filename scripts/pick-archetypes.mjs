@@ -243,6 +243,18 @@ export const REF_RULES = [
     traits: ['generative-dot-field'],
   },
   {
+    re: /video hero|looping (clip|video)[^.]{0,40}behind|clip fills the whole first screen/,
+    traits: ['video-scrim-hero'],
+  },
+  {
+    re: /(feature|alternating) rows?[^.]{0,80}(looping clip|short muted loop)|pairs? (one|a) short (looping )?(clip|loop)/,
+    traits: ['clip-feature-rows'],
+  },
+  {
+    re: /moving footage|footage carries|video-led|looping clip fills/,
+    signals: ['photo-rich'],
+  },
+  {
     re: /conversion|primary action|call to action/,
     signals: ['conversion-first'],
   },

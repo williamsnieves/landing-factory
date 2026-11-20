@@ -60,6 +60,20 @@ test('threeD defaults to a 200 KB gzip budget and is validated', () => {
   assert.ok(errors.some((e) => e.startsWith('threeD.extra')));
 });
 
+test('video defaults to 4000 KB per clip and 6 clips per page and is validated', () => {
+  assert.equal(DEFAULT_CONFIG.video.maxKb, 4000);
+  assert.equal(DEFAULT_CONFIG.video.maxPerPage, 6);
+  assert.deepEqual(validateConfig(structuredClone(DEFAULT_CONFIG)), []);
+  const bad = structuredClone(DEFAULT_CONFIG);
+  bad.video.maxKb = 0;
+  bad.video.maxPerPage = 0;
+  bad.video.extra = true;
+  const errors = validateConfig(bad);
+  assert.ok(errors.some((e) => e.startsWith('video.maxKb')));
+  assert.ok(errors.some((e) => e.startsWith('video.maxPerPage')));
+  assert.ok(errors.some((e) => e.startsWith('video.extra')));
+});
+
 test('diversity thresholds default to the calibrated values and are validated', () => {
   assert.deepEqual(DEFAULT_CONFIG.diversity, {
     minLayoutDistance: 0.2,

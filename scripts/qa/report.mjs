@@ -114,6 +114,27 @@ export function renderMarkdown(report) {
         );
       out.push('');
     }
+    if (page.video) {
+      const v = page.video;
+      out.push(`Video: ${v.count} clip(s)`, '');
+      if (v.reducedMotion)
+        out.push(
+          `- Reduced motion (${v.reducedMotion.viewportWidth}px): ${mark(v.reducedMotion.pass)}; posters visible: ${v.reducedMotion.clips.filter((c) => c.posterVisible).length}/${v.reducedMotion.clips.length}, playing: ${v.reducedMotion.clips.filter((c) => c.playing).length}`,
+        );
+      if (v.noJs)
+        out.push(
+          `- Without JavaScript: ${mark(v.noJs.pass)}; posters visible: ${v.noJs.clips.filter((c) => c.posterVisible).length}/${v.noJs.clips.length}, playing: ${v.noJs.clips.filter((c) => c.playing).length}`,
+        );
+      if (v.runtime)
+        out.push(
+          `- Runtime (${v.runtime.viewportWidth}px): ${mark(v.runtime.pass)}; ${v.runtime.h264 ? v.runtime.clips.map((c) => `clip ${c.index + 1}: ${c.playing ? 'plays' : 'does not play'}`).join('; ') : 'this browser cannot decode H.264, so playback was not verified'}; errors: ${v.runtime.errors.length}`,
+        );
+      if (v.budget)
+        out.push(
+          `- Video budget: ${mark(v.budget.pass)}; ${v.budget.count} of ${v.budget.maxPerPage} clips; ${v.budget.files.map((f) => `${f.url.split('/').pop()} ${f.kb} KB of ${v.budget.maxKb} KB`).join(', ') || 'no .mp4 referenced'}`,
+        );
+      out.push('');
+    }
     if (page.lighthouse) {
       const lh = page.lighthouse;
       const cats = Object.keys(lh.worst);

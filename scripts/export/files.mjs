@@ -89,6 +89,7 @@ export function exportedKnipConfig() {
       'src/scenes/*.ts',
       'src/components/forms/client.ts',
       'src/components/maps/client.ts',
+      'src/components/video/client.ts',
     ],
     project: ['src/**/*.{astro,ts,tsx,css}', 'scripts/**/*.mjs'],
     ignore: [
@@ -96,6 +97,7 @@ export function exportedKnipConfig() {
       'src/components/legal/**',
       'src/components/forms/**',
       'src/components/maps/**',
+      'src/components/video/**',
     ],
     ignoreDependencies: ['eslint-plugin-jsx-a11y'],
   };

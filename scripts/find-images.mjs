@@ -18,25 +18,34 @@ import {
   copyFileSync,
   existsSync,
   mkdirSync,
+  mkdtempSync,
   readFileSync,
   renameSync,
+  rmSync,
   statSync,
   writeFileSync,
 } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
+import { tmpdir } from 'node:os';
 
 import {
   assertImageOrigin,
+  assertVideoOrigin,
   getPixabayPhoto,
+  getPixabayVideo,
   maskKey,
   parsePixabayRef,
+  parsePixabayVideoRef,
   pixabayEntry,
+  pixabayVideoEntry,
   largeImageWidth,
   readKey as readPixabayKey,
   searchPixabay,
+  searchPixabayVideos,
 } from './lib/pixabay.mjs';
+import { assertTools, encodeVideo, videoMaxKb } from './lib/video-encode.mjs';
 import { reexecWithEnvProxy } from './lib/proxy.mjs';
 import { validateSlug } from './new-site.mjs';
 
@@ -54,7 +63,7 @@ export const MIME_EXTENSIONS = {
   'image/webp': '.webp',
 };
 export const ORIENTATIONS = ['landscape', 'portrait', 'square'];
-export const SOURCES = ['commons', 'met', 'pixabay'];
+export const SOURCES = ['commons', 'met', 'pixabay', 'pixabay-video'];
 
 export const PEXELS_LICENSE = 'Pexels License';
 export const PEXELS_LICENSE_URL = 'https://www.pexels.com/license/';
@@ -389,7 +398,7 @@ export async function searchAll(client, query, options = {}) {
   for (const source of sources) {
     let result;
     if (source === 'met') result = await searchMet(client, query, options);
-    else if (source === 'pixabay') {
+    else if (source === 'pixabay' || source === 'pixabay-video') {
       let key;
       try {
         key = options.pixabayKey ?? readPixabayKey(options.env);
@@ -398,7 +407,9 @@ export async function searchAll(client, query, options = {}) {
         options.warn?.(`skipping Pixabay: ${error.message}`);
         continue;
       }
-      result = await searchPixabay({
+      const searchStock =
+        source === 'pixabay-video' ? searchPixabayVideos : searchPixabay;
+      result = await searchStock({
         query,
         orientation: options.orientation,
         minWidth: options.minWidth,
@@ -725,6 +736,88 @@ async function getPixabayImage(
   };
 }
 
+/** Largest video download we accept (the medium rendition is a few MB; this only stops a runaway response). */
+const MAX_VIDEO_DOWNLOAD_BYTES = 120 * 1024 * 1024;
+
+/**
+ * Download one Pixabay video (the medium rendition, only from cdn.pixabay.com), encode it with the factory
+ * encoder into sites/<slug>/src/assets/video/ and append its manifest entry (kind "video"). Needs ffmpeg:
+ * checked before anything is requested.
+ */
+async function getPixabayClip(
+  client,
+  { slug, id, as, note, siteDir, now, env, maxKb },
+) {
+  await assertTools(env);
+  const candidate = await getPixabayVideo(id, { client, env });
+  assertVideoOrigin(candidate.originalUrl, env);
+  const name = fileStem(as ?? `${candidate.title}-${candidate.pixabayId}`);
+  if (as && as !== name)
+    throw new Error(
+      `--as "${as}": use lowercase letters, digits and "-" (no extension)`,
+    );
+  const file = `${name}.mp4`;
+  const poster = `${name}.poster.webp`;
+  const manifestPath = join(siteDir, 'assets.json');
+  const manifest = readManifest(manifestPath);
+  const outDir = join(siteDir, 'src/assets/video');
+  if (
+    existsSync(join(outDir, file)) ||
+    manifest.images.some((e) => e.file === file)
+  )
+    throw new Error(
+      `${file} already exists in sites/${slug}; pick another name with --as`,
+    );
+  const response = await client.request(candidate.originalUrl, {
+    headers: { accept: 'video/mp4,video/*' },
+  });
+  if (!response.ok)
+    throw new RequestError(
+      `download failed: HTTP ${response.status} for ${candidate.originalUrl}`,
+      response.status,
+    );
+  if (response.url) assertVideoOrigin(response.url, env);
+  const type = response.headers.get('content-type') ?? '';
+  if (!/^video\//i.test(type) && !/octet-stream/i.test(type))
+    throw new Error(`download is not a video (${type || 'no content type'})`);
+  const bytes = Buffer.from(await response.arrayBuffer());
+  if (!bytes.length) throw new Error('download is empty');
+  if (bytes.length > MAX_VIDEO_DOWNLOAD_BYTES)
+    throw new Error('download is larger than 120 MB; nothing was recorded');
+  const work = mkdtempSync(join(tmpdir(), 'pixabay-video-'));
+  try {
+    const input = join(work, 'source.mp4');
+    writeFileSync(input, bytes);
+    const encoded = await encodeVideo({
+      input,
+      outDir,
+      name,
+      maxKb,
+      env,
+    });
+    const entry = pixabayVideoEntry(candidate, {
+      file,
+      poster,
+      encoded,
+      note,
+      now,
+    });
+    manifest.images.push(entry);
+    writeManifest(manifestPath, manifest);
+    return {
+      entry,
+      path: encoded.file,
+      bytes: encoded.bytes,
+      width: encoded.width,
+      original: false,
+      video: true,
+      durationSec: encoded.durationSec,
+    };
+  } finally {
+    rmSync(work, { recursive: true, force: true });
+  }
+}
+
 /** The type of an image file from its first bytes: { mime, ext } for JPEG, PNG and WebP, else null. */
 export function sniffImage(bytes) {
   if (
@@ -867,6 +960,7 @@ export async function getImage(
     root = ROOT,
     now = new Date(),
     env = process.env,
+    maxKb,
   },
 ) {
   const slugError = validateSlug(slug);
@@ -876,6 +970,19 @@ export async function getImage(
     throw new Error(
       `sites/${slug} does not exist; run npm run new-site -- ${slug} first`,
     );
+
+  const videoId = parsePixabayVideoRef(ref);
+  if (videoId !== null)
+    return getPixabayClip(client, {
+      slug,
+      id: videoId,
+      as,
+      note,
+      siteDir,
+      now,
+      env,
+      maxKb,
+    });
 
   const pixabayId = parsePixabayRef(ref);
   if (pixabayId !== null)
@@ -947,7 +1054,7 @@ export async function getImage(
 // CLI
 
 const HELP = `Usage:
-  node scripts/find-images.mjs search "<query>" [--source commons,met,pixabay] [--lang <tag>] [--limit N] [--min-width W] [--orientation O] [--json]
+  node scripts/find-images.mjs search "<query>" [--source commons,met,pixabay,pixabay-video] [--lang <tag>] [--limit N] [--min-width W] [--orientation O] [--json]
   node scripts/find-images.mjs get <site-slug> <ref> [--as <file>] [--width W] [--note <text>] [--json]
   node scripts/find-images.mjs import <site-slug> <file> --source pexels --page <url> --author <name> [--author-url <url>] [--title <text>] [--as <file>] [--note <text>] [--json]
 
@@ -958,6 +1065,8 @@ search   Search Wikimedia Commons (default), The Met Open Access collection and/
                               --orientation do not apply to them. Each needs one request, so it is slow.
                               Pixabay: photos only, safe search on; the key comes from PIXABAY_API_KEY (never
                               an argument) and identical searches are cached for 24 hours in .cache/pixabay/.
+                              pixabay-video searches Pixabay videos (same key; --orientation and --min-width
+                              apply to the medium rendition, which is what get downloads).
            --lang TAG         language of the query for Pixabay (es, en, ...)
            --limit N          results to show (default 10)
            --min-width W      original width at least W px
@@ -968,7 +1077,11 @@ get      Download one file into sites/<site-slug>/src/assets/images/ and append 
            <ref>              a Commons title, page id or URL; or met:<objectID> / a metmuseum.org collection
                               URL for The Met (resized to a web JPEG; entry gets source "met" and the
                               museum's creditLine, credit true); or pixabay:<id> / a pixabay.com photo page URL
-                              (the large image, up to 1280 px, from pixabay.com; entry gets source "pixabay")
+                              (the large image, up to 1280 px, from pixabay.com; entry gets source "pixabay");
+                              or pixabay-video:<id> / a pixabay.com video page URL: the clip is downloaded only
+                              from cdn.pixabay.com, encoded with ffmpeg (H.264 MP4, no audio, at most 1280 px
+                              and 20 s, faststart, WebP poster) into src/assets/video/ and recorded with
+                              kind "video"; needs ffmpeg (use --as <name>, no extension)
            --as <file>        file name (default: slug of the Commons title)
            --width W          960, 1280 or 1920 (default 1920; the original is used when it is smaller)
            --note <text>      free text stored in the manifest (what the photo shows, crop plans)
@@ -1122,6 +1235,12 @@ export async function main(argv, io = console, clientOptions = {}) {
           const size = c.width
             ? `${c.width}x${c.height} ${c.orientation}`
             : 'size unknown';
+          if (c.kind === 'video') {
+            io.log(
+              `${i + 1}. [pixabay-video] pixabay-video:${c.pixabayId}  ${size}, ${c.durationSec ?? '?'} s, by ${c.author}\n   ${c.tags}\n   ${c.license} (credit shown); get ref: pixabay-video:${c.pixabayId}\n   ${c.sourcePage}`,
+            );
+            return;
+          }
           if (c.source === 'pixabay') {
             io.log(
               `${i + 1}. [pixabay] pixabay:${c.pixabayId}  ${size}, by ${c.author}\n   ${c.tags}\n   ${c.license} (credit shown); get ref: pixabay:${c.pixabayId}\n   ${c.sourcePage}`,
@@ -1153,12 +1272,13 @@ export async function main(argv, io = console, clientOptions = {}) {
         note: values.note,
         // Tests only: keep sites/ in another folder.
         root: factoryRoot(),
+        maxKb: videoMaxKb(factoryRoot(), args[0]),
       });
       waits();
       if (values.json) io.log(JSON.stringify(result.entry, null, 2));
       else
         io.log(
-          `Saved ${result.entry.file} (${result.width} px wide${result.original ? ', original' : ''}, ${(result.bytes / 1024).toFixed(0)} KB) to sites/${args[0]}/src/assets/images/\n  ${result.entry.title}\n  ${result.entry.author}, ${result.entry.license}${result.entry.credit ? ' (credit required)' : ''}\nAppended to sites/${args[0]}/assets.json. Next: node scripts/credits.mjs --site ${args[0]}`,
+          `Saved ${result.entry.file} (${result.width} px wide${result.original ? ', original' : ''}${result.video ? `, ${result.durationSec} s` : ''}, ${(result.bytes / 1024).toFixed(0)} KB) to sites/${args[0]}/src/assets/${result.video ? 'video' : 'images'}/\n  ${result.entry.title}\n  ${result.entry.author}, ${result.entry.license}${result.entry.credit ? ' (credit required)' : ''}\nAppended to sites/${args[0]}/assets.json. Next: node scripts/credits.mjs --site ${args[0]}`,
         );
       return 0;
     }

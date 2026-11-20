@@ -6,6 +6,7 @@
         "src/scenes/*.ts",
         "src/components/forms/client.ts",
         "src/components/maps/client.ts",
+        "src/components/video/client.ts",
         "scripts/**/*.mjs",
         "tests/**/*.mjs"
       ],
@@ -22,14 +23,16 @@
         "src/i18n/urls.ts",
         "src/scenes/*.ts",
         "src/components/forms/client.ts",
-        "src/components/maps/client.ts"
+        "src/components/maps/client.ts",
+        "src/components/video/client.ts"
       ],
       "project": ["src/**/*.{astro,ts,tsx,css}"],
       "ignore": [
         "src/components/three/**",
         "src/components/legal/**",
         "src/components/forms/**",
-        "src/components/maps/**"
+        "src/components/maps/**",
+        "src/components/video/**"
       ]
     }
   }

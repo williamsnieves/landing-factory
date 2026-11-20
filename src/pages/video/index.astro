@@ -1,0 +1,47 @@
+---
+// Demo of the video layer (docs/video.md): one looping clip with its poster, a scrim and a statement over it.
+// `noindex`, out of the sitemap. The clip is ffmpeg's own generated `gradients` source (nothing filmed, no third
+// party content: provenance "self"), encoded with the factory encoder and committed like any other asset:
+//   ffmpeg -f lavfi -i "gradients=size=640x360:rate=25:duration=4:speed=0.05:c0=0x1d3557:c1=0xe63946:c2=0xf1faee:c3=0x457b9d:nb_colors=4" source.mp4
+//   node -e "import('./scripts/lib/video-encode.mjs').then((m) => m.encodeVideo({ input: 'source.mp4', outDir: 'src/assets/video', name: 'demo-loop' }))"
+// The starter has no assets.json (a site records its clips there with kind "video"). Delete this folder and the
+// clip in a real landing.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import VideoLoop from '../../components/video/VideoLoop.astro';
+import demoClip from '../../assets/video/demo-loop.mp4';
+import demoPoster from '../../assets/video/demo-loop.poster.webp';
+---
+
+<BaseLayout
+  title="Video demo"
+  description="Demo page of the video layer: a poster-first looping clip that plays in view, pauses off-screen and never plays under reduced motion."
+  noindex
+>
+  <section class="mx-auto max-w-3xl px-6 pt-24 pb-12">
+    <p class="text-ink-soft mb-4 text-sm tracking-widest uppercase">Video</p>
+    <h1 class="font-display text-3xl leading-tight text-balance">
+      A loop that moves only when it should.
+    </h1>
+    <p class="text-ink-soft mt-6 text-lg">
+      The poster is the picture. The clip plays while it is on screen, stops
+      when you scroll away or switch tabs, and never starts if your system asks
+      for reduced motion.
+    </p>
+  </section>
+
+  <section class="mx-auto max-w-5xl px-6 pb-24">
+    <VideoLoop
+      video={demoClip}
+      poster={demoPoster}
+      label="A slow gradient of blue and red light"
+      priority
+      class="rounded-lg"
+    >
+      <div class="absolute inset-0 grid place-items-center bg-black/55 p-8 text-center">
+        <p class="font-display max-w-xl text-2xl leading-tight text-balance text-white">
+          Footage carries the page. The words stay readable.
+        </p>
+      </div>
+    </VideoLoop>
+  </section>
+</BaseLayout>
