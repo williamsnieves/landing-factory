@@ -90,9 +90,14 @@ export function readVideoState() {
       posterVisible: img
         ? img.naturalWidth > 0 && visible(img)
         : Boolean(video?.getAttribute('poster')) && visible(video),
+      // An `autoplay` attribute plays the clip as soon as the browser can, whatever the timing of this reading.
       playing: video
-        ? !video.paused || video.currentTime > 0 || video.readyState > 2
+        ? video.autoplay ||
+          !video.paused ||
+          video.currentTime > 0 ||
+          video.readyState > 2
         : false,
+      autoplay: video ? video.autoplay : false,
       currentTime: video ? video.currentTime : 0,
     };
   });
@@ -137,8 +142,9 @@ export async function runVideoChecks({
     try {
       const page = await context.newPage();
       await page.goto(url, { waitUntil: 'load' });
-      if (options.reducedMotion)
-        await page.waitForTimeout(config.reducedMotion.settleMs + 500);
+      // Same settle time with and without JavaScript: an autoplaying clip can take a moment to start on a slow
+      // runner, and the reading below must not depend on that race.
+      await page.waitForTimeout(config.reducedMotion.settleMs + 500);
       await page.evaluate(prepareVideos);
       await page.waitForTimeout(400);
       const clips = await page.evaluate(readVideoState);
@@ -153,7 +159,7 @@ export async function runVideoChecks({
       for (const c of clips) {
         if (c.playing)
           pushFailure(failures, path, width, check, 'playing', {
-            measured: `paused ${!c.playing}, currentTime ${c.currentTime}`,
+            measured: `autoplay ${c.autoplay}, currentTime ${c.currentTime}`,
             threshold: 'no clip plays',
             selector: selectorOf(c.index),
             message: `clip ${c.index + 1} plays ${mode}`,
