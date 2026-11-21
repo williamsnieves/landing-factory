@@ -1,0 +1,16 @@
+---
+// One display line with at most one italic serif phrase (the page's only typographic contrast).
+import type { DisplayLine } from '../../content/site';
+
+interface Props {
+  line: DisplayLine;
+}
+
+const { line } = Astro.props;
+---
+
+{line.before}
+{line.em && (
+  <em class="font-serif font-normal tracking-normal italic">{line.em}</em>
+)}
+{line.after}

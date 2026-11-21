@@ -1,0 +1,33 @@
+---
+// The page's one button shape: a pill. `primary` (amber) only on dark bands; `outline` is the secondary on dark
+// bands; `dark` is the action on light bands. Hover changes colour or outline, never size.
+interface Props {
+  href: string;
+  variant?: 'primary' | 'outline' | 'dark';
+  size?: 'sm' | 'md';
+  class?: string;
+}
+
+const {
+  href,
+  variant = 'primary',
+  size = 'md',
+  class: className,
+} = Astro.props;
+---
+
+<a
+  href={href}
+  class:list={[
+    'rounded-pill inline-flex items-center justify-center font-medium whitespace-nowrap transition-colors duration-(--duration-fast)',
+    size === 'md' ? 'min-h-12 px-6 text-base' : 'min-h-11 px-5 text-sm',
+    variant === 'primary' &&
+      'bg-primary text-primary-contrast hover:bg-primary-hover',
+    variant === 'outline' &&
+      'text-ink border-ink hover:bg-ink hover:text-paper border-2',
+    variant === 'dark' && 'bg-bone-ink text-bone hover:bg-bone-ink-soft',
+    className,
+  ]}
+>
+  <slot />
+</a>

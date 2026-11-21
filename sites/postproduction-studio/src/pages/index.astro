@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Motion from '../components/motion/Motion.astro';
+import Header from '../components/sections/Header.astro';
+import Stage from '../components/sections/Stage.astro';
+import EditList from '../components/sections/EditList.astro';
+import LastMile from '../components/sections/LastMile.astro';
+import ServiceRow from '../components/sections/ServiceRow.astro';
+import Grading from '../components/sections/Grading.astro';
+import Looks from '../components/sections/Looks.astro';
+import Process from '../components/sections/Process.astro';
+import FinalFrame from '../components/sections/FinalFrame.astro';
+import Footer from '../components/sections/Footer.astro';
+import editClip from '../assets/video/edit-city-bokeh.mp4';
+import editPoster from '../assets/video/edit-city-bokeh.poster.webp';
+import motionClip from '../assets/video/motion-lines.mp4';
+import motionPoster from '../assets/video/motion-lines.poster.webp';
+import finishClip from '../assets/video/finish-dark-water.mp4';
+import finishPoster from '../assets/video/finish-dark-water.poster.webp';
+import heroPoster from '../assets/video/hero-mountain-dusk.poster.webp';
+import { editing, finishing, motion, seo } from '../content/site';
+import { jsonLd } from '../data/seo';
+---
+
+<BaseLayout
+  title={seo.title}
+  description={seo.description}
+  lang="en"
+  ogImage={heroPoster.src}
+  jsonLd={jsonLd}
+>
+  <Motion slot="head" />
+  <Header slot="header" />
+  <Stage />
+  <EditList />
+  <LastMile />
+  <ServiceRow
+    copy={editing}
+    video={editClip}
+    poster={editPoster}
+    clipSide="left"
+  />
+  <Grading />
+  <ServiceRow
+    copy={motion}
+    video={motionClip}
+    poster={motionPoster}
+    clipSide="right"
+  />
+  <ServiceRow
+    copy={finishing}
+    video={finishClip}
+    poster={finishPoster}
+    clipSide="left"
+  />
+  <Looks />
+  <Process />
+  <FinalFrame />
+  <Footer slot="footer" />
+</BaseLayout>

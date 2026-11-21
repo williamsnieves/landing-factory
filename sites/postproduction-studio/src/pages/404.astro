@@ -1,0 +1,43 @@
+---
+// Not-found page: the build emits dist/404.html, which static hosts serve with status 404. Same header and footer
+// as the home page, links home and to the primary action; noindex.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/sections/Header.astro';
+import Footer from '../components/sections/Footer.astro';
+import Button from '../components/ui/Button.astro';
+import DisplayText from '../components/ui/DisplayText.astro';
+import Timecode from '../components/ui/Timecode.astro';
+import { actions, brand, notFound } from '../content/site';
+---
+
+<BaseLayout
+  title={notFound.title}
+  description={notFound.description}
+  lang="en"
+  noindex
+>
+  <Header slot="header" base="/" />
+  <section
+    id="not-found"
+    aria-labelledby="not-found-heading"
+    class="bg-paper text-ink flex min-h-[80svh] items-center px-5 pt-36 pb-28 md:px-10"
+  >
+    <div class="mx-auto w-full max-w-[80rem]">
+      <Timecode value={notFound.timecode} />
+      <h1
+        id="not-found-heading"
+        class="display-type mt-6 mb-0 max-w-[16ch] text-2xl sm:text-3xl"
+      >
+        <DisplayText line={notFound.heading} />
+      </h1>
+      <p class="mt-8 mb-0 text-lg">{notFound.body}</p>
+      <div class="mt-10 flex flex-wrap gap-3">
+        <Button href="/" variant="outline">
+          {notFound.home}
+        </Button>
+        <Button href={brand.bookHref}>{actions.book}</Button>
+      </div>
+    </div>
+  </section>
+  <Footer slot="footer" base="/" />
+</BaseLayout>

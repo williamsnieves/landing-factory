@@ -1,0 +1,125 @@
+---
+// Recent looks (#work, 00:01:24:00): the "See the reel" target. A bento board (trait `bento-grid`): one wide clip
+// and four stills, one gap and one radius for every tile, each tile labelled by its look, never by a client. The
+// footage and photos are stock, and the band says so.
+//
+// One clip per viewport: this is the only clip of the band. On phones it sits in the second row, under two stills,
+// so it is further from the finishing row's clip above.
+import { Image } from 'astro:assets';
+import VideoLoop from '../video/VideoLoop.astro';
+import DisplayText from '../ui/DisplayText.astro';
+import Timecode from '../ui/Timecode.astro';
+import clip from '../../assets/video/look-coast-sunset.mp4';
+import clipPoster from '../../assets/video/look-coast-sunset.poster.webp';
+import forest from '../../assets/images/look-forest-fog.jpg';
+import dunes from '../../assets/images/look-dunes.jpg';
+import stairs from '../../assets/images/look-concrete-stairs.jpg';
+import neon from '../../assets/images/look-neon-bokeh.jpg';
+import { looks } from '../../content/site';
+
+const stills = [
+  {
+    image: forest,
+    copy: looks.stills.forest,
+    tile: 'md:col-span-2 md:row-span-2',
+    sizes: '(min-width: 768px) 48vw, 50vw',
+  },
+  {
+    image: dunes,
+    copy: looks.stills.dunes,
+    tile: '',
+    sizes: '(min-width: 768px) 24vw, 50vw',
+  },
+  {
+    image: stairs,
+    copy: looks.stills.stairs,
+    tile: '',
+    sizes: '(min-width: 768px) 24vw, 50vw',
+  },
+  {
+    image: neon,
+    copy: looks.stills.neon,
+    tile: 'md:col-span-2',
+    sizes: '(min-width: 768px) 48vw, 50vw',
+  },
+];
+---
+
+<section
+  id="work"
+  aria-labelledby="work-heading"
+  class="looks bg-paper text-ink pb-28 md:pb-40"
+>
+  <div class="mx-auto max-w-[85rem] px-5 md:px-10">
+    <div class="text-center">
+      <h2 id="work-heading" data-reveal class="display-type m-0 text-4xl">
+        <DisplayText line={looks.heading} />
+      </h2>
+      <p
+        data-reveal
+        class="text-ink-soft mx-auto mt-6 mb-0 max-w-[34rem] text-base"
+      >
+        {looks.note}
+      </p>
+    </div>
+  </div>
+
+  <div class="mt-14 px-2 md:mt-20 md:px-6">
+    <div class="grid grid-cols-2 gap-(--gap-tile) md:auto-rows-[14rem] md:grid-cols-4 lg:gap-4">
+      <div class="looks-wide relative col-span-2 row-start-2 overflow-hidden rounded-lg md:col-span-4 md:row-start-1">
+        <VideoLoop
+          video={clip}
+          poster={clipPoster}
+          label={looks.clip.alt}
+          fill
+          sizes="100vw"
+        >
+          <p class="bg-paper/85 text-ink rounded-pill absolute top-3 left-3 z-10 m-0 px-3.5 py-1.5 text-xs font-medium">
+            {looks.clip.label}
+          </p>
+          <Timecode
+            value={looks.timecode}
+            tone="burn"
+            class="absolute bottom-3 left-3 z-10"
+          />
+        </VideoLoop>
+      </div>
+      {stills.map((still) => (
+        <figure
+          class:list={[
+            'relative m-0 aspect-square overflow-hidden rounded-lg md:aspect-auto',
+            still.tile,
+          ]}
+        >
+          <Image
+            src={still.image}
+            alt={still.copy.alt}
+            widths={[480, 800, 1280]}
+            sizes={still.sizes}
+            loading="lazy"
+            class="absolute inset-0 h-full w-full object-cover"
+          />
+          <figcaption class="bg-paper/85 text-ink rounded-pill absolute top-3 left-3 m-0 max-w-[calc(100%-1.5rem)] px-3.5 py-1.5 text-xs font-medium">
+            {still.copy.label}
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .looks {
+    padding-top: max(9rem, 24svh);
+  }
+  /* The wide clip: the full row on desktop (a cinema strip), a 16:9 tile on phones. */
+  .looks-wide {
+    aspect-ratio: 16 / 9;
+  }
+  @media (min-width: 768px) {
+    .looks-wide {
+      aspect-ratio: auto;
+      grid-row: span 2;
+    }
+  }
+</style>

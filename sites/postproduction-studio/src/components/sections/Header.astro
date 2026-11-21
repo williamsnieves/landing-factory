@@ -1,0 +1,81 @@
+---
+// Fixed header: solid graphite by default (no JavaScript, or past the first screen); transparent while the stage
+// clip is under it. Links collapse on phones, the primary action stays.
+import Button from '../ui/Button.astro';
+import { actions, brand, nav } from '../../content/site';
+
+interface Props {
+  /** Links point at the home page's sections; on other pages they need the `/` prefix. */
+  base?: string;
+}
+
+const { base = '' } = Astro.props;
+---
+
+<header
+  data-site-header
+  class="site-header bg-paper text-ink fixed inset-x-0 top-0 z-40 transition-colors duration-(--duration-base)"
+>
+  <div class="mx-auto flex h-18 max-w-[80rem] items-center justify-between gap-4 px-5 md:px-10">
+    <a href="/" class="text-lg font-semibold tracking-tight whitespace-nowrap">
+      {brand.name}
+    </a>
+    <nav aria-label="Main" class="hidden md:block">
+      <ul class="m-0 flex list-none gap-8 p-0">
+        {nav.map((link) => (
+          <li>
+            <a
+              href={`${base}${link.href}`}
+              class="text-ink-soft hover:text-ink text-sm transition-colors duration-(--duration-fast)"
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <Button href={brand.bookHref} size="sm">
+      {actions.book}
+    </Button>
+  </div>
+</header>
+
+<script>
+  // Transparent over the stage clip, solid well before the stage's bottom edge (its timecode chip and pause
+  // button) reaches it. Without the stage (other pages) the header stays solid.
+  const header = document.querySelector<HTMLElement>('[data-site-header]');
+  const stage = document.getElementById('stage');
+  if (header && stage) {
+    let queued = false;
+    const update = () => {
+      queued = false;
+      header.toggleAttribute(
+        'data-over-stage',
+        stage.getBoundingClientRect().bottom > header.offsetHeight + 160,
+      );
+    };
+    const onScroll = () => {
+      if (!queued) {
+        queued = true;
+        requestAnimationFrame(update);
+      }
+    };
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    document.addEventListener(
+      'astro:before-swap',
+      () => {
+        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('resize', onScroll);
+      },
+      { once: true },
+    );
+  }
+</script>
+
+<style>
+  .site-header[data-over-stage] {
+    background-color: transparent;
+  }
+</style>

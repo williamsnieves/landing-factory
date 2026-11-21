@@ -1,0 +1,42 @@
+---
+// Edit list (the hero's overlapping panel): the four services as jump links with their timecodes. It starts inside
+// the first screen, over the stage's dark ground, and runs into the bone band below; rows are told apart by a tone
+// step, not by lines. No clip here: one clip per viewport.
+import Timecode from '../ui/Timecode.astro';
+import { editList, services } from '../../content/site';
+---
+
+<section
+  id="edit-list"
+  aria-labelledby="edit-list-heading"
+  class="relative z-10 -mt-16 px-5 md:px-10"
+>
+  <div
+    aria-hidden="true"
+    class="bg-bone absolute inset-x-0 top-16 bottom-0 -z-10"
+  ></div>
+  <div class="bg-surface text-ink mx-auto max-w-6xl rounded-lg p-3 md:p-4">
+    <h2
+      id="edit-list-heading"
+      class="px-4 pt-3 pb-4 text-sm font-medium md:px-5"
+    >
+      {editList.heading}
+    </h2>
+    <ol class="m-0 grid list-none gap-1 p-0 md:grid-cols-4">
+      {services.map((service) => (
+        <li>
+          <a
+            href={`#${service.id}`}
+            class="edit-row bg-paper hover:bg-scrim flex h-full flex-col gap-3 rounded-md px-4 py-4 transition-colors duration-(--duration-fast) md:px-5 md:py-5"
+          >
+            <Timecode value={service.timecode} />
+            <span class="text-lg leading-tight font-semibold">
+              {service.name}
+            </span>
+            <span class="text-ink-soft text-sm">{service.summary}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>

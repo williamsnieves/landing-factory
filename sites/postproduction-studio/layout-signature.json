@@ -1,0 +1,111 @@
+{
+  "site": "postproduction-studio",
+  "version": 1,
+  "page": "/",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "features": {
+    "sectionCount": 10,
+    "cols1Share": 0.8,
+    "cols2Share": 0,
+    "cols3Share": 0.2,
+    "splitRatio": 0,
+    "fullBleedShare": 0.7,
+    "imageRadius": 28,
+    "buttonRadius": 24,
+    "buttonShape": "pill",
+    "headingScale": 8,
+    "headingAlign": "left",
+    "headingCase": 0,
+    "eyebrowShare": 0,
+    "wordsPerScreen": 53,
+    "footerType": "columns",
+    "mediaPerScreen": 1.5,
+    "rotatedShare": 0,
+    "overlapShare": 0,
+    "stickyCount": 0
+  },
+  "sections": [
+    {
+      "id": "stage",
+      "cols": 1,
+      "fullBleed": true,
+      "eyebrow": false
+    },
+    {
+      "id": "edit-list",
+      "cols": 4,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "last-mile",
+      "cols": 1,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "editing",
+      "cols": 1,
+      "fullBleed": true,
+      "eyebrow": false
+    },
+    {
+      "id": "grading",
+      "cols": 1,
+      "fullBleed": true,
+      "eyebrow": false
+    },
+    {
+      "id": "motion",
+      "cols": 1,
+      "fullBleed": true,
+      "eyebrow": false
+    },
+    {
+      "id": "finishing",
+      "cols": 1,
+      "fullBleed": true,
+      "eyebrow": false
+    },
+    {
+      "id": "work",
+      "cols": 1,
+      "fullBleed": true,
+      "eyebrow": false
+    },
+    {
+      "id": "process",
+      "cols": 4,
+      "fullBleed": false,
+      "eyebrow": false
+    },
+    {
+      "id": "book",
+      "cols": 1,
+      "fullBleed": true,
+      "eyebrow": false
+    }
+  ],
+  "mobile": {
+    "screens": 12.66,
+    "wordsPerScreen": 48,
+    "sectionCount": 10
+  },
+  "hashes": [
+    "b2e5d8caee65378b",
+    "3309727b19430000",
+    "3267dbd9f9e17171",
+    "b2619e88e4c08133",
+    "b281a79008106367",
+    "b249415545410201",
+    "3267275d3d0d5d39",
+    "b219669ae061c4f8",
+    "b2f0b25adace0dcd",
+    "b2616315554590a7",
+    "caf033b3a70f4ba9",
+    "960f5ba0a48aaa81"
+  ]
+}

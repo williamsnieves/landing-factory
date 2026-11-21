@@ -1,0 +1,89 @@
+---
+// Footer: a dark band of columns (studio, contact marked sample, sections, credits). The credits come from
+// src/data/credits.json, written by scripts/credits.mjs from assets.json: never edit them by hand.
+import credits from '../../data/credits.json';
+import { brand, footer } from '../../content/site';
+
+interface Credit {
+  author: string;
+  license: string;
+  url: string;
+}
+
+interface Props {
+  /** Section links point at the home page; on other pages they need the `/` prefix. */
+  base?: string;
+}
+
+const { base = '' } = Astro.props;
+const list = credits as Credit[];
+const people = list.filter((credit) => credit.author !== 'Pixabay');
+const providers = list.filter((credit) => credit.author === 'Pixabay');
+const year = 2026;
+---
+
+<footer class="bg-surface text-ink px-5 pt-20 pb-10 md:px-10 md:pt-28">
+  <div class="mx-auto grid max-w-[80rem] gap-12 md:grid-cols-12">
+    <div class="md:col-span-4">
+      <p class="m-0 text-xl font-semibold tracking-tight">{brand.name}</p>
+      <p class="text-ink-soft mt-4 mb-0 max-w-[22rem] text-sm">
+        {footer.studio}
+      </p>
+    </div>
+    <div class="md:col-span-3">
+      <h2 class="m-0 text-sm font-semibold">{footer.contactHeading}</h2>
+      <p class="mt-4 mb-0 text-sm">
+        <a href={brand.bookHref} class="underline underline-offset-4">
+          {brand.email}
+        </a>
+      </p>
+      <p class="text-ink-soft mt-3 mb-0 text-sm">{footer.sampleNote}</p>
+    </div>
+    <nav aria-labelledby="footer-sections" class="md:col-span-5">
+      <h2 id="footer-sections" class="m-0 text-sm font-semibold">
+        {footer.sectionsHeading}
+      </h2>
+      <ul class="m-0 mt-4 flex list-none flex-wrap gap-x-5 gap-y-2 p-0">
+        {footer.sections.map((link) => (
+          <li>
+            <a
+              href={`${base}${link.href}`}
+              class="text-ink-soft hover:text-ink text-sm transition-colors duration-(--duration-fast)"
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <div class="border-line border-t pt-10 md:col-span-12">
+      <h2 class="m-0 text-sm font-semibold">{footer.creditsHeading}</h2>
+      <div class="text-ink-soft mt-4 grid gap-x-8 gap-y-1.5 text-sm sm:grid-cols-2 md:grid-cols-4">
+        {people.map((credit) => (
+          <p class="m-0">
+            <a
+              href={credit.url}
+              class="hover:text-ink underline underline-offset-2"
+            >
+              {credit.author}
+            </a>
+            , {credit.license}
+          </p>
+        ))}
+      </div>
+      {providers.map((credit) => (
+        <p class="text-ink-soft mt-4 mb-0 text-sm">
+          <a
+            href={credit.url}
+            class="hover:text-ink underline underline-offset-2"
+          >
+            {credit.license}
+          </a>
+        </p>
+      ))}
+    </div>
+  </div>
+  <p class="text-ink-soft mx-auto mt-16 mb-0 max-w-[80rem] text-sm">
+    © {year} {brand.name}. Demo site with sample data.
+  </p>
+</footer>

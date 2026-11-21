@@ -1,0 +1,54 @@
+---
+/**
+ * Opt-in motion layer for a page. Place it in the head slot:
+ *   <Motion slot="head" smooth />
+ * Pages without it never download GSAP or Lenis.
+ */
+interface Props {
+  /** Enable Lenis smooth scrolling on this page. */
+  smooth?: boolean;
+}
+const { smooth = false } = Astro.props;
+---
+
+<!-- Runs before first paint: arms the hidden initial state of [data-reveal] only
+     when JS runs and the user has not asked for reduced motion. -->
+<script is:inline define:vars={{ smooth }}>
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.documentElement.classList.add('js-motion');
+  }
+  document.documentElement.dataset.motionSmooth = String(smooth);
+</script>
+
+<script>
+  import type { MotionInstance } from './index';
+
+  let instance: MotionInstance | undefined;
+  let mounting = false;
+
+  async function mount() {
+    if (instance || mounting) return;
+    mounting = true;
+    try {
+      const { initMotion } = await import('./index');
+      instance = await initMotion({
+        smooth: document.documentElement.dataset.motionSmooth === 'true',
+      });
+    } catch (error) {
+      // Never leave content hidden if the motion layer fails to load.
+      document.documentElement.classList.remove('js-motion');
+      console.error('[motion] failed to initialize', error);
+    } finally {
+      mounting = false;
+    }
+  }
+
+  // View transitions: release everything before the page is swapped out.
+  document.addEventListener('astro:before-swap', () => {
+    instance?.destroy();
+    instance = undefined;
+  });
+  document.addEventListener('astro:page-load', mount);
+
+  mount();
+</script>
