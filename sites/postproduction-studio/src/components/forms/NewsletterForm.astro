@@ -1,0 +1,124 @@
+---
+/**
+ * Newsletter sign-up from the brief's `forms` section (provider `brevo`, docs/forms.md). A plain HTML form that works
+ * without JavaScript: it posts to the action URL of the customer's own Brevo sign-up form. No Brevo script, no
+ * reCAPTCHA and nothing loaded from Brevo before the visitor submits; Brevo answers with its own confirmation page.
+ * Double opt-in is switched on in Brevo ("Double confirmation"), not here; the page says so.
+ * The consent checkbox is required, unchecked and links the privacy policy, which names Brevo (scripts/legal.mjs).
+ * Renders nothing without an action URL (the customer has no Brevo form yet).
+ * Not legal advice: a person reviews the privacy policy before production.
+ */
+import {
+  BREVO_FIELD_NAMES as N,
+  BREVO_HTML_TYPE,
+  BREVO_OPT_IN_VALUE,
+  brevoActionUrl,
+  formTexts,
+  type LeadFormConfig,
+} from './fields';
+import { privacyPath, type LegalData } from '../legal/texts';
+
+interface Props {
+  form: LeadFormConfig;
+  /** src/data/legal.json: the privacy page the consent links to and the language. */
+  legal: LegalData;
+  /** Multi-locale sites: the locale of the page (default: Astro.currentLocale, else the data's language). */
+  locale?: string;
+  class?: string;
+}
+
+const {
+  form,
+  legal,
+  locale = Astro.currentLocale ?? legal.language,
+  class: className,
+} = Astro.props;
+
+const action = brevoActionUrl(form.action);
+const t = formTexts(locale);
+const privacyHref = privacyPath(legal, locale);
+const id = `form-${form.id}`;
+const hasName = form.fields.includes('name');
+const control =
+  'border-line bg-paper text-ink focus-visible:border-primary w-full rounded-md border px-4 py-3';
+---
+
+{action && (
+  <div class:list={['newsletter-form', className]}>
+    <form
+      id={id}
+      method="post"
+      action={action.href}
+      data-newsletter-form
+      data-form-id={form.id}
+      data-form-purpose="newsletter"
+      data-form-provider="brevo"
+      class="grid gap-5"
+    >
+      {hasName && (
+        <div>
+          <label for={`${id}-name`} class="mb-2 block text-sm font-medium">
+            {t.labels.name}
+            <span class="text-ink-soft font-normal"> ({t.optional})</span>
+          </label>
+          <input
+            id={`${id}-name`}
+            name={N.firstName}
+            type="text"
+            autocomplete="given-name"
+            class={control}
+          />
+        </div>
+      )}
+      <div>
+        <label for={`${id}-email`} class="mb-2 block text-sm font-medium">
+          {t.labels.email}
+        </label>
+        <input
+          id={`${id}-email`}
+          name={N.email}
+          type="email"
+          autocomplete="email"
+          inputmode="email"
+          required
+          class={control}
+        />
+      </div>
+      <div class="sr-only" aria-hidden="true">
+        <input type="text" name={N.honeypot} tabindex="-1" autocomplete="off" />
+      </div>
+      <input type="hidden" name={N.locale} value={locale.split('-')[0]} />
+      <input type="hidden" name={N.htmlType} value={BREVO_HTML_TYPE} />
+      <label class="flex min-h-11 items-start gap-3 text-sm">
+        <input
+          type="checkbox"
+          name={N.optIn}
+          value={BREVO_OPT_IN_VALUE}
+          required
+          class="accent-primary mt-0.5 size-5 shrink-0"
+        />
+        <span>
+          {t.newsletter.consent.before}
+          <a
+            href={privacyHref}
+            target="_blank"
+            rel="noopener"
+            class="underline underline-offset-4"
+          >
+            {t.newsletter.consent.link}
+          </a>
+          {t.newsletter.consent.after}
+        </span>
+      </label>
+      <div>
+        <button
+          type="submit"
+          class="bg-primary text-primary-contrast rounded-pill px-8 py-4 font-medium"
+        >
+          {t.newsletter.submit}
+        </button>
+      </div>
+      <p class="text-ink-soft text-sm">{t.newsletter.doubleOptIn}</p>
+    </form>
+  </div>
+)}

@@ -1,0 +1,7 @@
+{
+  "target": "cloudflare",
+  "cloudflare": {
+    "pagesProject": "postproduction-studio",
+    "productionBranch": "main"
+  }
+}
