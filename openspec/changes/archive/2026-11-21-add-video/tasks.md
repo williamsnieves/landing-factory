@@ -25,5 +25,5 @@
 ## 5. Docs and checks
 
 - [x] 5.1 `docs/video.md`, CLAUDE.md, the `new-landing` skill (source order and build rules). Verify: Prettier.
-- [ ] 5.2 CI installs ffmpeg for `npm test` in the `qa` job. Verify: the PR's CI.
-- [ ] 5.3 `openspec validate add-video --strict`, `npm test`, `npm run lint`, `npm run check`, `npm run check:sites`, `npm run qa`. Verify: all pass in a clean clone.
+- [x] 5.2 CI installs ffmpeg for `npm test` in the `qa` job. Verify: the PR's CI.
+- [x] 5.3 `openspec validate add-video --strict`, `npm test`, `npm run lint`, `npm run check`, `npm run check:sites`, `npm run qa`. Verify: all pass in a clean clone.
