@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // Optional layers of a site: the 3D layer (src/components/three/, src/scenes/, `three` and `@types/three`), the
-// legal components (src/components/legal/), the lead forms (src/components/forms/) and the maps (src/components/maps/). `new-site` copies all into every site; the build prunes the
+// legal components (src/components/legal/), the lead forms (src/components/forms/), the maps (src/components/maps/) and the video loops (src/components/video/). `new-site` copies all into every site; the build prunes the
 // ones the finished landing does not use, and `add` copies one back from the starter.
 //   node scripts/site-layers.mjs prune --site <slug> [--dry-run]
-//   node scripts/site-layers.mjs add <3d|legal|forms|maps> --site <slug> [--dry-run]
+//   node scripts/site-layers.mjs add <3d|legal|forms|maps|video> --site <slug> [--dry-run]
 //   node scripts/site-layers.mjs check [--site <slug>]
 // Exit codes: 0 ok, 1 check failed or refused, 2 bad usage. Run `--help` for more.
 import {
@@ -85,6 +85,16 @@ export const LAYERS = {
     devDependencies: [],
     packages: [],
     requires: ['legal'],
+  },
+  // Looping clips (<VideoLoop />, docs/video.md). Self-contained: the clips are the site's own assets in
+  // src/assets/video/, imported by the pages that use them.
+  video: {
+    label: 'the video components',
+    paths: [fromNewSite(COPIED_PATHS, 'src/components/video', 'COPIED_PATHS')],
+    owned: [],
+    dependencies: [],
+    devDependencies: [],
+    packages: [],
   },
   // Static OpenStreetMap maps (<LocationMap />, docs/maps.md). The image is made by scripts/static-map.mjs and the
   // optional interactive map is named in the privacy policy by scripts/legal.mjs, but the component imports nothing
@@ -297,12 +307,12 @@ export function addLayer(siteDir, layer, { dryRun = false } = {}) {
 const HELP = `Usage: node scripts/site-layers.mjs <command> [options]
 
 Optional layers of a site: 3d (src/components/three/, src/scenes/, three, @types/three), legal
-(src/components/legal/), forms (src/components/forms/) and maps (src/components/maps/). A layer is in use when a file of the site's src/ outside the layer imports it.
+(src/components/legal/), forms (src/components/forms/), maps (src/components/maps/) and video (src/components/video/). A layer is in use when a file of the site's src/ outside the layer imports it.
 
 Commands:
   prune --site <slug> [--dry-run]       Remove each layer the site does not use, and its dependencies.
                                         Refuses when src/ has a dynamic import() with a non-literal argument.
-  add <3d|legal|forms|maps> --site <slug> [--dry-run]
+  add <3d|legal|forms|maps|video> --site <slug> [--dry-run]
                                         Copy a layer back from the starter (what new-site copies) and restore its
                                         dependency ranges. Refuses when the layer already exists.
   check [--site <slug>]                 Exit 1 listing every site that holds a layer it does not use

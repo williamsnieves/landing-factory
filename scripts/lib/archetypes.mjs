@@ -72,6 +72,8 @@ export const TRAITS = [
   'chapter-color-fields',
   'mono-meta-rows',
   'generative-dot-field',
+  'video-scrim-hero',
+  'clip-feature-rows',
 ];
 
 /** How striking a page looks, apart from the tone of its copy. A sheet lists the levels its grammar can deliver. */

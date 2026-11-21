@@ -318,3 +318,103 @@ test('an oversized 3D chunk fails scene-budget with measured size and budget', (
   assert.ok(f.measured > 20, `measured ${f.measured}`);
   assert.match(f.message, /KB gzip \(budget 20 KB\)/);
 });
+
+// --- video checks (add-video, task 3.1) ----------------------------------------------
+
+const VIDEO = ['--skip', 'lighthouse,impeccable,layout'];
+const videoFailures = (r, check) =>
+  r.report.failures.filter((f) => f.check === check);
+
+test('a page with a well-behaved clip passes every video check', () => {
+  const r = runQa('video-ok', VIDEO);
+  assert.equal(r.status, 0, r.stderr);
+  const video = r.report.pages[0].video;
+  assert.equal(video.count, 1);
+  assert.equal(video.reducedMotion.pass, true);
+  assert.equal(video.noJs.pass, true);
+  assert.equal(video.runtime.pass, true);
+  assert.equal(video.budget.pass, true);
+  assert.equal(video.budget.files.length, 1);
+  assert.match(video.budget.files[0].url, /clip\.mp4$/);
+  if (video.runtime.h264)
+    assert.ok(
+      video.runtime.clips.every((c) => c.playing),
+      'the clip plays when scrolled to',
+    );
+  assert.match(
+    readFileSync(join(r.latest, 'report.md'), 'utf8'),
+    /Video budget: pass/,
+  );
+});
+
+test('--skip video skips the video group', () => {
+  const r = runQa('video-never-plays', [
+    '--skip',
+    'lighthouse,impeccable,layout,video',
+  ]);
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(r.report.pages[0].video, null);
+});
+
+test('a clip that plays under reduced motion and without JavaScript fails both and names the clip', () => {
+  const r = runQa('video-autoplay', VIDEO);
+  assert.equal(r.status, 1, r.stderr);
+  const reduced = videoFailures(r, 'video-reduced-motion').find(
+    (f) => f.metric === 'playing',
+  );
+  assert.ok(reduced, 'expected a video-reduced-motion playing failure');
+  assert.match(reduced.message, /clip 1 plays under prefers-reduced-motion/);
+  assert.ok(
+    videoFailures(r, 'video-no-js').some((f) => f.metric === 'playing'),
+    'expected a video-no-js playing failure',
+  );
+});
+
+test('a clip without a poster fails with and without JavaScript', () => {
+  const r = runQa('video-no-poster', VIDEO);
+  assert.equal(r.status, 1, r.stderr);
+  assert.ok(
+    videoFailures(r, 'video-no-js').some((f) => f.metric === 'poster'),
+    'no-js poster failure',
+  );
+  assert.ok(
+    videoFailures(r, 'video-reduced-motion').some((f) => f.metric === 'poster'),
+    'reduced-motion poster failure',
+  );
+});
+
+test('a clip that never starts fails video-runtime when the browser can decode H.264', () => {
+  const r = runQa('video-never-plays', VIDEO);
+  const runtime = r.report.pages[0].video.runtime;
+  if (!runtime.h264) {
+    assert.equal(r.status, 0, r.stderr);
+    return;
+  }
+  assert.equal(r.status, 1, r.stderr);
+  const f = videoFailures(r, 'video-runtime').find((x) => x.metric === 'play');
+  assert.ok(f, 'expected a video-runtime play failure');
+  assert.match(f.message, /clip 1 did not start playing/);
+});
+
+test('a served .mp4 over video.maxKb fails video-budget with the size and the budget', () => {
+  const config = join(out, 'video-budget.json');
+  writeFileSync(config, JSON.stringify({ video: { maxKb: 1 } }));
+  const r = runQa('video-ok', [...VIDEO, '--config', config]);
+  assert.equal(r.status, 1, r.stderr);
+  const f = videoFailures(r, 'video-budget').find((x) => x.metric === 'kb');
+  assert.ok(f, 'expected a video-budget kb failure');
+  assert.equal(f.threshold, 1);
+  assert.ok(f.measured > 1, `measured ${f.measured}`);
+  assert.match(f.message, /clip\.mp4 is .* KB \(budget 1 KB per clip\)/);
+});
+
+test('more clips than video.maxPerPage fails video-budget', () => {
+  const config = join(out, 'video-count.json');
+  writeFileSync(config, JSON.stringify({ video: { maxPerPage: 1 } }));
+  const r = runQa('video-two', [...VIDEO, '--config', config]);
+  assert.equal(r.status, 1, r.stderr);
+  const f = videoFailures(r, 'video-budget').find((x) => x.metric === 'count');
+  assert.ok(f, 'expected a video-budget count failure');
+  assert.equal(f.measured, 2);
+  assert.equal(f.threshold, 1);
+});

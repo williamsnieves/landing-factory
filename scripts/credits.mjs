@@ -9,7 +9,9 @@
 //     customer" table when the manifest has entries with source "customer" (files the customer gave,
 //     with owner and permission; no public credit line unless credit: true) and an "AI-generated images" table
 //     for entries with source "ai" (tool, model, date and terms link; the prompt stays in assets.json), and
-//     one "Photos provided by" line under the photo table for each stock provider used (Pixabay, Pexels), and
+//     one "Photos provided by" line under the photo table for each stock provider used (Pixabay, Pexels),
+//     a "Video" table for entries with kind "video" (Pixabay clips, and files the customer or the owner supplied;
+//     see scripts/video.mjs) and "Videos provided by Pixabay" in the provider line, and
 //   - sites/<slug>/src/data/credits.json: the entries that need a visible credit (credit: true),
 //     one per source photo or customer file, for the footer to import.
 // Idempotent. With --check nothing is written; exit 1 when either file is out of date.
@@ -79,21 +81,40 @@ export const OSM_CREDIT = {
   url: 'https://www.openstreetmap.org/copyright',
 };
 
-/** Entries that are neither the customer's, AI-generated nor a map: the stock photos with a source page. */
-const isStock = (entry) => !isCustomer(entry) && !isAi(entry) && !isOsm(entry);
+/** A video entry (kind "video"): an encoded MP4 with a poster, from Pixabay or supplied by the customer or the owner. */
+export const isVideo = (entry) => entry?.kind === 'video';
+
+/** Fields of a video that the owner supplied (source "owner": their own footage, no source page). */
+export const OWNER_VIDEO_REQUIRED_FIELDS = [
+  'file',
+  'title',
+  'author',
+  'license',
+  'credit',
+];
+
+/** Entries that are neither the customer's, AI-generated, a map nor a video: the stock photos with a source page. */
+const isStock = (entry) =>
+  !isCustomer(entry) && !isAi(entry) && !isOsm(entry) && !isVideo(entry);
 
 /** Throws when a manifest entry lacks a field the credits need. */
 export function validateManifest(manifest, label = 'assets.json') {
   if (!manifest || !Array.isArray(manifest.images))
     throw new Error(`${label}: expected {"images": [...]}`);
   manifest.images.forEach((entry, index) => {
+    if (isVideo(entry) && !entry.poster)
+      throw new Error(
+        `${label}: video #${index + 1} (${entry?.file ?? 'no file'}) has no "poster"`,
+      );
     for (const field of isCustomer(entry)
       ? CUSTOMER_REQUIRED_FIELDS
-      : isAi(entry)
-        ? AI_REQUIRED_FIELDS
-        : isOsm(entry)
-          ? OSM_REQUIRED_FIELDS
-          : REQUIRED_FIELDS) {
+      : isVideo(entry) && entry.source === 'owner'
+        ? OWNER_VIDEO_REQUIRED_FIELDS
+        : isAi(entry)
+          ? AI_REQUIRED_FIELDS
+          : isOsm(entry)
+            ? OSM_REQUIRED_FIELDS
+            : REQUIRED_FIELDS) {
       if (entry?.[field] === undefined || entry[field] === '')
         throw new Error(
           `${label}: image #${index + 1} (${entry?.file ?? 'no file'}) has no "${field}"`,
@@ -141,11 +162,29 @@ export const STOCK_PROVIDERS = [
   { source: 'pexels', name: 'Pexels', url: 'https://www.pexels.com' },
 ];
 
-/** The providers a manifest uses, in the order of STOCK_PROVIDERS. */
+/**
+ * The providers a manifest uses, in the order of STOCK_PROVIDERS, each with `kinds` (`photos`, `videos` or
+ * both) and the `line` the credits say: "Photos provided by X", "Videos provided by X" or "Photos and videos
+ * provided by X".
+ */
 export const providersUsed = (entries) =>
-  STOCK_PROVIDERS.filter((provider) =>
-    entries.some((entry) => entry?.source === provider.source),
-  );
+  STOCK_PROVIDERS.flatMap((provider) => {
+    const own = entries.filter((entry) => entry?.source === provider.source);
+    const kinds = [
+      ...(own.some((entry) => !isVideo(entry)) ? ['photos'] : []),
+      ...(own.some(isVideo) ? ['videos'] : []),
+    ];
+    if (!kinds.length) return [];
+    const what =
+      kinds.length === 2
+        ? 'Photos and videos'
+        : kinds[0] === 'photos'
+          ? 'Photos'
+          : 'Videos';
+    return [
+      { ...provider, kinds, line: `${what} provided by ${provider.name}` },
+    ];
+  });
 
 /** The footer list: one {author, license, url} per credited source photo, then per customer file with credit: true, then one line per stock provider used. */
 export function creditList(entries) {
@@ -157,21 +196,37 @@ export function creditList(entries) {
       url: group.sourcePage,
     }));
   const customer = entries
-    .filter((entry) => isCustomer(entry) && entry.credit)
+    .filter((entry) => isCustomer(entry) && !isVideo(entry) && entry.credit)
     .map((entry) => ({
       author: entry.owner,
       license: entry.permission,
       url: entry.sourcePage ?? '',
     }));
+  // A video is credited like a photo: its author and license, or the owner and permission of a supplied file.
+  const videos = entries
+    .filter((entry) => isVideo(entry) && entry.credit)
+    .map((entry) =>
+      isCustomer(entry)
+        ? {
+            author: entry.owner,
+            license: entry.permission,
+            url: entry.sourcePage ?? '',
+          }
+        : {
+            author: entry.author,
+            license: entry.license,
+            url: entry.sourcePage ?? '',
+          },
+    );
   const providers = providersUsed(entries).map((provider) => ({
     author: provider.name,
-    license: `Photos provided by ${provider.name}`,
+    license: provider.line,
     url: provider.url,
   }));
   const maps = entries.some((entry) => isOsm(entry) && entry.credit)
     ? [OSM_CREDIT]
     : [];
-  return [...stock, ...customer, ...providers, ...maps];
+  return [...stock, ...customer, ...videos, ...providers, ...maps];
 }
 
 export function renderCreditsJson(entries) {
@@ -225,14 +280,15 @@ export function renderPhotoTable(entries) {
 export function renderProviderLines(entries) {
   return providersUsed(entries)
     .map(
-      (provider) => `Photos provided by [${provider.name}](${provider.url}).`,
+      (provider) =>
+        `${provider.line.replace(provider.name, `[${provider.name}](${provider.url})`)}.`,
     )
     .join('\n\n');
 }
 
 /** The "Provided by the customer" part: files the customer gave, or '' when there are none. */
 export function renderCustomerSection(entries) {
-  const files = entries.filter(isCustomer);
+  const files = entries.filter((entry) => isCustomer(entry) && !isVideo(entry));
   if (!files.length) return '';
   const rows = files.map((entry) => [
     `\`${entry.file}\``,
@@ -246,6 +302,42 @@ export function renderCustomerSection(entries) {
       'Asset(s) in `src/assets/images/`',
       'Owner',
       'Permission',
+      'Credit shown',
+      'Notes',
+    ],
+    rows,
+  )}`;
+}
+
+/** The "Video" part: one row per clip (Pixabay, customer or owner), or '' when there are none. */
+export function renderVideoSection(entries) {
+  const clips = entries.filter(isVideo);
+  if (!clips.length) return '';
+  const rows = clips.map((entry) => {
+    const customer = isCustomer(entry);
+    return [
+      `\`${entry.file}\`, \`${entry.poster}\``,
+      customer
+        ? 'Supplied by the customer'
+        : (entry.sourcePage ?? 'Supplied by the owner'),
+      customer ? entry.owner : entry.author,
+      customer ? entry.permission : entry.license,
+      entry.credit ? 'yes' : 'no',
+      [
+        entry.durationSec ? `${entry.durationSec} s` : '',
+        entry.width && entry.height ? `${entry.width}x${entry.height}` : '',
+        String(entry.note ?? '').replace(/\.$/, ''),
+      ]
+        .filter(Boolean)
+        .join(', '),
+    ];
+  });
+  return `### Video\n\nClips are encoded to H.264 MP4 without an audio track, with a WebP poster, by \`node scripts/video.mjs\` or \`node scripts/find-images.mjs get\`.\n\n${markdownTable(
+    [
+      'Asset(s) in `src/assets/video/`',
+      'Source',
+      'Author or owner',
+      'License or permission',
       'Credit shown',
       'Notes',
     ],
@@ -319,11 +411,15 @@ export function renderCreditsFile(existing, entries) {
   const customer = renderCustomerSection(entries);
   const ai = renderAiSection(entries);
   const maps = renderMapsSection(entries);
-  // Customer files, AI images and maps get their own parts; a manifest of only those has no stock photo table.
+  const video = renderVideoSection(entries);
+  // Customer files, AI images, maps and video get their own parts; a manifest of only those has no stock photo table.
   const body = [
-    stock.length || (!customer && !ai && !maps) ? renderPhotoTable(stock) : '',
+    stock.length || (!customer && !ai && !maps && !video)
+      ? renderPhotoTable(stock)
+      : '',
     renderProviderLines(entries),
     customer,
+    video,
     ai,
     maps,
   ]

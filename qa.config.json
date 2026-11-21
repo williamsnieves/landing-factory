@@ -35,6 +35,11 @@
     "maxGzipKb": 200,
     "canvasTimeoutMs": 15000
   },
+  "video": {
+    "maxKb": 4000,
+    "maxPerPage": 6,
+    "playTimeoutMs": 8000
+  },
   "diversity": {
     "minLayoutDistance": 0.2,
     "maxHashMatch": 0.5,

@@ -28,14 +28,14 @@ const sheet = (name) =>
   readFileSync(join(ROOT, 'design-archetypes', `${name}.md`), 'utf8');
 const quiet = { log() {}, error() {} };
 
-test('the catalog has 14 valid sheets and the validator exits 0', () => {
-  assert.equal(loadCatalog(ROOT).length, 14);
+test('the catalog has 15 valid sheets and the validator exits 0', () => {
+  assert.equal(loadCatalog(ROOT).length, 15);
   const r = spawnSync(process.execPath, ['scripts/validate-archetypes.mjs'], {
     cwd: ROOT,
     encoding: 'utf8',
   });
   assert.equal(r.status, 0, r.stderr);
-  assert.match(r.stdout, /14 sheet\(s\) valid/);
+  assert.match(r.stdout, /15 sheet\(s\) valid/);
 });
 
 test('every trait has exactly one owner sheet and every signal is used', () => {
@@ -186,7 +186,7 @@ test('CLI help and unknown options', () => {
     });
   assert.equal(run('--help').status, 0);
   assert.equal(run('--nope').status, 2);
-  assert.equal(readdirSync(join(ROOT, 'design-archetypes')).length, 15);
+  assert.equal(readdirSync(join(ROOT, 'design-archetypes')).length, 16);
   void quiet;
 });
 
@@ -199,6 +199,7 @@ test('every sheet lists the impact levels it can deliver, and the levels match t
     'brutalist-raw': ['bold'],
     'calm-statement': ['balanced', 'bold'],
     'chaptered-atlas': ['balanced', 'bold'],
+    'cinematic-loop': ['balanced', 'bold'],
     'collage-scrapbook': ['balanced', 'bold'],
     'data-and-proof': ['quiet', 'balanced'],
     'dev-console': ['quiet', 'balanced'],
@@ -262,6 +263,7 @@ test('the reference archetypes lend their traits, the README names them as owner
   const owners = {
     'chaptered-atlas': ['self-map-hero', 'chapter-color-fields'],
     'dev-console': ['mono-meta-rows', 'generative-dot-field'],
+    'cinematic-loop': ['video-scrim-hero', 'clip-feature-rows'],
   };
   for (const [name, traits] of Object.entries(owners)) {
     assert.deepEqual(catalog.find((a) => a.name === name).lends, traits);
@@ -278,4 +280,12 @@ test('the reference archetypes lend their traits, the README names them as owner
   assert.match(atlas, /4\.5:1/);
   assert.match(atlas, /reduced-motion form/);
   assert.match(sheet('dev-console'), /real entries/);
+  // The video-led sheet states its guard rails.
+  const cinematic = sheet('cinematic-loop');
+  assert.match(cinematic, /poster/);
+  assert.match(cinematic, /reduced-motion form/);
+  assert.match(cinematic, /at most one clip playing/);
+  assert.match(cinematic, /4\.5:1/);
+  assert.match(cinematic, /No sound/);
+  assert.match(cinematic, /No countdown/);
 });

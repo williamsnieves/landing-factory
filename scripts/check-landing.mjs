@@ -37,6 +37,9 @@
 //                      sold: prospect.json not "sold" or a page still showing the notice (see docs/prospect.md)
 //   dark-patterns      a pre-checked checkbox in a form, a countdown timer (data-countdown or a ticking page script) or
 //                      confirmshaming on a link or button, on every built page except 404.html (Spanish and English)
+//   video-assets       (only when dist/ has an .mp4 or assets.json has entries with kind "video") a built .mp4 without an assets.json entry,
+//                      a video entry without its file, license (permission and owner for a customer file) or poster, or a hero clip
+//                      whose poster is not an eager, high-priority image (the LCP candidate); see docs/video.md
 //   visual-assets      the built home page (each locale's home page on a multi-locale site) has no visual at all, or its first
 //                      section (the hero) has none. A visual is an img, a picture, a video, a [data-scene] poster or an inline
 //                      svg with a viewBox at least 96 units wide (icons do not count), or a role="img" illustration with an aria-label. Warning visual-assets-sparse: fewer than
@@ -59,7 +62,13 @@ import { parseArgs } from 'node:util';
 
 import { cmsOwnsOffer } from './lib/cms-config.mjs';
 import { reexecWithEnvProxy } from './lib/proxy.mjs';
-import { AI_REQUIRED_FIELDS, isAi, syncCredits } from './credits.mjs';
+import {
+  AI_REQUIRED_FIELDS,
+  isAi,
+  isCustomer,
+  isVideo,
+  syncCredits,
+} from './credits.mjs';
 import {
   aiImagesConsent,
   briefLocales,
@@ -201,7 +210,14 @@ export function manifestNames(sitePath) {
 }
 
 export function checkUncredited(siteDir, manifest) {
-  const listed = new Set(manifest.images.map((entry) => entry.file));
+  // A video entry lists two files: the clip (judged by video-assets) and its poster image.
+  const listed = new Set(
+    manifest.images.flatMap((entry) =>
+      isVideo(entry) && entry.poster
+        ? [entry.file, entry.poster]
+        : [entry.file],
+    ),
+  );
   const files = imageFiles(siteDir);
   const failures = [];
   for (const file of files)
@@ -226,15 +242,19 @@ export function checkUncredited(siteDir, manifest) {
           `${entry.file} is a customer asset in assets.json without ${!String(entry.owner ?? '').trim() ? '"owner"' : '"permission"'}; record who owns it and what the customer allowed`,
         ),
       );
-  for (const entry of manifest.images)
-    if (!files.some((file) => manifestNames(file).includes(entry.file)))
+  for (const entry of manifest.images) {
+    // The clip of a video entry is checked by video-assets; its poster is an image like any other.
+    const name = isVideo(entry) ? entry.poster : entry.file;
+    if (!name) continue;
+    if (!files.some((file) => manifestNames(file).includes(name)))
       failures.push(
         failure(
           'uncredited-image',
-          entry.file,
-          `assets.json lists ${entry.file} but no such image exists in src/assets/ or public/; remove the entry or restore the file`,
+          name,
+          `assets.json lists ${name} but no such image exists in src/assets/ or public/; remove the entry or restore the file`,
         ),
       );
+  }
   return failures;
 }
 
@@ -332,6 +352,11 @@ export function countFileUses(siteDir, files) {
 
 export function checkPhotoUses(siteDir, manifest, max = MAX_USES_PER_PHOTO) {
   const bySource = new Map();
+  // A clip is not a photo: how often it plays is the archetype's business, and its poster follows it.
+  manifest = {
+    ...manifest,
+    images: manifest.images.filter((e) => !isVideo(e)),
+  };
   for (const entry of manifest.images) {
     // An AI image has no source page and its title is a description, so every AI file counts on its own.
     const key = isAi(entry)
@@ -2193,6 +2218,133 @@ export function checkMapAttribution(siteDir, manifest) {
 }
 
 // --------------------------------------------------------------------------------------------------
+// Rule: every built video is recorded and its hero poster is the LCP candidate (design: add-video)
+
+/** Does a built file name come from the manifest file? Astro fingerprints imports: `loop.AbC123.mp4` -> `loop.mp4`. */
+export function builtVideoMatches(builtName, file) {
+  if (builtName === file) return true;
+  const dot = file.lastIndexOf('.');
+  return new RegExp(
+    `^${escapeRegExp(file.slice(0, dot))}\\.[A-Za-z0-9_-]{6,}${escapeRegExp(file.slice(dot))}$`,
+  ).test(builtName);
+}
+
+const builtVideos = (siteDir) =>
+  walk(join(siteDir, 'dist'), (path) => /\.mp4$/i.test(path)).map((path) =>
+    posix(relative(siteDir, path)),
+  );
+
+export const videoUsed = (siteDir, manifest) =>
+  manifest.images.some(isVideo) || builtVideos(siteDir).length > 0;
+
+/** The poster of the clip in the first section of a page must load first: an eager, high-priority img. */
+export function heroPosterProblems(html, page) {
+  const { sections } = pageSections(parseTree(html));
+  const first = sections[0];
+  if (!first) return [];
+  const clip =
+    findAll(first, (n) => 'data-video' in (n.attrs ?? {}))[0] ??
+    findAll(first, (n) => n.name === 'video')[0];
+  if (!clip) return [];
+  const figure = clip.name === 'video' ? (clip.parent ?? clip) : clip;
+  const img = findAll(figure, (n) => n.name === 'img')[0];
+  if (!img)
+    return [
+      `the hero clip of ${page} has no poster image: the poster is the LCP candidate and what no-JavaScript and reduced-motion visitors see`,
+    ];
+  const problems = [];
+  if (String(img.attrs.loading ?? '').toLowerCase() === 'lazy')
+    problems.push('is loaded lazily');
+  if (String(img.attrs.fetchpriority ?? '').toLowerCase() !== 'high')
+    problems.push('has no fetchpriority="high"');
+  return problems.length
+    ? [
+        `the poster of the hero clip of ${page} ${problems.join(' and ')}: pass priority to <VideoLoop /> so the poster is the LCP candidate`,
+      ]
+    : [];
+}
+
+export function checkVideoAssets(siteDir, manifest) {
+  const slug = basename(siteDir);
+  const failures = [];
+  const warnings = [];
+  const entries = manifest.images.filter(isVideo);
+  const assetFiles = walk(join(siteDir, 'src/assets')).concat(
+    walk(join(siteDir, 'public')),
+  );
+  const exists = (name) => assetFiles.some((file) => basename(file) === name);
+  for (const entry of entries) {
+    if (!exists(entry.file))
+      failures.push(
+        failure(
+          'video-assets',
+          entry.file,
+          `assets.json lists the video ${entry.file} but no such file exists in src/assets/ or public/; remove the entry or restore the file`,
+        ),
+      );
+    if (isCustomer(entry)) {
+      for (const field of ['owner', 'permission'])
+        if (!String(entry[field] ?? '').trim())
+          failures.push(
+            failure(
+              'video-assets',
+              entry.file,
+              `the customer video ${entry.file} has no "${field}" in assets.json; record who owns it and what the customer allowed`,
+            ),
+          );
+    } else if (!String(entry.license ?? '').trim())
+      failures.push(
+        failure(
+          'video-assets',
+          entry.file,
+          `the video ${entry.file} has no "license" in assets.json; record where it came from (node scripts/find-images.mjs get ... pixabay-video:<id> or node scripts/video.mjs import ...)`,
+        ),
+      );
+    if (!String(entry.poster ?? '').trim())
+      failures.push(
+        failure(
+          'video-assets',
+          entry.file,
+          `the video ${entry.file} has no "poster" in assets.json; every clip needs its poster image (encode it with scripts/video.mjs or find-images.mjs)`,
+        ),
+      );
+    else if (!exists(entry.poster))
+      failures.push(
+        failure(
+          'video-assets',
+          entry.poster,
+          `the poster ${entry.poster} of ${entry.file} does not exist in src/assets/ or public/`,
+        ),
+      );
+  }
+  const dist = join(siteDir, 'dist');
+  if (!existsSync(dist) || !statSync(dist).isDirectory()) {
+    if (entries.length)
+      warnings.push({
+        rule: 'video-assets-no-build',
+        item: 'dist',
+        message: `video-assets did not check the build: sites/${slug}/dist does not exist; build first (npm run build -w site-${slug}) so the served clips and the hero poster can be checked`,
+      });
+    return { failures, warnings };
+  }
+  for (const built of builtVideos(siteDir))
+    if (
+      !entries.some((entry) => builtVideoMatches(basename(built), entry.file))
+    )
+      failures.push(
+        failure(
+          'video-assets',
+          built,
+          `${built} is served but assets.json has no video entry for it; record it with node scripts/video.mjs import or node scripts/find-images.mjs get ... pixabay-video:<id>`,
+        ),
+      );
+  for (const { page, html } of builtHtml(siteDir))
+    for (const message of heroPosterProblems(html, page))
+      failures.push(failure('video-assets', page, message));
+  return { failures, warnings };
+}
+
+// --------------------------------------------------------------------------------------------------
 // Orchestration
 
 export async function runChecks({
@@ -2210,6 +2362,10 @@ export async function runChecks({
   const copyClaims = checkCopyClaims(siteDir);
   const darkPatterns = checkDarkPatterns(siteDir);
   const visualAssets = checkVisualAssets(siteDir);
+  const videoUsedHere = videoUsed(siteDir, manifest);
+  const videoAssets = videoUsedHere
+    ? checkVideoAssets(siteDir, manifest)
+    : { failures: [], warnings: [] };
   const cmsManagedOffer =
     existsSync(join(siteDir, 'brief.json')) && cmsOwnsOffer(siteDir);
 
@@ -2234,6 +2390,7 @@ export async function runChecks({
     ['copy-claims', () => copyClaims.failures],
     ['dark-patterns', () => darkPatterns.failures],
     ['visual-assets', () => visualAssets.failures],
+    ...(videoUsedHere ? [['video-assets', () => videoAssets.failures]] : []),
     ...(mapUsed(siteDir, manifest)
       ? [['map-attribution', () => checkMapAttribution(siteDir, manifest)]]
       : []),
@@ -2281,6 +2438,7 @@ export async function runChecks({
       ...copyClaims.warnings,
       ...darkPatterns.warnings,
       ...visualAssets.warnings,
+      ...videoAssets.warnings,
       ...(cmsManagedOffer
         ? [
             {
@@ -2323,6 +2481,8 @@ Final check of sites/<slug>/ after site QA passes. Fails, naming the item, when:
   landing-meta      MASTER.md has no valid \`landing-meta\` block (primary, display-font, hero)
   diversity         another site has the same primary color, display font and hero type
   layout-diversity  the layout signature (scripts/layout-signature.mjs) is too close to another site's (qa.config.json: diversity)
+  video-assets      (only with a built .mp4 or video entries in assets.json) a served .mp4 without an assets.json entry, a video entry
+                    without its file, license (owner and permission for a customer file) or poster, or a hero clip whose poster is lazy or not high priority
   scenes            a built [data-scene] has no poster, a poster missing from assets.json, or the site has more than ${MAX_SCENES} scenes
   i18n              (only with an i18n block in astro.config.mjs) a locale without its home page, a wrong <html lang>, hreflang
                     alternates missing, not reciprocal or without x-default, a broken language switcher, config, dictionary and

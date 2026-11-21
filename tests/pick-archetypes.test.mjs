@@ -529,3 +529,37 @@ test('the fisioterapia-ribera signals keep calm-statement first and neither new 
   for (const name of ['chaptered-atlas', 'dev-console'])
     assert.ok(lone(r, name).score < calm, name);
 });
+
+// ------------------------------------------------------------------------------------------------
+// The video-led archetype: add-video
+
+test('the buzzy-now reference sheet yields the video traits and the photo-rich signal', () => {
+  const sheet = readRefSheet(ROOT, 'buzzy-now');
+  for (const trait of ['video-scrim-hero', 'clip-feature-rows'])
+    assert.ok(sheet.traits.includes(trait), trait);
+  assert.ok(sheet.signals.includes('photo-rich'));
+});
+
+test('a bold, video-led product page with the buzzy-now reference ranks cinematic-loop first among the archetypes', () => {
+  const root = realRefRoot(
+    'reel',
+    'bold, product-showcase, photo-rich',
+    'bold',
+    ['buzzy-now'],
+  );
+  const r = pickBlends({ root, slug: 'reel', refs: ['buzzy-now'] });
+  assert.equal(firstArchetype(r).primary, 'cinematic-loop');
+  const cinematic = lone(r, 'cinematic-loop');
+  assert.ok(
+    cinematic.reasons.some((x) => /video-scrim-hero|clip-feature-rows/.test(x)),
+    'the reference traits count for the owner',
+  );
+});
+
+test('the fisioterapia-ribera signals do not rank cinematic-loop above calm-statement', () => {
+  const root = freshRoot();
+  impactSite(root);
+  const r = pickBlends({ root, slug: 'clinic' });
+  assert.equal(r.blends[0].primary, 'calm-statement');
+  assert.ok(lone(r, 'cinematic-loop').score < lone(r, 'calm-statement').score);
+});

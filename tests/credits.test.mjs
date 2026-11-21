@@ -639,3 +639,122 @@ test('a map gets a Maps section and one footer line; stock-only output is unchan
   assert.ok(!only.includes('No photographs are used yet.'));
   assert.ok(only.includes('### Maps'));
 });
+
+// --- video ------------------------------------------------------------------------------------------
+const clip = (extra = {}) => ({
+  file: 'ocean.mp4',
+  poster: 'ocean.poster.webp',
+  kind: 'video',
+  title: 'Ocean, waves',
+  sourcePage: 'https://pixabay.com/videos/clip-501/',
+  author: 'clipmaker',
+  license: 'Pixabay Content License',
+  credit: true,
+  source: 'pixabay',
+  durationSec: 14,
+  bytes: 1000,
+  width: 1280,
+  height: 720,
+  ...extra,
+});
+
+test('a video needs a poster; customer and owner clips need their own fields', () => {
+  assert.doesNotThrow(() => validateManifest({ images: [clip()] }));
+  assert.throws(
+    () => validateManifest({ images: [clip({ poster: undefined })] }),
+    /no "poster"/,
+  );
+  assert.throws(
+    () =>
+      validateManifest({
+        images: [clip({ source: 'customer', owner: 'Ana' })],
+      }),
+    /no "permission"/,
+  );
+  assert.doesNotThrow(() =>
+    validateManifest({
+      images: [
+        clip({
+          source: 'owner',
+          sourcePage: undefined,
+          license: 'Own footage',
+          credit: false,
+        }),
+      ],
+    }),
+  );
+});
+
+test('a Pixabay video gets a Video section, a footer line and "Videos provided by Pixabay"; photos keep their line', () => {
+  const videoOnly = renderCreditsFile('# Credits\n', [clip()]);
+  assert.match(videoOnly, /### Video/);
+  assert.match(videoOnly, /`ocean\.mp4`, `ocean\.poster\.webp`/);
+  assert.match(videoOnly, /Videos provided by \[Pixabay\]/);
+  assert.doesNotMatch(videoOnly, /Photos provided by/);
+  assert.doesNotMatch(videoOnly, /No photographs are used yet/);
+  const list = creditList([clip()]);
+  assert.deepEqual(list, [
+    {
+      author: 'clipmaker',
+      license: 'Pixabay Content License',
+      url: 'https://pixabay.com/videos/clip-501/',
+    },
+    {
+      author: 'Pixabay',
+      license: 'Videos provided by Pixabay',
+      url: 'https://pixabay.com',
+    },
+  ]);
+  const photo = {
+    file: 'a.jpg',
+    title: 'A',
+    sourcePage: 'https://pixabay.com/photos/a-1/',
+    author: 'x',
+    license: 'Pixabay Content License',
+    credit: true,
+    source: 'pixabay',
+  };
+  const both = creditList([photo, clip()]);
+  assert.equal(
+    both.filter((c) => c.author === 'Pixabay').length,
+    1,
+    'one provider line',
+  );
+  assert.equal(
+    both.find((c) => c.author === 'Pixabay').license,
+    'Photos and videos provided by Pixabay',
+  );
+  // A video never lands in the photo table.
+  const withPhoto = renderCreditsFile('# C\n', [photo, clip()]);
+  assert.doesNotMatch(
+    withPhoto.slice(0, withPhoto.indexOf('### Video')),
+    /ocean\.mp4/,
+  );
+});
+
+test('customer and owner clips are listed in the Video section with their owner and permission', () => {
+  const customer = clip({
+    file: 'brand.mp4',
+    poster: 'brand.poster.webp',
+    source: 'customer',
+    owner: 'Clinica Ribera',
+    permission: 'Written permission, 2026-11-01',
+    credit: false,
+    sourcePage: undefined,
+    author: undefined,
+    license: undefined,
+  });
+  const text = renderCreditsFile('# C\n', [customer]);
+  assert.match(text, /Supplied by the customer/);
+  assert.match(text, /Clinica Ribera/);
+  assert.doesNotMatch(text, /### Provided by the customer/);
+  assert.deepEqual(creditList([customer]), []);
+  const credited = creditList([{ ...customer, credit: true }]);
+  assert.deepEqual(credited, [
+    {
+      author: 'Clinica Ribera',
+      license: 'Written permission, 2026-11-01',
+      url: '',
+    },
+  ]);
+});

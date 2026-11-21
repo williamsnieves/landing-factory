@@ -30,6 +30,9 @@ export const DEFAULT_CONFIG = Object.freeze({
   // Pages with [data-scene]: budget for the JS chunks that contain Three.js (gzip KB)
   // and how long to wait for the canvas after scrolling to a scene.
   threeD: { maxGzipKb: 200, canvasTimeoutMs: 15000 },
+  // Pages with [data-video]: the largest served .mp4 (KB), clips per page and how long to wait for a clip in
+  // view to start playing.
+  video: { maxKb: 4000, maxPerPage: 6, playTimeoutMs: 8000 },
   // Layout diversity between sites (scripts/check-landing.mjs, scripts/lib/layout-core.mjs): the weighted
   // feature distance must be at least minLayoutDistance (0 identical .. 1 opposite) and at most maxHashMatch
   // of the viewport slices may match another site's within hashHamming bits (of 64).
@@ -94,6 +97,7 @@ export function validateConfig(config) {
       'lighthouse',
       'impeccable',
       'threeD',
+      'video',
       'diversity',
       'brief',
       'report',
@@ -225,6 +229,19 @@ export function validateConfig(config) {
       err('threeD.maxGzipKb', 'must be a number > 0');
     if (!Number.isInteger(td.canvasTimeoutMs) || td.canvasTimeoutMs < 1000)
       err('threeD.canvasTimeoutMs', 'must be an integer >= 1000');
+  }
+
+  const vd = config.video;
+  if (!isObject(vd)) {
+    err('video', 'must be an object');
+  } else {
+    known(vd, ['maxKb', 'maxPerPage', 'playTimeoutMs'], 'video');
+    if (typeof vd.maxKb !== 'number' || !(vd.maxKb > 0))
+      err('video.maxKb', 'must be a number > 0');
+    if (!Number.isInteger(vd.maxPerPage) || vd.maxPerPage < 1)
+      err('video.maxPerPage', 'must be an integer >= 1');
+    if (!Number.isInteger(vd.playTimeoutMs) || vd.playTimeoutMs < 1000)
+      err('video.playTimeoutMs', 'must be an integer >= 1000');
   }
 
   const dv = config.diversity;

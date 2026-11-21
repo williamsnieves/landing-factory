@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fixture video-no-poster</title>
+    <meta
+      name="description"
+      content="QA fixture page: Fixture video-no-poster."
+    />
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        color: #111;
+        background: #fff;
+      }
+      figure {
+        position: relative;
+        margin: 0 0 40px;
+      }
+      img,
+      video {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      video {
+        position: absolute;
+        inset: 0;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="main">
+      <h1>Fixture video-no-poster</h1>
+      <figure data-video>
+        <video muted loop playsinline preload="none">
+          <source src="clip.mp4" type="video/mp4" />
+        </video>
+      </figure>
+    </main>
+    <script>
+      // Plays a clip while it is in view, never under reduced motion (what the video layer does).
+      var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduced) {
+        var io = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (e) {
+              var v = e.target.querySelector('video');
+              if (e.isIntersecting) v.play().catch(function () {});
+              else v.pause();
+            });
+          },
+          { threshold: 0.25 },
+        );
+        document.querySelectorAll('[data-video]').forEach(function (f) {
+          io.observe(f);
+        });
+      }
+    </script>
+  </body>
+</html>
