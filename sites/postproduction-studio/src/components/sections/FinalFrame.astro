@@ -1,0 +1,52 @@
+---
+// Final frame (#book, 00:02:00:00): the closing band repeats the primary action, the reel link and the sample
+// email as text. The timecode closes the band like an end slate. Behind it, under a strong scrim, a still of the
+// opening shot (the hero clip's poster): the page ends on its first frame. A still, not a second clip.
+import { Image } from 'astro:assets';
+import openingFrame from '../../assets/video/hero-mountain-dusk.poster.webp';
+import Button from '../ui/Button.astro';
+import DisplayText from '../ui/DisplayText.astro';
+import Timecode from '../ui/Timecode.astro';
+import { actions, brand, finalFrame } from '../../content/site';
+---
+
+<section
+  id="book"
+  aria-labelledby="book-heading"
+  class="bg-paper text-ink relative isolate overflow-hidden px-5 py-32 text-center md:px-10 md:py-48"
+>
+  <Image
+    src={openingFrame}
+    alt=""
+    widths={[640, 1280]}
+    sizes="100vw"
+    loading="lazy"
+    class="absolute inset-0 -z-20 h-full w-full object-cover"
+  />
+  <div aria-hidden="true" class="bg-scrim/80 absolute inset-0 -z-10"></div>
+  <div class="mx-auto max-w-[64rem]">
+    <h2
+      id="book-heading"
+      data-reveal
+      class="display-type m-0 text-2xl sm:text-3xl"
+    >
+      <DisplayText line={finalFrame.heading} />
+    </h2>
+    <p data-reveal class="mx-auto mt-8 mb-0 max-w-[34rem] text-base md:text-lg">
+      {finalFrame.lead}
+    </p>
+    <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+      <Button href={brand.bookHref}>{actions.book}</Button>
+      <Button href={brand.reelHref} variant="outline">
+        {actions.reel}
+      </Button>
+    </div>
+    <p class="text-ink-soft mt-8 mb-0 text-sm">
+      <a href={brand.bookHref} class="text-ink underline underline-offset-4">
+        {brand.email}
+      </a>{' '}
+      {finalFrame.emailNote}
+    </p>
+    <Timecode value={finalFrame.timecode} class="mt-16" />
+  </div>
+</section>

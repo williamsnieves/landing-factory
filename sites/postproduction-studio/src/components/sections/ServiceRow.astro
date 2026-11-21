@@ -1,0 +1,88 @@
+---
+// One service as a clip-feature row on a light band: the heading, two short lines and the deliverable chips, then
+// a wide rounded clip under them.
+//
+// One clip per viewport: two clips must never both be a quarter in view. For clips of height h stacked one per
+// row, that holds when the distance between them is more than (viewport - h/2). The clips are wide (2:1, the full
+// content width), so h/2 is large, and the text block of the next row plus the band padding fills the distance
+// between two clips with content instead of empty space.
+import type { ImageMetadata } from 'astro';
+import VideoLoop from '../video/VideoLoop.astro';
+import ChipList from '../ui/ChipList.astro';
+import Timecode from '../ui/Timecode.astro';
+import type { ServiceRowCopy } from '../../content/site';
+
+interface Props {
+  copy: ServiceRowCopy;
+  video: string;
+  poster: ImageMetadata;
+  /** Which side the heading takes from md up (the text block alternates from row to row). */
+  clipSide: 'left' | 'right';
+}
+
+const { copy, video, poster, clipSide } = Astro.props;
+const headingId = `${copy.id}-heading`;
+---
+
+<section
+  id={copy.id}
+  aria-labelledby={headingId}
+  class="service-row band-light bg-bone text-bone-ink py-28 md:py-32"
+>
+  <div class="mx-auto w-full max-w-[85rem] px-5 md:px-10">
+    <div class="grid gap-8 md:grid-cols-2 md:items-end md:gap-16">
+      <h2
+        id={headingId}
+        data-reveal
+        class:list={[
+          'display-type m-0 max-w-[34rem] text-2xl text-balance',
+          clipSide === 'left' && 'md:order-2',
+        ]}
+      >
+        {copy.heading}
+      </h2>
+      <div class:list={['max-w-[34rem]', clipSide === 'left' && 'md:order-1']}>
+        <p data-reveal class="m-0 text-base md:text-lg">
+          {copy.lines[0]}
+        </p>
+        <p data-reveal class="mt-3 mb-0 text-base md:text-lg">
+          {copy.lines[1]}
+        </p>
+        <ChipList
+          items={copy.chips}
+          label="Deliverables"
+          tone="light"
+          class="mt-8"
+        />
+      </div>
+    </div>
+  </div>
+  <div class="service-clip mt-10 w-full px-2 md:mt-16 md:px-6">
+    <VideoLoop
+      video={video}
+      poster={poster}
+      label={copy.clipLabel}
+      fill
+      sizes="100vw"
+      class="rounded-lg"
+    >
+      <Timecode
+        value={copy.timecode}
+        tone="burn"
+        class="absolute top-4 left-5 z-10 md:left-10"
+      />
+    </VideoLoop>
+  </div>
+</section>
+
+<style>
+  /* Nearly edge to edge (a framed screen with rounded corners), a wide strip that never fills more than about two thirds of the screen. */
+  .service-clip {
+    height: min(56vw, 60svh);
+  }
+  @media (min-width: 768px) {
+    .service-clip {
+      height: min(45vw, 70svh);
+    }
+  }
+</style>

@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/inter/wght.css';
+@import '@fontsource-variable/playfair-display/wght-italic.css';
 @import './tokens.css';
 
 @layer base {
@@ -18,6 +20,22 @@
     outline: 3px solid var(--color-primary);
     outline-offset: 3px;
   }
+  /* Amber on bone is 1.6:1: on light bands the focus ring is the bone ink. */
+  .band-light :focus-visible {
+    outline-color: var(--color-bone-ink);
+  }
+  /* Jump links land below the fixed header. */
+  section[id] {
+    scroll-margin-top: 4.5rem;
+  }
+}
+
+/* Display statements: one family, tight leading and tracking from the tokens. */
+@utility display-type {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  line-height: var(--display-leading);
+  letter-spacing: var(--display-tracking);
 }
 
 /* Motion layer -----------------------------------------------------------

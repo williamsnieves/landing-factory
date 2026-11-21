@@ -1,0 +1,43 @@
+---
+// Last mile (00:00:12:00, agitate): a light band with a short statement, a lead line and three plain points, each
+// opening with a bold run-in phrase. No cards, no icons.
+import Timecode from '../ui/Timecode.astro';
+import { lastMile } from '../../content/site';
+---
+
+<section
+  id="last-mile"
+  aria-labelledby="last-mile-heading"
+  class="band-light bg-bone text-bone-ink px-5 pt-24 pb-28 md:px-10 md:pt-32 md:pb-40"
+>
+  <div class="mx-auto max-w-[80rem]">
+    <div class="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3">
+      <h2
+        id="last-mile-heading"
+        data-reveal
+        class="display-type m-0 max-w-[22ch] text-2xl text-balance"
+      >
+        {lastMile.heading}
+      </h2>
+      <Timecode value={lastMile.timecode} tone="light" />
+    </div>
+    <p
+      data-reveal
+      class="mt-10 max-w-[44rem] text-lg md:text-xl md:leading-snug"
+    >
+      {lastMile.lead}
+    </p>
+    <ul class="m-0 mt-14 grid list-none gap-x-10 gap-y-8 p-0 md:mt-20 md:grid-cols-3">
+      {lastMile.points.map((point, index) => (
+        <li
+          data-reveal
+          data-reveal-delay={String(index * 0.08)}
+          class="text-bone-ink-soft max-w-[24rem] text-base"
+        >
+          <strong class="text-bone-ink font-semibold">{point.lead}</strong>{' '}
+          {point.text}
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

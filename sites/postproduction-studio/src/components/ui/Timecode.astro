@@ -1,0 +1,24 @@
+---
+// A band's timecode marker (the page reads like a timeline): Inter with tabular numerals, never a mono font.
+// `burn` draws it over footage like a burned-in timecode on dailies: a small chip in a corner of the clip.
+interface Props {
+  value: string;
+  /** `dark` on paper bands, `light` on bone bands, `burn` over a clip. */
+  tone?: 'dark' | 'light' | 'burn';
+  class?: string;
+}
+
+const { value, tone = 'dark', class: className } = Astro.props;
+---
+
+<p
+  class:list={[
+    'm-0 text-xs font-medium tabular-nums',
+    tone === 'dark' && 'text-ink-soft',
+    tone === 'light' && 'text-bone-ink-soft',
+    tone === 'burn' && 'bg-paper/85 text-ink rounded-pill px-3 py-1.5',
+    className,
+  ]}
+>
+  {value}
+</p>

@@ -1,0 +1,42 @@
+---
+// Process (00:01:30:00): four steps from call to delivery on a light band, text only. Order is carried by the
+// list, its position and the timecode of each step, never by 01/02/03.
+import Timecode from '../ui/Timecode.astro';
+import { process } from '../../content/site';
+---
+
+<section
+  id="process"
+  aria-labelledby="process-heading"
+  class="band-light bg-bone text-bone-ink px-5 py-28 md:px-10 md:py-40"
+>
+  <div class="mx-auto max-w-[80rem]">
+    <div class="grid gap-6 md:grid-cols-12 md:items-end">
+      <h2
+        id="process-heading"
+        data-reveal
+        class="display-type m-0 text-2xl md:col-span-6"
+      >
+        {process.heading}
+      </h2>
+      <p data-reveal class="m-0 text-lg md:col-span-6 md:col-start-7">
+        {process.lead}
+      </p>
+    </div>
+    <ol class="m-0 mt-14 grid list-none gap-3 p-0 sm:grid-cols-2 md:mt-20 lg:grid-cols-4">
+      {process.steps.map((step, index) => (
+        <li
+          data-reveal
+          data-reveal-delay={String(index * 0.08)}
+          class="bg-bone-surface flex min-h-[15rem] flex-col rounded-md p-6"
+        >
+          <Timecode value={step.timecode} tone="light" />
+          <h3 class="mt-auto mb-0 pt-10 text-xl leading-tight font-semibold">
+            {step.title}
+          </h3>
+          <p class="mt-3 mb-0 text-base">{step.text}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>

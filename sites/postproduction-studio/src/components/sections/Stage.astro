@@ -1,0 +1,59 @@
+---
+// Stage (hero, 00:00:00:00): a full-bleed looping clip under a strong scrim, a centred two-line statement and the
+// two actions. The clip stops 4rem above the band's end so the edit-list panel, which starts inside the first
+// screen, never covers the clip's pause button.
+import VideoLoop from '../video/VideoLoop.astro';
+import Button from '../ui/Button.astro';
+import DisplayText from '../ui/DisplayText.astro';
+import Timecode from '../ui/Timecode.astro';
+import clip from '../../assets/video/hero-mountain-dusk.mp4';
+import poster from '../../assets/video/hero-mountain-dusk.poster.webp';
+import { actions, brand, hero } from '../../content/site';
+---
+
+<section id="stage" class="bg-paper relative h-svh min-h-[38rem]">
+  <div class="absolute inset-x-0 top-0 bottom-16">
+    <VideoLoop
+      video={clip}
+      poster={poster}
+      label={hero.clipLabel}
+      priority
+      fill
+      sizes="100vw"
+    >
+      <div aria-hidden="true" class="stage-scrim absolute inset-0"></div>
+      <Timecode
+        value={hero.timecode}
+        tone="burn"
+        class="absolute bottom-4 left-5 z-10 md:left-10"
+      />
+      <div class="relative z-10 flex h-full flex-col items-center justify-center px-5 pt-18 text-center md:px-10">
+        <h1 class="display-type text-ink m-0 text-2xl sm:text-3xl lg:text-4xl">
+          {hero.headline.map((line, index) => (
+            <span class="block">
+              <DisplayText line={line} />
+              {index === 0 && ' '}
+            </span>
+          ))}
+        </h1>
+        <p class="text-ink mt-7 max-w-[38rem] text-base md:text-lg">
+          {hero.lead}
+        </p>
+        <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
+          <Button href={brand.bookHref}>{actions.book}</Button>
+          <Button href={brand.reelHref} variant="outline">
+            {actions.reel}
+          </Button>
+        </div>
+      </div>
+    </VideoLoop>
+  </div>
+</section>
+
+<style>
+  /* The clip runs from daylight to night: the scrim is strong everywhere (the token at 72% keeps ink above
+     4.5:1 even over a white frame: about 6.7:1 for ink over pure white). */
+  .stage-scrim {
+    background-color: color-mix(in srgb, var(--color-scrim) 72%, transparent);
+  }
+</style>

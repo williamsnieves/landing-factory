@@ -1,0 +1,204 @@
+---
+// Colour grading (00:00:48:00): the signature moment. One looping clip with a vertical split: left of the split a
+// layer with a backdrop filter flattens the frame into a "Log" look, right of it the footage stays as graded. A
+// native range input moves the split through the --split custom property. The filter works over the poster as
+// well, so reduced motion and no JavaScript still show both sides; without JavaScript the input stays hidden and
+// the split stays at 50%. The input sits below the frame so it never covers the clip's pause button.
+//
+// Spacing: the band's top and bottom padding (in svh) keep this clip and its neighbours' clips from being a quarter
+// in view at the same time (see ServiceRow.astro).
+import VideoLoop from '../video/VideoLoop.astro';
+import ChipList from '../ui/ChipList.astro';
+import Timecode from '../ui/Timecode.astro';
+import clip from '../../assets/video/grade-cliffs-sunrise.mp4';
+import poster from '../../assets/video/grade-cliffs-sunrise.poster.webp';
+import { grading } from '../../content/site';
+---
+
+<section
+  id={grading.id}
+  aria-labelledby="grading-heading"
+  data-grade
+  class="grade bg-paper text-ink"
+>
+  <div class="mx-auto max-w-[85rem] px-5 md:px-10">
+    <div class="grid gap-8 md:grid-cols-2 md:items-end md:gap-16">
+      <div>
+        <h2
+          id="grading-heading"
+          data-reveal
+          class="display-type m-0 max-w-[18ch] text-2xl text-balance"
+        >
+          {grading.heading}
+        </h2>
+      </div>
+      <div>
+        <p data-reveal class="m-0 max-w-[34rem] text-base md:text-lg">
+          {grading.lead}
+        </p>
+        <ChipList
+          items={grading.chips}
+          label="Deliverables"
+          tone="dark"
+          class="mt-6"
+        />
+      </div>
+    </div>
+  </div>
+
+  <div class="grade-frame mt-12 w-full px-2 md:mt-16 md:px-6">
+    <VideoLoop
+      video={clip}
+      poster={poster}
+      label={grading.clipLabel}
+      fill
+      sizes="100vw"
+      class="rounded-lg"
+    >
+      <div aria-hidden="true" class="grade-log absolute inset-0 z-[1]"></div>
+      <div aria-hidden="true" class="grade-divider absolute inset-y-0 z-[2]">
+        <span class="grade-handle bg-primary text-primary-contrast rounded-pill">
+          <svg
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M9 6 3 12l6 6V6zm6 0v12l6-6-6-6z"></path>
+          </svg>
+        </span>
+      </div>
+      <p class="bg-paper/85 text-ink rounded-pill absolute top-3 left-3 z-[3] m-0 px-3.5 py-1.5 text-xs font-medium md:top-4 md:left-4">
+        {grading.logLabel}
+      </p>
+      <p class="bg-paper/85 text-ink rounded-pill absolute top-3 right-3 z-[3] m-0 px-3.5 py-1.5 text-xs font-medium md:top-4 md:right-4">
+        {grading.gradedLabel}
+      </p>
+      <Timecode
+        value={grading.timecode}
+        tone="burn"
+        class="absolute bottom-3 left-3 z-[3] md:bottom-4 md:left-4"
+      />
+    </VideoLoop>
+  </div>
+
+  <div class="mx-auto max-w-[85rem] px-5 md:px-10">
+    <div data-grade-control hidden class="mt-5">
+      <label for="grade-range" class="text-ink-soft text-sm">
+        {grading.rangeLabel}
+      </label>
+      <input
+        id="grade-range"
+        type="range"
+        min="0"
+        max="100"
+        step="1"
+        value="50"
+        aria-valuetext="Log on the left 50% of the frame"
+        class="grade-range mt-2 block w-full"
+      />
+    </div>
+    <p class="text-ink-soft mt-4 mb-0 max-w-[40rem] text-sm">
+      {grading.caption}
+    </p>
+  </div>
+</section>
+
+<script>
+  // Moves the grade split. Runs under reduced motion too: the split is a control, not an animation.
+  for (const section of document.querySelectorAll<HTMLElement>(
+    '[data-grade]',
+  )) {
+    const control = section.querySelector<HTMLElement>('[data-grade-control]');
+    const input = section.querySelector<HTMLInputElement>(
+      'input[type="range"]',
+    );
+    if (!control || !input) continue;
+    const apply = () => {
+      const value = Math.min(100, Math.max(0, Number(input.value) || 0));
+      section.style.setProperty('--split', `${value}%`);
+      input.setAttribute(
+        'aria-valuetext',
+        `Log on the left ${value}% of the frame`,
+      );
+    };
+    input.addEventListener('input', apply);
+    control.hidden = false;
+    apply();
+  }
+</script>
+
+<style>
+  .grade {
+    --split: 50%;
+    padding-top: max(7rem, 16svh);
+    padding-bottom: max(8rem, 26svh);
+  }
+  .grade-frame {
+    height: min(60svh, 30rem);
+  }
+  @media (min-width: 768px) {
+    .grade-frame {
+      height: min(70svh, 46rem);
+    }
+  }
+  /* The "Log" side: a flat, washed look laid over the clip (and over its poster when it does not play). */
+  .grade-log,
+  .grade-divider {
+    pointer-events: none;
+  }
+  .grade-log {
+    backdrop-filter: saturate(0.35) contrast(0.7) brightness(1.15);
+    clip-path: inset(0 calc(100% - var(--split)) 0 0);
+  }
+  .grade-divider {
+    left: var(--split);
+    width: 3px;
+    transform: translateX(-50%);
+    background-color: var(--color-primary);
+  }
+  .grade-handle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    width: 2.75rem;
+    height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    transform: translate(-50%, -50%);
+  }
+  .grade-range {
+    height: 2.75rem;
+    appearance: none;
+    background: transparent;
+    cursor: ew-resize;
+  }
+  .grade-range::-webkit-slider-runnable-track {
+    height: 0.5rem;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-surface);
+  }
+  .grade-range::-moz-range-track {
+    height: 0.5rem;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-surface);
+  }
+  .grade-range::-webkit-slider-thumb {
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-top: -0.625rem;
+    appearance: none;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-primary);
+  }
+  .grade-range::-moz-range-thumb {
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-primary);
+  }
+</style>
