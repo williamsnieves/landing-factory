@@ -68,6 +68,8 @@ content:
                 - { value: etsy-4349241344.jpg, label: etsy-4349241344.jpg }
                 - { value: etsy-4298208749.jpg, label: etsy-4298208749.jpg }
                 - { value: etsy-4297967816.jpg, label: etsy-4297967816.jpg }
+                - { value: etsy-4621708265.jpg, label: etsy-4621708265.jpg }
+                - { value: etsy-4621943285.jpg, label: etsy-4621943285.jpg }
           - name: alt
             label: Texto alternativo de la portada
             description: 'Qué se ve en la portada (obligatorio si hay portada).'
