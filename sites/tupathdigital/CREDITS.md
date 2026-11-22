@@ -40,5 +40,7 @@ Photographs come from Wikimedia Commons (renditions served by `upload.wikimedia.
 | `etsy-4369377710.jpg`            | tupathdigital | Owner's own product image from their store listing                          | no           | Product image: Guía de IA Generativa + 450 Prompts: Midjourney, DALL-E 3 (Tutorial en PDF, edición en español)           |
 | `favicon-48.png`                 | tupathdigital | Own brand logo, provided by the owner for the landing; icon cropped from it | no           | Favicon: the circle mark of logo.webp on white, 48 px, no wordmark                                                       |
 | `apple-touch-icon.png`           | tupathdigital | Own brand logo, provided by the owner for the landing; icon cropped from it | no           | Apple touch icon: the circle mark of logo.webp on white, 180 px, no wordmark                                             |
+| `etsy-4621708265.jpg`            | tupathdigital | Owner's own product image from their store listing                          | no           | Product image: Neon Crime City Thumbnail Pack (30 open world gaming backgrounds)                                         |
+| `etsy-4621943285.jpg`            | tupathdigital | Owner's own product image from their store listing                          | no           | Product image: Multi-Agent AI Systems, a practical guide to building AI agent teams                                      |
 
 <!-- credits:end -->

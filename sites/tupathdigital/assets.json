@@ -183,6 +183,22 @@
       "permission": "Own brand logo, provided by the owner for the landing; icon cropped from it",
       "credit": false,
       "note": "Apple touch icon: the circle mark of logo.webp on white, 180 px, no wordmark"
+    },
+    {
+      "file": "etsy-4621708265.jpg",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: Neon Crime City Thumbnail Pack (30 open world gaming backgrounds)"
+    },
+    {
+      "file": "etsy-4621943285.jpg",
+      "source": "customer",
+      "owner": "tupathdigital",
+      "permission": "Owner's own product image from their store listing",
+      "credit": false,
+      "note": "Product image: Multi-Agent AI Systems, a practical guide to building AI agent teams"
     }
   ]
 }
